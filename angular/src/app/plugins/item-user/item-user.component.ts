@@ -1,0 +1,284 @@
+import {Component, OnInit, Input} from '@angular/core';
+import {Default} from "../../model/constant";
+import {RequestService} from "../../service/request.service";
+import {WarningService} from "../../service/warning.service";
+import {Messages} from "../../model/msg";
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+
+
+@Component({
+    selector: 'rev-item-user',
+    templateUrl: './item-user.component.html',
+    styleUrls: ['./item-user.component.scss']
+})
+export class ItemUserComponent implements OnInit {
+    /**
+     * 考试id
+     */
+    @Input() eid:string;
+
+    public title:string;
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public departmentId: number = 0;
+
+    public userType: number = 1;
+    public workerList: Array<any> = [];
+
+
+    public storeData: Array<any> = [];
+
+    public workerListCopy: Array<any> = [];
+
+    //部门
+    public nodes: Array<any> = [];
+
+    public displayData: Array<any> = [];
+
+    //全选或者非全选时
+    public allChecked = false;
+    public indeterminate = false;
+
+    /**
+     * 是否已经获取考试人员数据
+     * @type {boolean}
+     */
+    public examFlag:boolean = false;
+
+
+    constructor(private req: RequestService,
+                private warn: WarningService,
+                public modal:NgbActiveModal) {
+    }
+
+    ngOnInit() {
+        this.title = "选择人员";
+        this.loadDepartment();
+        //加载已经选中的全部人员
+        this.loadExam(this.eid);
+
+    }
+
+
+    /**
+     * 加载已经选择的全部人员（员工或者工人）
+     * @param eid
+     */
+    loadExam(eid){
+        if(this.eid){
+            this.req.doPost({
+                url:"detailMemberExam",
+                data:{
+                    id: eid,
+                    state: 0
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        this.storeData = this.reCallStore(res.data);
+                    }else{
+                        this.warn.onError(res.msg ||  Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    /**
+     * 重新组装store data数据
+     * @param list
+     */
+    reCallStore(list){
+        if(list && list.length > 0){
+            list.forEach(item =>{
+                item["id"] = item.memberId;
+                item["userType"] = item.memberType
+                if(item.memberType == 1){
+                    item["positionName"] = item.workerType;
+                }
+            });
+        }
+        return list;
+    }
+
+    // 根据id拉取部门人员列表
+    onClick(e): void {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.pageSize = Default.PAGE.PAGE_SIZE;
+        this.departmentId = e.node.origin.id;
+        this.changeData();
+    }
+
+    changeData() {
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+            state: 0 //员工或者工人均为在职人员
+        };
+        if (this.departmentId) {
+            params["departmentId"] = this.departmentId;
+        }
+        let url;
+        if (this.userType === 1) {
+            url = 'listEmployee'
+        } else if (this.userType === 2) {
+            url = 'workerList'
+        }
+
+        this.req.doPost({
+            url: url,
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.workerList = res.data.pageSet;
+                    this.total = res.data.total;
+                    // 回显
+                    if (this.storeData.length > 0) {
+                        this.workerList.forEach(data => {
+                            for (let i = 0; i < this.storeData.length; i++) {
+                                if (data.id === this.storeData[i].id) {
+                                    data.checked = true;
+                                }
+                            }
+                        })
+                    }
+                    // this.workerListCopy = [...this.workerList]
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    // 切换工人、员工
+    handleUserType() {
+        this.changeData()
+    }
+
+
+    // 拉取部门信息
+    loadDepartment() {
+        this.req.doPost({
+            url: "listDepartAddEmp",
+            data: {},
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.nodes = res.data;
+
+                    for (let i = 0; i < this.nodes.length; i++) {
+                        this.nodes[i]['title'] = this.nodes[i].name;
+                        this.nodes[i]['value'] = this.nodes[i].id;
+                        this.nodes[i]['key'] = this.nodes[i].id;
+                        this.nodes[i]['isLeaf'] = !this.nodes[i].ownSubset;
+                    }
+                    this.nodes[0].selected = true;
+                    this.departmentId = this.nodes[0].value;
+                    this.changeData()
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    // 拉取子部门
+    onExpandChange(e): void {
+        if (e.node.getChildren().length === 0 && e.node.isExpanded) {
+            this.req.doPost({
+                url: "listDepartSearch",
+                data: {
+                    superiorDepartmentId: e.node.key
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+
+                        for (let i = 0; i < res.data.length; i++) {
+                            res.data[i]['title'] = res.data[i].name;
+                            res.data[i]['value'] = res.data[i].id;
+                            res.data[i]['key'] = res.data[i].id;
+                            res.data[i]['isLeaf'] = !res.data[i].ownSubset
+                            // this.allStoreData.set(res.data[i].id,[])
+                        }
+                        e.node.addChildren(res.data)
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    // 全选
+    currentPageDataChange($event: Array<any>): void {
+        this.displayData = $event;
+        this.refreshStatus();
+    }
+
+    refreshStatus() {
+        this.indeterminate = false;
+        this.allChecked = false;
+        if(this.displayData && this.displayData.length > 0){
+            let allChecked = this.displayData.filter(value => !value.disabled).every(value => value.checked === true);
+            let allUnChecked = this.displayData.filter(value => !value.disabled).every(value => !value.checked);
+            this.allChecked = allChecked;
+            this.indeterminate = (!allChecked) && (!allUnChecked);
+            this.displayData.forEach(data => {
+                if (data.checked) {
+                    // 加入前清除工人员工数据差异
+                    if (this.userType === 1) {
+                        data["userType"] = 1
+                        data["positionName"] = data.positionName
+                    } else if (this.userType === 2) {
+                        data["userType"] = 2
+                        data["positionName"] = data.workerType
+                    }
+                    this.storeData.push(data)
+                } else if (!data.checked) {
+                    this.storeData.forEach((item, index) => {
+                        if (item.id === data.id) {
+                            this.storeData.splice(index, 1)
+                        }
+                    });
+                }
+            });
+        }
+
+        if (this.storeData.length > 0) {
+            this.storeData = this.distinct(this.storeData)
+        }
+    }
+
+    checkAll(value: boolean): void {
+        this.displayData.forEach(data => {
+            if (!data.disabled) {
+                data.checked = value;
+            }
+        });
+        this.refreshStatus();
+    }
+
+    // 根据id去重
+    distinct(arr) {
+        // var result = [];
+        let obj = {};
+        //设置cur默认类型为数组，并且初始值为空的数组;
+        arr = arr.reduce((cur, next) => {
+            obj[next.id] ? "" : obj[next.id] = true && cur.push(next);
+            return cur;
+        }, [])
+        return arr;
+    }
+
+
+    submit(){
+        this.modal.close(this.storeData);
+    }
+
+    ngOnDestroy(){
+        this.storeData = null;
+    }
+
+
+}

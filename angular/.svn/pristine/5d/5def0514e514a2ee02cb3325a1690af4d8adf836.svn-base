@@ -1,0 +1,193 @@
+import { Injectable } from '@angular/core';
+import { RequestService } from "./request.service";
+import { UserService } from "./user.service";
+import { WarningService } from "./warning.service";
+import { Company } from "../model/company";
+import { Messages } from "../model/msg";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class BaseService {
+    private baseCompany: Company = new Company();
+
+    constructor(private request: RequestService,
+        private userInfo: UserService,
+        private warn: WarningService) { }
+
+    /**
+     * 加载公司数据信息
+      */
+    loadCompany() {
+        let that = this;
+        if (this.userInfo.getCompanyId() && this.userInfo.getCompanyId() > 0) {
+            that.request.doPost({
+                url: "loadCompany",
+                data: { companyId: that.userInfo.getCompanyId() },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // that.baseCompany = Object.assign()
+                        if (!res.data["headImg"]) {
+                            res.data["headImg"] = this.baseCompany.headImg;
+                        }
+                        this.baseCompany = Object.assign(this.baseCompany, res.data);
+                        this.userInfo.setCompanyState(res.data.state);
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    getCompanyInfo() {
+        return this.baseCompany;
+    }
+    getBaseCompanyId() {
+        return this.baseCompany["companyId"];
+    }
+
+    setHeadImg(img: string) {
+        this.baseCompany["headImg"] = img;
+    }
+
+    getHeadImg() {
+        return this.baseCompany["headImg"];
+    }
+
+    setAddress(address: string) {
+        this.baseCompany["address"] = address;
+    }
+
+    getAddress() {
+        return this.baseCompany["address"];
+    }
+
+    setCompanyName(name: string) {
+        this.baseCompany["companyName"] = name;
+    }
+
+    getCompanyName() {
+        return this.baseCompany["companyName"];
+    }
+    getShortName() {
+        return this.baseCompany["abbreviation"];
+    }
+    setShortName(shortName: string) {
+        this.baseCompany["abbreviation"] = shortName;
+    }
+
+    setCompanyPhone(phone: string) {
+        this.baseCompany["companyPhone"] = phone;
+    }
+
+    getCompanyPhone() {
+        return this.baseCompany["companyPhone"];
+    }
+
+    setPoint(point: any) {
+        this.baseCompany["latitude"] = point["lat"];
+        this.baseCompany["longitude"] = point["lng"];
+    }
+
+    getPoint() {
+        return {
+            lat: this.baseCompany["latitude"],
+            lng: this.baseCompany["longitude"]
+        };
+    }
+
+
+    setSummary(summary: string) {
+        this.baseCompany["summary"] = summary;
+    }
+
+    getSummary() {
+        return this.baseCompany["summary"];
+    }
+
+    setAreaId(ids: string) {
+        this.baseCompany["serviceAreaId"] = ids;
+    }
+
+    getAreaId() {
+        return this.baseCompany["serviceAreaId"];
+    }
+
+    setAreaName(names: string) {
+        this.baseCompany["serviceAreaName"] = names;
+    }
+
+    getAreaName() {
+        return this.baseCompany["serviceAreaName"];
+    }
+
+    setCityId(id: string) {
+        this.baseCompany["serviceCityId"] = id;
+    }
+
+    getCityId() {
+        return this.baseCompany["serviceCityId"];
+    }
+
+    setCityName(name: string) {
+        this.baseCompany["serviceCityName"] = name;
+    }
+
+    getCityName() {
+        return this.baseCompany["serviceCityName"];
+    }
+
+    setCode(code: string) {
+        this.baseCompany["code"];
+    }
+
+    getCode() {
+        return this.baseCompany["code"];
+    }
+
+    setLegal(legal: string) {
+        this.baseCompany["legaLperson"] = legal;
+    }
+
+    getLegal() {
+        return this.baseCompany["legaLperson"];
+    }
+
+    setIdCard(id: string) {
+        this.baseCompany["idCard"] = id;
+    }
+
+    getIdCard() {
+        return this.baseCompany["idCard"];
+    }
+
+    setState(state: number) {
+        this.baseCompany["state"] = state;
+    }
+
+    getState() {
+        return this.baseCompany["state"];
+    }
+
+    getExamineInfo() {
+        return this.baseCompany["examineInfo"];
+    }
+
+    setPlace(place: string) {
+        this.baseCompany["place"] = place
+    }
+
+    getPlace() {
+        return this.baseCompany["place"].toString();
+    }
+
+    setLicense(license: string) {
+        this.baseCompany["businessLicense"] = license;
+    }
+
+    getLicense() {
+        return this.baseCompany["businessLicense"];
+    }
+}

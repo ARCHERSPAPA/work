@@ -1,0 +1,103 @@
+<div class="detail-dynamic">
+  <div *ngIf="dynamics">
+      <dl *ngFor="let dynamic of dynamics" class="clearfixed">
+
+          <dt class="dynamic-head">
+              <span style="font-size: 16px;">
+                  {{dynamic.memberName}} <span style="margin-right: 48px;"
+                                               class="dark">({{dynamic.userRoleName}})</span>
+              </span>
+              <span class="dynamic-name"
+                    [title]="dynamic.stageName">{{dynamic.stageName?dynamic.stageName:dynamic.userRoleName}}</span>
+              <span class="dynamic-date"
+                    *ngIf="dynamic.createDate">上传时间&nbsp;&nbsp;&nbsp;&nbsp;{{dynamic.createDate|date:'yyyy-MM-dd HH:mm'}}</span>
+              <span class="dynamic-btns">
+       
+                  <a href="javascript:void(0)" nz-popconfirm [nzTitle]="'是否删除该项目动态'"
+                     nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="delItem(dynamic.id,0)">
+                   删除
+               </a>
+                  <!--<a href="javascript:void(0)" (click)="submitItem(dynamic)"-->
+                  <!--*ngIf="dynamic.verifyState === 0">提交</a>-->
+              </span>
+          </dt>
+          <dd class="dynamic-info" *ngIf="dynamic.content">
+              <p>{{dynamic.content}}</p>
+          </dd>
+          <dd class="dynamic-audit"
+              *ngIf="dynamic.verifyState === 0 && (dynamic.imgList && dynamic.imgList.length>0 )">
+              <p>请审核项目图片</p>
+          </dd>
+          <dd class="dynamic-list clearfixed"
+              *ngIf="dynamic.imgList && (dynamic.imgList && dynamic.imgList.length>0  )">
+              <ul>
+                  <li *ngFor="let img of dynamic.imgList;let i =index " class="dynamic-item"  
+                      (mouseenter)="showImgMark(img,true)" (mouseleave)="showImgMark(img,false)"
+                  >
+                      <!-- <span class="item-box" ><label nz-checkbox
+                              [(ngModel)]="img.verifyState"></label></span> -->
+                      <div class="dynamic-chks" [hidden]="!img.state" *ngIf='dynamic.verifyState === 0'>
+
+                          <span class="dynamic-yes" (click)="auditImg(img,1)">
+                              合格
+                          </span>
+                          <span class="dynamic-no" (click)="auditImg(img,2)">
+                              不合格
+                          </span>
+                      </div>
+                      <!--<span class="item-confirm" *ngIf="dynamic.verifyState !== 0"-->
+                      <!--[ngClass]="{'ant-btn-success':img.verifyState === 1,'ant-btn-danger':img.verifyState === 2}">{{img.verifyState === 1?'合格':'不合格'}}</span>-->
+                      <span class="item-confirm "
+                            [ngClass]="{'showYes':img.verifyState === 1 || img.verifyState ===true || img.verifyState ===0,'showNo':img.verifyState === 2 || img.verifyState === false}">
+                          <span
+                                >{{img.verifyState ===  0 || img.verifyState ===  true || img.verifyState ===  1?'合格':'不合格'}}</span>
+                      </span>
+                      <span class="item-img" (click)="openModal(dynamic.imgList,i)"><img [src]="img.imgUrl"/></span>
+                      <span class="item-remark" nz-tooltip [nzTitle]='img.remark'>
+                          <input nz-input type="text" placeholder="请输入备注信息" [(ngModel)]="img.remark" maxlength="32"
+                                 [disabled]="dynamic.verifyState !== 0"/>
+                          <span *ngIf="img.remark && img.remark.length > 0" class="item-count"><span
+                                  class="text-danger">{{img.remark.length}}</span>/32</span>
+                      </span>
+                  </li>
+              </ul>
+          </dd>
+          <div class="submit-warp">
+              <div> </div>
+              <button nz-button [nzType]="'primary'" type="button" (click)="submitItem(dynamic)" class="submit"
+                      *ngIf="dynamic.verifyState === 0 && (dynamic.imgList && dynamic.imgList.length>0 )">提交
+              </button>
+          </div>
+
+          <ul class="coment">
+              <li class="coment-name" *ngFor='let item of dynamic.coments'>
+                  <div>
+                      <p>{{item.userName}}
+                          <span class="dark" *ngIf=' item.userRoleName '>({{item.userRoleName}}) <span
+                                  *ngIf='item.replyUserName'>回复 {{item.replyUserName}} </span>
+                                  <span class="dark"
+                                        *ngIf='item.replyUserRoleName'>({{item.replyUserRoleName}})</span></span>
+
+                          <span
+                                  class="coment-date">{{item.createDate|date:'yyyy-MM-dd HH:mm'}}</span></p>
+                      <a href="javascript:void(0)" nz-popconfirm [nzTitle]="'是否删除该评论'"
+                         nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="delItem(item.id,1,item.createUserTopId)">
+                          删除
+                      </a>
+                  </div>
+
+                  <p style="color: rgba(0, 0, 0, 0.65);">{{item.comment}}</p>
+              </li>
+          </ul>
+      </dl>
+  </div>
+
+  <div *ngIf="!dynamics || (dynamics && dynamics.length == 0)">
+      <p>暂无数据信息显示</p>
+  </div>
+  <div class="page" *ngIf="dynamics && dynamics.length > 0">
+      <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+      <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                     (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+  </div>
+</div>

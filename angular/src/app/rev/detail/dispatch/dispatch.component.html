@@ -1,0 +1,85 @@
+<div class="detail-dispatch">
+    <div nz-row>
+        <!---数据列表---->
+        <div nz-col nzSpan="8">
+            <div class="dispatch-depart">
+                <nz-tree-select style="width: 100%;"
+                        [nzDefaultExpandedKeys]="expandKeys"
+                        [nzNodes]="nodes"
+                        nzShowSearch
+                        nzPlaceHolder="请选择部门"
+                        [(ngModel)]="value"
+                        [nzDropdownStyle]="{height:'600px','overflow-y':'scroll'}"
+                        (ngModelChange)="onChange($event)">
+
+                        <!--[nzNodes]="nodes"-->
+                        <!--nzAsyncData="true"-->
+                        <!--nzShowLine="true"-->
+                        <!--(nzClick)="changeDataClick($event)"-->
+                        <!--(nzExpandChange)="onExpandChange($event)">-->
+                </nz-tree-select>
+
+            </div>
+            <div class="dispatch-data">
+            <nz-table [nzData]="listData" [nzFrontPagination]="false"
+                      nzShowPagination="false" [nzScroll]="{ y: '450px' }"
+                      #filterTable>
+                <thead>
+                <tr>
+                    <th nzWidth="30%">姓名</th>
+                    <th nzWidth="20%" nzShowSort [(nzSort)]="sortMap.projectCount" (nzSortChange)="sort('projectCount',$event)">在建</th>
+                    <th nzWidth="30%" nzShowSort [(nzSort)]="sortMap.meanDistance" (nzSortChange)="sort('meanDistance',$event)">距离</th>
+                    <th nzWidth="20%" nzShowSort [(nzSort)]="sortMap.identicalCount" (nzSortChange)="sort('identicalCount',$event)">相同</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let data of filterTable.data" [ngClass]="{'actived':selectUser && selectUser.id === data.id}" (click)="selectData(data)">
+                    <td>{{ data.name }}</td>
+                    <td>{{ data.projectCount?data.projectCount:'--'}}</td>
+                    <td>{{ data.meanDistance?data.meanDistance+'km':'--'}}</td>
+                    <td>{{ data.identicalCount?data.identicalCount:'--'}}</td>
+                </tr>
+                </tbody>
+            </nz-table>
+            </div>
+        </div>
+        <!---地图--->
+        <div nz-col nzSpan="16" class="dispatch-map">
+            <div id="container" style="width: 100%;height: 544px;"></div>
+            <div class="dispatch-render" *ngIf="selectUser">
+                <div class="dispatch-mark"></div>
+                <div nz-row class="dispatch-user">
+                    <div nz-col nzSpan="2" style="height: 48px;">
+                        <img [src]="selectUser.headImg" class="user-head"/>
+                    </div>
+                    <div nz-col nzSpan="16">
+                        <div nz-col nzSpan="24">
+                            <span class="dispatch-item">{{selectUser.name}}</span>
+                            <span class="dispatch-item-gray ml-10">{{selectUser.positionName?selectUser.positionName:'--'}}</span>
+                        </div>
+                        <div nz-flex nzSpan="24">
+                            <span nz-col nzSpan="6" class="dispatch-item">在建工地：{{selectUser.projectCount?selectUser.projectCount:'--'}}</span>
+                            <span nz-col nzSpan="6" class="dispatch-item">平均距离：{{selectUser.meanDistance?selectUser.meanDistance+'km':'--'}}</span>
+                            <span nz-col nzSpan="6" class="dispatch-item">同一工地：{{selectUser.identicalCount?selectUser.identicalCount:'--'}}</span>
+                            <span nz-col nzSpan="6" class="dispatch-item">完成工地：{{selectUser.completeCount?selectUser.completeCount:'--'}}</span>
+                        </div>
+                    </div>
+                    <div nz-col nzSpan="4" *ngIf="showDispatchByState()">
+                        <nz-dropdown>
+                            <button nz-button nz-dropdown nzType="primary" class="dispatch-btn"><span>指派为</span></button>
+                            <ul nz-menu>
+                                <li nz-menu-item (click)="dispatchTo(3)">工长</li>
+                                <li nz-menu-item (click)="dispatchTo(4)">监理</li>
+                            </ul>
+                        </nz-dropdown>
+                    </div>
+                    <div nz-col nzSpan="2" *ngIf="selectUser && selectUser['type']">
+                        <span class="dispatch-item-gray">已指派为<br/>{{getDispatchByType(selectUser['type'])}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.15&key=f765d6b350eb0744f00d395812e98ffc&&plugin=AMap.ToolBar,AMap.Geocoder"></script>

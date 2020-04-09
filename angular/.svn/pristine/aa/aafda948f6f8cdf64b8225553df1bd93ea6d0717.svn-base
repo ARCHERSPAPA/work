@@ -1,0 +1,77 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.info-user{
+    .search-bar{
+        width: 50%;
+        height: 38px;
+        margin: 10px 0 10px 50%;
+        .inp{
+            width: 80%;
+            display: inline-block;
+            vertical-align: top;
+            input{
+                width: 90%;
+                line-height: 26px;
+                text-indent: 1em;
+                color: #111;
+                outline: none;
+                border: 1px solid #dedede;
+                font-size: 13px;
+            }
+        }
+        .btn{
+            display: inline-block;
+            vertical-align: top;
+            width: 20%;
+            height: 30px;
+            outline: none;
+            border: 0;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    }
+    .list-group-rev{
+       display: flex;
+       tr th,
+       tr td {
+         font-size: 14px;
+         max-width: 22px;
+         overflow: hidden;
+         white-space: nowrap;
+         text-overflow: ellipsis;
+         a {
+           padding-right: 4px;
+           color: #007bff;
+         }
+       }
+       tr th,
+       tr td.w6{
+        max-width: 40px;
+      }
+        margin-top: 20px;
+        overflow: hidden;
+        .list-items{
+            width: 70%;
+            float:left;
+        }
+        .list-quick{
+            width: 42%;
+            .list-quick-title{
+                margin-top: 10px;
+            }
+        }
+    }
+}
+.btns {
+    margin: 24px -16px 1px -16px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+      margin-right: 24px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }

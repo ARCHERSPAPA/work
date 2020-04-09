@@ -1,0 +1,223 @@
+<div class="staff-add">
+    <img [src]="headImg" class="avatar" style="width:160px" *ngIf="headImg" (click)="openModal()"/>
+    <rev-uploader-new [content]='content' class="avatar" (click)="openModal()" *ngIf="!headImg"
+                      title="修改"></rev-uploader-new>
+    <ul>
+        <form [formGroup]="staffForm">
+            <li><label class="label" style="font-weight:bold">基本资料</label></li>
+            <li style="margin-bottom:20px;">
+                <div class="tick-code">
+                    <input nz-input type="text" class="text" placeholder="请输入提取码" [ngModelOptions]="{standalone: true}"
+                           [(ngModel)]="pickCode" maxlength="20"/>
+                    <button nz-button type="button" nzType="primary" [disabled]="!pickCode" (click)="handlePick()">提取
+                    </button>
+                </div>
+            </li>
+         <li class='border-bottom'>
+
+         </li>
+            <li style="margin-top:20px;">
+                <nz-form-label class="label" nzRequired>姓名</nz-form-label>
+                <div class="inp" style="text-align: left;position: relative">
+                    <div class="tick-name">
+                        <input nz-input type="text" class="text" placeholder="请输入员工姓名" autocomplete="off"
+                               [(ngModel)]="name"
+                               formControlName="name" name="name" maxlength="32" [readonly]="pickStatus"/>
+                    </div>
+
+                    <div [hidden]="staffForm.get('name').valid || staffForm.get('name').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('required',['name'])">员工姓名为必填选项</span>
+                        <span [hidden]="!staffForm.hasError('text',['name'])">输入格式错误,只能输入中文或者英文</span>
+                        <span [hidden]="!staffForm.hasError('minlength',['name'])">至少输入2个字符</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <nz-form-label class="label" >身份证号码</nz-form-label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入身份证号" autocomplete="off"
+                           [(ngModel)]="idCard"
+                           formControlName="idCard" name="idCard" maxlength="32" [readonly]="pickStatus"/>
+                    <div [hidden]="staffForm.get('idCard').valid || staffForm.get('idCard').pristine" class="error">
+                        <!--<span [hidden]="!staffForm.hasError('required',['idCard'])">身份证号为必填选项</span>-->
+                        <span [hidden]="!staffForm.hasError('idCard',['idCard'])">身份证号格式输入错误</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <nz-form-label class="label" >籍贯</nz-form-label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入籍贯" autocomplete="off"
+                           [(ngModel)]="nativePlace"
+                           formControlName="nativePlace" name="nativePlace" maxlength="30" [readonly]="pickStatus"/>
+                    <!--<div [hidden]="staffForm.get('nativePlace').valid || staffForm.get('nativePlace').pristine"-->
+                    <!--class="error">-->
+                    <!--<span [hidden]="!staffForm.hasError('required',['nativePlace'])">籍贯为必填选项</span>-->
+                    <!--</div>-->
+                </div>
+            </li>
+            <li style="margin-bottom:48px;">
+                <nz-form-label class="label" >性别</nz-form-label>
+                <div class="inp">
+                    <nz-select style="width: 348px;" [(ngModel)]='sex' nzPlaceHolder='男' formControlName="sex"
+                               name="sex" >
+                        <nz-option nzValue="1" nzLabel="男"></nz-option>
+                        <nz-option nzValue="0" nzLabel="女"></nz-option>
+                    </nz-select>
+                    <!-- <select class="chk-sex" formControlName="sex" name="sex" [(ngModel)]="sex">
+                      <option value="1" [selected]="sex === '1'" [disabled]="pickStatus">男</option>
+                      <option value="0" [selected]="sex === '0'" [disabled]="pickStatus">女</option>
+                    </select> -->
+                    <!--<div [hidden]="staffForm.get('sex').valid || staffForm.get('sex').pristine" class="error">-->
+                    <!--<span [hidden]="!staffForm.hasError('required',['sex'])">性别为必选选项</span>-->
+                    <!--</div>-->
+                </div>
+            </li>
+
+            <!--<li>-->
+            <!--<label class="label">姓名</label>-->
+            <!--<div class="inp">-->
+            <!--<input type="text" class="text" placeholder="请输入员工姓名" autocomplete="off" [(ngModel)]="realname"-->
+            <!--formControlName="realname" name="realname" maxlength="32"/>-->
+            <!--<div [hidden]="staffForm.get('realname').valid || staffForm.get('realname').pristine" class="error">-->
+            <!--<span [hidden]="!staffForm.hasError('text',['realname'])">输入格式错误,只能输入中文或者英文</span>-->
+            <!--<span [hidden]="!staffForm.hasError('minlength',['realname'])">&nbsp;&nbsp;至少输入2个字符</span>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</li>-->
+            <li>
+                <nz-form-label class="label" >创建账号</nz-form-label>
+         </li>
+            <li>
+                <nz-form-label class="label" nzRequired>帐号</nz-form-label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入员工帐号" autocomplete="on"
+                           [(ngModel)]="account"
+                           formControlName="account" name="account" maxlength="32" [readonly]="isEdit"/>
+                    <div [hidden]="staffForm.get('account').valid || staffForm.get('account').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('required',['account'])">帐号名为必填选项</span>
+                        <span [hidden]="!staffForm.hasError('number',['account'])">&nbsp;&nbsp;输入格式错误，可以输入数字、字母和下划线</span>
+                        <span [hidden]="!staffForm.hasError('minlength',['account'])">&nbsp;&nbsp;至少输入6个字符</span>
+                        <span [hidden]="!staffForm.hasError('maxlength',['account'])">&nbsp;&nbsp;至多输入20个字符</span>
+                    </div>
+                </div>
+            </li>
+            <div formGroupName="pwdGroup" *ngIf="!isEdit">
+                <li>
+                    <nz-form-label class="label" nzRequired>密码</nz-form-label>
+                    <div class="inp">
+                        <input nz-input type="password" class="text" placeholder="请输入员工密码" autocomplete="off"
+                               formControlName="pwd"
+                               name="pwd" maxlength="32"/>
+                        <div [hidden]="staffForm.get('pwdGroup').get('pwd').valid || staffForm.get('pwdGroup').get('pwd').pristine"
+                             class="error">
+                            <span [hidden]="!staffForm.get('pwdGroup').hasError('required',['pwd'])">密码为必填选项</span>
+                            <span
+                                    [hidden]="!staffForm.get('pwdGroup').hasError('pwd',['pwd'])">&nbsp;&nbsp;格式不正确，必须包含数字和字母，且能输入数字、字母和下划线</span>
+                            <span [hidden]="!staffForm.get('pwdGroup').hasError('minlength',['pwd'])">&nbsp;&nbsp;至少输入8位字符</span>
+                            <span [hidden]="!staffForm.get('pwdGroup').hasError('maxlength',['pwd'])">&nbsp;&nbsp;至多输入32位字符</span>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <nz-form-label class="label" nzRequired>确认密码</nz-form-label>
+                    <div class="inp">
+                        <input nz-input type="password" class="text" placeholder="请再次确认密码" autocomplete="off"
+                               formControlName="repwd"
+                               name="repwd" maxlength="32"/>
+                        <div [hidden]="staffForm.get('pwdGroup').valid || staffForm.get('pwdGroup').pristine"
+                             class="error">
+                            <span>两次输入密码不一致</span>
+                        </div>
+                    </div>
+                </li>
+            </div>
+            <li>
+                <nz-form-label class="label" >工号</nz-form-label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入员工工号" autocomplete="off" [(ngModel)]="no"
+                           formControlName="no"
+                           name="no" maxlength="32"/>
+                    <div [hidden]="staffForm.get('no').valid || staffForm.get('no').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('number',['no'])">输入格式错误，只能输入数字、字母和下划线</span>
+                        <span [hidden]="!staffForm.hasError('maxlength',['no'])">&nbsp;&nbsp;至多输入20个字符</span>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <nz-form-label class="label" nzRequired>手机号码</nz-form-label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入员工手机号码" autocomplete="off"
+                           [(ngModel)]="phone"
+                           formControlName="phone" name="phone" maxlength="16"/>
+                    <div [hidden]="staffForm.get('phone').valid || staffForm.get('phone').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('required',['phone'])">手机号码为必填选项</span>
+                        <span [hidden]="!staffForm.hasError('phone',['phone'])">&nbsp;&nbsp;输入格式错误</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <nz-form-label class="label" nzRequired>部门</nz-form-label>
+                <div class="inp">
+                    <div class="inp-over" (click)="selectDepart(departs)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择部门" autocomplete="off" maxlength="100"
+                           [(ngModel)]="departNames" formControlName="depart" name="depart"/>
+                    <!--<input type="text"  [(ngModel)]="departs"/>-->
+                    <div [hidden]="staffForm.get('depart').valid || staffForm.get('depart').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('required',['depart'])">部门名称必填选项</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <nz-form-label class="label" nzRequired>职位</nz-form-label>
+                <div class="inp">
+                    <nz-select style="width: 348px;" [(ngModel)]='positionId' nzPlaceHolder='--请选择职位--' 
+                               formControlName="positionId" name="positionId">
+                        <nz-option [nzValue]="post.id" [nzLabel]="post.name" *ngFor="let post of postList"></nz-option>
+                    </nz-select>
+                    <!-- <select class="chk-sex" formControlName="positionId" name="positionId" [(ngModel)]="positionId">
+                      <option value="">--请选择职位--</option>
+                      <option *ngFor="let post of postList" [value]="post.id">{{post.name}}</option>
+                    </select> -->
+                    <div [hidden]="staffForm.get('positionId').valid || staffForm.get('positionId').pristine"
+                         class="error">
+                        <span [hidden]="!staffForm.hasError('required',['phone'])">职位选项为必选选项</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <nz-form-label class="label" >备注</nz-form-label>
+                <div class="inp">
+          <textarea nz-input class="text textarea" placeholder="请输入需要的备注信息" autocomplete="off" maxlength="150"
+                    formControlName="remarks" name="remarks" [(ngModel)]="remarks"></textarea>
+                    <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                    <div [hidden]="staffForm.get('remarks').valid || staffForm.get('remarks').pristine" class="error">
+                        <span [hidden]="!staffForm.hasError('maxlength',['remarks'])">&nbsp;&nbsp;至多输入120位字符</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="btn">
+                    <button nz-button type="submit" nzType="default" class=" sub-btn" (click)="exist()">关闭</button>
+                    <button nz-button type="submit" nzType="primary" class=" sub-btn" (click)="submit()"
+                            *ngIf="!isEdit" [disabled]="!staffForm.valid">提交
+                    </button>
+                    <button nz-button type="submit" nzType="primary" class="sub-btn  " (click)="modify()" *ngIf="isEdit"
+                            [ngClass]="{'disabled':!staffForm.valid}">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+
+    </ul>
+
+</div>
+
+
+<!-- <div class="inp">
+    <div class="head-img">
+      <img [src]="headImgss"/>
+      <a href="javascript:void(0)" class="fix" (click)="openModal()" *ngIf="!pickStatus"><i nz-icon type="edit" title="修改"></i></a>
+    </div>
+  </div> -->

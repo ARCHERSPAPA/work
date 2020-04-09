@@ -1,0 +1,187 @@
+import {Component, OnInit} from '@angular/core';
+import {Messages} from "../../../../model/msg";
+import {QuoteService} from "../../../../service/quote.service";
+import {Router, NavigationStart, NavigationEnd, NavigationCancel, ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {atob, controlBuildInfo, getIndexByUrl} from "../../../../model/methods";
+import {Default} from "../../../../model/constant";
+import {HeaderService} from "../../../../service/header.service";
+
+@Component({
+    selector: 'rev-article-detail',
+    templateUrl: './article-detail.component.html',
+    styleUrls: ['./../../article.component.scss', './../../../detail/detail.scss']
+})
+export class ArticleDetailComponent implements OnInit {
+
+    public msg: string;
+    public mid: string;
+    public cid: string;
+
+    public baseQuote: any;
+
+    public tabs: Array<any>;
+    public loading: boolean = false;
+    public index: number = 0;
+    public agendas: any;
+
+    constructor(private quote:QuoteService,
+                private header: HeaderService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private warn: WarningService) {
+
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["cid"]) {
+                this.cid = params["cid"];
+            }
+        });
+
+        this.tabs = [
+            {
+                name: "派单参考",
+                url: "dispatch",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            },
+            {
+                name: "项目考勤",
+                url: "attend",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            },
+            {
+                name: "项目动态",
+                url: "dynamic",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            },
+            {
+                name: "客户评价",
+                url: "assess",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            },
+            {
+                name: "项目日志",
+                url: "log",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            },
+            {
+                name: "项目方量",
+                url: "quantity",
+                params: {
+                    cid: this.cid
+                },
+                count: 0
+            }
+        ];
+
+        //判断当前url
+        let url = this.router.url.split("detail");
+        this.index = getIndexByUrl(url[1], this.tabs);
+
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationStart) {
+                this.loading = true;
+            } else if (event instanceof NavigationEnd) {
+                setTimeout(() => {
+                    this.loading = false;
+                }, 1500)
+            } else if (event instanceof NavigationCancel) {
+                this.loading = false;
+            }
+        })
+
+    }
+
+
+    ngDoCheck() {
+        // if (this.quote.getQuoteInfo()) {//     this.baseQuote = this.quote.getQuoteInfo().quoteBase;
+        // }
+        // if (this.quote.getFinanceInfo()) {
+        //     this.baseQuote = this.quote.getFinanceInfo().quoteBase;
+        // }
+        if(this.header && this.header.getHeaderInfo() && this.header.getHeadBool()){
+            this.header.setHeadBool(false);
+            this.baseQuote = this.header.getHeaderInfo().quoteBase;
+            this.agendas = this.header.getHeaderInfo()["agendas"];
+            if(this.agendas){
+                this.tabs[2].count = (this.agendas[106]?this.agendas[106]:0)+(this.agendas[104]?this.agendas[104]:0);
+                this.tabs[3].count = this.agendas[107]?this.agendas[107]:0;
+            }
+        }
+    }
+
+    submit() {
+        if (this.cid) {
+            this.req.doPost({
+                url: "buildProjectSubmit",
+                data: {id: atob(this.cid)},
+                success: (res => {
+                    // console.log(res);
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.quote.setTypeByParam("head",true);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+
+    showBtn() {
+        if (!this.baseQuote) return true;
+        switch (this.baseQuote.state) {
+            case 0:
+                return true;
+            case 1:
+                return true;
+            case 2:
+                return true;
+            case 10:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    controlBuildInfo() {
+        return controlBuildInfo(this.baseQuote);
+    }
+
+    tabClick(url, params) {
+        this.tabs[this.index].count = this.index == 2 ? (this.agendas[104] ? this.agendas[104] : 0) : 0;
+        this.router.navigate(['./' + url + '', Default.STATE.ITEM_4], {
+            queryParams: params,
+            relativeTo: this.activatedRoute
+        });
+    }
+
+    selectChange(e: any) {
+        this.index = e.index;
+    }
+
+    selectIndexChange(i: number) {
+        this.index = i;
+    }
+
+}

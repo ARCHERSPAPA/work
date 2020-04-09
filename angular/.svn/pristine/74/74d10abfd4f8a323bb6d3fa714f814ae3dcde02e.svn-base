@@ -1,0 +1,111 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "./../../../service/request.service";
+import {WarningService} from "./../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {Default} from "../../../model/constant";
+import {ActivatedRoute} from '@angular/router';
+import {atob, getEvaluateLevel} from "../../../model/methods";
+
+
+@Component({
+    selector: 'rev-assessment',
+    templateUrl: './assessment.component.html',
+    styleUrls: ['./../detail.scss', './assessment.component.scss']
+})
+export class AssessmentComponent implements OnInit {
+
+
+    //放大图片
+    public isVisible: boolean = false;
+    public src: string;
+
+    public reply: string;
+    public assessments: Array<any>;
+
+    //查询
+    public cid:string;
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+
+
+    constructor(private req: RequestService,
+                private warn: WarningService,
+                private activatedRoute:ActivatedRoute) {
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params =>{
+            if(params && params["cid"]){
+                this.cid = atob(params["cid"]);
+            }
+        });
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.changeData();
+        }, 1000);
+    }
+
+    openModal(src: string) {
+        this.src = src;
+        this.isVisible = true;
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.src = null;
+    }
+
+    submitReply(id) {
+        if (this.reply) {
+            if(this.reply.length < 10) return false;
+            this.req.doPost({
+                url:"replyEvaluate",
+                data:{
+                    id: id,
+                    content: this.reply
+                },
+                success:(res =>{
+                    this.reply = null;
+                    if(res && res.code == 200){
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.changeData();
+                    }else{
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        } else {
+            this.warn.onWarn(Messages.EMPTY);
+        }
+
+    }
+
+    changeData(){
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+            quoteId: this.cid
+        };
+        this.req.doPost({
+            url:"listEvaluate",
+            data:params,
+            success:(res =>{
+                if(res && res.code == 200){
+                    this.assessments = res.data.pageSet;
+                    this.total = res.data.pageCount;
+                }else{
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    getEvaluateLevel(level){
+       return getEvaluateLevel(level);
+    }
+
+
+}

@@ -1,0 +1,96 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="person-content" style="padding-top:24px;">
+        <div class="staff-list">
+            <div class="list-group-rev" style='margin-top: 0;'>
+                <nz-table #nzTable [nzData]="reUsers" [nzBordered]="true" [nzFrontPagination]="false"
+                    [nzShowPagination]="false" nzSize="middle" class="tables">
+                    <thead nz-thead>
+                        <tr nzWidth='600px'>
+                            <th nz-th><span>职位</span></th>
+                            <th nz-th><span>姓名</span></th>
+                            <th nz-th><span>帐号</span></th>
+                            <th nz-th><span>性别</span></th>
+                            <th nz-th><span>操作</span></th>
+                        </tr>
+                    </thead>
+                    <tbody nz-tbody>
+                        <tr nz-tbody-tr *ngFor="let item of nzTable.data">
+                            <td nz-td class="w20" [title]="item.roleInfo">{{item.roleInfo?item.roleInfo:'--'}}</td>
+                            <td nz-td class="w20" [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+                            <td nz-td class="w20" [title]="item.account?item.account:''">
+                                {{item.account?item.account:'--'}}
+                            </td>
+                            <td nz-td class="w20" [ngSwitch]="item.sex">
+                                <span *ngSwitchCase="1">男</span>
+                                <span *ngSwitchCase="0">女</span>
+                                <span *ngSwitchDefault>男</span></td>
+                            <td nz-td class="w20">
+                                <a href="javascript:void(0)" (click)="editItem(item)">编辑</a>
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="你确定要删除该人员吗?" nzOkText="删除"
+                                    nzCancelText="取消" (nzOnConfirm)="delItem(item.reuseId)"
+                                    nzPopconfirmPlacement="center" *ngIf="item.type !== 1">删除</a></td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+
+            </div>
+        </div>
+    </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="添加复用人员" [nzFooter]="null" class="meal_modal"
+    (nzOnCancel)="handleCancel()">
+    <ul>
+        <form nz-form [formGroup]="userForm">
+            <nz-form-item class="reuse_inp">
+                <nz-form-label [nzSpan]="2"><span style="color:red">* </span>职位</nz-form-label>
+                <nz-form-control [nzSpan]="22">
+                    <input nz-input placeholder="请输入职位" [value]="roleInfo" *ngIf="type === 1" disabled />
+                    <input nz-input type="hidden" [(ngModel)]="roleInfo" formControlName="roleInfo" name="roleInfo"
+                        *ngIf="type === 1" />
+                    <input nz-input type="text" placeholder="请输入职位" autocomplete="off" *ngIf="type === 2"
+                        [(ngModel)]="roleInfo" formControlName="roleInfo" name="roleInfo" maxlength="32" />
+                    <nz-form-explain *ngIf="userForm.get('roleInfo').dirty && userForm.get('roleInfo').errors">
+                        <ng-container *ngIf="userForm.get('roleInfo').hasError('minlength')">
+                            &nbsp;&nbsp;至少输入1个字符
+                        </ng-container>
+                        <ng-container *ngIf="userForm.get('roleInfo').hasError('maxlength')">
+                            &nbsp;&nbsp;至多输入10个字符
+                        </ng-container>
+                        <ng-container *ngIf="userForm.get('roleInfo').hasError('required')">
+                            职位必填
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="reuse_inp">
+                <nz-form-label [nzSpan]="2"><span style="padding-left: 10px;">姓名</span></nz-form-label>
+                <nz-form-control [nzSpan]="22" class="reuse_chk">
+                    <input nz-input type="text" placeholder="请选择员工" autocomplete="off" [(ngModel)]="name"
+                        formControlName="name" name="name" maxlength="32" readonly="true" />
+                    <div class="overflow" (click)="openModal()" readonly="readonly"></div>
+                    <nz-form-explain *ngIf="userForm.get('name').dirty && userForm.get('name').errors">
+                        <ng-container *ngIf="userForm.get('name').hasError('required')">
+                            职位必填
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-label [nzSpan]="6" class="acconut">帐号：<span>{{account?account:'无'}}</span></nz-form-label>
+            <nz-form-label [nzSpan]="6">性别：{{sex?(sex==='1'?'男':'女'):'无'}}</nz-form-label>
+            <li>
+                <div class="btns">
+                    <button nz-button [nzType]="'default'" type="button" (click)="handleCancel()">关闭</button>
+                    <button nz-button [nzType]="'primary'" type="submit" [ngClass]="{'disabled':!userForm.valid}"
+                        (click)="submit($event)" [disabled]="!userForm.valid" *ngIf="!reuseId">提交
+                    </button>
+                    <button nz-button [nzType]="'primary'" type="submit" [ngClass]="{'disabled':!userForm.valid}"
+                        (click)="update($event)" [disabled]="!userForm.valid" *ngIf="reuseId">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+    </ul>
+</nz-modal>

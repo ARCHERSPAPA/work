@@ -1,0 +1,33 @@
+import {Component, OnInit} from '@angular/core';
+
+@Component({
+    selector: 'app-root',
+    template: `
+        <nz-alert *ngIf="showAlert" nzType="warning"  nzBanner="true" nzCloseable [nzDescription]="description"></nz-alert>
+        <router-outlet></router-outlet>
+        <ng-template #description>
+        <p>您当前的浏览器版本过低，某些功能可能无法正常使用。如果是双核浏览器，请切换至极速模式，或使用<a href="https://www.google.cn/intl/zh-CN/chrome/" target="_blank">谷歌浏览器</a>或使用<a href="http://www.firefox.com.cn/" target='_blank'>火狐浏览器</a>浏览，效果更佳</p>
+</ng-template>
+        `,
+    styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+    public showAlert:boolean = false;
+    constructor() {
+    }
+
+    ngOnInit() {
+
+    }
+
+    ngDoCheck(){
+        let agent = window.navigator.userAgent.toLowerCase();
+        if(agent.indexOf( "webkit" )> 0){
+            this.showAlert = false;
+        }else if(agent.indexOf( "gecko" )> 0 && agent.indexOf( "like gecko" )< 0 ){
+            this.showAlert = false;
+        }else{
+            this.showAlert = true;
+        }
+    }
+}

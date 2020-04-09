@@ -1,0 +1,17 @@
+@charset "utf-8";
+.finance{
+    padding: 10px 20px;
+    overflow: hidden;
+    .content{
+        padding-top: 20px;
+    }
+}
+tr th,tr td{
+    // padding: 4px !important;
+    font-size: 14px;
+    max-width: 5vw;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  
+  }

@@ -1,0 +1,78 @@
+<div class="merchant">
+    <div class="merchant-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="merchant-content">
+        <!-- 添加了认证的部分 -->
+        <div class="isPass">
+            <div class="ispassWarp">
+                <!-- <p>{{'info-circle':state === 1,'check-circle':(state === 2 || state === 9)}}</p> -->
+                <i nz-icon theme="outline" [type]="shows"
+                    [ngClass]="{'info':state === 0,'fail':state === 1,'success':(state === 2 || state === 9)}"></i>
+                <dd *ngIf="state === 1" style="margin: 4px;">{{exInfo}}
+                </dd>
+                <dt style="margin:8px 0">{{info}}
+                </dt>
+
+                <a *ngIf="state === 1" href="javascript:void(0)" class="resume ant-btn ant-btn-primary"
+                    [routerLink]="'/rev/steps/two'">重新提交</a>
+            </div>
+        </div>
+        <div class="identity">
+            <!-- <dl class="tip">
+                <dt [ngClass]="{'info':state === 0,'fail':state === 1,'success':(state === 2 || state === 9)}">{{info}}
+                </dt>
+                <dd *ngIf="state === 1">{{exInfo}}</dd>
+                <a *ngIf="state === 1" href="javascript:void(0)" class="resume ant-btn ant-btn-primary"
+                    [routerLink]="'../../../step/two'">重新提交</a>
+            </dl> -->
+            <ul class="list">
+                <li class="item">
+
+                    <figure>
+
+        <nz-spin [nzSize]="'large'" *ngIf="!license" class="loading"></nz-spin>
+        <!-- <div [hidden]='fade' class="imgs"> -->
+           
+            <div  *ngIf="!license" class="loading-White">
+                
+            </div>
+        <div class="avatar-warp in " *ngIf="license" [ngStyle]="styleLicense(license)" (click)="openModal()" >
+            <!-- <img [src]="license" (click)="openModal()" (load)='fadein()' [class]='fade'
+                [hidden]='!fade' /> -->
+        </div>
+          
+                        <figcaption class="labels">公司营业执照</figcaption>
+                    </figure>
+
+                    <!-- <label class="label">公司营业执照</label> -->
+                    <!-- <input class="text" type="text" readonly="readonly" /> -->
+                    <!-- <a href="javascript:void(0)" class="sight" (click)="openModal()">查看</a> -->
+                </li>
+                <li class="item">
+                    <p class="text">{{name}}</p>
+
+                    <label class="label">公司名称</label>
+                </li>
+                <li class="item">
+                    <p class="text">{{code}}</p>
+                  
+                    <label class="label">社会统一信用代码</label>
+                </li>
+                <li class="item">
+                        <p class="text">{{legal}}</p>
+                    <label class="label">法人代表姓名</label>
+                </li>
+                <li class="item">
+                        <p class="text">{{id}}</p>
+                    <label class="label">身份证号码</label>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" (nzOnCancel)="handleCancel()" [nzFooter]="null" nzWidth="1000">
+    <div class="large-img" *ngIf="license">
+        <img [src]="license" />
+    </div>
+</nz-modal>

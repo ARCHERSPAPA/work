@@ -1,0 +1,132 @@
+import { Component, OnInit } from '@angular/core';
+import { Default } from "../../../../model/constant";
+import { Messages } from "../../../../model/msg";
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { sideAnimate } from "../../../../animation/transform.component";
+import { btoa, getWageState, getWageType } from "../../../../model/methods";
+
+@Component({
+    selector: 'rev-audit-list',
+    templateUrl: './audit-list.component.html',
+    styleUrls: ['../../../detail/list.scss', './../../settle.component.scss', './../../settle-wage/wage-list/wage-list.component.scss'],
+    animations: [sideAnimate]
+})
+export class AuditListComponent implements OnInit {
+
+
+    public title: string;
+    public switch: string;
+    public radioSwitch = [{
+        key: 1,
+        text: '待审核'
+    }, {
+        key: 0,
+        text: '全部申请'
+    }];
+    //审核状态(auditState:1->待审，0->全部)
+    public auditState: number = 1;
+    public searchType: any;
+
+    //分页
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+
+    public auditList: any;
+
+    constructor(private request: RequestService,
+        private warn: WarningService) {
+    }
+
+    ngOnInit() {
+
+        this.title = "工费审核";
+        this.switch = "left";
+        // this.auditList = [
+        //     {
+        //         id:1,
+        //         workerName:"张三",
+        //         workerType:1,
+        //         price:200,
+        //         memberName:"李四",
+        //         masterAuditTime:new Date().getTime(),
+        //         customerHouseAddress:"两江国际2010",
+        //         finalPrice:2000,
+        //         state:1,
+        //         type:1
+        //     },
+        //     {
+        //         id:2,
+        //         name:"王平",
+        //         position:2,
+        //         pay:800,
+        //         worker:"李四",
+        //         verifyTime:new Date().getTime(),
+        //         address:"时堂在上1010",
+        //         total:13000,
+        //         state:2,
+        //         type:2
+        //     }
+        // ];
+        this.changeData();
+    }
+
+
+    handleSwitch(status: number) {
+        this.selectAudit(status);
+    }
+
+
+    changeData(type = false) {
+        let pageNo
+        if (type) {
+            pageNo = 1
+        } else {
+            pageNo = this.pageNo
+        }
+        this.request.doPost({
+            url: "listLabourExpenses",
+            data: {
+                pageNo: pageNo,
+                pageSize: this.pageSize,
+                type: this.auditState,
+                searchName: this.searchType
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.auditList = res.data.pageSet;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    getWageState(s) {
+        return getWageState(s);
+    }
+
+    getWageType(t) {
+        return getWageType(t);
+    }
+
+    selectAudit(state: number) {
+        this.auditState = state;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.pageSize = Default.PAGE.PAGE_SIZE;
+        this.changeData();
+    }
+
+    /**
+     * url中加密
+     * @param {string} id
+     * @returns {any}
+     */
+    btoa(id: string) {
+        return btoa(id);
+    }
+
+}

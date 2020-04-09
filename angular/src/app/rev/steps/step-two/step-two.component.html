@@ -1,0 +1,62 @@
+<div class="step">
+    <div class="step-com-head">
+        <rev-step-head step="2"></rev-step-head>
+    </div>
+    <div class="form">
+        <form nz-form [formGroup]="fillForm">
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="mobile"><span class="info-label">联系电话</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="mobile" id="mobile" autocomplete="off"
+                           maxlength="32" placeholder="请输入联系电话" [(ngModel)]="mobile"/>
+                    <div *ngIf="!fillForm.get('mobile').valid && !fillForm.get('mobile').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="fillForm.hasError('required',['mobile'])" class="ng-trigger ng-trigger-helpMotion">必填电话号码</span>
+                        <span *ngIf="fillForm.hasError('communicate',['mobile'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;联系电话格式不对</span>
+                        <span *ngIf="fillForm.hasError('minlength',['mobile'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至少输入6位字符</span>
+                        <span *ngIf="fillForm.hasError('maxlength',['mobile'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入13位字符</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="address"><span class="info-label">公司地址</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="address" id="address" autocomplete="off"
+                           maxlength="100" placeholder="请选择公司地址" [(ngModel)]="address" readonly="readonly"/>
+                    <div class="step-overflow" nzSm="14" nzXs="24" (click)="openModal('address',address)"></div>
+                    <div *ngIf="!fillForm.get('address').valid && !fillForm.get('address').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="fillForm.hasError('required',['address'])"
+                              class="ng-trigger ng-trigger-helpMotion">必选公司地址</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="area"><span class="info-label">服务范围</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" placeholder="请选择服务范围" [value]="area|region" readonly="readonly"/>
+                    <input nz-input type="text" formControlName="area" id="area" autocomplete="off" maxlength="200"
+                    [(ngModel)]="area" readonly="readonly" [hidden]="true">
+                    <div class="step-overflow" nzSm="14" nzXs="24" (click)="openModal('area',area)"></div>
+                    <div *ngIf="!fillForm.get('area').valid && !fillForm.get('area').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="fillForm.hasError('required',['area'])" class="ng-trigger ng-trigger-helpMotion">必选服务范围</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item nz-row>
+                <nz-form-control [nzSpan]="14" [nzOffset]="6">
+                    <button nz-button nzType="primary" nzBlock (click)="next($event)" [disabled]="!fillForm.valid">下一步
+                    </button>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+
+</div>

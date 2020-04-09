@@ -1,0 +1,5 @@
+<div class="preview">
+  <h3>{{materialTitle}}</h3>
+  <div class="time" *ngIf="time">{{time | date:'yyyy-MM-dd HH:mm'}}</div>
+  <div class="text ql-editor" [innerHTML]="text"></div>
+</div>

@@ -1,0 +1,32 @@
+<form (ngSubmit)="query()" class="ant-form ant-form-inline">
+    <!--<p *ngIf="msg" class="error">{{msg}}</p>-->
+    <div class="ant-row ant-form-item" style="width:80%;">
+        <div class="ant-form-item-control-wrapper" style="width:100%;">
+        <div class="ant-form-item-control">
+            <span class="ant-form-item-children"><input type="text" class="ant-input" required [(ngModel)]="address" autocomplete="off" name="address" id="geography"/></span>
+        </div>
+        </div>
+    </div>
+    <div class="ant-row ant-form-item" style="width:10%;">
+        <div class="ant-form-item-control-wrapper" style="width:100%;">
+            <div class="ant-form-item-control">
+                <span class="ant-form-item-children"><button type="submit" class="ant-btn ant-btn-primary">查询</button></span>
+            </div>
+        </div>
+    </div>
+</form>
+<ngx-amap style="width:100%;height:360px;" [resizeEnable]="true"
+          [center]="point" [zoom]="16" (mapClick)="onMapEvent($event)">
+    <amap-marker [position]="point">
+        <amap-info-window [offset]="{x: -6, y: -30}" [isOpen]="locationInfo!=''">{{locationInfo}}</amap-info-window>
+    </amap-marker>
+</ngx-amap>
+
+<!----
+<ngx-amap class="diy_map" [resizeEnable]="true" [center]="point" [zoom]="16" (mapClick)="onMapEvent($event)">
+  	<amap-marker [position]="point">
+    	<amap-info-window [offset]="{x: 0, y: -30}" [isOpen]="locationInfo!=''">{{locationInfo}}</amap-info-window>
+ 	</amap-marker>
+</ngx-amap>
+
+----->

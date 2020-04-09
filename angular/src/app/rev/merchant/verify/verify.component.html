@@ -1,0 +1,56 @@
+<div class="merchant">
+  <!-- <div class="merchant-head">
+    <rev-title [title]="title"></rev-title>
+  </div> -->
+  <div class="merchant-content">
+    <div class="verify">
+      <dl>
+        <dt class="dt"><span class="title">资质证书</span> <span class="tip">建议上传装饰行业相关资质证书</span></dt>
+        <ul class="imgs">
+          <rev-uploader-new [content]='content' class="uploaders" (click)="addVerify(1)"></rev-uploader-new>
+          <li *ngFor="let item of images.qualification;let i = index" class="img-item" [ngStyle]="styleImg(item.imgUrl)"
+            (click)="openLarge($event,images.qualification,i)">
+            <a class="del" href="javascript:void(0)" (click)="delVerify(1,item.id,i,$event)"></a>
+            <span class="showDel"></span>
+          </li>
+          <!-- <p *ngIf="images.qualification.length == 0">暂未上传图片</p> -->
+        </ul>
+      </dl>
+      <dl>
+        <dt class="dt"><span class="title">荣誉证书</span><span class='tip'>荣誉证书越多，客户越信任企业</span></dt>
+        <ul class="imgs">
+          <rev-uploader-new [content]='content' class="uploaders" (click)="addVerify(2)"></rev-uploader-new>
+          <li *ngFor="let item of images.honor;let i = index" class="img-item"
+            (click)="openLarge($event,images.honor,i)" [ngStyle]="styleImg(item.imgUrl)">
+            <!-- <img [src]="(item.imgUrl.indexOf('?') > -1)?item.imgUrl:item.imgUrl+'?imageView2/2/w/160/h/100'"
+             /> -->
+            <a class="del" href="javascript:void(0)" (click)="delVerify(2,item.id,i,$event)"></a>
+            <span class="showDel"></span>
+          </li>
+          <!-- <p *ngIf="images.honor.length == 0">暂未上传图片</p> -->
+        </ul>
+      </dl>
+      <dl>
+        <dt class="dt"><span class="title">其它</span></dt>
+        <ul class="imgs">
+          <rev-uploader-new [content]='content' class="uploaders" (click)="addVerify(3)"></rev-uploader-new>
+          <li *ngFor="let item of images.others;let i = index" class="img-item" [ngStyle]="styleImg(item.imgUrl)"
+            (click)="openLarge($event,images.others,i)">
+            <a class="del" href="javascript:void(0)" (click)="delVerify(3,item.id,i,$event)"></a>
+            <span class="showDel"></span>
+          </li>
+          <!-- <p *ngIf="images.qualification.length == 0">暂未上传图片</p> -->
+        </ul>
+      </dl>
+      <rev-imgview [album]="_albums" [index]="index" *ngIf="_albums.length>0"></rev-imgview>
+    </div>
+  </div>
+
+
+
+</div>
+<!-- <nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" (nzOnCancel)="handleCancel()" [nzFooter]="null" nzWidth="1000">
+  <div class="large-img" *ngIf="largeImg">
+    <img [src]="largeImg" />
+  </div>
+</nz-modal> -->

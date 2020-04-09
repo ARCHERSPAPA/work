@@ -1,0 +1,140 @@
+import {Component, OnInit, Input} from '@angular/core';
+
+@Component({
+    selector: 'rev-role-trees',
+    template: `
+        <dl *ngFor="let tree of trees" class="tree-dl">
+              <dt *ngIf="tree.parentId === 0" class="tree-dt">{{tree.catalogName}}</dt>
+              <dd class="tree-dd">
+                  <span class="tree-item" (click)="checkTree($event,tree)">
+                    <label nz-checkbox [(ngModel)]="tree.checked">{{tree.catalogName}}</label>
+                  </span>
+                  <rev-role-trees [trees]="tree.catalogs" [roots]="roots" *ngIf="tree.catalogs && tree.catalogs.length > 0"></rev-role-trees>
+                  <rev-role-trees [permits]="tree.largePermissions" [branches]="trees" [roots]="roots" *ngIf="tree.largePermissions && tree.largePermissions.length > 0"></rev-role-trees>  
+              </dd> 
+        </dl>
+            <dd class="tree-li">
+                <span class="tree-item" *ngFor="let permit of permits" (click)="checkItem($event,permit)">
+                    <label nz-checkbox [(ngModel)]="permit.checked">{{permit.name}}</label>
+                  </span>
+            </dd>
+    `,
+    styleUrls: ['./../post.component.scss']
+})
+export class RoleTreesComponent implements OnInit {
+    /**
+     * 获取当前渲染的树
+     */
+    @Input() trees: any;
+
+    @Input() roots:any;
+
+    /**
+     * 获取树的最后一层
+     */
+    @Input() permits:any;
+
+    @Input() branches:any;
+
+    constructor() {
+    }
+
+    ngOnInit() {
+
+    }
+
+    checkItem(e:any,item:any){
+        e.stopPropagation();
+        e.preventDefault();
+        this.changeItem(item);
+        this.findParantNodes2(item);
+    }
+
+
+    checkTree(e:any,tree:any){
+        e.stopPropagation();
+        e.preventDefault();
+        this.changeItem(tree);
+        this.findChildNodes(tree);
+        this.findParentNodes1(tree);
+    }
+
+    /**
+     * 查找子集
+     * @param tree
+     */
+    findChildNodes(tree){
+        if(tree && tree.catalogs && tree.catalogs.length > 0){
+            tree.catalogs.forEach(item =>{
+                item.checked = tree.checked;
+                this.changeItem(item);
+                this.findChildNodes(item);
+            })
+        }
+        if(tree && tree.largePermissions && tree.largePermissions.length > 0){
+            tree.largePermissions.forEach(item =>{
+                item.checked = tree.checked;
+                this.changeItem(item);
+            })
+        }
+    }
+
+    /**
+     * 查找父集
+     * @param tree
+     */
+    findParentNodes1(tree){
+        if(tree && tree.parentId){
+            for (let i in this.roots) {
+                if(this.roots[i].id == tree.parentId){
+                    let bool = false;
+                    if(this.roots[i] && this.roots[i].catalogs && this.roots[i].catalogs.length > 0){
+                        bool = this.roots[i].catalogs.some(item =>{
+                            return item.checked;
+                        });
+                    }
+
+                    this.roots[i].checked = bool;
+                    this.changeItem(this.roots[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     * 重载查找父集
+     * @param tree
+     */
+    findParantNodes2(tree){
+        if(tree && tree.catalogCode){
+            for(let i in this.branches){
+                if(this.branches[i].id == parseInt(tree.catalogCode)){
+                    let bool = false;
+                    if(this.branches[i] && this.branches[i].largePermissions && this.branches[i].largePermissions.length > 0){
+                        bool = this.branches[i].largePermissions.some(item =>{
+                            return item.checked;
+                        });
+                    }
+
+                    this.branches[i].checked = bool;
+                    this.changeItem(this.branches[i]);
+                    this.findParentNodes1(this.branches[i]);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 设置公共改变
+     * @param item
+     */
+    changeItem(item){
+        item.show = item.checked?1:0;
+    }
+
+
+
+
+
+}

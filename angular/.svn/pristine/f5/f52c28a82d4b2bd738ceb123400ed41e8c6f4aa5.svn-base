@@ -1,0 +1,57 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.case-head{
+    padding-bottom: 20px;
+    .ft-20{
+        font-size: 20px;
+    }
+    .case-title{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+        span{
+            font-size: 20px;
+            display: inline-block;
+        }
+        .edit{
+            float: right;
+            font-size: 14px;
+        }
+    }
+    span{
+        display: block;
+        font-size:14px;
+        font-family:"PingFang SC";
+        font-weight:400;
+        line-height:22px;
+        color:rgba(0,0,0,0.85);
+    }
+    &-left{
+        float: left;
+        display: inline-block;
+        width: 30%;
+        .Grey{
+            color:rgba(0,0,0,0.45);
+        }
+    }
+
+    &-right{
+        float: left;
+        display: inline-block;
+        width: 10%;
+        text-align: right;
+    }
+    .line{
+        float: left;
+        width:1px;
+        height:90px;
+        background:rgba(232,232,232,1);
+        opacity:1;
+        margin: 20px 80px 0;
+    }
+    .display{
+        display: inline-block;
+    }
+}
+
+

@@ -1,0 +1,8 @@
+<div class="personnel">
+  <div class="person-head">
+    <rev-title [title]="title" [atags]="buttons" [show]="showBtn" (handleName)="handleName($event)"></rev-title>
+  </div>
+  <div class="person-content">
+    <router-outlet *ngIf='showTitle'></router-outlet>
+  </div>
+</div>

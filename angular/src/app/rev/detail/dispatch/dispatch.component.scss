@@ -1,0 +1,76 @@
+@charset "utf-8";
+@import "../../../../assets/scss/mixin";
+.detail-dispatch{
+  position: relative;
+  .dispatch-depart{
+    width: 100%;
+    height: 30px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    @include compatibility(box-sizing,border-box);
+  }
+  .dispatch-data{
+    width: 100%;
+    padding-top: 40px;
+  }
+  .dispatch-map{
+    position: relative;
+    .dispatch-render{
+      width: 100%;
+      height:96px;
+      opacity:1;
+      border-radius:0px 0px 4px 4px;
+      position: absolute;
+      bottom: 0;
+      left:0;
+      z-index: 999;
+      @include compatibility(box-sizing,content-box);
+      .dispatch-mark{
+        width: 100%;
+        height: 98px;
+        background:rgba(255,255,255,0.9);
+        position:absolute;
+        left: 0;
+        top:0;
+        z-index: 9;
+      }
+      .dispatch-user{
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        padding: 24px;
+        @include compatibility(box-sizing,content-box);
+        .user-head{
+          width: 48px;
+          height: 100%;
+          border-radius: 100%;
+        }
+        .dispatch-item{
+          font-size:14px;
+          font-family:'PingFang SC';
+          font-weight:bold;
+          line-height:24px;
+          color:rgba(0,0,0,0.65);
+          display: inline-block;
+          @include ellipsis();
+        }
+        .dispatch-item-gray{
+          font-size:14px;
+          font-family:'PingFang SC';
+          font-weight:400;
+          line-height:24px;
+          color:rgba(0,0,0,0.25);
+        }
+        .dispatch-btn{
+          margin: 8px 0;
+          text-align: right;
+        }
+      }
+    }
+  }
+
+}
+.actived td{
+  background: #e6f7ff;
+}

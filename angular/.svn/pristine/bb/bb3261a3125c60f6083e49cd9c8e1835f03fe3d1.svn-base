@@ -1,0 +1,19 @@
+<div class="detail-price" nz-col nzSpan="20" nzOffset="2">
+    <!--<dl>-->
+        <!--<dt>-->
+            <!--<span class="title">{{seriesName}}</span>-->
+        <!--</dt>-->
+        <!--<dd>-->
+            <!--<p [innerHTML]="explainInfo | translateHTML"></p>-->
+        <!--</dd>-->
+    <!--</dl>-->
+    <dl nz-row class="mt-20">
+        <dt nz-col nzSpan="24">
+            <span class="title">{{data && data.length > 0 && data[0].name?data[0].name:'装修类型'}}</span>
+        </dt>
+        <dd nz-col nzSpan="24" class="mt-30">
+            <textarea rows="20" nz-input  disabled="disabled"
+                      [value]="data && data.length > 0 && data[0].offerExplain?data[0].offerExplain:''"></textarea>
+        </dd>
+    </dl>
+</div>

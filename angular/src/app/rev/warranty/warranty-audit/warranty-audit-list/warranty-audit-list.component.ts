@@ -1,0 +1,81 @@
+import { Component, OnInit } from '@angular/core';
+import { Messages } from "../../../../model/msg";
+import { UserService } from "../../../../service/user.service";
+import { RequestService } from "../../../../service/request.service";
+import { Default } from "../../../../model/constant";
+import { WarningService } from "../../../../service/warning.service";
+import { getTypeName, btoa } from "../../../../model/methods";
+
+@Component({
+    selector: 'rev-warranty-audit-list',
+    templateUrl: './warranty-audit-list.component.html',
+    styleUrls: ['./../../warranty.component.scss', './warranty-audit-list.component.scss']
+})
+
+export class WarrantyAuditListComponent implements OnInit {
+
+    // 组件相关
+    public title: string = '保修卡审核';
+    //审核状态
+    public status: number = 0;
+    public radioSwitch = [{
+        key: 0,
+        text: '待审核'
+    }, {
+        key: 1,
+        text: '已审核'
+    }];
+
+    // 页面相关
+    public auditList: Array<any>;
+
+    // 分页
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    constructor(
+        private user: UserService,
+        private req: RequestService,
+        private warn: WarningService
+    ) { }
+
+    ngOnInit() {
+        this.changeData();
+    }
+
+    changeData() {
+        let params = {
+            companyId: this.user.getCompanyId(),
+            status: this.status,
+            pageNo: this.pageNo,
+            pageSize: this.pageSize
+        };
+        this.req.doPost({
+            url: "listCard",
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.auditList = res.data.pageSet;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    handleSwitch(status: number) {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.pageSize = Default.PAGE.PAGE_SIZE;
+        this.status = status;
+        this.changeData();
+    }
+
+    getTypeName(type: number) {
+        return getTypeName(type);
+    }
+    btoa(id:string) {
+        return btoa(id)
+    }
+}

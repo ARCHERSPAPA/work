@@ -1,0 +1,114 @@
+<div class="exam">
+        <rev-title [title]="isDetail === 1?'详情':'新建考试'" [show]="true"></rev-title>
+    <div class="head">
+        <rev-topic-title [title]="title" [buttons]="buttons" [atags]="atags" [show]="state === 1" [nums]="nums"[editListener]='editList'
+                         (titleListener)="changeTitle($event)"></rev-topic-title>
+    </div>
+    <div class="content">
+        <div class="detail-list">
+            <ul class="exam-head" >
+                <li class="exam-li">
+                    <label class="label">发布时间</label>
+                    <div class="inp">
+                        <nz-date-picker
+                            nzShowTime
+                            nzClassName="text"
+                            nzFormat="yyyy-MM-dd HH:mm:ss"
+                            [(ngModel)]="startValue"
+                            nzPlaceHolder="请选择发布时间"
+                            (nzOnOk)="onStartChange($event)"
+                            [nzAllowClear]="false"
+                            [nzDisabled] = "state !== 1"
+                            [nzShowToday] = "false"
+                        ></nz-date-picker>
+                    </div>
+                </li>
+                <li class="exam-li" style='text-align:center'>
+                    <label class="label">截止时间</label>
+                    <div class="inp">
+                        <nz-date-picker
+                            nzShowTime
+                            nzClassName="text"
+                            nzFormat="yyyy-MM-dd HH:mm:ss"
+                            [(ngModel)]="endValue"
+                            nzPlaceHolder="请选择截止时间"
+                            (nzOnOk)="onEndChange($event)"
+                            [nzAllowClear]="false"
+                            [nzDisabled] = "state !== 1"
+                            [nzShowToday]="false"
+                        >
+                        </nz-date-picker>
+                    </div>
+                </li>
+                <li class="exam-li" style='text-align:right'>
+                    <label class="label">考试对象</label>
+                    <div class="inp">
+                        <input nz-input placeholder="查看人数" *ngIf="state !== 1" [value]="examCount" readonly (click)="viewApplicants()"/>
+                        <input nz-input placeholder="考试人数" *ngIf="state === 1" [value]="examCount" readonly (click)="selectApplicants()"/>
+                    </div>
+                </li>
+         
+            </ul>
+            <div class="exam-acrocss" >
+                    <label class="lable">通过率</label>
+                    <div style="display: inline-block;">
+                        <nz-select
+                            style="width: 278%;"
+                            [nzAllowClear]="false"
+                            nzPlaceHolder="请选择通过率"
+                            [(ngModel)]="examRadio"
+                            (ngModelChange)="radioChange($event)"
+                            [disabled]="state !== 1"
+                        >
+                            <nz-option [nzLabel]="((i+1)*10)+'%'" [nzValue]="((i+1)*10)+'%'" *ngFor="let radio of examRadios;let i = index;"></nz-option>
+                        </nz-select>
+                    </div>
+                </div>
+            <div class="list-group-rev">
+                <div class="list-items">
+                    <div class="item-content" *ngIf="exams && exams.length > 0">
+                        <ul class="item-body ul-flex" *ngFor="let exam of exams;let first = first;let last = last">
+                            <li class="flex7 strength text-left">
+                                <strong>({{exam.type === 1?'选择题':'填空题'}}){{exam.title?exam.title:'--'}}</strong>
+                                <div class="flex1 strength" *ngIf="state === 1">
+                                        <span class="item-block">
+                                                <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该题库吗?"
+                                                nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="deleteItem(exam.id)" style="color: red;">删除</a>
+                                            <a href="javascript:void(0)" (click)="editItem(exam)">编辑</a>
+                                         </span>
+                                        <span class="item-block">
+                                            <a href="javascript:void(0)" (click)="moveItem(exam.id,true)" *ngIf="!first">上移</a>
+                                            <a href="javascript:void(0)" (click)="moveItem(exam.id,false)" *ngIf="!last">下移</a>
+                                        </span>
+                                    </div>
+                            </li>
+                            <li class="flex2 strength" *ngIf="exam.type === 1">
+                                 <span class="item-icon-block" *ngFor="let option of exam.options;let i = index;">
+                                   <span>
+                                    {{getOptionLetter(i)}}：{{option.answer}}
+                                   </span> 
+                                   <i nz-icon type="check" theme="outline" style="color:rgba(24,144,255,1);" *ngIf='option.right'></i>
+                                </span>
+                            </li>
+                            <li class="flex2 strength" *ngIf="exam.type == 2">
+                                <span class="item-icon-block" *ngFor="let answer of exam.answers;let i = index;">
+                                    {{getOptionTag(exam.type)}}{{getOptionName(i)}}：{{answer}}</span>
+                            </li>
+                            <li class="flex1 strength" *ngIf="state !== 1">
+                                <span>
+                                    <a href="javascript:void(0)">--</a>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="item-content" *ngIf="!exams || exams.length == 0">
+                        <ul class="item-body">
+                            <p>暂无数据信息</p>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

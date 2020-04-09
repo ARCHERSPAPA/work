@@ -1,0 +1,13 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+    selector: 'rev-cost-budget',
+    templateUrl: './cost-budget.component.html',
+    styleUrls: ['./cost-budget.component.scss']
+})
+export class CostBudgetComponent implements OnInit {
+
+    ngOnInit() {
+        console.log("Method not implemented.");
+    }
+}

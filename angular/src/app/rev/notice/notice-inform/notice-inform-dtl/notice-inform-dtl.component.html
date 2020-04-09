@@ -1,0 +1,90 @@
+<div class="notice-detail">
+  <rev-title [title]="title"></rev-title>
+  <!--操作-->
+  <div class="notice-detail_operation">
+    <div nz-col nzSpan="8">
+      <span style="margin-right: 10px">发布时间</span>
+      <nz-date-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" [(ngModel)]="date" (ngModelChange)="onChange($event)"></nz-date-picker>
+    </div>
+    <div nz-col nzSpan="8">
+      <span style="margin-right: 10px">通知对象</span>
+      <button style="margin: 0 auto" nz-button [nzType]="'default'" (click)="showModal()">
+        <span *ngIf='objList.length !== 0'>已选中<span style="color: #0a8ddf;margin: 0 5px"> {{objList.length}}</span>人</span>
+      </button>
+    </div>
+
+    <div nz-col nzSpan="8" (click)="handleResetVal()">
+      <label nz-radio  [ngModel]="resetVal">通知需要回执</label>
+    </div>
+  </div>
+
+  <!--标题-->
+  <div>
+    <input nz-input type="text" maxlength="100" [(ngModel)]="noticeTitle" placeholder="请在这里填写素材标题">
+  </div>
+
+  <!--富文本-->
+  <div class="notice-detail_wrap">
+    <quill-editor [(ngModel)]="content" placeholder="请填写内容" (onEditorCreated)="EditorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
+    已输入{{quillLen}}字
+  </div>
+
+  <div nz-row>
+    <div nz-col nzOffset="10">
+      <div nz-col nzSpan="4"><button nz-button [nzType]="'primary'" (click)="handleSub()">保存</button></div>
+    </div>
+  </div>
+
+
+  <!--查看人员-->
+  <div class="depart-tree">
+    <nz-modal nzWidth="1000px" [(nzVisible)]="isVisible" nzTitle="查看人员"  [nzFooter]="modalFooter" (nzOnCancel)="handleCancel()">
+      <div>
+        <nz-tabset style="height: 600px;">
+          <nz-tab nzTitle="总共{{objList.length}}人">
+            <nz-table #allTable [nzData]="objList" nzVirtualScroll
+                      [nzFrontPagination]="false" [nzShowPagination]="false" [nzScroll]="{y:'500px'}" >
+              <tbody>
+              <tr *ngFor="let data of allTable.data">
+                <td>{{data.userName}}</td>
+                <td>{{data.phone}}</td>
+                <td>{{data.positionName}}</td>
+                <td>{{data.departmentName}}</td>
+              </tr>
+              </tbody>
+            </nz-table>
+          </nz-tab>
+          <nz-tab nzTitle="已阅{{objReadList.length}}人" *ngIf="resetVal">
+            <nz-table #readTable [nzData]="objReadList"  nzVirtualScroll
+                      [nzFrontPagination]="false" [nzShowPagination]="false" [nzScroll]="{y:'500px'}" >
+              <tbody>
+              <tr *ngFor="let data of readTable.data">
+                <td>{{data.userName}}</td>
+                <td>{{data.phone}}</td>
+                <td>{{data.positionName}}</td>
+                <td>{{data.departmentName}}</td>
+              </tr>
+              </tbody>
+            </nz-table>
+          </nz-tab>
+          <nz-tab nzTitle="未阅{{objUnReadList.length}}人" *ngIf="resetVal">
+            <nz-table #unreadTable [nzData]="objUnReadList" nzVirtualScroll
+                      [nzFrontPagination]="false" [nzShowPagination]="false" [nzScroll]="{y:'500px'}" >
+              <tbody>
+              <tr *ngFor="let data of unreadTable.data">
+                <td>{{data.userName}}</td>
+                <td>{{data.phone}}</td>
+                <td>{{data.positionName}}</td>
+                <td>{{data.departmentName}}</td>
+              </tr>
+              </tbody>
+            </nz-table>
+          </nz-tab>
+        </nz-tabset>
+      </div>
+      <ng-template #modalFooter>
+        <button nz-button nzType="primary" (click)="handleCancel()">关闭</button>
+      </ng-template>
+    </nz-modal>
+  </div>
+</div>

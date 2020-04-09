@@ -1,0 +1,58 @@
+import { Component, OnInit, ElementRef } from '@angular/core';
+import {RequestService} from "../../service/request.service";
+import {WarningService} from "../../service/warning.service";
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {Messages} from "../../model/msg";
+
+@Component({
+  selector: 'rev-upfile',
+  templateUrl: './upfile.component.html',
+  styleUrls: ['./../uploader/uploader.component.scss','./upfile.component.scss']
+})
+export class UpfileComponent implements OnInit {
+
+  public name:string;
+  public upload:File = null;
+  constructor(private req:RequestService,
+              private warn:WarningService,
+              public activeModal:NgbActiveModal) { }
+
+  ngOnInit() {
+      this.name = "上传成本表";
+  }
+
+  getFile(){
+      let that = this;
+      if(that.upload){
+          that.req.doPostImg({
+              url:"token",
+              data:"id=1",
+              success:(res =>{
+                  if(res && res.code == 200){
+                      let token = JSON.parse(res.data).uptoken;
+                      let uploadUrl = JSON.parse(res.data).url;
+                      that.req.doPostFile({
+                          file: this.upload,
+                          token: token
+                      }).subscribe(data =>{
+                          if(data &&　data["url"]){
+                              that.activeModal.close(uploadUrl+"/"+data["url"])
+                          }else{
+                              that.activeModal.dismiss("上传文件失败");
+                          }
+                      })
+                  }else{
+                      that.warn.onError(res.msg || Messages.FAIL.DATA);
+                  }
+              })
+          })
+      }
+  }
+
+  changeFile(files:FileList){
+      // console.log(files);
+      this.upload = files.item(0);
+      // console.log(this.upload);
+  }
+
+}

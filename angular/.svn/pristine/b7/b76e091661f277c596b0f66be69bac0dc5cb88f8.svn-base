@@ -1,0 +1,13 @@
+<ul class="verifyContent" *ngIf="verify && verify.length > 0">
+	<li *ngFor="let item of verify">
+		<p>
+			{{item.name?item.name:'--'}}
+			<span>{{item.title?item.title:'--'}}</span>
+			<span>{{item.date?(item.date | date:'yyyy-MM-dd HH:mm'):'--'}}</span>
+		</p>
+		<p>{{item.remark?item.remark:'还没有备注哦'}}</p>
+	</li>
+</ul>
+<ul class="verifyNoContent" *ngIf="!verify || (verify && verify.length == 0)">
+	<li>暂无数据显示</li>
+</ul>

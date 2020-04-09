@@ -1,0 +1,146 @@
+<!-- <div class="item" *ngFor="let depart of departTree;let isFirst = first;let i = index;let isLast = last;">
+    <dl class="item-dl">
+        <dd>
+            <span class="choice">
+                <span class="chn-btn chn-empty" *ngIf="!depart.ownSubset"></span>
+                <span class="chn-btn" [ngClass]="{'chn-plus':!depart.show,'chn-minus':depart.show}"
+                      *ngIf="depart.ownSubset" (click)="loadChild(depart)"></span>
+                <span class="chn-btn" [ngClass]="{'chn-close':!depart.show,'chn-open':depart.show}"
+                      *ngIf="depart.ownSubset"></span>
+            </span>
+            <span class="name" [title]="depart.name">（{{depart.rank}}级目录）{{depart.name}}</span>
+        </dd>
+        <dd class="remark" [nzTitle]="depart.remarks?depart.remarks:'暂无描述信息'" nzPlacement="top"
+            nz-tooltip>{{depart.remarks?depart.remarks:'--'}}
+        </dd>
+        <dd class="item-dd-btns">
+            <a (click)="editDepart(depart)" class="edit"> 
+                <i nz-icon type="edit" title="编辑"></i> 
+            </a>
+            <a nz-popconfirm nzTitle="删除后该部门及其下子部门均被删除？"
+               (nzOnConfirm)="delDepart(depart.id)" nzPlacement="top" class="del"> 
+                <i nz-icon type="delete" title="删除"></i>
+            </a>
+            <a (click)="addDepart(depart.id)"> 
+                <i nz-icon type="plus-circle" title="新建"></i>
+            </a> 
+            <a (click)="moveDepart(depart,departTree[i-1].id)" *ngIf="!isFirst"> 
+                <i nz-icon type="up-circle" title="上移"></i>
+            </a>
+            <a (click)="moveDepart(depart,departTree[i+1].id)" *ngIf="!isLast"> 
+                <i nz-icon type="down-circle" title="下移"></i>
+            </a>
+        </dd>
+    </dl>
+    <rev-depart-node [departTree]="depart.child"
+                     [hidden]="!depart.show" *ngIf="depart.child && depart.child.length > 0"></rev-depart-node>
+</div>  -->
+
+<!-- 树形表格 -->
+<div class="depart-list">
+    <nz-table #nzTable [nzData]="departTree" [nzFrontPagination]="false" [nzShowPagination]="false" nzBordered>
+        <thead nz-thead>
+            <tr>
+                <th nzWidth="50%" nz-th>名称</th>
+                <th nzWidth="30%" nz-th>描述</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody nz-tbody>
+            <ng-template ngFor let-data [ngForOf]="nzTable.data" let-isFirst ="first" let-i="index" let-isLast = "last">
+                <ng-template ngFor let-item [ngForOf]="expandDataCache[data.id]" let-idx="index">
+                    <tr nz-tbody-tr *ngIf="(item.parent&&item.parent.expand)||!(item.parent)">
+                        <td nz-td nzWidth="50%" [nzIndentSize]="item.level*20" [nzShowExpand]="!!item.children" [(nzExpand)]="item.expand" (nzExpandChange)="collapse(expandDataCache[data.id],item,$event)">
+                            <span class="name" [title]="item.name">{{item.name}}</span>
+                        </td>
+                        <td nz-td [nzTitle]="item.remarks?item.remarks:'暂无描述信息'" nzPlacement="top"
+                        nz-tooltip class="second" nzWidth="30%">
+                            <div>{{item.remarks?item.remarks:'--'}}</div>
+                        </td>
+                        <td nz-td>
+                            <a (click)="editDepart(item)" class="edit"> 
+                               编辑 
+                            </a>
+                            <a nz-popconfirm nzTitle="删除后该部门及其下子部门均被删除？"
+                                (nzOnConfirm)="delDepart(item.id)" nzPlacement="top" class="del"> 
+                                删除
+                            </a>
+                            <a (click)="addDepart(item.id)"> 
+                                添加
+                            </a> 
+                             <ng-container *ngIf="item.rank == 1; else elseTemplate">
+                                <a (click)="moveDepart(item,nzTable.data[i-1].id)" *ngIf="!isFirst"> 
+                                    上移                         
+                                </a>
+                                <a (click)="moveDepart(item,nzTable.data[i+1].id)" *ngIf="!isLast"> 
+                                    下移
+                                </a>
+                            </ng-container>
+                            <ng-template #elseTemplate>
+                                <a (click)="moveDepart(item,item.parent.children[item.num-1].id)" *ngIf="item.num!==0"> 
+                                    上移
+                                </a>
+                                <a (click)="moveDepart(item,item.parent.children[item.num+1].id)" *ngIf="item.num!==item.parent.children.length-1"> 
+                                    下移    
+                                </a>
+                            </ng-template>
+                        </td>
+                    </tr>
+                </ng-template>
+            </ng-template>
+        </tbody>
+    </nz-table>
+</div>
+
+<nz-modal nzWidth="500px" [(nzVisible)]="isVisible" [nzTitle]="title" [nzFooter]="null"
+          (nzOnCancel)="handleCancel()" class="meal_modal">
+    <form nz-form [formGroup]="departForm">
+        <div nz-row>
+            <div nz-col [nzSpan]="24">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6">部门</nz-form-label>
+                    <nz-form-control [nzSpan]="18">
+                        <input nz-input formControlName="name" [(ngModel)]="name" placeholder="请输入部门名称">
+                        <nz-form-explain
+                                *ngIf="departForm.get('name').dirty && departForm.get('name').errors">
+                            <ng-container *ngIf="departForm.get('name').hasError('required')">
+                                部门名称必填项
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('account')">
+                                只能输入数字、字母、中文或者下划线
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('minlength')">
+                                至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('maxlength')">
+                                至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="24">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6">描述</nz-form-label>
+                    <nz-form-control [nzSpan]="18" class="textarea">
+                <textarea formControlName="remarks" nz-input rows="5" [(ngModel)]="remarks" placeholder="请输入当前部门的描述信息"
+                          maxlength="120"></textarea>
+                        <span class="count"
+                              *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                        <nz-form-explain
+                                *ngIf="departForm.get('remarks').dirty && departForm.get('remarks').errors">
+                            <ng-container *ngIf="departForm.get('remarks').hasError('maxlength')">
+                                至多输入120位字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div class="btns">
+                <button nz-button (click)="handleCancel()">关闭</button>
+                <button nz-button nzType="primary" (click)="submit($event)" [disabled]="!departForm.valid">提交</button>
+            </div>
+        </div>
+
+    </form>
+</nz-modal>

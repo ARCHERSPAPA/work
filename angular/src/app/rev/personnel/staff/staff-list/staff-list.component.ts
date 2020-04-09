@@ -1,0 +1,125 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Default} from "../../../../model/constant";
+import {Messages} from "../../../../model/msg";
+import {DepartService} from "../../../../service/depart.service";
+import {Router, ActivatedRoute} from '@angular/router';
+import {UserService} from "../../../../service/user.service";
+import {transformQuickDepartType,btoa} from "../../../../model/methods";
+
+
+
+@Component({
+    selector: 'rev-staff-list',
+    templateUrl: './staff-list.component.html',
+    styleUrls: ['./../staff.component.scss']
+})
+export class StaffListComponent implements OnInit {
+
+    /***查询***/
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public searchInfo: string = "";
+    public departmentId: string;
+    public departType: number;
+
+    public state;
+    //离职状态126需要去交接项目
+
+
+    public staffList: any;
+
+    constructor(private request: RequestService,
+                private warn: WarningService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private user: UserService) {}
+
+    ngOnInit() {
+        this.departType = transformQuickDepartType(this.user.getQuickQueryDepartType());
+    }
+
+
+    selectDepart(e:any){
+        this.departmentId = e;
+        this.searchInfo = "";
+        this.changeData();
+    }
+
+    changeData(...args) {
+        let that = this;
+        if(args && args.length > 0){
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+        };
+
+        if (this.searchInfo) {
+            params["searchInfo"] = this.searchInfo;
+        }else{
+            params["departmentId"] = this.departmentId;
+        }
+        this.request.doPost({
+            url: "listEmployee",
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.staffList = res.data.pageSet;
+                    that.total = res.data.total;
+                    // that.router.navigate(['./'],{queryParams:{page:that.pageNo,search:encodeURI(that.searchInfo),did:that.departmentId},relativeTo:that.activatedRoute});
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    quitStaff(id) {
+        let that = this;
+        if (id) {
+            that.request.doPost({
+                url: "quitEmp",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200 ) {
+                        this.state=res.code;
+                        this.changeData();
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else if(res && res.code == 126) {
+                        this.router.navigate(["../associate"], {queryParams:{id:btoa(id)}, relativeTo: this.activatedRoute});
+                    }else{
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    delStaff(id) {
+        let that = this;
+        if (id) {
+            that.request.doPost({
+                url: "delEmp",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.changeData();
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+    btoa(id:string) {
+        return btoa(id)
+    }
+
+}

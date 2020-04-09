@@ -1,0 +1,47 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {StepOneComponent} from "./step-one/step-one.component";
+import {StepTwoComponent} from "./step-two/step-two.component";
+import {StepThreeComponent} from "./step-three/step-three.component";
+
+const routes: Routes = [
+    {
+        path: "",
+        redirectTo: "one",
+        pathMatch: "full"
+    },
+    {
+        path: "one",
+        component: StepOneComponent,
+        data: {
+            breadcrumb: "阅读开店须知"
+        }
+    },
+    {
+        path: "two",
+        component: StepTwoComponent,
+        data: {
+            breadcrumb: "填写开店资料"
+        }
+    },
+    {
+        path: "three",
+        component: StepThreeComponent,
+        data: {
+            breadcrumb: "申请开店认证"
+        }
+    }
+];
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class StepsRoutingModule {
+}

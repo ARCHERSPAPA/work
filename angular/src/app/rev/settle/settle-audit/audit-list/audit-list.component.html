@@ -1,0 +1,75 @@
+<div class="settle" style="padding: 0">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <div class="detail-list">
+      <div class="detail-list-head">
+        <!-- <div class="head-bar">
+                    <a href="javascript:void(0)" [ngClass]="{active:auditState === 1}" (click)="selectAudit(1)">待审核</a>
+                    <a href="javascript:void(0)"[ngClass]="{active:auditState === 0}" (click)="selectAudit(0)">全部申请</a>
+                </div> -->
+        <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        <div class="search">
+          <input nz-input [(ngModel)]="searchType" (keyup)="($event.which === 13) ? changeData(true) : 0"
+            onkeyup="this.value = this.value.replace(/^\s+/g,'')" placeholder="请输入客户/楼盘/工长/监理" />
+          <button nz-button nzType="primary" (click)="changeData(true)">查询</button>
+        </div>
+      </div>
+
+      <div class="list-group-rev">
+        <nz-table #nzTable [nzData]="auditList" [nzBordered]="true" [nzFrontPagination]="false" [(nzPageIndex)]='pageNo'
+          [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changeData()' nzSize="middle"
+          [nzShowPagination]='true'>
+          <thead>
+            <tr>
+              <th>申请人</th>
+              <th>工种</th>
+              <th>部门</th>
+              <th>金额</th>
+              <th>类型</th>
+              <th>工长</th>
+              <th>监理</th>
+              <th>客户</th>
+              <th>楼盘</th>
+              <th>状态</th>
+              <th>申请时间</th>
+              <th>操作</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let audit of nzTable.data">
+              <td [title]="audit.workerName?audit.workerName:''">
+                <nz-badge [nzDot]="audit.agendaCount > 0">{{audit.workerName?audit.workerName:'--'}}</nz-badge>
+              </td>
+              <td [title]="audit.workerType?audit.workerType:''">{{audit.workerType?audit.workerType:'--'}}</td>
+              <td [title]="audit.departmentNames?audit.departmentNames:''">
+                {{audit.departmentNames?audit.departmentNames:'--'}}</td>
+              <td [title]="audit.price?audit.price:''">{{audit.price?(audit.price|number:'1.2'):'--'}}</td>
+              <td>{{getWageType(audit.type)}}</td>
+              <td [title]="audit.foremanName?audit.foremanName:''">{{audit.foremanName?audit.foremanName:'--'}}
+              </td>
+              <td [title]="audit.supervisorName?audit.supervisorName:''">
+                {{audit.supervisorName?audit.supervisorName:'--'}}
+              </td>
+              <td [title]="audit.customerName?audit.customerName:''">{{audit.customerName?audit.customerName:'--'}}
+              </td>
+              <td [title]="audit.customerHouseAddress?audit.customerHouseAddress:''">
+                {{audit.customerHouseAddress?audit.customerHouseAddress:'--'}}</td>
+              <td>{{getWageState(audit.state)}}</td>
+              <td>
+                {{audit.submitTime?(audit.submitTime|date:'yy-MM-dd HH:mm'):'--'}}
+              </td>
+              <td>
+                <a href="javascript:void(0)" [routerLink]="['./../detail/attend']"
+                  [queryParams]="{aid:btoa(audit.id),cid:btoa(audit.quoteId)}">详情</a></td>
+
+            </tr>
+          </tbody>
+        </nz-table>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,225 @@
+import { Component, OnInit, Input, ɵConsole,Output,EventEmitter } from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {DepartService} from "../../../../service/depart.service";
+import {Router, ActivatedRoute} from '@angular/router';
+import {Messages} from "../../../../model/msg";
+import * as UserValidate from "../../../../validate/user-validate";
+import {FormGroup,FormBuilder,Validators} from '@angular/forms';
+import { ChangeDetectorRef } from '@angular/core';
+
+
+export interface TreeNodeInterface {
+    id:string;
+    name: string;
+    remarks: string;
+    show:boolean;
+    level: number;
+    expand: boolean;
+    children?: TreeNodeInterface[];
+}
+@Component({
+    selector: 'rev-depart-node',
+    templateUrl: './depart-node.html',
+    styleUrls: ['./../depart.component.scss']
+})
+
+
+export class DepartNodeComponent implements OnInit {
+
+    @Input() departTree:any;
+    @Output()  toParent= new EventEmitter();
+
+    public isVisible:boolean = false;
+    public selectDepart:any;
+    public pid:string;
+    public departForm:FormGroup;
+    public name:string;
+    public remarks:string;
+    public title:string;
+    public expandDataCache:object = {};
+    constructor(private request:RequestService,
+                private warn:WarningService,
+                private depart:DepartService,
+                private fb:FormBuilder,
+                public changeDetectorRef:ChangeDetectorRef) {
+
+    }
+
+    collapse(array: TreeNodeInterface[], data: TreeNodeInterface, $event: boolean): void {
+        data.show = !data.show; //改变树形表格文件图标
+        if ($event === false) {
+            if (data.children) {
+                data.children.forEach(d => {
+                    const target = array.find(a => a.id === d.id);
+                    target.expand = false;
+                    this.collapse(array, target, false);
+                });
+            }else {
+                return;
+            }
+        }
+       
+    }
+    
+
+    convertTreeToList(root: object): TreeNodeInterface[] {   
+        const stack = []; 
+        const array = [];
+        const hashMap = {};
+        stack.push({ ...root, level: 0, expand: false })
+        while (stack.length !== 0) {
+            const node = stack.pop();
+            this.visitNode(node, hashMap, array);
+            if (node.children) {
+                for (let i = node.children.length - 1; i >= 0; i--) {
+                    node.children[i]["num"] = i;
+                    /* if(node.children[i].children){
+                        node.children[i].ownSubset = true;
+                    } */
+                    stack.push({ ...node.children[ i ], level: node.level + 1, expand: false, parent: node });
+                }
+
+            }
+        }
+        return array;
+    }
+    
+    visitNode(node: TreeNodeInterface, hashMap: object, array: TreeNodeInterface[]): void {
+        if (!hashMap[ node.id ]) {
+            hashMap[ node.id ] = true;
+            array.push(node);
+        }
+    }
+   
+    ngOnChanges(){
+        if(this.departTree){
+            /* for(let i=0;i<this.departTree.length;i++){
+                if(this.departTree[i].children){
+                    this.departTree[i].ownSubset = true;
+                }
+            } */
+            this.departTree.forEach(item => {
+                this.expandDataCache[ item.id ] = this.convertTreeToList(item);
+            });
+        }
+    }
+    
+    ngOnInit() {
+        this.departForm = this.fb.group({
+            name:[this.name,[
+                Validators.required,
+                Validators.minLength(2),
+                Validators.maxLength(10),
+                UserValidate.ValidateAccount
+            ]],
+            remarks:[this.remarks,[
+                Validators.maxLength(120)
+            ]]
+        })
+    }
+
+    
+
+    /* loadChild(item){
+        item.show = !item.show;
+        if(!item.load && item.ownSubset){
+            this.depart.loadDepart(item.id,1);
+        }
+    } */
+
+    editDepart(depart){
+        
+        this.isVisible = true;
+        this.selectDepart = depart;
+        this.name = this.selectDepart.name;
+        this.remarks = this.selectDepart.remarks;
+        this.title = "修改部门";
+    }
+
+    addDepart(id){
+        this.isVisible = true;
+        this.selectDepart = null;
+        this.pid = id;
+        this.title = "新建部门";
+    }
+
+    delDepart(id){
+        let that = this;
+        that.request.doPost({
+            url:"delDepart",
+            data:{id:id},
+            success:(res =>{
+                if(res && res.code == 200){
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.depart.loadDepart(0,1);
+                }else{
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    moveDepart(item,pid){
+        let that = this;
+        that.request.doPost({
+            url:"moveDepart",
+            data:{
+               id:item.id,
+               toId:pid
+            },
+            success:(res =>{
+                if(res && res.code == 200){
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    // that.depart.loadDepart(item["superiorDepartmentId"],1);
+                    that.depart.loadDepart(0,1);
+                }else{
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    submit(e:any){
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        console.log(that.selectDepart);
+
+        if(that.departForm.valid){
+            let params = that.departForm.value;
+            if(that.pid){
+                params["superiorDepartmentId"] = that.pid;
+            }
+            if(that.selectDepart && that.selectDepart.superiorDepartmentId){
+                params["superiorDepartmentId"] = that.selectDepart.superiorDepartmentId;
+            }
+            if(that.selectDepart && that.selectDepart.id){
+                params["id"] = that.selectDepart.id;
+            }
+            that.request.doPost({
+                url:(that.selectDepart && that.selectDepart.id)?"upDepart":"addDepart",
+                data:params,
+                success:(res =>{
+                    this.handleCancel();
+                    if(res && res.code == 200){
+                        that.depart.loadDepart(0,1);
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    }else{
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    handleCancel(){
+        this.name = null;
+        this.remarks = null;
+        this.pid = null;
+        this.selectDepart = null;
+        this.isVisible = false;
+        this.departForm.reset();
+    }
+
+}

@@ -1,0 +1,205 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {GuardService} from "../../service/guard.service";
+import {TempBaseComponent} from "./temp-base/temp-base.component";
+import {TempMealComponent} from "./temp-meal/temp-meal.component";
+import {TempMealListComponent} from "./temp-meal/temp-meal-list/temp-meal-list.component";
+import {TempDtlComponent} from "./temp-dtl/temp-dtl.component";
+import {TempMealEditComponent} from "./temp-meal/temp-meal-edit/temp-meal-edit.component";
+import {TempBaseListComponent} from "./temp-base/temp-base-list/temp-base-list.component";
+import {TempMealBaseComponent} from "./temp-meal-base/temp-meal-base.component";
+import {TempMealBaseListComponent} from "./temp-meal-base/temp-meal-base-list/temp-meal-base-list.component";
+import {TempWholeComponent} from "./temp-whole/temp-whole.component";
+import {TempWholeListComponent} from "./temp-whole/temp-whole-list/temp-whole-list.component";
+import {TempWholeEditComponent} from "./temp-whole/temp-whole-edit/temp-whole-edit.component";
+import {TempWholeBaseComponent} from "./temp-whole-base/temp-whole-base.component";
+import {TempWholeBaseListComponent} from "./temp-whole-base/temp-whole-base-list/temp-whole-base-list.component";
+import {TempSourceAddComponent} from "./temp-source-add/temp-source-add.component";
+
+
+const routes: Routes = [
+    {
+        path: "",
+        redirectTo: "base",
+        pathMatch: "full"
+    },
+    {
+        path: "base",
+        component: TempBaseComponent,
+        data:{
+          breadcrumb:"基装管理"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:TempBaseListComponent,
+                canActivate: [GuardService],
+                data:{
+                    breadcrumb:"基装列表"
+                }
+            },
+            {
+                path:"detail",
+                component:TempDtlComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"基装详情"
+                }
+            }
+        ]
+    },
+    {
+        path: "meal",
+        component:TempMealComponent,
+        data:{
+            breadcrumb:"套餐管理"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:TempMealListComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"套餐列表"
+                }
+            },
+            {
+                path:"edit",
+                component:TempMealEditComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"套餐详情"
+                }
+            },
+            {
+                path:"add",
+                component:TempSourceAddComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"套餐数据选择"
+                }
+            }
+        ]
+    },
+    {
+        path:"mBase",
+        component:TempMealBaseComponent,
+        data:{
+          breadcrumb:"套餐基装管理"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component: TempMealBaseListComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"套餐基装列表"
+                }
+            },
+            {
+                path:"detail",
+                component:TempDtlComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"套餐基装详情"
+                }
+            }
+        ]
+    },
+    {
+        path:"whole",
+        component:TempWholeComponent,
+        data:{
+          breadcrumb:"整装管理"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:TempWholeListComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"整装列表"
+                }
+            },
+            {
+                path:"edit",
+                component:TempWholeEditComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"整装编辑"
+                }
+            },
+            {
+                path:"add",
+                component:TempSourceAddComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"整装数据选择"
+                }
+            }
+        ]
+    },
+    {
+        path:"wBase",
+        component:TempWholeBaseComponent,
+        data:{
+            breadcrumb:"整装基装管理"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:TempWholeBaseListComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"整装基装列表"
+                }
+            },
+            {
+                path:"detail",
+                component:TempDtlComponent,
+                canActivate:[GuardService],
+                data:{
+                    breadcrumb:"整装基装详情"
+                }
+            }
+        ]
+    }
+];
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class TemplateRoutingModule {
+}

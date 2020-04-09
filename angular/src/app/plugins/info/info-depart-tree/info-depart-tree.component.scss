@@ -1,0 +1,62 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+/***部门树状结构布局***/
+.item{
+    width: 100%;
+    .item-dl{
+        width: 100%;
+        margin: 0;
+        dd{
+            margin: -1px 0 0 0;
+            padding: 5px 0;
+            border: 1px solid #dedede;
+            text-align: center;
+            &:first-child{
+                text-align: center;
+                overflow:  hidden;
+                .choice,.name{
+                    display:block;
+                    width: 20%;
+                    height: 100%;
+                    font-size: 0;
+                    float:left;
+                    text-align: right;
+                }
+                .name{
+                    width: 80%;
+                    font-size: 12px;
+                    text-align: left;
+                    cursor: pointer;
+                    @include ellipsis;
+                    &.selected{
+                        color: #0a8ddf;
+                    }
+                }
+                .choice{
+                    .chn-btn{
+                        display: inline-block;
+                        width: 16px;
+                        height: 16px;
+                        cursor: pointer;
+                        background-image: url("./../../../../assets/images/standard.png");
+                        &.chn-plus{
+                            background-position: -76px 24px;
+                        }
+                        &.chn-minus{
+                            background-position: -94px 24px;
+                        }
+                        &.chn-empty{
+                            background-position: -110px 66px;
+                        }
+                        &.chn-close{
+                            background-position: -111px 98px;
+                        }
+                        &.chn-open{
+                            background-position: -111px 81px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

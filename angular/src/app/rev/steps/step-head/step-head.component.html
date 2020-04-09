@@ -1,0 +1,6 @@
+<div class="step-head">
+    <nz-steps [nzCurrent]="step" nzSize="small">
+        <nz-step *ngFor="let item of desc; let i = index" [nzTitle]="item.headline" [nzDescription]="item.subtitle"
+                 [nzStatus]="(step > (i+1)?'finish':((step==(i +1))?'process':'wait'))"></nz-step>
+    </nz-steps>
+</div>

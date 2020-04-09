@@ -1,0 +1,58 @@
+<div class="merchant">
+  <div class="merchant-head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="merchant-content">
+    <ul class="basis">
+      <div (mouseenter)="changeImg()" (mouseleave)="edit_img = false" class="image left_box">
+        <img [src]="(headImg.indexOf('?') > -1)?headImg:headImg+'?imagelim'" width="100%" height="100%"
+          *ngIf="headImg" />
+        <div *ngIf="!headImg" class="img">图片加载中</div>
+        <div *ngIf='edit_img' class="change_img">
+          <a href="javascript:void(0)" class="image-fix" (click)="openModal()"><i nz-icon type="edit"
+              title="修改"></i></a>
+        </div>
+      </div>
+      <div class="right_box">
+        <!-- <li class="company_name">{{name}}</li> -->
+        <li>
+            <div class="mobile_box">
+              <input type="text" class="text mobile"  readonly="readonly" [value]="shortName" />
+              <a href="javascript:void(0)" class="fix" (click)="onUpdateModal('shortName',shortName)"><i nz-icon type="edit"
+                  title="修改"></i></a>
+            </div>
+            <p class="label">{{name}}</p>
+          </li>
+        <li>
+          <div class="mobile_box">
+            <input type="text" class="text mobile" placeholder="请填写公司联系电话" readonly="readonly" [value]="mobile" />
+            <a href="javascript:void(0)" class="fix" (click)="onUpdateModal('mobile',mobile)"><i nz-icon type="edit"
+                title="修改"></i></a>
+          </div>
+          <p class="label">公司联系电话</p>
+        </li>
+        <li>
+          <!-- <label class="label">服务范围</label> -->
+          <div class="mobile_box">
+            <div class="text mobile">{{area|areaDivide}}</div>
+            <a href="javascript:void(0)" class="fix" (click)="onUpdateModal('area',area)"><i nz-icon type="edit"
+                title="修改"></i></a>
+          </div>
+          <p class="label">服务范围</p>
+        </li>
+        <li>
+          <div class="label address">公司地址:{{address}}</div>
+          <!-- <input type="text" class="text" placeholder="请填写公司地址" readonly="readonly" [value]="address"/> -->
+          <a href="javascript:void(0)" class="fix" (click)="onUpdateModal('address',address)"><i nz-icon type="edit"
+              title="修改"></i></a>
+        </li>
+        <li>
+          <div class="label address brief">公司简介:{{brief}}</div>
+          <!-- <textarea class="text brief" placeholder="请填写公司简介" readonly="readonly" [value]="brief"></textarea> -->
+          <a href="javascript:void(0)" class="fix" (click)="onUpdateModal('brief',brief)"><i nz-icon type="edit"
+              title="修改"></i></a>
+        </li>
+      </div>
+    </ul>
+  </div>
+</div>

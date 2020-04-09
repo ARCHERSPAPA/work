@@ -1,0 +1,38 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.detail-record{
+    tr th, tr td{
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 33%;
+        a {
+          padding-right: 4px;
+          color: #007bff;
+        }
+      }
+    ul{
+        margin: 0;
+        padding: 0;
+        li{
+            font-size: 0;
+            border-bottom: 1px solid #dedede;
+            @include compatibility(display,flex);
+            &.record-title{
+                background: #f2f2f2;
+            }
+            &:last-child{
+                border: 0;
+            }
+            span{
+                display: inline-block;
+                font-size: 14px;
+                line-height: 30px;
+                text-align: center;
+                flex: 1;
+            }
+        }
+    }
+
+}

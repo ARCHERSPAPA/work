@@ -1,0 +1,133 @@
+<div class="step">
+    <div class="step-com-head">
+        <rev-step-head step="3"></rev-step-head>
+    </div>
+    <div class="form">
+        <form nz-form [formGroup]="infoForm">
+            <!---营业执照--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="companyName"><span class="info-label info-label-bold">企业营业执照</span></nz-form-label>
+                <nz-form-control col-row [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="hidden" formControlName="businessLicense" id="businessLicense"
+                           autocomplete="off"
+                           [(ngModel)]="businessLicense"/>
+                    <div nz-col nzSpan="8">
+                        <!--<rev-upload [width]="120" [height]="180" (imageListener)="uploadImg($event)"-->
+                                    <!--[isData]="businessLicense?true:false"></rev-upload>-->
+                        <div class="rev-upload-wrapper">
+                            <div class="rev-upload">
+                                <input type="file" class="rev-upload-file" (change)="fileChange($event)"
+                                       accept="image/jpeg,image/png,image/jpg"/>
+                                <i nz-icon type="plus" *ngIf="!isData"></i>
+                                <div class="rev-upload-text" *ngIf="!isData">上传图片</div>
+                            </div>
+                        </div>
+                        <div class="img-license" *ngIf="businessLicense" (click)="handleOk(businessLicense)" [ngStyle]="styleLicense(businessLicense)">
+                            <!--<img [src]="businessLicense" (click)="handleOk(businessLicense)"/>-->
+                            <a href="javascript:void(0)" class="license-del" (click)="deleteImg($event)"><i nz-icon
+                                                                                                      type="delete"></i></a>
+                        </div>
+                    </div>
+                    <div nz-col nzSpan="6" nzOffset="1">
+                        <div class="info-img" (click)="handleOk(src)"><img [src]="src"/></div>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+            <!---执照图片--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="companyName"><span class="info-label info-label-bold">企业信息</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <span class="info-text">按照证书上填写</span>
+                </nz-form-control>
+            </nz-form-item>
+            <!---企业名称--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="companyName"><span class="info-label">企业名称</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="companyName" id="companyName" autocomplete="off"
+                           maxlength="32" placeholder="请与营业执照信息一致" [(ngModel)]="companyName"/>
+                    <div *ngIf="!infoForm.get('companyName').valid && !infoForm.get('companyName').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="infoForm.hasError('required',['companyName'])"
+                              class="ng-trigger ng-trigger-helpMotion">必填公司名称</span>
+                        <span *ngIf="infoForm.hasError('maxlength',['companyName'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入20位字符</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+            <!---统一代码--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="code"><span class="info-label">统一社会信用代码号</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="code" id="code" autocomplete="off"
+                           maxlength="32" placeholder="请与营业执照信息一致" [(ngModel)]="code"/>
+                    <div *ngIf="!infoForm.get('code').valid && !infoForm.get('code').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="infoForm.hasError('required',['code'])" class="ng-trigger ng-trigger-helpMotion">必填统一社会信用代码号</span>
+                        <span *ngIf="infoForm.hasError('maxlength',['code'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入20位字符</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+            <!------>
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="companyName"><span class="info-label info-label-bold">法人代表信息</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24"></nz-form-control>
+            </nz-form-item>
+            <!---法人归属地--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="place"><span class="info-label">法人代表归属地</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <nz-select style="width: 100%;" [(ngModel)]="place" (ngModelChange)="placeChange($event)"
+                               formControlName="place" id="place" name="place">
+                        <nz-option *ngFor="let n of native" [nzValue]="n.id" [nzLabel]="n.name"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+            <!---法人姓名--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="legaLperson"><span class="info-label">法人代表姓名</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="legaLperson" id="legaLperson" autocomplete="off"
+                           maxlength="32" placeholder="请与营业执照信息一致" [(ngModel)]="legaLperson"/>
+                    <div *ngIf="!infoForm.get('legaLperson').valid && !infoForm.get('legaLperson').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="infoForm.hasError('required',['legaLperson'])"
+                              class="ng-trigger ng-trigger-helpMotion">必填法人代表姓名</span>
+                        <span *ngIf="infoForm.hasError('maxlength',['legaLperson'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入20位字符</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+            <!---身份证号--->
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="idCard"><span class="info-label">身份证号码</span></nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <input nz-input type="text" formControlName="idCard" id="idCard" autocomplete="off"
+                           maxlength="32" placeholder="请与营业执照信息一致" [(ngModel)]="idCard"/>
+                    <div *ngIf="!infoForm.get('idCard').valid && !infoForm.get('idCard').pristine"
+                         class="ant-form-explain ng-star-inserted">
+                        <span *ngIf="infoForm.hasError('required',['idCard'])" class="ng-trigger ng-trigger-helpMotion">必填法人代表姓名</span>
+                        <span *ngIf="infoForm.hasError('maxlength',['idCard'])"
+                              class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入20位字符</span>
+                    </div>
+                </nz-form-control>
+            </nz-form-item>
+            <!---功能键作用--->
+            <nz-form-item nz-row>
+                <nz-form-control [nzSpan]="14" nzOffset="6">
+                    <button nz-button nzType="primary" nzBlock (click)="submit($event)" [disabled]="!infoForm.valid">下一步
+                    </button>
+                </nz-form-control>
+            </nz-form-item>
+
+        </form>
+    </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" [nzWidth]="1000"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="showImg">
+        <img [src]="showImg"/>
+    </div>
+</nz-modal>

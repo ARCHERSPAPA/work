@@ -1,0 +1,144 @@
+import {Component, OnInit} from '@angular/core';
+import {bounceAnimate} from "../../../../animation/transform.component";
+import {Router, ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Messages} from "../../../../model/msg";
+import {QUERY_DEPART_TYPES} from "../../../../model/constant";
+import {NzFormatEmitEvent} from 'ng-zorro-antd';
+import {RoleService} from "../../../../service/role.service";
+
+@Component({
+    selector: 'rev-post-role',
+    templateUrl: './post-role.component.html',
+    styleUrls: ['./../post.component.scss'],
+    animations: [
+        bounceAnimate
+    ]
+})
+export class PostRoleComponent implements OnInit {
+
+    public name: string;
+
+    private pid: number;
+    public pname: string;
+
+    public roleList: any;
+
+    public options: Array<any> = [];
+    public queryDepartType: string;
+
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private request: RequestService,
+                private warn: WarningService,
+                private role:RoleService) {
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params.item) {
+                let items = JSON.parse(params.item);
+                this.pid = items["id"];
+                this.pname = items["name"];
+                this.queryDepartType = items["departmentQueryType"];
+                this.reloadRoles(this.pid);
+            } else {
+                this.router.navigate(["./../"], {relativeTo: this.activatedRoute});
+            }
+        });
+
+        this.options = QUERY_DEPART_TYPES;
+    }
+
+
+    exist(e:any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.router.navigate(["./../"], {relativeTo: this.activatedRoute});
+    }
+
+    submit(e:any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.request.doPost({
+            url: "setPosition",
+            data: {
+                id: this.pid,
+                permissions: this.combineData(),
+                departmentQueryType: this.queryDepartType
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.router.navigate(["./../"], {relativeTo: this.activatedRoute});
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+
+    }
+
+    /**
+     * 组装参数
+     * @returns {any[]}
+     */
+    combineData() {
+        let arr = [];
+        for (let i of this.roleList) {
+            for (let j of i.catalogs) {
+                for (let k of j.largePermissions) {
+                    if (k.show == 1) {
+                        arr.push(k.id);
+                    }
+                }
+            }
+
+        }
+        return arr;
+    }
+
+    /***
+     * 改版
+     */
+    reloadRoles(pid){
+        if(pid){
+            let p = new Promise((resolve,reject)=>{
+                this.role.loadRoles(pid,resolve,reject);
+            });
+            p.then(res =>{
+                this.roleList = res;
+                this.resetRoles(this.roleList);
+                if(this.roleList && this.roleList.length > 0){
+                    this.roleList = this.roleList.filter(item =>{
+                        return item.catalogName !== "待办事项";
+                    });
+                }
+            }).catch(err =>{
+                this.warn.onError(err|| Messages.FAIL.DATA);
+            })
+        }
+    }
+
+    /**
+     * 方便使用ui库件
+     * @param data
+     */
+    resetRoles(data){
+        if(data && data.length > 0){
+            data.forEach(item =>{
+                item["checked"] = item.show?true:false;
+                if(item.catalogs && item.catalogs.length > 0){
+                    this.resetRoles(item.catalogs);
+                }
+                if(item.largePermissions && item.largePermissions.length > 0){
+                    this.resetRoles(item.largePermissions);
+                }
+            });
+        }
+    }
+
+
+
+}

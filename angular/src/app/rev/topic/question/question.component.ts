@@ -1,0 +1,10 @@
+import { Component, OnInit } from '@angular/core';
+@Component({
+    selector: 'rev-question',
+    template: `<router-outlet></router-outlet>`,
+    styleUrls: [],
+})
+export class QuestionComponent implements OnInit {
+    constructor(){}
+    ngOnInit(){}
+}

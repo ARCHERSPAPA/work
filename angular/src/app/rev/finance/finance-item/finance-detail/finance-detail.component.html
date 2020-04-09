@@ -1,0 +1,29 @@
+<div class="finance" >
+    <div class="head">
+        <rev-title [title]="'详情'"></rev-title>
+        <rev-detail-head></rev-detail-head>
+    </div>
+    <!-- <div class="content"> -->
+        <!-- <div class="tab"> -->
+            <!--<a class="tab-item"-->
+               <!--[routerLink]="['./price',2]" [queryParams]="{cid:cid}" [routerLinkActive]="'active'">报价</a>-->
+            <!--<a class="tab-item"-->
+               <!--[routerLink]="['./contract',2]" [queryParams]="{cid:cid}" [routerLinkActive]="'active'">合同</a>-->
+            <!-- <a style="cursor:default;" class="tab-item active">合同</a> -->
+        <!-- </div>
+        <div class="data">
+            <router-outlet><p *ngIf="msg">{{msg}}</p></router-outlet>
+        </div> -->
+    <!-- </div> -->
+    <div class="content">
+        <nz-tabset [nzSelectedIndex]="index">
+            <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name"></nz-tab>
+        </nz-tabset>
+        <div class="data">
+            <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+            <div [hidden]="loading">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    </div>
+</div>

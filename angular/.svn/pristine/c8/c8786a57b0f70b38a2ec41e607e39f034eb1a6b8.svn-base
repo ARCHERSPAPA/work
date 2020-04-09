@@ -1,0 +1,26 @@
+@charset "utf-8";
+.settle {
+  padding: 10px 20px;
+  overflow: hidden;
+  .content {
+    padding-top: 20px;
+  }
+}
+
+.settle-detail {
+  font-size: 14px;
+}
+
+tr th, tr td {
+  a {
+    padding-right: 4px;
+  }
+  max-width: 60px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+tr th, tr td:not(.w10) {
+  max-width: 60px;
+}

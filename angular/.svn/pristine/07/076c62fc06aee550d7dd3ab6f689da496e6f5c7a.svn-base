@@ -1,0 +1,31 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.public{
+
+  width: 100%;
+  height: 550px;
+  .p-content{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .text{
+      width: 100%;
+      height: 100%;
+      word-break: break-all;
+      padding:1%;
+      outline: none;
+      resize: none;
+      @include border();
+      @include compatibility(box-sizing,border-box);
+    }
+    .count{
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      > span{
+        color: #f92650;
+      }
+    }
+  }
+}

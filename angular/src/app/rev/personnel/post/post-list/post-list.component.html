@@ -1,0 +1,103 @@
+<div class="post-list">
+    <div class="list-head">
+        <div class="search-bar">
+            <input nz-input type="text" class="text" placeholder="请输入要查询的职位" [(ngModel)]="positionName"/>
+            <button nz-button nzType="primary" type="button" (click)="changeData(true)">查询</button>
+        </div>
+    </div>
+    <nz-table #nzTable [nzData]="listPost" [nzBordered]="true" [nzFrontPagination]="false" [nzShowPagination]="true"
+              nzSize="middle" [nzNoResult]='false'>
+        <thead nz-thead>
+        <tr nzWidth='600px'>
+            <th nz-th><span>职位</span></th>
+            <th nz-th><span>描述</span></th>
+            <th nz-th><span>操作</span></th>
+        </tr>
+        </thead>
+        <tbody nz-tbody style="font-size: 12px">
+        <tr nz-tbody-tr *ngFor="let item of nzTable.data">
+            <td nz-td [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+            <td nz-td [nzTitle]="item.remarks?item.remarks:'暂无描述信息'" nzPlacement="top" nz-tooltip>
+                {{item.remarks?item.remarks:'--'}}
+            </td>
+            <td nz-td>
+                <!--<a nz-popconfirm nzTitle="删除角色后，使用该角色的账号变为默认权限?"-->
+                <!--(nzOnConfirm)="delPost(item.id)">删除</a>-->
+                <a nz-popconfirm nzTitle='"删除后该部门及其下子部门均被删除？"' (nzOnConfirm)="delPost(item.id)" nzPlacement="top"></a>
+                <!-- <a href="javascript:void(0)" (click)="delPost(item.id)">删除</a> -->
+                <a href="javascript:void(0)" (click)="editPost(item)">编辑</a>
+                <a href="javascript:void(0)" (click)="rolePost(item)">权限</a>
+            </td>
+        </tr>
+        </tbody>
+    </nz-table>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="编辑" [nzFooter]="null"
+          (nzOnCancel)="handleCancel()" class="meal_modal">
+    <form nz-form  [formGroup]="postForm" style="margin:0 auto;text-align: center">
+  
+        <nz-form-item class="post_inp">
+                <nz-form-label [nzSpan]="4">职位</nz-form-label>
+                <nz-form-control [nzSpan]="20" >
+                        <input nz-input type="text" class="text" placeholder="请输入职位名称" formControlName="name" name="name"
+                        autocomplete="off" maxlength="16" [(ngModel)]="name"/>
+                    <nz-form-explain
+                            *ngIf="postForm.get('name').valid || postForm.get('name').pristine">
+                        <ng-container *ngIf="postForm.get('name').hasError('account')">
+                                只能输入数字、字母、中文或者下划线
+                        </ng-container>
+                        <ng-container *ngIf="postForm.get('name').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入2位字符
+                        </ng-container>
+                        <ng-container *ngIf="postForm.get('name').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入10位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="post_inp">
+                <nz-form-label [nzSpan]="4">描述</nz-form-label>
+                <nz-form-control [nzSpan]="20" >
+                    <textarea nz-input class="text textarea" placeholder="请输入当前职位的描述信息" maxlength="120"
+                    [(ngModel)]="remarks"
+                    autocomplete="off" formControlName="remarks" name="remarks"></textarea>
+                    <span class="count" *ngIf="remarks && remarks.length > 0"><span
+                        style="color: red">{{remarks.length}}</span>/120</span>
+                    <nz-form-explain
+                            *ngIf="postForm.get('remarks').valid || postForm.get('remarks').pristine">
+                        <ng-container *ngIf="postForm.get('remarks').hasError('maxlengtht')">
+                            &nbsp;&nbsp;至多输入120位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        <!-- <li>
+
+            <div class="inp">
+                <label class="declaration">描述</label>
+                <textarea nz-input class="text textarea" placeholder="请输入当前职位的描述信息" maxlength="120"
+                          [(ngModel)]="remarks"
+                          autocomplete="off" formControlName="remarks" name="remarks"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span
+                        style="color: red">{{remarks.length}}</span>/120</span>
+                <div [hidden]="postForm.get('remarks').valid || postForm.get('remarks').pristine" class="error">
+                    <span [hidden]="!postForm.hasError('maxlength',['remarks'])">&nbsp;&nbsp;至多输入120位字符</span>
+                </div>
+            </div>
+        </li> -->
+        <li>
+            <div class="btns">
+                <button nz-button nzType="default" (click)="exist()">关闭</button>
+                <button nz-button nzType="primary" (click)="submit()"
+                        [ngClass]="{'disabled':!postForm.valid}" [disabled]="!postForm.valid">修改
+                </button>
+            </div>
+        </li>
+    </form>
+
+    
+</nz-modal>
+
+
+
+ 

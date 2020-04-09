@@ -1,0 +1,130 @@
+<div class="product">
+    <div class="product_head">
+        <rev-title [title]="title"  [buttons]="buttons" [show]="true" (handleName)="Newproduct()"></rev-title>
+    </div>
+    <div class="product_wrap">
+        <nz-table #nzTable [nzData]="productList" [nzBordered]="true" [nzFrontPagination]="false"
+            [nzShowPagination]="false" nzSize="middle">
+            <thead nz-thead>
+                <tr>
+                    <th>名称</th>
+                    <th>单价</th>
+                    <th>描述</th>
+                    <th>状态</th>
+                    <th>移动</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody nz-tbody style="font-size: 12px">
+                <tr nz-tbody-tr *ngFor="let data of nzTable.data;let i = index">
+                    <td title="{{data.name}}">{{data.name}}</td>
+                    <td title="{{data.price}}">{{data.price}}</td>
+                    <td >
+                        <nz-tooltip [nzTitle]="data.info"><span nz-tooltip>{{data.info | MaxPipe}}</span></nz-tooltip>
+                    </td>
+                    <td  [ngSwitch]="data.state">
+                        <span *ngSwitchCase="0">未上架</span>
+                        <span *ngSwitchCase="1">已上架</span>
+                        <span *ngSwitchDefault>----</span>
+                    </td>
+                    <td  class="product_move">
+                        <div>
+                            <span title="置顶" *ngIf='i !== 0' (click)="topProduct(data.id)"><i
+                                    class="anticon anticon-to-top"></i></span>
+                            <span title="上移" *ngIf='i !== 0' (click)="moveProduct(data.id,nzTable.data[i-1].id)"><i
+                                    class="anticon anticon-up-circle-o"></i></span>
+                            <span title="下移" *ngIf='i !== nzTable.data.length-1'
+                                (click)="moveProduct(data.id,nzTable.data[i+1].id)"><i
+                                    class="anticon anticon-down-circle-o"></i></span>
+                        </div>
+                    </td>
+                    <td >
+                        <div class="product_ctr">
+                            <a href="javascript:void(0)" class="product_a" *ngIf='data.state === 0' nz-popconfirm
+                                nzTitle="确定删除该产品？" nzOkText="删除" nzCancelText="取消"
+                                (nzOnConfirm)="delProduct(data.id)">删除</a>
+                            <a href="javascript:void(0)" *ngIf='data.state === 0' class="product_a"
+                                (click)="upperProduct(data.id)">上架</a>
+                            <a href="javascript:void(0)" *ngIf='data.state === 1' class="product_a"
+                                (click)="downProduct(data.id)">下架</a>
+                            <a href="javascript:void(0)" class="product_a" [routerLink]="['./../dtl']"
+                                [queryParams]="{id:btoa(data.id), index:'0'}">详情</a>
+                            <a href="javascript:void(0)" class="product_a" [routerLink]="['./../dtl']"
+                                [queryParams]="{id:btoa(data.id), index:'2'}">关联案例</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="新建产品" [nzFooter]="null" (nzOnCancel)="handleCancel()"
+    class="meal_modal">
+    <form nz-form [formGroup]="workerForm"  class="add-layout">
+        <div class="upload-img">
+            <img *ngIf="headImg" [src]="headImg" class="worker_headImg" />
+            <rev-uploader-new [content]='"上传产品照片"' [width]='120' [height]='120' (click)="openModal()"
+                *ngIf="!headImg" title='上传你的产品图片'></rev-uploader-new>
+        </div>
+        <ul >
+            <nz-form-item class="product_inp">
+                <nz-form-label [nzSpan]="2" nzRequired>产品</nz-form-label>
+                <nz-form-control [nzSpan]="22">
+                    <input nz-input type="text" class="com_input" placeholder="" autocomplete="off" [(ngModel)]="name"
+                        formControlName="name" name="name" maxlength="10" />
+                    <nz-form-explain *ngIf="workerForm.get('name').dirty && workerForm.get('name').errors">
+                        <ng-container *ngIf="workerForm.get('name').hasError('required')">
+                            产品为必填选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="product_inp">
+                <nz-form-label [nzSpan]="2" nzRequired>原价</nz-form-label>
+                <nz-form-control [nzSpan]="22">
+                    <input nz-input type="text" class="com_input" placeholder="" autocomplete="off" [(ngModel)]="price"
+                        formControlName="price" name="price" maxlength="6" />
+                    <nz-form-explain *ngIf="workerForm.get('price').dirty && workerForm.get('price').errors">
+                        <ng-container *ngIf="workerForm.get('price').hasError('required')">
+                            原价为必填选项
+                        </ng-container>
+                        <ng-container *ngIf="workerForm.get('price').hasError('nonInt')">
+                            只能输入非0正整数
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="product_inp">
+                <nz-form-label [nzSpan]="2">描述</nz-form-label>
+                <nz-form-control [nzSpan]="22" class="inp">
+                    <textarea class="com_input" rows="6" placeholder=""  autocomplete="off" style="width: 100%;"
+                        maxlength="120" name="info" [(ngModel)]="info" formControlName="info"></textarea>
+                    <nz-form-explain *ngIf="workerForm.get('info').dirty && workerForm.get('info').errors">
+                        <ng-container *ngIf="workerForm.get('info').hasError('maxlength')">
+                            描述最大长度为120字
+                        </ng-container>
+                    </nz-form-explain>
+                    <strong class="count" *ngIf="info && info.length > 0"><span
+                            style="color: red">{{info.length}}</span>/120</strong>
+                </nz-form-control>
+            </nz-form-item>
+
+            <li class="btns">
+              <span></span>
+                <div >
+                    <button  nz-button nzType="default" type="button"
+                        style="padding:4px 17px;margin-top: -4px;font-size: 14px" type="button"
+                        (click)="handleCancel()">关闭</button>
+                    <button  nz-button nzType="primary" type="submit" [ngClass]="{'disabled':!workerForm.valid}"
+                        (click)="submit()" *ngIf="!isEdit" [disabled]="!workerForm.valid">提交
+                    </button>
+                    <button  nz-button nzType="primary" type="submit" (click)="modify()" *ngIf="isEdit"
+                        [ngClass]="{'disabled':!workerForm.valid}" [disabled]="!workerForm.valid">修改
+                    </button>
+                </div>
+            </li>
+        </ul>
+    </form>
+</nz-modal>

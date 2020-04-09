@@ -1,0 +1,397 @@
+import {Component, OnInit, Input} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {WarningService} from "../../service/warning.service";
+import {RequestService} from '../../service/request.service';
+import * as UserValidate from "../../validate/user-validate";
+import {Messages} from './../../model/msg';
+
+
+@Component({
+    selector: 'rev-modal',
+    templateUrl: './modal.component.html',
+    styleUrls: ['./modal.component.scss']
+})
+export class ModalComponent implements OnInit {
+    @Input() value: any;
+    @Input() type: string;
+    @Input() point: any;
+    @Input() name: string;
+
+    public modifyForm: FormGroup;
+    public nameForm: FormGroup;
+    /***错误提示信息***/
+    public msg: string;
+
+    public val: any;
+    public title: string;
+
+    /***当前服务类型***/
+        // public serviceType:any = Items ;
+
+
+    public outType: number;
+    /***地图选址***/
+    public location: any;
+
+    /***区域、行政选择***/
+    public areas: Array<any>;
+    // public areaIndex:number;
+    // public selectedCity:object;
+
+    public selectArea: any;
+
+    // public district:Array<any>;
+    public districts: Array<any>;
+
+    // public isLoading:boolean = false;
+    public multipleDistrict: Array<any> = [];
+
+    private totalDistrict: Array<any> = [];
+    public totalArea: Array<any> = [];
+
+
+    constructor(public activeModal: NgbActiveModal,
+                private fb: FormBuilder,
+                private req: RequestService,
+                private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.modifyFormGroup();
+        if (this.type === 'area') {
+            let that = this;
+            that.totalArea = that.val && that.val.citys && that.val.citys.length > 0 ? that.val.citys : [];
+            that.totalDistrict = that.val && that.val.districts && that.val.districts.length > 0 ? that.val.districts : [];
+            that.req.doPost({
+                url: "loadArea",
+                data: {
+                    level: 2
+                },
+                success: function (res) {
+                    console.log(res)
+                    if (res && res.code == 200) {
+                        that.areas = res.data;
+                        if (that.val && that.val.citys && that.val.citys.length > 0) {
+                            for (let c in that.areas) {
+                                if (that.val.citys[0].id == that.areas[c].id) {
+                                    that.selectArea = that.areas[c];
+                                    that.loadDistrict(that.selectArea["id"]);
+                                }
+                            }
+                        } else {
+                            that.selectArea = that.areas[0];
+                            that.loadDistrict(that.areas[0].id);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    modifyFormGroup() {
+        this.val = this.value;
+        this.title = this.getTitle(this.type);
+
+        if (this.type === "address") {
+            console.log(this.point);
+            console.log(this.val);
+            let location = this.point;
+            location["address"] = this.val;
+            this.location = JSON.stringify(location);
+        }
+        // if(this.type === "local"){
+        //     this.location = JSON.stringify(this.point);
+        // }
+
+        if (this.type === 'shortName') {
+            this.nameForm = this.fb.group({
+                val: [this.val, [
+                    Validators.required,
+                    UserValidate.ValidateCommunicate
+                ]]
+            })
+        }
+        if (this.type === "mobile") {
+            this.modifyForm = this.fb.group({
+                mobile: [this.val, [
+                    Validators.required,
+                    UserValidate.ValidateCommunicate
+                ]],
+                val: [this.val, [
+                    Validators.required,
+                    UserValidate.ValidateCommunicate
+                ]]
+            })
+        }
+    }
+
+    onClickItem(item) {
+        item.checked = !item.checked;
+    }
+
+    onClickOk() {
+        let that = this;
+        // if(that.type==='shortName'　&& that.val.length>0){
+        if (this.type === "mobile") {
+            if (this.modifyForm.valid) {
+                this.activeModal.close(JSON.stringify({mobile: this.val}));
+            }
+        }
+        else if (this.type === "address") {
+            console.log(this.location);
+            if (this.location && this.location.address) {
+                this.activeModal.close(JSON.stringify(this.location));
+            } else {
+                this.showMsg(Messages.SELECT_NOT_EMPTY);
+            }
+
+        }
+        else if (this.type === "shortName") {
+            if(this.val.length>0){
+                this.activeModal.close(JSON.stringify({shortName: this.val}));
+            }else{
+                this.showMsg(Messages.EMPTY);
+            }
+    
+        }
+        else if (this.type === "area") {
+            this.renderTotalArea(this.selectArea, this.multipleDistrict.length > 0);
+            this.renderTotalDistrict(this.multipleDistrict);
+
+            let selectAreas = {citys: this.totalArea, districts: this.totalDistrict};
+            if (this.areaValid(selectAreas)) {
+                this.activeModal.close(JSON.stringify(selectAreas))
+            } else {
+                this.showMsg(Messages.EMPTY);
+            }
+
+        }
+        else if (this.type === "brief") {
+            if (this.val && this.val.length > 0) {
+                this.activeModal.close(JSON.stringify({brief: this.val}));
+            } else {
+                this.showMsg(Messages.EMPTY);
+            }
+
+        }
+
+
+    }
+
+    areaValid(o) {
+        return o.citys && o.citys.length > 0 && o.districts.length > 0;
+    }
+
+    getTitle(type) {
+        switch (type) {
+            case "mobile":
+                this.outType = 1;
+                return "公司联系电话";
+            case "address":
+                this.outType = 2;
+                return "地址";
+            // case "items":
+            //     this.outType = 3;
+            //     return "服务项目";
+            case "area":
+                this.outType = 4;
+                return "服务范围";
+            case "brief":
+                this.outType = 5;
+                return "公司简介";
+            case "role":
+                this.outType = 6;
+                return "";
+            case "large":
+                this.outType = 7;
+                return "图片展示";
+            case "shortName":
+                this.outType = 8;
+                return "公司简称";
+            // case "local":
+            //         this.outType = 100;
+            //     return "位置";
+            default:
+                return "";
+        }
+    }
+
+    onMapEvent($event) {
+        this.location.lng = $event.lnglat.lng;
+        this.location.lat = $event.lnglat.lat;
+        this.getLocation($event);
+        this.getAddress($event);
+    }
+
+    onEvent($event) {
+        let clickType = $event.type;
+        if (clickType) {
+            if (clickType != "click") {
+                this.getLocation($event);
+                this.getAddress($event);
+            }
+        }
+    }
+
+    getAddress(e) {
+        if (e.poi) {
+            let district = e.poi.district ? e.poi.district : '';
+            let addr = e.poi.address ? e.poi.address : '';
+            this.val = district + addr;
+        }
+    }
+
+    getLocation(e) {
+        if (e.poi) {
+            this.location.lat = e.poi.location.lat ? e.poi.location.lat : this.location.lat;
+            this.location.lng = e.poi.location.lng ? e.poi.location.lng : this.location.lng;
+        }
+    }
+
+    getGps(e: any) {
+        // this.val = e.address?e.address:this.val;
+        // this.location = e.point?e.point:this.location;
+        this.location = e;
+        console.log(e);
+        // console.log(this);
+    }
+
+    // onSelectArea(index,obj){
+    //     this.areaIndex = index;
+    //     this.selectedCity = obj;
+    //     this.districts = [];
+    //     let that = this;
+    //     this.req.doPost({
+    //         url:"loadArea",
+    //         data:{
+    //             level:2,
+    //             parentId:obj.id
+    //         },
+    //         success:function(res){
+    //             if(res && res.code == 200){
+    //                 that.district = res.data;
+    //             }
+    //         }
+    //     })
+    // };
+
+    areaChange(e: any) {
+        this.loadDistrict(this.selectArea.id);
+    }
+
+    districtChange(e: any) {
+        this.renderTotalDistrict(this.multipleDistrict);
+        this.renderTotalArea(this.selectArea, this.multipleDistrict.length > 0);
+    }
+
+    loadDistrict(pid) {
+        let that = this;
+        if (pid) {
+            that.districts = [];
+            that.req.doPost({
+                url: "loadArea",
+                data: {
+                    level: 2,
+                    parentId: pid
+                },
+                success: function (res) {
+                    console.log(res)
+                    if (res && res.code == 200) {
+                        that.districts = res.data;
+                        that.multipleDistrict = that.setMultipleDistrict(that.totalDistrict, that.districts);
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            })
+        }
+    }
+
+    setMultipleDistrict(od, array) {
+        let districts = [];
+        if (od && od.length > 0 && array && array.length > 0) {
+            array.map(current => {
+                od.map(multip => {
+                    if (current.id === Number(multip.id)) {
+                        districts.push(current);
+                    }
+                })
+            });
+        }
+        return districts;
+    }
+
+    renderTotalDistrict(multi) {
+        if (multi && multi.length > 0) {
+            this.resetTotalDistrict(multi, this.selectArea.id);
+        } else {
+            this.resetTotalDistrict(multi, this.selectArea.id);
+        }
+    }
+
+    resetTotalDistrict(multi, id) {
+        if (this.totalDistrict && this.totalDistrict.length > 0) {
+            // if(id){
+            let tds = this.totalDistrict.filter(t => {
+                return t.id.toString().substring(0, 4) !== (id).toString().substring(0, 4);
+            });
+            let total = tds;
+            total = total.concat(multi);
+            this.totalDistrict = total;
+            // }else{
+            //     this.totalDistrict = this.totalDistrict.concat(multi);
+            // }
+        } else {
+            this.totalDistrict = multi;
+        }
+    }
+
+    /**
+     * 添加城市
+     * @param area 城市数据信息
+     * @param bool 区别是否添加或者删除
+     */
+    renderTotalArea(area, bool) {
+        if (this.totalArea && this.totalArea.length > 0) {
+            let i;
+            let a = this.totalArea.filter((item, index) => {
+                if (item.id == area.id) {
+                    i = index;
+                    return item;
+                }
+            });
+
+            if (a && a.length <= 0) {
+                if (bool) {
+                    this.totalArea.push(area);
+                }
+            } else {
+                if (!bool) {
+                    this.totalArea.splice(i, 1);
+                }
+            }
+        } else {
+            if (bool) {
+                this.totalArea.push(area);
+            }
+        }
+        // console.log(this.totalArea);
+    }
+
+    showMsg(msg) {
+        this.msg = msg;
+        setTimeout(() => {
+            this.msg = null;
+        }, 2000);
+    }
+
+    ngOnDestroy() {
+        this.areas = null;
+        this.selectArea = null;
+        this.districts = null;
+        // console.log("destroy in here");
+    }
+
+
+}

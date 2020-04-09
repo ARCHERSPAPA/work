@@ -1,0 +1,87 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../service/request.service";
+import {WarningService} from "../../service/warning.service";
+import {UserService} from "../../service/user.service";
+import {Messages} from "../../model/msg";
+import {bounceAnimate} from "../../animation/transform.component";
+import {CheckService} from "../../service/check.service";
+import {atob, getPayType} from "../../model/methods";
+import {PAY_ITEMS} from "../../model/constant";
+
+@Component({
+    selector: 'rev-view-contract',
+    templateUrl: './view-contract.component.html',
+    styleUrls: ['./view-contract.component.scss'],
+    animations: [bounceAnimate]
+})
+export class ViewContractComponent implements OnInit {
+
+    public cid: string;
+    public switch: string
+
+    public cont: any;
+    public checkUser: boolean = false;
+    //竣工日期
+    public engineeringEndTime: any;
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private warn: WarningService,
+                private user: UserService,
+                private check: CheckService) {
+    }
+
+    ngOnInit() {
+        this.switch = "bottom";
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["cid"]) {
+                this.cid = atob(params["cid"]);
+                // this.loadData(this.cid);
+            }
+        });
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.switch = "down";
+        }, 1500);
+    }
+
+    ngDoCheck() {
+        if (!this.user || (this.user && !this.user.getId())) {
+            this.check.check();
+        }
+        if (this.user && this.user.getId() && this.cid && !this.checkUser) {
+            this.checkUser = true;
+            this.loadData(this.cid);
+        }
+    }
+
+    loadData(cid) {
+        let that = this;
+        // if (cid && that.user && that.user.getId()) {
+        that.req.doPost({
+            url: "webQuoteContract",
+            data: {id: cid},
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.cont = res.data;
+                    that.engineeringEndTime = (that.cont && that.cont.agreement && that.cont.agreement.engineeringStartTime) ? (that.cont.agreement.engineeringStartTime+(Number(that.cont.agreement.engineeringTimeLimit)-1)* 86400000) : null;
+                    if(that.cont && that.cont.pays.length === 0){
+                        that.cont.pays= PAY_ITEMS;
+                    }
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+        // }
+    }
+
+    getPayType(item){
+        return getPayType(item);
+    }
+
+
+}

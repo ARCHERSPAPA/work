@@ -1,0 +1,732 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Messages} from "../../../../model/msg";
+
+@Component({
+    selector: 'rev-address-role',
+    templateUrl: './address-role.component.html',
+    styleUrls: ['./address-role.component.scss']
+})
+export class AddressRoleComponent implements OnInit {
+
+    public title: string;
+
+    public contentHeight: number = 500;
+
+    //左侧部门
+    public leftDeparts: any;
+    //左侧部门id
+    public lsId: number;
+    //左侧职位
+    public leftPos: any;
+    //左侧边栏高度设置
+    public leftTop: number = 0;
+    //右侧边栏高度设置
+    public rightTop: number = 0;
+    //选中职位id
+    public selectId: number = 0;
+    //选中的左侧职位
+    public selectItem: any;
+    //左侧选中的部门
+    public selectDepartment:any;
+
+    //开启设置
+    public setBool: boolean = false;
+
+    //右侧部门
+    public rightDeparts: any;
+    //右侧职位
+    public rightPos: any;
+    //右侧选中id
+    public rsId: number;
+
+    //记录选择的右侧数据信息
+    public records: Array<any> = [];
+    //提交效果
+    public submitting: boolean = false;
+
+    //线条渲染时数据
+    public data: any;
+
+    //确认提交
+    public isVisible: boolean = false;
+    public isConfirmLoading: boolean = false;
+
+    constructor(private req: RequestService,
+                private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.title = "权限设置";
+        this.loadDeparts().then(data => {
+            this.leftDeparts = data;
+            if (this.leftDeparts && this.leftDeparts.length > 0) {
+                this.rsId = this.leftDeparts[0].id;
+                this.lsId = this.leftDeparts[0].id;
+
+                this.renderPositions(this.leftDeparts[0].id, true, 0);
+                this.renderPositions(this.leftDeparts[0].id, false, 0);
+            }
+
+            this.rightDeparts = data;
+            this.contentHeight = this.setContentHeight();
+
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+
+
+    }
+
+
+    /**
+     * 拉取所有部门数据
+     * @returns {Promise<any>}
+     */
+    loadDeparts(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "listDepartAddressBook",
+                data: {},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 渲染拉取的职位信息
+     * @param {number} id 当前部门id
+     * @param {boolean} bool 分辨左右拉取=>true:左侧；false:右侧
+     * @param {number} index 当前的下标 index
+     */
+    renderPositions(id: number, bool: boolean, index: number, ...args) {
+        let selectId = 0;
+        if (args && args.length > 0 && typeof args[0] === "number") {
+            selectId = args[0];
+        }
+        this.loadPositions(id).then(data => {
+            //(左边的内容高度:lh,右边的内容高度：rh
+            let lh = 0, rh = 0;
+            if (bool) {
+                this.setBool = false;
+                this.lsId = id;
+                this.leftPos = data.filter(item => {
+                    item["toggle"] = false;
+                    return item;
+                })
+                this.leftTop = (index * 48);
+                if (this.leftPos && this.leftPos.length > 0) {
+                    lh = this.leftPos.length * 48;
+                    this.selectId = selectId ? selectId : this.leftPos[0].positionId;
+                }
+                this.data = [];
+                this.records = [];
+                if (this.rsId && this.rightPos && this.rightPos.length > 0) {
+                    this.getRightPosChecked(this.rsId, this.rightPos);
+                }
+            }
+            else {
+                if (args && args[0]) {
+                    this.getRightPosChecked(this.rsId, this.rightPos);
+                }
+                //当前右侧部门id
+                this.rsId = id;
+                this.rightTop = (index * 48);
+                this.rightPos = data;
+                if (this.rightPos && this.rightPos.length > 0) {
+                    rh = this.rightPos.length * 48;
+                }
+            }
+
+            //可见区域高度换算
+            this.contentHeight = this.setContentHeight();
+
+            if (this.leftTop + lh > this.contentHeight) {
+                this.leftTop = this.contentHeight - lh;
+            }
+
+            if (this.rightTop + rh > this.contentHeight) {
+                this.rightTop = this.contentHeight - rh;
+            }
+
+            this.justLines(bool);
+
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 左侧部门切换
+     * @param {number} id
+     * @param {number} index
+     */
+    renderLPos(id: number, index: number) {
+        this.compareToModal(true, {id: id, index: index});
+    }
+
+    /**
+     * 划线
+     * @param {boolean} bool
+     */
+    justLines(bool: boolean) {
+        /**
+         *职位关联部门(L to R) LtoR;
+         *职位关联部门数据 LtoResD
+         *组装数据 Li:左侧对应的职位index
+         *Ris:右侧对应的部门index数组
+         */
+
+        let LtoR, LtoResD, Li, Ris = [];
+
+        if (this.leftPos && this.leftPos.length > 0) {
+            LtoR = this.leftPos.filter(item => {
+                return item.positionId === this.selectId;
+            });
+        }
+
+        if (LtoR && LtoR.length > 0) {
+            if (bool) {
+                if (LtoR[0]["toDepartmentRes"] && LtoR[0].toDepartmentRes.length > 0) {
+                    this.records = LtoR[0].toDepartmentRes;
+                } else {
+                    this.records = [];
+                }
+            }
+            LtoResD = this.records;
+        }
+        else {
+            //左侧无对象匹配时，重置
+            if (bool) {
+                if (this.rightDeparts && this.rightDeparts.length > 0) {
+                    if (this.rsId && this.rsId !== this.rightDeparts[0].id) {
+                        this.rightPos = [];
+                        this.renderPositions(this.rightDeparts[0].id, false, 0);
+                    } else {
+                        this.rightPos.map(item => {
+                            item["checked"] = false;
+                        })
+                    }
+                }
+            }
+        }
+
+
+        if (LtoResD && LtoResD.length > 0) {
+            LtoResD = LtoResD.filter(item => {
+                return item["toPositionRes"] && item["toPositionRes"].length > 0;
+            })
+            //获取左侧的定位信息
+            if (this.leftPos && this.leftPos.length > 0) {
+                Li = this.getIndexById(this.leftPos, "positionId", this.selectId);
+            }
+
+            if (this.rightDeparts && this.rightDeparts.length > 0) {
+                if (bool) {
+                    //判断一下是否当前的右侧的id是否存
+                    let b = this.getIndexById(LtoResD, "toDepartmentId", this.rsId);
+                    if (b < 0 && LtoResD && LtoResD.length > 0) {
+                        this.rsId = LtoResD[0].toDepartmentId;
+                    }
+                    //获取当前的数据节点位置
+                    let i = this.getIndexById(this.rightDeparts, "id", this.rsId);
+                    this.renderPositions(this.rsId, false, i);
+                }
+
+                LtoResD.map(item => {
+                    this.rightDeparts.forEach((rit, index) => {
+                        if (item.toPositionRes && item.toPositionRes.length > 0 &&
+                            item.toDepartmentId === rit.id) {
+                            Ris.push({id: rit.id, index: index});
+                            return;
+                        }
+                    });
+                    if (item.toDepartmentId === this.rsId && this.rightPos && this.rightPos.length > 0) {
+                        if (item["toPositionRes"] && item["toPositionRes"].length > 0) {
+
+                            this.rightPos.map(rps => {
+                                rps["checked"] = false;
+                            });
+
+                            item.toPositionRes.map(itp => {
+                                this.rightPos.map(rps => {
+                                    if (itp.toPositionId === rps.positionId) {
+                                        rps["checked"] = true;
+                                    }
+                                })
+                            })
+                        }
+
+                    }
+                })
+            }
+        }
+        else {
+            //判定当前右侧重置为初始化
+            if (bool) {
+                if (this.rightDeparts && this.rightDeparts.length > 0) {
+                    if (this.rsId && this.rsId !== this.rightDeparts[0].id) {
+                        this.renderPositions(this.rightDeparts[0].id, false, 0);
+                    } else {
+                        if (this.rightPos && this.rightPos.length > 0) {
+                            this.rightPos.map(rps => {
+                                rps["checked"] = false;
+                            });
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+        if (Li !== 'undefined' && Ris.length > 0) {
+            this.data = this.mergeData(Li, Ris);
+        }
+        else {
+            this.data = [];
+        }
+    }
+
+    /**
+     * 右侧选中的部门和职位
+     */
+    getRightPosChecked(rsId, rightPos) {
+
+        let obj = {
+            toDepartmentId: rsId,
+            toDepartmentName: "",
+            toPositionRes: []
+        };
+        let chkDepartment = this.getCheckedDepartment(rsId);
+        if (chkDepartment && chkDepartment.length > 0) {
+            obj.toDepartmentName = chkDepartment[0].name;
+        }
+
+
+        if (rightPos && rightPos.length > 0) {
+            let checkedPositions = rightPos.filter(item => {
+                return item["checked"] && item["checked"] === true;
+            });
+            if (checkedPositions && checkedPositions.length > 0) {
+                checkedPositions.forEach(pos => {
+                    obj.toPositionRes.push({
+                        toPositionName: pos.positionName,
+                        toPositionId: pos.positionId
+                    });
+                });
+            }
+            this.justExistById(rsId, obj.toPositionRes);
+        }
+    }
+
+    /**
+     * 判断是否已经存在于当前的数据中
+     * @param {number} rsId 部门id
+     * @param rps 职位数组
+     */
+    justExistById(rsId: number, rps: any) {
+        let chkDepartment;
+
+        if (this.records && this.records.length > 0) {
+            chkDepartment = this.records.filter(item => {
+                return item.toDepartmentId === rsId;
+            });
+
+            if (chkDepartment && chkDepartment.length > 0) {
+                chkDepartment[0]["toPositionRes"] = rps;
+            } else {
+                chkDepartment = this.getCheckedDepartment(rsId);
+                if (chkDepartment && chkDepartment.length > 0) {
+                    this.records.push({
+                        toDepartmentId: chkDepartment[0].id,
+                        toDepartmentName: chkDepartment[0].name,
+                        toPositionRes: rps
+                    });
+                }
+            }
+        } else {
+            chkDepartment = this.getCheckedDepartment(rsId);
+            if (chkDepartment && chkDepartment.length > 0) {
+                this.records.push({
+                    toDepartmentId: chkDepartment[0].id,
+                    toDepartmentName: chkDepartment[0].name,
+                    toPositionRes: rps
+                });
+            }
+
+        }
+    }
+
+    /**
+     * 根据部门id查看部门信息
+     * @param {number} id 部门id
+     * @returns {any}
+     */
+    getCheckedDepartment(id: number) {
+        if (this.rightDeparts && this.rightDeparts.length > 0) {
+            return this.rightDeparts.filter(item => {
+                return item.id == id;
+            });
+        }
+        return null;
+    }
+
+
+    /**
+     * 合并当前的数据后渲染成线条
+     * @param i
+     * @param res
+     * @returns {any[]}
+     */
+    mergeData(i, res) {
+        let data = [];
+        if (res && res.length > 0) {
+            res.map(item => {
+                data.push({id: item.id, data: [10, (i + 1) * 54 + this.leftTop, 700, (item.index + 1) * 48]});
+            })
+        }
+        return data;
+    }
+
+    /**
+     * 根据部门id去拉取职位信息
+     * @param {number} id 部门id
+     * @returns {Promise<any>}
+     */
+    loadPositions(id: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "listDepartPositions",
+                data: {departmentId: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 设置展示部门列表高度
+     * @returns {{height: string}}
+     */
+    setContentHeight() {
+        let height = 500;
+        if (this.leftDeparts && this.leftDeparts.length > 0) {
+            height = this.leftDeparts.length * 50;
+            let ld = this.leftDeparts.length;
+            if (this.leftPos && this.leftPos.length > 0) {
+                let lp = this.leftPos.length;
+                if (ld < lp) {
+                    height = lp * 50;
+                }
+            }
+
+            if (this.rightPos && this.rightPos.length > 0) {
+                let rp = this.rightPos.length;
+                if (ld < rp) {
+                    height = rp * 50;
+                }
+            }
+        }
+
+        return height ? height : 200;
+    }
+
+    /**
+     * 选中职位
+     * @param e
+     * @param item 当前职位
+     * @param {boolean} bool 为左侧还是有右侧
+     */
+    selectLPos(e: any, item: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.compareToModal(false,item);
+    }
+
+
+    /**
+     * 对比时是否显示弹出框
+     * @param {boolean} bool：true为部门切换，false为职位切换
+     * @param args 当前要比较的对象信息
+     */
+    compareToModal(bool: boolean, ...args) {
+        //暂时缓存
+        sessionStorage.setItem("records", JSON.stringify(this.records));
+        this.getRightPosChecked(this.rsId, this.rightPos);
+        if (sessionStorage && sessionStorage.getItem("records")) {
+            let stRecords = sessionStorage.getItem("records");
+            stRecords = JSON.parse(stRecords);
+            let etRecords = this.records.filter(item => item.toPositionRes && item.toPositionRes.length > 0);
+            let cb = this.compareTo(stRecords, etRecords);
+            sessionStorage.removeItem("records");
+
+            if (this.setBool) {
+                this.isVisible = true;
+                this.selectItem = bool ? null : args[0];
+                this.selectDepartment = bool?args[0]: null;
+            } else {
+                if (bool) {
+                    this.renderPositions(args[0].id,true,args[0].index);
+                } else {
+                    this.selectId = args[0].positionId;
+                    this.leftPos = this.leftPos.filter(item => {
+                        item.toggle = false;
+                        return item;
+                    });
+                    this.setBool = false;
+                    this.records = [];
+                    this.justLines(true);
+                }
+
+            }
+        } else {
+            this.isVisible = true;
+            this.selectItem = bool?null:args[0];
+            this.selectDepartment = bool?args[0]:null;
+        }
+    }
+
+
+    /**
+     * 比较两个对象数组内部 根据id来对比
+     * @param o1 对象数组1
+     * @param o2 对象数组2
+     * @returns {boolean} 对象比较是否完全相同
+     */
+    compareTo(o1: any, o2: any): boolean {
+
+        if (Array.isArray(o1) && Array.isArray(o2)) {
+            if (o1.length != o2.length) return false;
+            else {
+                //两个可能：
+                // 1.相同数量时，但第一层选中的部门明显不一致；
+                let o11 = [], o12 = [];
+                o1.filter(item => o11.push(item.toDepartmentId));
+                o12 = o2.filter(item => o11.indexOf(item.toDepartmentId) > -1);
+                if (o11.length != o12.length) return false;
+                // 2.相同数量，第一层部门数据一致时，比较第二层选中的职位
+                else {
+                    for (let i = 0; i < o1.length; i++) {
+                        for (let j = 0; j < o2.length; j++) {
+                            if (o1[i].toDepartmentId === o2[j].toDepartmentId) {
+                                //第二层的数量是否相等
+                                if (o1[i].toPositionRes.length != o2[j].toPositionRes.length) {
+                                    return false;
+                                }
+                                else {
+                                    let o21 = [], o22 = [];
+                                    o1[i].toPositionRes.filter(item => o21.push(item.toPositionId));
+                                    o22 = o2[j].toPositionRes.filter(item => o21.indexOf(item.toPositionId) > -1);
+                                    if (o21.length != o22.length) return false;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 左侧控制键去控制右侧提交和显示选中
+     * @param e
+     * @param item
+     */
+    setPosRole(e: any, item: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if(this.setBool){
+            this.compareToModal(false,item);
+        }else{
+            this.selectId = item.positionId;
+            this.leftPos.filter(lp => {
+                lp.toggle = false;
+            });
+            item.toggle = true;
+            this.setBool = item.toggle;
+            //重置右侧职位数据信息
+            this.justLines(true);
+        }
+    }
+
+    /**
+     * 实现重置右键部门
+     */
+    resetRPos(item: any) {
+        this.data = [];
+        if (this.rightDeparts && this.rightDeparts.length > 0) {
+            this.renderPositions(this.rightDeparts[0].id, false, 0);
+        }
+    }
+
+    //重置左侧
+    resetLSet(pid: number) {
+        if (this.leftPos && this.leftPos.length > 0) {
+            this.leftPos.map(item => {
+                if (item.positionId === pid) {
+                    item.toggle = false;
+                }
+            })
+        }
+    }
+
+    /**
+     * 一部门一职位 对应多部门多职位关系传参
+     * @returns {any[]}
+     */
+    mergeDepartments() {
+        let departments = [];
+        if (this.records && this.records.length > 0) {
+            this.records.forEach(dp => {
+                departments.push({
+                    toDepartmentId: dp.toDepartmentId,
+                    toPositionIds: []
+                });
+                if (dp && dp.toPositionRes && dp.toPositionRes.length > 0) {
+                    dp.toPositionRes.forEach(tp => {
+                        departments[departments.length - 1].toPositionIds.push(tp.toPositionId);
+                    })
+                }
+            })
+        }
+        return departments;
+    }
+
+    /**
+     * 提交
+     * @param e
+     */
+    submit(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.selectId > 0) {
+            this.getRightPosChecked(this.rsId, this.rightPos);
+
+            this.req.doPost({
+                url: "setDepartPositions",
+                data: {
+                    departmentId: this.lsId,
+                    positionId: this.selectId,
+                    byRightForms: this.mergeDepartments()
+                },
+                success: (res => {
+                    this.setBool = false;
+                    this.submitting = false;
+                    this.resetLSet(this.selectId);
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        let i = this.leftDeparts.findIndex(item => item.id === this.lsId);
+                        this.renderPositions(this.lsId, true, i, this.selectId);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    /**
+     * 取消
+     * @param e
+     */
+    cancel(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.setBool = false;
+        let i = this.leftDeparts.findIndex(item => item.id === this.lsId);
+        this.renderPositions(this.lsId, true, i, this.selectId);
+    }
+
+    /**
+     * 整理要提交的positionId
+     * @param {Array<any>} ps
+     * @returns {any[]}
+     */
+    sortPositions(ps: Array<any>) {
+        let arr = [];
+        if (ps && ps.length > 0) {
+            ps.forEach(p => {
+                arr.push(p.positionId);
+            });
+        }
+        return arr;
+    }
+
+    /**
+     * 根据相应的查询内容,返回当前所有的index位置
+     * @param array
+     * @param {number} id
+     * @param {string} type
+     * @returns {any}
+     */
+    getIndexById(array: any, type: string, id: number) {
+        return array.findIndex(item => item[type] === id);
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.setBool = false;
+        if(this.selectItem && this.selectItem.positionId){
+            this.selectId = this.selectItem.positionId;
+            let i = this.getIndexById(this.leftPos,"positionId",this.selectId);
+            this.renderPositions(this.lsId, true, i, this.selectId);
+        }
+
+        if(this.selectDepartment && this.selectDepartment.id){
+            this.renderPositions(this.selectDepartment.id,true,this.selectDepartment.index);
+        }
+        this.leftPos = this.leftPos.filter(item => {
+            item.toggle = false;
+            return item;
+        });
+        this.setBool = false;
+        this.records = [];
+        this.justLines(true);
+        this.selectItem = null;
+        this.selectDepartment = null;
+    }
+
+
+    handleOk() {
+        this.isConfirmLoading = true;
+        if (this.selectId > 0) {
+            this.req.doPost({
+                url: "setDepartPositions",
+                data: {
+                    departmentId: this.lsId,
+                    positionId: this.selectId,
+                    byRightForms: this.mergeDepartments()
+                },
+                success: (res => {
+                    this.setBool = false;
+                    this.isConfirmLoading = false;
+                    this.resetLSet(this.selectId);
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.handleCancel();
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+
+}

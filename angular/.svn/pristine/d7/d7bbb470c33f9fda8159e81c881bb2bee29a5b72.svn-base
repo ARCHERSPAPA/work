@@ -1,0 +1,177 @@
+<div class="settle-detail">
+    <div nz-row>
+        <!--项目基本情况--->
+        <div nz-col nzSpan="10" class="settle-chart">
+            <div nz-row>
+                <div class="settle-title">项目情况</div>
+            </div>
+            <div nz-row>
+                <div nz-col nzSpan="12" class="settle-chart-data">
+                    <dl class="settle-chart-info">
+                        <dt [nzTitle]="Ipay && Ipay.total?Ipay.total:0"
+                            nzTooltipPlacement="top" nz-tooltip>{{(Ipay &&
+                            Ipay.total?Ipay.total:0)|number:'1.2'}}
+                        </dt>
+                        <dd>项目预算</dd>
+                    </dl>
+                    <v-chart [forceFit]="true" height="300" [data]="data">
+                        <v-coord type="theta" [radius]="1" innerRadius="0.9"></v-coord>
+                        <v-pie position="percent" [color]="colors[0]" [select]="false"></v-pie>
+                        <v-view [data]="viewData">
+                            <v-coord type="theta" [radius]="0.9" innerRadius="0.85"></v-coord>
+                            <v-pie position="percent" [color]="colors[1]" [select]="false"></v-pie>
+                        </v-view>
+                    </v-chart>
+                </div>
+                <div nz-col nzSpan="10" nzOffset="2" class="settle-chart-data">
+                    <dl class="settle-chart-side mt-30">
+                        <dt [nzTitle]="Ipay && Ipay.labor?Ipay.labor:0"
+                            nzTooltipPlacement="top" nz-tooltip>
+                            <span class="data-circle circle-expand"></span>
+                            {{(Ipay && Ipay.labor?Ipay.labor:0)|number:'1.2'}}
+                        </dt>
+                        <dd>已支出人工费</dd>
+                    </dl>
+                    <dl class="settle-chart-side mt-50">
+                        <dt [nzTitle]="Ipay && Ipay.accepted?Ipay.accepted:0"
+                            nzTooltipPlacement="top" nz-tooltip>
+                            <span class="data-circle circle-income"></span>
+                            {{(Ipay && Ipay.accepted?Ipay.accepted:0)|number:'1.2'}}
+                        </dt>
+                        <dd>总计已收</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <!---项目成本--->
+        <div nz-col nzSpan="14" class="settle-cost">
+            <div nz-row>
+                <div class="settle-title">项目成本<span class="settle-cost-state" *ngIf="Ipay">（{{getCostState(Ipay.costState)}}）</span></div>
+            </div>
+            <div nz-row>
+                <div nz-col nzSpan="12" class="settle-cost-data">
+                    <div nz-col nzSpan="12">
+                        <dl class="settle-cost-side mt-30"
+                            [nzTitle]="Ipay && Ipay.laborCost?Ipay.laborCost:0"
+                            nzTooltipPlacement="top" nz-tooltip>
+                            <dt>{{(Ipay && Ipay.laborCost?Ipay.laborCost:0)|number:'1.2'}}</dt>
+                            <dd>人工成本</dd>
+                        </dl>
+                    </div>
+                    <div nz-col nzSpan="11" nzOffset="1">
+                        <dl class="settle-cost-side mt-30">
+                            <dt>{{Ipay && Ipay.laborCostPercentage?Ipay.laborCostPercentage:0}}</dt>
+                            <dd>人工占比</dd>
+                        </dl>
+                    </div>
+                    <div nz-col nzSpan="12">
+                        <dl class="settle-cost-side mt-50"
+                            [nzTitle]="Ipay && Ipay.materialCost?Ipay.materialCost:0"
+                            nzTooltipPlacement="top" nz-tooltip>
+                            <dt>{{(Ipay && Ipay.materialCost?Ipay.materialCost:0)|number:'1.2'}}</dt>
+                            <dd>材料成本</dd>
+                        </dl>
+                    </div>
+                    <div nz-col nzSpan="10" nzOffset="1">
+                        <dl class="settle-cost-side mt-50">
+                            <dt>{{Ipay && Ipay.materialCostPercentage?Ipay.materialCostPercentage:0}}</dt>
+                            <dd>材料占比</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div nz-col nzSpan="12" class="settle-cost-data">
+                    <div nz-col nzSpan="12" class="mt-24">
+                        <span class="settle-cost-line">木工：{{(Ipay && Ipay.carpentryCost?Ipay.carpentryCost:0)|number:'1.2'}}</span>
+                        <span class="settle-cost-line mt-16">漆工：{{(Ipay && Ipay.paintCost?Ipay.paintCost:0)|number:'1.2'}}</span>
+                    </div>
+                    <div nz-col nzSpan="12" class="mt-24">
+                        <span class="settle-cost-line">泥工：{{(Ipay && Ipay.masonCost?Ipay.masonCost:0)|number:'1.2'}}</span>
+                        <span class="settle-cost-line mt-16">水电工：{{(Ipay && Ipay.electricianCost?Ipay.electricianCost:0)|number:'1.2'}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!----pay 数据展示-->
+    <div nz-row>
+        <div nz-col nzSpan="24">
+            <div class="settle-title">收款详情</div>
+        </div>
+        <div nz-col nzSpan="24">
+            <nz-table #payTable [nzData]="Cpays" nzSize="middle" [nzFrontPagination]="false"
+                      [nzShowPagination]="false">
+                <thead>
+                <tr>
+                    <th>收款期数</th>
+                    <th>收款比例（%）</th>
+                    <th>金额</th>
+                    <th>实收</th>
+                    <th nzWidth="400px">备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let pay of payTable.data;let i = index">
+                    <td>{{pay.payType?pay.payType:'--'}}</td>
+                    <td>{{pay.percentage?pay.percentage:'--'}}</td>
+                    <td>{{(pay.totalPrice?pay.totalPrice:0)|number:'1.2'}}</td>
+                    <td>{{(pay.discountPrice?pay.discountPrice:0)|number:'1.2'}}</td>
+                    <td nzWidth="400px" [nzTitle]="pay.remark?pay.remark:'暂无备注信息'"
+                        nzPlacement="topLeft" nz-tooltip>{{pay.remark?pay.remark:'暂无备注信息'}}
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+    <!---功能键--->
+    <div nz-row *ngIf="showSettleByState()">
+        <div nz-col class="text-right mt-30">
+            <button nz-button nzType="default" *ngIf="Ipay && Ipay.costUrl"
+                (click)="viewCost()">查看成本</button>
+            <!-- <button nz-button nzType="danger"
+                    nz-popconfirm nzTitle="您确认忽略本次结算?" *ngIf="showSettleResultByState()" class="ml-10"
+                    (nzOnConfirm)="reject()" (nzOnCancel)="cancel()" nzPlacement="top">忽略
+            </button> -->
+            <button nz-button nzType="danger" *ngIf="showSettleResultByState()" class="ml-10" (click)="showEllModal()">忽略</button>
+            <button nz-button nzType="primary" *ngIf="showSettleResultByState()"
+                    (click)="showCostModal()" class="ml-10">结算</button>
+        </div>
+    </div>
+</div>
+<!-- 省略弹窗 -->
+<nz-modal 
+    [(nzVisible)]="ellVisible" 
+    nzTitle="忽略工费结算" 
+    (nzOnCancel)="ellCancel()" 
+    (nzOnOk)="ellOk()">
+    <textarea rows="4" nz-input placeholder="写点备注吧" [(ngModel)]="remarks" autocomplete="off" maxlength="300"></textarea>
+</nz-modal>
+
+<nz-modal
+        [(nzVisible)]="costVisible"
+        nzTitle="结算备注"
+        nzOkText="提交"
+        nzCancelText="关闭"
+        (nzOnCancel)="costCancel()"
+        (nzOnOk)="costOk()">
+    <div class="modify">
+        <form nz-form [formGroup]="costForm">
+            <nz-form-item>
+                <nz-form-control>
+                    <!-- <input nz-input [(ngModel)]="costAccount" formControlName="costAccount"
+                           name="costAccount" maxlength="100" placeholder="请输入付款帐号" autocomplete="off"/> -->
+                    <textarea rows="4" nz-input placeholder="写点备注吧" [(ngModel)]="costAccount" autocomplete="off" maxlength="300" formControlName="costAccount"></textarea>
+                    <nz-form-explain *ngIf="!costForm.get('costAccount').valid && costForm.get('costAccount').errors">
+                        <ng-container *ngIf="costForm.get('costAccount').hasError('maxlength')">
+                            至多输入300个字符
+                        </ng-container>
+                        <!-- <ng-container *ngIf="costForm.get('costAccount').hasError('account')">
+                            输入格式错误
+                        </ng-container> -->
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+    
+</nz-modal>

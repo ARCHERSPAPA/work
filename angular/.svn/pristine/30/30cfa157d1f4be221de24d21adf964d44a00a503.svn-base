@@ -1,0 +1,56 @@
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {sideAnimate} from "../../../animation/transform.component";
+import {DepartService} from "../../../service/depart.service";
+
+@Component({
+  selector: 'rev-client-detail',
+  templateUrl: './client-detail.component.html',
+  styleUrls: ['./../client.component.scss'],
+  animations: [
+    sideAnimate
+  ]
+})
+export class ClientDetailComponent implements OnInit {
+
+  public title:string;
+  public buttons:Array<any>;
+  public switch:string;
+  public showBtn:boolean = false;
+
+  constructor(private router:Router,
+              private activatedRoute:ActivatedRoute) {
+  }
+
+
+  ngOnInit() {
+    if(this.router.url.split('/').includes('add')){
+      this.title='新建客户'
+    }else{
+      this.title = "客户列表";
+    }
+
+    this.buttons = [{
+      color: "btn-primary",
+      name: "新建客户"
+    }]
+  }
+
+  handleName(name:string) {
+    if(name === this.buttons[0].name){
+        this.router.navigate(["./../detail/add"], {relativeTo: this.activatedRoute});
+    }
+  }
+
+
+  ngDoCheck() {
+    if(this.router.url.split('/').includes('add')){
+      this.title='新建客户'
+    }else{
+      this.title = "客户列表";
+    }
+   
+    let url = this.activatedRoute.snapshot["_routerState"].url.toString();
+    this.showBtn = url.indexOf("list") >= 0;
+  }
+}

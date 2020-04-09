@@ -1,0 +1,22 @@
+<div class="list-group-rev">
+  <nz-table #nzTable [nzData]="materialsList" [nzBordered]="true" [nzFrontPagination]="false"
+            [nzShowPagination]="false" nzSize="middle" class="tables" 
+          >
+      <thead>
+      <tr>
+          <th>材料</th>
+          <th>品牌</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of nzTable.data">
+          <td [title]="item.name?item.name:''">
+              <nz-badge >{{item.name?item.name:'--'}}</nz-badge>
+          </td>
+          <td [title]="item.brand?item.brand:''">
+              {{item.brand?item.brand:'--'}}
+          </td>
+      </tr>
+      </tbody>
+  </nz-table>
+</div>

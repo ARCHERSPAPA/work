@@ -1,0 +1,22 @@
+@charset "utf-8";
+.exam{
+    // padding: 10px 20px;
+    overflow: hidden;
+    .content{
+        padding-top: 24px;
+    }
+        input{
+            width: 200px !important;
+        }
+}
+tr th,tr td{
+    max-width: 60px;
+    font-size: 14px;
+    // padding: 4px !important;
+    a{
+        padding-right: 4px;
+    }
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+   }

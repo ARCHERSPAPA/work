@@ -1,0 +1,118 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.account{
+    padding: 10px 20px;
+    overflow: hidden;
+    .head{
+        margin-bottom: 20px;
+        background: #fff;
+    }
+    .content{
+        padding: 50px 10px;
+        margin-bottom: 20px;
+        background: #fff;
+        .form{
+            width: 60%;
+            min-width: 240px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 120, 132, 0.2);
+            &.border_0{
+                border: 0;
+            }
+             li{
+                width: 100%;
+                font-size: 0;
+                &.title{
+                    font-size: 14px;
+                    height: 40px;
+                    line-height: 40px;
+                    text-align: center;
+                    border-bottom: 1px solid rgba(0,120,132,0.2);
+                    margin-bottom: 50px;
+                }
+                &.btns{
+                    margin:20px 0  40px 0;
+                    display: block;
+                    text-align: center;
+                    .btn {
+                        padding: 3px 20px;
+                        letter-spacing: 2px;
+                        font-size: 14px;
+                        margin-right: 50px;
+                        outline: none;
+                        border: 0;
+                        cursor: pointer;
+                        color: #fff;
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                        &.btn-primary {
+                            @include hover(#0a8ddf);
+                        }
+                        &.btn-default {
+                            @include hover(#999)
+                        }
+                        &.disabled{
+                            cursor: not-allowed;
+                            color: #666;
+                            @include  hover(#dedede);
+                        }
+                    }
+                }
+                .label,.inp{
+                    display: inline-block;
+                    vertical-align: top;
+                    font-size: 13px;
+                    line-height: 26px;
+                }
+                .label{
+                    width: 30%;
+                    padding-right: 3%;
+                    text-align: right;
+                }
+                .inp{
+                    width: 50%;
+                    .text{
+                        display: inline-block;
+                        width: 100%;
+                        border: 1px solid #dedede;
+                        text-indent: 10px;
+                        outline: none;
+                        font-size: 14px;
+                        margin-bottom: 10px;
+                        @include border;
+                        &.code{
+                            width: 48%;
+                        }
+                    }
+                    .send{
+                        width: 50%;
+                        display: inline-block;
+                        color: #fff;
+                        text-indent: 10px;
+                        line-height: 30px;
+                        cursor: pointer;
+                        outline: none;
+                        border: 0;
+                        @include  hover(#0a8ddf);
+                        &.code{
+                            width: 50%;
+                            margin-left: 2%;
+                        }
+                        &.disabled{
+                            cursor: not-allowed;
+                            color: #666;
+                            @include  hover(#dedede);
+                        }
+                    }
+                    p{
+                        width: 100%;
+                        font-size: 12px;
+                        color: #bbb;
+                        line-height: 20px;
+                    }
+                }
+            }
+        }
+    }
+}

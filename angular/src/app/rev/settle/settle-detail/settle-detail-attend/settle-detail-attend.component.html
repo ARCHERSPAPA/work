@@ -1,0 +1,151 @@
+<div class="settle-detail">
+    <div class="detail-attend">
+        <div nz-row>
+            <div nz-col nzSpan="12">
+                <div class="attend-calendar">
+                    <div class="attend-worker" *ngIf="state && state === 4">
+                        <nz-select
+                                style="width: 150px;height: 30px;"
+                                nzPlaceHolder="请选择工人"
+                                [(ngModel)]="selectWorker"
+                                (ngModelChange)="modalChange($event)"
+                        >
+                            <ng-container *ngFor="let worker of workers">
+                                <nz-option [nzLabel]="worker.name" [nzValue]="worker"></nz-option>
+                            </ng-container>
+                        </nz-select>
+                    </div>
+                    <nz-calendar class="attend-date"
+                                 [nzDateFullCell]="dateCellTpl"
+                                 [nzFullscreen]="true"
+                                 [(ngModel)]="currentDate">
+
+                    </nz-calendar>
+                </div>
+            </div>
+            <div nz-col nzSpan="12">
+                <div class="attend-data">
+                    <div class="attend-data-title">考勤统计</div>
+                    <div nz-row class="attend-data-chart" *ngIf="statistics">
+                        <div nz-col nzSpan="12">
+                            <dl class="attend-chart-title">
+                                <dt [nzTitle]="statistics.doing?statistics.doing:0" nzPlacement="topCenter"
+                                    nz-tooltip>{{statistics.doing}}</dt>
+                                <dd>打卡（天）</dd>
+                            </dl>
+                            <v-chart [forceFit]="true" height="280" [data]="items">
+                                <v-tooltip [showTitle]="false" [show]="true" [itemTpl]="itemTpl"></v-tooltip>
+                                <v-pie position="percent" [color]="color" [select]="false" [tooltip]="tooltip"></v-pie>
+                                <v-coord type="theta" [radius]="1" [innerRadius]="0.9"></v-coord>
+                            </v-chart>
+                        </div>
+                        <div nz-col nzSpan="12" class="attend-chart-desc">
+                            <dl nz-col nzSpan="12" class="mt-16">
+                                <dt [title]="statistics.all">
+                                    <span class="date-circle date-chart circle-success"></span>{{statistics.all}}
+                                </dt>
+                                <dd>全勤（天）</dd>
+                            </dl>
+                            <dl nz-col nzSpan="12" class="mt-16">
+                                <dt [title]="statistics.morning">
+                                    <span class="date-circle date-chart circle-morning"></span>{{statistics.morning}}
+                                </dt>
+                                <dd>早卡（天）</dd>
+                            </dl>
+                            <dl nz-col nzSpan="12" class="mt-56">
+                                <dt [title]="statistics.night">
+                                    <span class="date-circle date-chart circle-night"></span>{{statistics.night}}
+                                </dt>
+                                <dd>晚卡（天）</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div nz-row class="attend-data-chart attend-chart-empty" *ngIf="!statistics">
+                        <div nz-col nzSpan="24">暂无考勤数据</div>
+                    </div>
+                    <div nz-row class="attend-data-info" *ngIf="statistics">
+                        <div nz-col nzSpan="24" class="attend-info-title">{{currentDate|date:'MM月dd日'}}打卡时间</div>
+                        <div nz-col nzSpan="12" class="attend-info-detail">
+                            <dl>
+                                <dt>
+                                    <span class="date-circle date-info circle-morning"></span>
+                                    {{selectInfo && selectInfo.firstCheck?(selectInfo.firstCheck|date:'HH:mm'):'--:--'}}
+                                </dt>
+                                <dd *ngIf="selectInfo && selectInfo.firstCheck
+                                && justPointBylngAndlat(selectInfo.firstLatitude,selectInfo.firstLongitude)">
+                                    <a href="javascript:void(0)" (click)="getLocal(selectInfo,'first')"
+                                       [title]="selectInfo.firstInfo" class="color-blue">{{selectInfo.firstInfo}}</a>
+                                </dd>
+                                <dd *ngIf="!(selectInfo && selectInfo.firstCheck)">
+                                    <span class="color-gray">缺卡</span>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div nz-col nzSpan="12" class="attend-info-detail">
+                            <dl>
+                                <dt>
+                                    <span class="date-circle date-info circle-night"></span>
+                                    {{selectInfo && selectInfo.lastCheck?(selectInfo.lastCheck|date:'HH:mm'):'--:--'}}
+                                </dt>
+                                <dd *ngIf="selectInfo && selectInfo.lastCheck
+                                && justPointBylngAndlat(selectInfo.lastLatitude,selectInfo.lastLongitude)">
+                                    <a href="javascript:void(0)" (click)="getLocal(selectInfo,'last')"
+                                       [title]="selectInfo.lastInfo" class="color-blue">{{selectInfo.lastInfo}}</a></dd>
+                                <dd *ngIf="!(selectInfo && selectInfo.lastCheck)">
+                                    <span class="color-gray">缺卡</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!---功能键--->
+        <div nz-row *ngIf="!(state && state === 4) && settleInfo && settleInfo.state === 3">
+            <div nz-col nzSpan="24" class="text-right">
+                <!-- <button nz-button nzType="danger" nz-popconfirm nzTitle="确定不通过本次工费申请吗?"
+                        (nzOnConfirm)="confirm(0)"
+                        (nzOnCancel)="cancel()" nzPlacement="top">未通过
+                </button>
+                <button nz-button nzType="primary" nz-popconfirm nzTitle="确定通过本次工费申请吗?"
+                        (nzOnConfirm)="confirm(1)" class="ml-20"
+                        (nzOnCancel)="cancel()" nzPlacement="top">通过
+                </button> -->
+                <button nz-button nzType="primary" (click)="viewAttend()">审核</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 审核弹窗 -->
+<nz-modal 
+    [(nzVisible)]="isVisible" 
+    [nzTitle]="modalTitle" 
+    [nzContent]="modalContent"
+    [nzFooter]="modalFooter"
+    (nzOnCancel)="cancel()">
+    <ng-template #modalTitle>工程审核</ng-template>
+    <ng-template #modalContent>
+        <textarea rows="4" nz-input placeholder="写点备注吧" [(ngModel)]="remarks" autocomplete="off" maxlength="300"></textarea>
+    </ng-template>
+    <ng-template #modalFooter>
+        <button nz-button nzType="danger" (click)="confirm(0)">不通过</button>
+        <button nz-button nzType="primary" (click)="confirm(1)">通过</button>
+    </ng-template>
+</nz-modal>
+
+<!-- -模板- -->
+<ng-template #dateCellTpl let-date>
+    <div *ngIf="showDate(date)">
+        <div class="temp-date" (click)="selectChange(date)">
+            <span class="date-number">{{date.getDate()}}</span>
+            <span class="date-circle date-render"
+                  [ngClass]="{'circle-night':justColorByDate(date) === 'night',
+                  'circle-success':justColorByDate(date) === 'all',
+                  'circle-morning':justColorByDate(date) === 'morning'}"></span>
+        </div>
+    </div>
+    <div *ngIf="!showDate(date)">
+        <div class="temp-date date-disabled">{{date.getDate()}}</div>
+    </div>
+</ng-template>
+

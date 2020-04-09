@@ -1,0 +1,329 @@
+import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { RequestService } from "../../../service/request.service";
+import { UserService } from "../../../service/user.service";
+import { ModalComponent } from "../../../plugins/modal/modal.component";
+import { WarningService } from "../../../service/warning.service";
+import { BaseService } from "../../../service/base.service";
+import { Messages } from "../../../model/msg";
+import { UploaderComponent } from "../../../plugins/uploader/uploader.component";
+import { DepartService } from "../../../service/depart.service";
+import { debug } from 'util';
+
+@Component({
+    selector: 'rev-basis',
+    templateUrl: './basis.component.html',
+    styleUrls: ['./../merchant.component.scss', './basis.component.scss']
+})
+export class BasisComponent implements OnInit {
+    public title: string;
+    public buttons: Array<any>;
+
+    public name: string = Messages.LOADING;
+    public shortName: string = Messages.LOADING
+    public mobile: string = Messages.LOADING;
+    public headImg: string;
+    public address: string = Messages.LOADING;
+    public point: any;
+    public items: Array<any>;
+    public area: any = Messages.LOADING;
+    public brief: string = Messages.LOADING;
+
+    public edit_img: boolean = false;
+
+
+
+    constructor(private router: Router,
+        private modalService: NgbModal,
+        private request: RequestService,
+        private userInfo: UserService,
+        private warn: WarningService,
+        private base: BaseService,
+        private depart: DepartService) {
+    }
+
+    ngOnInit() {
+        let that = this;
+        that.title = "基础资料";
+        that.buttons = [
+            {
+                name: "上传",
+                type: "click",
+                color: "btn-primary",
+                method: () => {
+                    that.router.navigateByUrl("/user");
+                }
+            },
+            {
+                name: "下载",
+                type: "mouseout",
+                method: () => {
+                    that.router.navigateByUrl("/rev/step");
+                }
+            }
+        ];
+        if (!that.base.getBaseCompanyId()) {
+            that.base.loadCompany();
+        }
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.name = this.base.getCompanyName();
+            this.address = this.base.getAddress();
+            this.mobile = this.base.getCompanyPhone();
+            this.point = this.base.getPoint();
+            this.area = this.base.getAreaName();
+            this.brief = this.base.getSummary();
+            this.headImg = this.base.getHeadImg();
+            this.depart.resetDepartFirstId();
+            this.shortName = this.base.getShortName();
+
+        }, 1000)
+    }
+
+    changeImg() {
+        this.edit_img = true;
+    }
+
+    onUpdateModal(type, val) {
+        let that = this;
+        const modalRef = this.modalService.open(ModalComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: "static"
+        });
+        modalRef.componentInstance.type = type;
+        modalRef.componentInstance.name = "修改";
+        if (type === "address") {
+            modalRef.componentInstance.point = this.point;
+        }
+        if (type === "area") {
+            modalRef.componentInstance.value = {
+                citys: that.combineArea(),
+                districts: that.combineDistrict()
+            }
+        } else {
+            modalRef.componentInstance.value = val;
+        }
+
+        modalRef.result.then((res) => {
+            // console.log(res);
+            this.updateCondition(type, JSON.parse(res));
+        }, (reason) => {
+            console.log(reason);
+        });
+    }
+
+    combineDistrict() {
+        let districts = [], ids = this.base.getAreaId().split(","),
+            names = this.base.getAreaName().split(",");
+        for (let i = 0; i < ids.length; i++) {
+            districts.push({
+                id: ids[i],
+                name: names[i]
+            });
+        }
+        return districts;
+    }
+    combineArea() {
+        let areas = [], ids = this.base.getCityId().split(","),
+            names = this.base.getCityName().split(",");
+        for (let i = 0; i < ids.length; i++) {
+            areas.push({
+                id: ids[i],
+                name: names[i]
+            });
+        }
+        return areas;
+    }
+
+
+    openModal() {
+        let that = this;
+        const modalRef = this.modalService.open(UploaderComponent, {
+            centered: true,
+            keyboard: false,
+            backdrop: "static"
+        });
+        modalRef.componentInstance.name = "修改头像信息";
+        modalRef.componentInstance.width = 10;
+        modalRef.componentInstance.height = 10;
+        modalRef.result.then((result) => {
+            if (result && result.image) {
+                that.updateCondition("head", result);
+            } else {
+                that.warn.onError(Messages.ERROR.IMG_LARGE);
+            }
+
+        }, (reason) => {
+            console.log(reason);
+        });
+    }
+
+
+    updateCondition(type, result) {
+        console.log(result)
+        let params = {}, that = this;
+        params["id"] = that.userInfo.getCompanyId();
+        if (type === "mobile") {
+            params["companyPhone"] = result.mobile;
+        } else if (type === "address") {
+            params["address"] = result.address;
+            if (Array.isArray(result.point)) {
+                params["longitude"] = result.point[0];
+                params["altitude"] = result.point[1];
+            } else {
+                params["longitude"] = result.point.lng;
+                params["altitude"] = result.point.lat;
+            }
+
+        } else if (type === "area") {
+            let districts = result;
+            params["serviceCityId"] = that.getDistricts(districts, "citys").ids.join(",");
+            params["serviceCityName"] = that.getDistricts(districts, "citys").names.join(",");
+            params["serviceAreaId"] = that.getDistricts(districts, "districts").ids.join(",");
+            params["serviceAreaName"] = that.getDistricts(districts, "districts").names.join(",");
+        } else if (type === "brief") {
+            params["summary"] = result.brief;
+        } else if (type === "head") {
+            params["headImg"] = result.image;
+        } else if (type === "shortName") {
+            params["abbreviation"] = result.shortName;
+        }
+        if (params) {
+            that.request.doPost({
+                url: "upCompany",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.resetByParam(type, result);
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    resetByParam(type, result) {
+        let that = this;
+        switch (type) {
+            case "mobile":
+                that.base.setCompanyPhone(result.mobile);
+                that.mobile = that.base.getCompanyPhone();
+                break;
+            case "shortName":
+                that.base.setShortName(result.shortName)
+                that.shortName = that.base.getShortName();
+                break;
+            case "address":
+                that.base.setAddress(result.address);
+                if (Array.isArray(result.point)) {
+                    let point = {
+                        lat: result.point[1],
+                        lng: result.point[0]
+                    }
+                    that.base.setPoint(point);
+                } else {
+                    that.base.setPoint(result.point);
+                }
+
+                that.address = that.base.getAddress();
+                that.point = that.base.getPoint();
+                break;
+            case "brief":
+                that.base.setSummary(result.brief);
+                that.brief = that.base.getSummary();
+                break;
+            case "area":
+                that.base.setCityId(that.getDistricts(result, "citys").ids.join(","));
+                that.base.setCityName(that.getDistricts(result, "citys").names.join(","));
+                that.base.setAreaId(that.getDistricts(result, "districts").ids.join(","));
+                that.base.setAreaName(that.getDistricts(result, "districts").names.join(","));
+                that.area = that.base.getAreaName();
+                break;
+            case "head":
+                that.base.setHeadImg(result.image);
+                that.headImg = that.base.getHeadImg();
+                break;
+        }
+    }
+
+    getAreasByParam(param) {
+        let o = {
+            city: {},
+            districts: []
+        };
+        o.city["id"] = param.serviceCityId;
+        o.city["name"] = param.serviceCityName;
+        if (param.serviceAreaId && param.serviceAreaName) {
+            let areaIds = param.serviceAreaId.split(",");
+            let areaNames = param.serviceAreaName.split(",");
+            for (var i = 0; i < areaIds.length; i++) {
+                let district = {
+                    id: areaIds[i],
+                    name: areaNames[i]
+                }
+                o.districts.push(district);
+            }
+        }
+
+
+        return o;
+    }
+
+
+    // getItems(result){
+    //     let that = this,items = [];
+    //     if(result && result.length > 0){
+    //         for(let i=0; i<result.length;i++){
+    //             if(result[i].checked){
+    //                 items.push(result[i].id);
+    //             }
+    //         }
+    //     }
+    //     return items;
+    // }
+
+    getDistricts(areas, type) {
+        let o = { ids: [], names: [] };
+        if (areas && areas[type]) {
+            let as = areas[type];
+            for (let i = 0; i < as.length; i++) {
+                o.ids.push(as[i].id);
+                o.names.push(as[i].name);
+            }
+        }
+        return o;
+    }
+    // getCitys(citys){
+    //     let c = {ids:[],names:[]};
+    //     for(citys && citys["citys"].length > 0){
+    //
+    //     }
+    // }
+
+
+    ngOnDestroy() {
+        this.headImg = null;
+    }
+
+}
+
+
+@Pipe({
+    name: 'areaDivide'
+})
+export class AreaDividePipe implements PipeTransform {
+    transform(area: any, args?: any): any {
+        if (area) {
+            return area.replace(/,/g, '，');
+        }
+
+    }
+}

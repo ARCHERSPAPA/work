@@ -1,0 +1,54 @@
+<div class="account">
+  <!--<div class="account" [@bounce]="switch">-->
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <form [formGroup]="pwdForm">
+      <ul class="form border_0">
+        <li>
+          <label class="label">旧密码</label>
+          <div class="inp">
+            <input type="password" class="text" name="old" maxlength="32" autocomplete="off"
+                   placeholder="请输入旧密码" formControlName="old"/>
+            <p>请输入旧密码</p>
+            <div [hidden]="pwdForm.get('old').valid || pwdForm.get('old').pristine" class="error">
+              <span [hidden]="!pwdForm.hasError('required',['old'])">输入格式错误</span>
+            </div>
+          </div>
+        </li>
+        <div formGroupName="pwdGroup">
+          <li>
+            <label class="label">新密码</label>
+            <div class="inp">
+              <input type="password" class="text" name="pwd" autocomplete="off" formControlName="pwd"
+                     placeholder="请输入新密码" maxlength="32"/>
+              <p>字母、数字或下划线，且必须包含字母和数字，8~32位，区分大小写</p>
+              <div [hidden]="pwdForm.get('pwdGroup').get('pwd').valid || pwdForm.get('pwdGroup').get('pwd').pristine"
+                   class="error">
+                <span [hidden]="!pwdForm.get('pwdGroup').hasError('pwd',['pwd'])">格式不正确，必须包含数字和字母，且能输入数字、字母和下划线</span>
+                <span [hidden]="!pwdForm.get('pwdGroup').hasError('minlength',['pwd'])">&nbsp;&nbsp;至少输入8位字符</span>
+                <span [hidden]="!pwdForm.get('pwdGroup').hasError('maxlength',['pwd'])">&nbsp;&nbsp;至多输入20位字符</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <label class="label">确认新密码</label>
+            <div class="inp">
+              <input type="password" class="text" name="repwd" autocomplete="off" formControlName="repwd"
+                     placeholder="请再次确认新密码" maxlength="32"/>
+              <p>请再次输入密码</p>
+              <div [hidden]="pwdForm.get('pwdGroup').valid || pwdForm.get('pwdGroup').pristine" class="error">
+                <span>与新密码不一致</span>
+              </div>
+            </div>
+          </li>
+        </div>
+        <li class="btns">
+          <button type="button" class="btn btn-default" (click)="cancel()">取消</button>
+          <button type="submit" class="btn btn-primary" (click)="submit()">下一步</button>
+        </li>
+      </ul>
+    </form>
+  </div>
+</div>

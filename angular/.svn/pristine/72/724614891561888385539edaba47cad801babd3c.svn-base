@@ -1,0 +1,125 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.verify {
+  > dl {
+    dt.dt {
+      font-size: 0;
+      .title {
+        display: inline-block;
+        vertical-align: bottom;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 32px;
+      }
+    }
+    .tip {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.25);
+      display: inline-block;
+      margin-left: 24px;
+    }
+    .imgs {
+      font-size: 0;
+      margin-bottom: 48px;
+
+      p {
+        width: 100%;
+        height: 20px;
+        line-height: 20px;
+        color: #a7a7a7;
+        font-size: 12px;
+      }
+      li {
+        margin-top: 24px;
+        display: inline-block;
+        width: 162px;
+        height: 162px;
+        border-radius: 4px;
+        border: 1px solid #dedede;
+        margin-right: 24px;
+        text-align: center;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.149019607);
+        position: relative;
+        @include compatibility(box-sizing, border-box);
+        img {
+          max-width: 100%;
+          min-height: 100%;
+        }
+        .showDel {
+            position: absolute;
+            display: inline-block;
+            opacity: 0;
+            width: 160px;
+            height: 40px;
+            background:rgba(0,0,0,0.45);
+            border-radius: 0px 0px 4px 4px;
+            top: 130px;
+            left: 0;
+            transition: .2s;
+            z-index: 1;
+          }
+        .del {
+          position: absolute;
+          top: 135px;
+          opacity: 0;
+          left: 50%;
+          transform: translate(-50%);
+          color: #dedede;
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          cursor: pointer;
+          background: url("./del.png") no-repeat;
+          @include compatibility(background-size, 100% 100%);
+          @include compatibility(transition, all 0.5s);
+          z-index: 2;
+          //   &:hover {
+          //     @include compatibility(transform, scale(1.2, 1.2));
+          //   }
+        }
+        &:hover {
+          .del,
+          .showDel {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+}
+.uploaders {
+  margin-right: 24px;
+  margin-top: 24px;
+  display: inline-block;
+  width: 161px;
+  height: 161px;
+}
+.avatar-uploader {
+  display: inline-block;
+  margin-right: 16px;
+  height: 160px;
+
+  div {
+    width: 144px;
+    margin-bottom: 45px;
+  }
+  i {
+    margin-top: 45px;
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+  .ant-upload-text {
+    margin-top: 8px;
+    color: #666;
+    font-family: PingFang SC;
+    font-size: 13px;
+  }
+  .upload-icon {
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+}
+

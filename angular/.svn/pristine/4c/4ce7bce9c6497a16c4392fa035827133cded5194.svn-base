@@ -1,0 +1,96 @@
+<div class="detail-data" [@bounce]="switch">
+    <div class="data-head">
+        <h3 class="data-title">当前支出统计</h3>
+        <p class="data-show">
+            <!--<span>已支出材料费用：{{0|number:'1.2'}}</span>-->
+            <span>已支出人工费用：{{wageTotal?(wageTotal|number:'1.2'):'--'}}</span>
+            <!--<span>总额：{{wageTotal?(wageTotal|number:'1.2'):'&#45;&#45;'}}</span>-->
+        </p>
+    </div>
+    <dl>
+        <dd>
+            <ol>
+                <li class="head">
+                    <span>申请人</span>
+                    <span>工种</span>
+                    <span class="w10">总额</span>
+                    <span class="w15">工长审核通过时间</span>
+                    <span class="w10">结算状态</span>
+                    <span class="w10">类型</span>
+                    <span class="w10">结算时间</span>
+                    <span class="w10">付款银行</span>
+                    <span class="w10">付款流水号</span>
+                    <span>操作人</span>
+                    <span class="w10">操作</span>
+                </li>
+                <ul  *ngIf="wageList && wageList.length > 0">
+                    <li *ngFor="let data of wageList" class="cnt">
+                        <span [title]="data.workerName">{{data.workerName?data.workerName:'--'}}</span>
+                        <span [title]="data.workerType">{{data.workerType}}</span>
+                        <span class="w10" [title]="data.price">{{data.price?(data.price|number:'1.2'):'--'}}</span>
+                        <span class="w15">{{data.masterAuditTime?(data.masterAuditTime|date:'yy-MM-dd HH:mm'):'--'}}</span>
+                        <span class="w10">{{getWageState(data.state)}}</span>
+                        <span class="w10">{{getWageType(data.type)}}</span>
+                        <span class="w10">{{data.financeAuditTime?(data. financeAuditTime|date:'yy-MM-dd HH:mm'):'--'}}</span>
+                        <span class="w10" [title]="data.bankName">{{data.bankName?data.bankName:'--'}}</span>
+                        <span class="w10" [title]="data.batchNum">{{data.batchNum?data.batchNum:'--'}}</span>
+                        <span [title]="data.financeUserName">{{data.financeUserName?data.financeUserName:'--'}}</span>
+                        <span  class="w10">
+                            <a href="javascript:void(0)" *ngIf="data.state <= 3" (click)="openWage(data)">结算</a>
+                            <a href="javascript:void(0)" nz-popconfirm nzTitle="确定驳回工人此次工费申报吗?"
+                               nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="rejectData(data.id)"
+                               *ngIf="data.state <= 3">驳回</a>
+                            <a href="javascript:void(0)" *ngIf="data.state > 3 && data.state != 5" (click)="openWage(data)">修改</a>
+                            <a *ngIf="data.state > 3 && data.state == 5">--</a>
+                        </span>
+                    </li>
+                </ul>
+                <div *ngIf="!wageList || (wageList && wageList.length == 0)">
+                    <li><p>暂无数据显示</p></li>
+                </div>
+            </ol>
+        </dd>
+    </dl>
+</div>
+
+<!---结算工费--->
+<nz-modal
+    [(nzVisible)]="isWage"
+    [nzTitle]="'结算工费'"
+    nzOkText="确定"
+    nzCancelText="取消"
+    (nzOnCancel)="wageCancel()"
+    (nzOnOk)="wageOk()">
+    <div class="modify">
+        <form [formGroup]="wageForm">
+            <ul>
+                <li>
+                    <label class="label">结算帐户</label>
+                    <div class="inp">
+                        <input type="hidden" name="id"  formControlName="id" [(ngModel)]="wid"/>
+                        <input type="text" class="text" placeholder="请输入帐户信息" autocomplete="off"
+                                formControlName="bankName" name="bankName" maxlength="32" [(ngModel)]="wageBankName"/>
+                        <div [hidden]="wageForm.get('bankName').valid || wageForm.get('bankName').pristine" class="error">
+                            <span [hidden]="!wageForm.hasError('required',['bankName'])">必填选项</span>
+                            <span [hidden]="!wageForm.hasError('minlength',['bankName'])">&nbsp;&nbsp;至少输入1位字符</span>
+                            <span [hidden]="!wageForm.hasError('maxlength',['bankName'])">&nbsp;&nbsp;至多输入20位字符</span>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <label class="label">银行流水</label>
+                    <div class="inp">
+                        <!--<input type="hidden" name="id"  formControlName="id" [(ngModel)]="currentId"/>-->
+                        <input type="text" class="text" placeholder="请输入流水号信息" autocomplete="off"
+                               formControlName="batchNum" name="batchNum" maxlength="32" [(ngModel)]="wageBatchNum"/>
+                        <div [hidden]="wageForm.get('batchNum').valid || wageForm.get('batchNum').pristine" class="error">
+                            <span [hidden]="!wageForm.hasError('required',['batchNum'])">必填选项</span>
+                            <span [hidden]="!wageForm.hasError('minlength',['batchNum'])">&nbsp;&nbsp;至少输入1位字符</span>
+                            <span [hidden]="!wageForm.hasError('maxlength',['batchNum'])">&nbsp;&nbsp;至多输入20位字符</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </form>
+    </div>
+</nz-modal>

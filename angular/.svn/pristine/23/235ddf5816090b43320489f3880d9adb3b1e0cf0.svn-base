@@ -1,0 +1,11 @@
+<div class="rev-quick">
+    <h3 class="quick-title">快速查询</h3>
+    <div class="quick-content">
+        <div class="quick-list" *ngIf="departList && departList.length > 0">
+            <rev-quick-tree [quickTree]="departList" [rank]="0" [type]="type" [relate]="connection" (selectDepartmentId)="selectQuickId($event)" [quickId]="quickId"></rev-quick-tree>
+        </div>
+        <div class="quick-list" *ngIf="!departList">正在努力加载中...</div>
+        <div class="quick-list" *ngIf="departList && departList.length == 0">暂无数据显示</div>
+    </div>
+
+</div>

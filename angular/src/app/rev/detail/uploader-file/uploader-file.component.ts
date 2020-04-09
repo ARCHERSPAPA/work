@@ -1,0 +1,563 @@
+import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
+import {FormGroup, FormBuilder, Validators, FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Default} from "../../../model/constant";
+import {Messages} from "../../../model/msg";
+import {UserService} from "../../../service/user.service";
+import {btoa} from "../../../model/methods";
+import {
+    atob,
+    equalToSame,
+} from "../../../model/methods";
+import {HeaderService} from "../../../service/header.service";
+
+@Component({
+    selector: 'rev-uploader-file',
+    templateUrl: './uploader-file.component.html',
+    styleUrls: ['./uploader-file.component.scss']
+})
+export class uploaderFileComponent implements OnInit {
+    public userFiles = [];
+    public filesData: any;
+    public addFileData: any;//添加附件的列表
+    public uploaderForm: FormGroup;
+    public isVisible: boolean;
+    public isFistSubmit: number;//0不是第一次提交，1是第一次提交
+    public isClose: number;//0未关闭1已关闭
+    public info: string;
+    public isDesigners: boolean = false;
+
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    // 报价单Id
+    public id: string;
+    public accessoryId = [];
+
+    constructor(private req: RequestService,
+                private warn: WarningService,
+                private activatedRoute: ActivatedRoute,
+                private user: UserService,
+                private header: HeaderService) {}
+
+    ngOnInit() {
+   
+        this.activatedRoute.queryParams.subscribe((params) => {
+            if(params && params["cid"]){
+                this.id = atob(params.cid);
+                this.uploaderLoadDetail();
+            }
+
+        });
+    }
+
+    ngDoCheck() {
+        if (this.header && this.header.getHeaderInfo()) {
+            if(this.header.getHeaderInfo()["quoteBase"].state==-1){
+                this.isClose=1;
+            }
+            this.isDesigners = equalToSame(this.user.getPhone(), this.header.getHeaderInfo()["designers"]);
+        }
+    }
+
+
+    addFiles(e: any, index) {
+        if (e.checked == true) {
+            this.userFiles.splice(index, 1, e.id)
+        } else {
+            this.userFiles.splice(index, 1, '')
+        }
+    }
+
+    openfileModel() {
+        this.isVisible = true;
+        this.loadDetailList()
+    }
+//添加公司附件
+    loadDetailList() {
+        this.req.doPost({
+            url: 'currentOfferContractList',
+            success: (res => {
+                if(res.data && res.data.length>0){
+                let length = res.data.length;
+                this.userFiles = new Array(length).fill('');
+                this.addFileData = res.data.filter(item => {
+                    item["checked"] = false;
+                    return item;
+                })
+            }else{
+                this.warn.onWarn('请先在合同附件库添加附件');
+            }
+            })
+        })
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.userFiles = [];
+    }
+
+//加载页面详情
+    uploaderLoadDetail() {
+        this.req.doPost({
+            url: 'getOfferContractListNew',
+            data: {
+                'quoteId': this.id,
+            },
+            success: (res => {
+                if(res.data ){
+                    this.filesData = res.data.list;
+                    this.isFistSubmit = res.data.isFirst;
+                    this.isClose = res.data.isClose;
+                    this.info = res.data.isAffirm == 0 ? '客户尚未确认' : '客户已确认';
+                    this.filesData.forEach(id => {
+                        this.accessoryId.push(id.id);
+                    });
+                }else{
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+          
+            })
+        })
+    }
+
+    NoResult() {
+        return this.userFiles.length == 0 ? false : true;
+    }
+
+    delList(accessoryId, index) {
+        if (this.isFistSubmit == 1) {
+            this.filesData.splice(index, 1);
+            this.accessoryId.splice(index, 1)
+        } else {
+            this.req.doPost({
+                url: "delOfferContractListFile",
+                data: {
+                    'id': accessoryId,
+                    'quoteId': this.id
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.uploaderLoadDetail();
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    submitAdd() {
+        this.req.doPost({
+            url: 'addOfferContractList',
+            data: {
+                'ids': this.userFiles,
+                'quoteId': this.id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.uploaderLoadDetail();
+                    this.isVisible = false;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    submit() {
+        this.req.doPost({
+            url: 'submitOfferContractListFirst',
+            data: {
+                'ids': this.accessoryId,
+                'quoteId': this.id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.uploaderLoadDetail();
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+    btoa(id:string){
+        return btoa(id);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

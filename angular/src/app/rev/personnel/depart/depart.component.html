@@ -1,0 +1,66 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="person-content" style="padding-top:24px;">
+        <!--<router-outlet></router-outlet>-->
+        <div class="depart-list">
+            <div class="list-items">
+                <div class="item-content">
+                    <rev-depart-node [departTree]="departList"></rev-depart-node>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<nz-modal nzWidth="500px" [(nzVisible)]="isVisible" nzTitle="新建部门" [nzFooter]="null" (nzOnCancel)="handleCancel()"
+    class="meal_modal">
+    <form nz-form [formGroup]="departForm">
+        <div nz-row>
+            <div nz-col [nzSpan]="24">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6">部门</nz-form-label>
+                    <nz-form-control [nzSpan]="18">
+                        <input nz-input formControlName="name" placeholder="请输入部门名称">
+                        <nz-form-explain *ngIf="departForm.get('name').dirty && departForm.get('name').errors">
+                            <ng-container *ngIf="departForm.get('name').hasError('required')">
+                                部门名称必填项
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('account')">
+                                只能输入数字、字母、中文或者下划线
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('minlength')">
+                                至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="departForm.get('name').hasError('maxlength')">
+                                至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="24">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6">描述</nz-form-label>
+                    <nz-form-control [nzSpan]="18" class="textarea">
+                        <textarea formControlName="remarks" nz-input rows="5" [(ngModel)]="remarks"
+                            placeholder="请输入当前部门的描述信息" maxlength="120"></textarea>
+                        <span class="count"
+                            *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                        <nz-form-explain *ngIf="departForm.get('remarks').dirty && departForm.get('remarks').errors">
+                            <ng-container *ngIf="departForm.get('remarks').hasError('maxlength')">
+                                至多输入120位字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div class="btns">
+                <button nz-button (click)="handleCancel()">关闭</button>
+                <button nz-button nzType="primary" (click)="submit($event)" [disabled]="!departForm.valid">提交</button>
+            </div>
+        </div>
+    </form>
+</nz-modal>

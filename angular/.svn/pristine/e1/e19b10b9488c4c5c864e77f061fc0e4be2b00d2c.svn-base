@@ -1,0 +1,444 @@
+import { Injectable } from '@angular/core';
+import { RequestService } from "./request.service";
+import { WarningService } from "./warning.service";
+import { Messages } from "../model/msg";
+import { GuardService } from "./guard.service";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DepartService {
+    private listDepart: any;
+    //专供选择部门列表展示
+    private displayDeparts: Array<any> = [];
+    //快捷查询部门列表时的id
+    private quickDepartId: string;
+    //选择部门是存储量
+    private selectDepart: any;
+
+    //查询部门列表存储
+    private searchListDepart: any;
+
+    //用于客户和报价时的部门列表展示
+    private addListDepart: any;
+
+    //用于员工添加时的部门列表信息
+    private empListDepart: any;
+
+
+    //用于快速查询部门相关信息数据
+    //listDepartAll：全部部门信息，listDepartIn:所在部门信息，listDepartSon:所在部门及其子部门信息
+    private listDepartAll: any;
+    private listDepartIn: any;
+    private listDepartSon: any;
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        private guard: GuardService) { }
+
+
+    /**
+     * 加载某级的部门数据信息
+     * @param arg: ‘0’为root级，其它类推
+     *
+     */
+    loadDepart(id, type) {
+        let that = this, param = {};
+        if (id) {
+            param["superiorDepartmentId"] = id;
+        }
+        if (this.guard.saftyGuard()) {
+            that.request.doPost({
+                url: this.getUrlByType(type),
+                data: param,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // console.log(res.data)
+                        that.setDepartList(id, res.data, type);
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    getUrlByType(type) {
+        switch (type) {
+            case 1:
+                return "listDepartTree";
+            case 2:
+                return "listDepartAdd";
+            case 3:
+                return "listDepartAddEmp";
+            case 4:
+                return "listDepartSearch";
+            case 10:
+                return "listDepartAll";
+            case 11:
+                return "listDepartIn";
+            case 12:
+                return "listDepartSon";
+            default:
+                return "listDepart";
+        }
+    }
+
+    /**
+     * 设置部门数据
+     * @param pid 父级id
+     * @param list 拉取后的数据data
+     */
+    setDepartList(pid, list, type) {
+        for (let i of list) {
+            if (i.ownSubset) {
+                i["child"] = "";
+            }
+            i["show"] = false;
+            i["load"] = false;
+        }
+        this.setDepartData(type, pid, list);
+    }
+
+    setDepartData(type, pid, list) {
+        switch (type) {
+            case 1:
+                if (pid === 0) {
+                    this.listDepart = list;
+                }
+                else {
+                    this.listDepart = this.loadChild(pid, list, type);
+                }
+                break;
+            case 2:
+                if (pid === 0) {
+                    this.addListDepart = list;
+                }
+                else {
+                    this.addListDepart = this.loadChild(pid, list, type);
+                }
+                break;
+            case 3:
+                if (pid === 0) {
+                    this.empListDepart = list;
+                }
+                else {
+                    this.empListDepart = this.loadChild(pid, list, type);
+                }
+                break;
+            case 4:
+                if (pid === 0) {
+                    this.searchListDepart = list;
+                }
+                else {
+                    this.searchListDepart = this.loadChild(pid, list, type);
+                }
+                break;
+            case 10:
+                if (pid === 0) {
+                    this.listDepartAll = list;
+                }
+                else {
+                    this.listDepartAll = this.loadChild(pid, list, type);
+                }
+                break;
+            case 11:
+                if (pid === 0) {
+                    this.listDepartIn = list;
+                }
+                else {
+                    this.listDepartIn = this.loadChild(pid, list, type);
+                }
+                break;
+            case 12:
+                if (pid === 0) {
+                    this.listDepartSon = list;
+                }
+                else {
+                    this.listDepartSon = this.loadChild(pid, list, type);
+                }
+                break;
+        }
+    }
+
+    /**
+     * 供外部调用，获取部门列表信息
+     * @returns {any}
+     */
+    getDepartList(type) {
+        switch (type) {
+            case 1:
+                // console.log(this.listDepart)
+                return this.listDepart;
+            case 2:
+                return this.addListDepart;
+            case 3:
+                return this.empListDepart;
+            case 4:
+                return this.searchListDepart;
+            case 10:
+                return this.listDepartAll;
+            case 11:
+                return this.listDepartIn;
+            case 12:
+                return this.listDepartSon;
+            default:
+                return this.listDepart;
+        }
+    }
+
+
+    getArrayDepart(type) {
+        switch (type) {
+            case 1:
+                return this.listDepart;
+            case 2:
+                return this.addListDepart;
+            case 3:
+                return this.empListDepart;
+            case 4:
+                return this.searchListDepart;
+            case 10:
+                return this.listDepartAll;
+            case 11:
+                return this.listDepartIn;
+            case 12:
+                return this.listDepartSon;
+        }
+    }
+
+    /**
+     * 处理父级数据信息
+     * @param pid 父级id
+     * @param data 父级拉取data
+     * @returns {any} 返回list
+     */
+    loadChild(pid, data, type) {
+        let arr = this.getArrayDepart(type);
+        if (arr && arr.length > 0) {
+            this.callback(pid, data, arr);
+        };
+        return arr;
+    }
+
+    /**
+     * 回调函数用来处理父级数据嵌套
+     * @param pid 父级id
+     * @param data 父级data
+     * @param arr 返回list
+     */
+    callback(pid, data, arr) {
+        if (arr && arr.length > 0) {
+            for (let a of arr) {
+                if (a.id == pid) {
+                    a["child"] = data;
+                } else {
+                    this.callback(pid, data, a["child"]);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 弹出框数据调用显示选中部门信息(多选)
+     * @param depart 当前选中的部门
+     */
+    showDeparts(depart) {
+        let that = this;
+        let dp = that.displayDeparts;
+        if (dp.length == 0) {
+            dp.push(depart);
+        } else {
+            if (!that.existDepart(depart)) {
+                dp.push(depart);
+            } else {
+                that.removeDisplayDeparts(depart);
+            }
+        }
+    }
+
+    removeDisplayDeparts(depart) {
+        let dp = this.displayDeparts;
+        if (dp && dp.length > 0) {
+            for (let i = 0; i < dp.length; i++) {
+                if (dp[i].id == depart.id) {
+                    dp.splice(i, 1);
+                }
+            }
+        }
+    }
+
+
+    replaceDepart(depart) {
+        if (this.displayDeparts && this.displayDeparts.length > 0) {
+            this.displayDeparts.splice(0, 1, depart);
+            // console.log(this.displayDeparts);
+        } else {
+            this.displayDeparts.push(depart);
+        }
+    }
+
+    /**
+     * 弹出框效果，是否选中部门已存在
+     * @param depart 当前选中部门
+     * @returns {boolean} true：已存在，false：不存在
+     */
+    existDepart(depart) {
+        if (this.displayDeparts && this.displayDeparts.length > 0) {
+            for (let de of this.displayDeparts) {
+                if (de.id == depart.id) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 弹出框获取部门显示数组(多选)
+     * @returns {Array<any>} 数据信息list
+     */
+    getDisplayDeparts() {
+        return this.displayDeparts;
+    }
+
+    setDisplayDeparts(departs) {
+        this.displayDeparts = departs;
+    }
+    /**
+     * 清空弹出框所有显示数据信息
+     */
+    clearDisplayDeparts() {
+        this.displayDeparts = [];
+    }
+
+    resetDepartFirstId() {
+        this.searchListDepart = null;
+        this.addListDepart = null;
+        this.displayDeparts = [];
+    }
+
+    getDepartFirstId(type) {
+        switch (type) {
+            case 1:
+                if (this.listDepart && this.listDepart.length > 0)
+                    return this.listDepart[0].id;
+            case 2:
+                if (this.addListDepart && this.addListDepart.length > 0)
+                    return this.addListDepart[0].id;
+            case 3:
+                if (this.empListDepart && this.empListDepart.length > 0)
+                    return this.empListDepart[0].id;
+            case 4:
+                if (this.searchListDepart && this.searchListDepart.length > 0)
+                    return this.searchListDepart[0].id;
+            case 10:
+                if (this.listDepartAll && this.listDepartAll.length > 0)
+                    return this.listDepartAll[0].id;
+            case 11:
+                if (this.listDepartIn && this.listDepartIn.length > 0) {
+                    return this.listDepartIn[0].id;
+                }
+            case 12:
+                if (this.listDepartSon && this.listDepartSon.length > 0) {
+                    return this.listDepartSon[0].id;
+                }
+            default:
+                if (this.searchListDepart && this.searchListDepart.length > 0)
+                    return this.searchListDepart[0].id;
+        }
+    }
+
+    setQuickDepartId(id) {
+        this.quickDepartId = id;
+    }
+
+    getQuickDepartId() {
+        return this.quickDepartId;
+    }
+
+    setSelectDepartByName(depart) {
+        this.selectDepart = depart;
+    }
+
+    getSelectDepartByName() {
+        return this.selectDepart;
+    }
+
+    removeSelectDepartByName() {
+        this.selectDepart = null;
+    }
+
+    calcDisplayDeparts(url) {
+        let sub = this.getDisplayDeparts();
+        let returnSub = [];
+        if (sub && sub.length > 0) {
+            for (let s of sub) {
+                this.findTreeById(s, this.getArrayDepart(url));
+            }
+
+            for (let i = 0; i < sub.length; i++) {
+                if (!sub[i]["deleteMark"]) {
+                    returnSub.push(sub[i]);
+                }
+            }
+        }
+        return returnSub;
+    }
+
+    findParentById(id) {
+        let sub = this.getDisplayDeparts();
+        if (sub && sub.length > 1) {
+            for (let s of sub) {
+                if (s.id === id) return true;
+            }
+        }
+        return false;
+    }
+
+    findTreeById(depart, arr) {
+        if (arr && arr.length > 0) {
+            for (let a of arr) {
+                if (depart.id === a.id) {
+                    if (this.findParentById(a["topDepartmentId"]) && a["rank"] > 2) {
+                        // this.removeDisplayDeparts(depart-tree);
+                        this.markDisplayDeparts(depart);
+                    }
+                    if (this.findParentById(a["superiorDepartmentId"]) && a["rank"] > 1) {
+                        // this.removeDisplayDeparts(depart-tree);
+                        this.markDisplayDeparts(depart);
+                    }
+                } else {
+                    this.findTreeById(depart, a["child"]);
+                }
+            }
+        }
+    }
+
+    getTreeByIdAndName(arr) {   //减少组件传递的冗余数据
+        if(arr){
+            let key = [] //部门组件传递的参数
+            if(arr.length===1){
+                arr.forEach(item => {
+                    key.push({ id: item['id'], name: item['name'] })
+                })
+            }
+
+ 
+            return key
+        }
+    }
+
+    markDisplayDeparts(depart) {
+        let dp = this.displayDeparts;
+        if (dp && dp.length > 0) {
+            for (let i = 0; i < dp.length; i++) {
+                if (dp[i].id == depart.id) {
+                    dp[i]["deleteMark"] = true;
+                }
+            }
+        }
+    }
+
+
+}

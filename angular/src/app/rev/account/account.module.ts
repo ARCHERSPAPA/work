@@ -1,0 +1,23 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {PublicModule} from "../../public/public.module";
+import {AccountRoutingModule} from "./account-routing.module";
+import {BaseComponent} from './base/base.component';
+import {FreshComponent} from './fresh/fresh.component';
+import {PwdComponent} from './pwd/pwd.component';
+
+
+@NgModule({
+  imports: [
+    CommonModule,
+    PublicModule,
+    AccountRoutingModule
+  ],
+  declarations: [
+    BaseComponent,
+    FreshComponent,
+    PwdComponent
+  ]
+})
+export class AccountModule {
+}

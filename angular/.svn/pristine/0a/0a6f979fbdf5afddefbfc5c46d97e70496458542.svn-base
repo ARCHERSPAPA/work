@@ -1,0 +1,150 @@
+import {Component, OnInit} from '@angular/core';
+import {bounceAnimate} from "../../../animation/transform.component";
+import {Router, ActivatedRoute} from '@angular/router';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import * as UserValidate from '../../../validate/user-validate';
+import {UserService} from "../../../service/user.service";
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "./../../../model/msg";
+
+@Component({
+  selector: 'rev-base',
+  templateUrl: './base.component.html',
+  styleUrls: ['./../account.component.scss'],
+  animations: [
+    bounceAnimate
+  ]
+})
+export class BaseComponent implements OnInit {
+
+  public title:string;
+  public mobile:string;
+
+  public switch:string;
+
+  public isOpen:boolean = false;
+
+  public baseForm:FormGroup;
+
+  public isModify:boolean = false;
+  public modifyMsg:string = "";
+  
+  constructor(
+    private router:Router,
+    private activatedRoute:ActivatedRoute,
+    private fb:FormBuilder,
+    private userInfo:UserService,
+    private request:RequestService,
+    private warn:WarningService
+  ) {}
+
+  ngOnInit() {
+    this.title = "基础信息更新";
+    this.mobile = this.userInfo.getPhone();
+
+    this.switch = "up";
+
+    this.baseForm = this.fb.group({
+      code: ['', [
+        Validators.required,
+        UserValidate.ValidateCode
+      ]]
+    })
+  }
+
+  checkPhoneTimes() {
+    let that = this;
+    if (that.userInfo.getId()) {
+      that.request.doPost({
+        url: "checkPhoneTimes",
+        data: {id: that.userInfo.getId()},
+        success: (res => {
+          if (res && res.code == 200) {
+            that.isModify = false;
+          } else {
+            that.isModify = true;
+            this.modifyMsg = res.msg;
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    }
+  }
+
+  openTimer($e) {
+    // console.log($e);
+  }
+
+  closeTimer($e) {
+    // console.log($e);
+    if (!$e) {
+      this.isOpen = false;
+    }
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.switch = "down";
+      if (!this.mobile) {
+        this.router.navigate(["./../fresh"], {relativeTo: this.activatedRoute})
+      } else {
+        this.checkPhoneTimes();
+      }
+    });
+  }
+
+  send() {
+    let that = this;
+    if (that.isModify) {
+      that.warn.onWarn(this.modifyMsg || Messages.FAIL.DATA);
+    } else {
+      that.isOpen = true;
+      that.request.doPost({
+        url: "phoneCaptcha",
+        data: {
+          phone: that.mobile,
+          type: 7
+        },
+        success: (res => {
+          if (res && res.code == 200) {
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    }
+
+  }
+
+  cancel() {
+    window.history.go(-1);
+  }
+
+  next() {
+    let that = this;
+
+    if (that.baseForm.valid) {
+      if (that.isModify) {
+        that.warn.onWarn(this.modifyMsg || Messages.FAIL.DATA);
+      }
+      else {
+        that.request.doPost({
+          url: "codeMatching",
+          data: {
+            code: that.baseForm.value["code"]
+          },
+          success: (res => {
+            if (res && res.code == 200) {
+              that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+              this.router.navigate(["./../fresh"], {relativeTo: this.activatedRoute})
+            } else {
+              that.warn.onError(res.msg || Messages.FAIL.DATA);
+            }
+          })
+        })
+      }
+    }
+  }
+}

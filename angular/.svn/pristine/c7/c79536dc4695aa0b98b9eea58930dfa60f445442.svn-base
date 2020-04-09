@@ -1,0 +1,33 @@
+.salecs-add{
+    margin-top: 50px;
+    &-info{
+        img{
+            width: 132px;
+        }
+        >span{
+            display: inline-block;
+            width: 257px;
+            vertical-align: middle;
+            color:rgba(0,0,0,0.45);
+            margin-left: 16px;   
+        }
+    }
+    &-label{
+        text-align: right;
+        padding-right: 11px;
+    }
+}
+.btn{
+    margin: 16px 0 0 224px;
+    display: block;
+    text-align: left;
+    button:first-child{
+        margin-right: 24px;
+    }
+}
+.about{
+    margin: 32px 0 0 238px;
+    color:rgba(0,0,0,0.45);
+    display: inline-block;
+    font-size: 14px;
+}

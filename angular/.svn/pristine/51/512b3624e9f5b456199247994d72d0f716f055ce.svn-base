@@ -1,0 +1,15 @@
+<div class="common-head">
+    <div class="head-wrapper">
+        <div class="logo"></div>
+        <div class="user" *ngIf="visible">
+            <span class="name" [title]="name">{{name}}<span></span></span>
+            <div class="user-wrapper">
+                <a class="mobile" [routerLink]="'/rev/account/base'">修改手机号</a>
+                <a class="password" [routerLink]="'/rev/account/pwd'">修改密码</a>
+                <a class="exit" (click)="exit()">退出</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+

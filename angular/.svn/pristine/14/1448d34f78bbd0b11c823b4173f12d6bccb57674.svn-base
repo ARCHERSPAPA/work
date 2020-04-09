@@ -1,0 +1,79 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {RouterModule, Routes} from '@angular/router';
+import {QuestionListComponent} from "./question/question-list/question-list.component";
+import {GuardService} from "../../service/guard.service";
+import {QuestionDetailComponent} from "./question/question-detail/question-detail.component";
+import {ExamineListComponent} from "./examine/examine-list/examine-list.component";
+import {ExamineDetailComponent} from "./examine/examine-detail/examine-detail.component";
+import {QuestionComponent} from "./question/question.component";
+import {ExamineComponent} from "./examine/examine.component";
+
+
+
+const routes:Routes = [
+    {
+        path:"",
+        redirectTo:"quest",
+        pathMatch:"full"
+    },
+    {
+        path:"quest",
+        component:QuestionComponent,
+        data:{
+            breadcrumb:"考试题库"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:QuestionListComponent,
+                canActivate:[GuardService]
+            },
+            {
+                path:"detail",
+                component:QuestionDetailComponent,
+                canActivate:[GuardService]
+            },
+        ]
+    },
+    {
+        path:"exam",
+        component:ExamineComponent,
+        data:{
+            breadcrumb:"考试列表"
+        },
+        children:[
+            {
+                path:"",
+                redirectTo:"list",
+                pathMatch:"full"
+            },
+            {
+                path:"list",
+                component:ExamineListComponent,
+                canActivate:[GuardService]
+            },
+            {
+                path:"detail",
+                component:ExamineDetailComponent,
+                canActivate:[GuardService]
+            }
+        ]
+    }
+]
+
+@NgModule({
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes)
+  ],
+    exports: [
+        RouterModule
+    ]
+})
+export class TopicRoutingModule { }

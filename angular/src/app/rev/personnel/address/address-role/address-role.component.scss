@@ -1,0 +1,104 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+
+.address-role {
+   position: relative;
+   width: 100%;
+   height: auto;
+  .address-departs,
+  .address-positions {
+    width: 24%;
+    position: absolute;
+    top: 24px;
+    .address-menu {
+      width: 30%;
+      > li{
+        @include compatibility(user-select,none);
+      }
+    }
+    .address-pos {
+      width: 70%;
+      position: absolute;
+      left: 30%;
+      top: 0;
+      > ul{
+         width: 100%;
+         padding-left: 24px;
+         li {
+           position: relative;
+           @include compatibility(user-select,none);
+           &:hover{
+             background-color:#E6F7FF;
+           }
+           > label{
+             display: inline-block;
+             position: absolute;
+             left: 0;
+             top: 12.5px;
+           }
+           > span{
+             display: inline-block;
+             width: 136px;
+             height: 48px;
+             line-height: 48px;
+             font-size:14px;
+             font-family:'PingFang SC';
+             font-weight:400;
+             text-indent: 20px;
+             color:rgba(0,0,0,0.65);
+             @include ellipsis;
+             &.checked{
+               color: #1890FF;
+             }
+           }
+           > button,
+           > a{
+             position: absolute;
+             right: 5px;
+             top: 15px;
+             &.setting{
+               border: none;
+             }
+           }
+           &.selected{
+             &:hover{
+               background-color: transparent;
+             }
+              > span{
+                background:#1890FF;
+                border-radius:4px;
+                color: #fff;
+              }
+           }
+           .address-circle{
+             position: absolute;
+             right: -15px;
+             top: 22px;
+             width: 10px;
+             height: 10px;
+             border-radius: 10px;
+             background: transparent;
+             z-index: 99;
+             &.circle-active{
+               background: #1890FF;
+             }
+           }
+         }
+      }
+    }
+  }
+  .address-depart {
+    left: 0;
+  }
+  .address-positions {
+    right: 0;
+  }
+  .address-pad{
+    width: 52%;
+    margin-left: 24%;
+    position: relative;
+    svg{
+      width: 100%;
+    }
+  }
+}

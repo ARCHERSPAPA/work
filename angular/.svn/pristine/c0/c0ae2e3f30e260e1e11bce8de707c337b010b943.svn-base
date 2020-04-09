@@ -1,0 +1,64 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.detail-notice{
+    // padding: 5px 20px 50px 20px;
+    // border: 1px solid #dedede;
+    margin-top: 24px;
+    // margin: -1px 0 0 0;
+    dl{
+        // margin: 5px;
+        padding-bottom: 10px;
+
+        dt,dd{
+            margin: 0;
+        }
+        .notice-head{
+            width: 100%;
+            font-size: 0;
+            display: flex;
+            justify-content: space-between;
+            span{
+                display: inline-block;
+                vertical-align: top;
+                font-size: 12px;
+                .notice-urgency{
+                  margin-right: 24px;
+                }
+                &.notice-name{
+                    color: #000;
+                    vertical-align: top;
+                    font-size: 14px;
+                    padding: 5px 0;
+                    font-weight:bold;
+                }
+                &.notice-date{
+                    font-size: 14px;
+                    color:rgba(0,0,0,0.25);
+                }
+                &.notice-state{
+                    color:rgba(0,0,0,0.25);
+                }
+            }
+        }
+        .notice-remark{
+            font-size: 14px;
+            p{
+                margin: 16px 0 8px 0;
+            }
+        }
+        .notice-imgs{
+            ul{
+                margin: 0;
+                font-size: 0;
+                li{
+                    display: inline-block;
+                    img{
+                        width: 96px;
+                        height: 96px;
+                        margin-right: 16px;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+@charset "utf-8";
+.detail-list{
+  .search-bar{
+    min-width: 21% !important;
+    input{
+      width: 70% !important;
+    }
+  }
+}

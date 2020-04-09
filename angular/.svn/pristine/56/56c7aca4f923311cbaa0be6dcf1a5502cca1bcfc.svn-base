@@ -1,0 +1,104 @@
+.sketch-data{
+    height: 160px;
+    background: #1890FF;
+    border-radius: 4px 4px 0px 0px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-family: 'PingFang SC';
+    margin: -24px -24px 0;
+    color: #fff;
+    font-size: 14px;
+    li{
+        width: 100%;
+        text-align: center;
+            p{
+              
+                font-size: 14px;
+                &:first-child{
+                    font-size: 24px;
+                    margin-bottom: 8px;
+                    font-weight: bold;
+                }
+            }
+    }
+}
+.sketch-time{
+    font-family: 'PingFang SC';
+    width: 437px;
+    height: 190px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    .time-left{
+        font-size: 14px;
+        text-align: center;
+        p:first-child{
+            font-size: 30px;
+            font-weight: bold;
+        }
+    }
+    .line{
+        width:160px;
+        height:36px;
+        text-align: center;
+        line-height: 36px;
+        font-size: 14px;
+        font-weight:400;
+        border-bottom: 1px solid #E8E8E8;
+        opacity:1;
+        margin: 33px 48px;
+    }
+    .time-right{
+        font-size: 14px;
+        text-align: center;
+        p:first-child{
+            font-size: 30px;
+            font-weight: bold;
+        }
+    }
+    nz-range-picker{
+        opacity: 0;
+        width: 100%;
+        position: absolute;
+        top: 130px;
+        left: -30px;
+        .ant-calendar-picker{
+            width: 100%;
+        }
+    }
+}
+.vis{
+    width: 100%;
+    margin: -24px -24px 48px;
+    #container{
+       width: 100%;  
+    }
+}
+.sketch-table{
+    margin: -24px -24px 0;
+    font-family: 'PingFang SC';
+    box-sizing: border-box;
+    padding: 0 24px;
+    .title{
+        margin-bottom: 16px;
+        height: 22px;
+        p:first-child{
+            float: left;
+            font-size: 16px;
+            font-weight: bold;
+            line-height:24px;
+        }
+        p:last-child{
+            float: right;
+            font-size:14px;
+            font-weight:400;
+            line-height:22px;
+            color:rgba(24,144,255,1);
+            cursor: pointer;
+        }
+    }
+}

@@ -1,0 +1,18 @@
+<div class="company">
+    <div class="company-head">
+        <div class="head-wrapper">
+            <div class="logo"></div>
+        </div>
+    </div>
+    <div class="company-content">
+        <rev-title [title]="'选择公司'"></rev-title>
+        <div class="company-list">
+            <a href="javascript: void(0)" *ngFor="let company of companys" (click)="selectCompany(company)">
+                <img [src]="company.img"/>
+                <span class="text" [title]="company.name">{{company.name}}</span>
+                <i nz-icon type="right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+

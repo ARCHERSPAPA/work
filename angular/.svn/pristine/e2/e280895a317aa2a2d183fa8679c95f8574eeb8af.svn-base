@@ -1,0 +1,5 @@
+<div class="steps">
+    <h2>我要开店</h2>
+    <router-outlet></router-outlet>
+</div>
+

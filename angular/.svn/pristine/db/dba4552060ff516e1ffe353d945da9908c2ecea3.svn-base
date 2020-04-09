@@ -1,0 +1,474 @@
+import { Component, OnInit,ElementRef } from '@angular/core';
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Default} from "../../../model/constant";
+import {Messages} from "../../../model/msg";
+import G2 from '@antv/g2/build/g2';
+import { DataSet } from '@antv/data-set/build/data-set';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+import * as differenceInCalendarDays from 'date-fns/difference_in_calendar_days';
+
+@Component({
+  selector: 'rev-stats-overall',
+  templateUrl: './stats-overall.component.html',
+  styleUrls: ['./stats-overall.component.scss']
+})
+export class StatsOverallComponent implements OnInit {
+	public data:Array<any>=[];
+	public chart:any ;
+	public graph:any;
+	public overallList:Array<any>;
+	public idx:string = '-1';
+	public backgroundColor:string;
+	public startTime:Date;
+	public endTime:any;
+	public timeFlag:boolean = false;
+	public dateRange:Array<any>;
+	public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+	public total: number = Default.PAGE.PAGE_TOTAL;
+	public tableList:Array<any>;
+	public flag:boolean = true;
+	public ismouseenter:boolean = false
+	public today:Date = new Date();
+
+	constructor(private request:RequestService,
+				private warn:WarningService,
+				private el:ElementRef) { }
+
+	ngOnInit() {
+		this.endTime = new Date();
+		let date2 = new Date(this.endTime);
+		date2.setDate(this.endTime.getDate() - 7);
+		this.startTime = date2;
+		this.dateRange = [this.startTime,this.endTime]
+		this.overallList = [	
+			{ num:'',name:'客户数'},
+			{ num:'',name:'报价数'},
+			{ num:'',name:'签单数'},
+			{ num:'',name:'签单总额'},
+			{ num:'',name:'退单数'},
+			{ num:'',name:'退单总额'}
+		]
+		this.lineData();
+		this.changeData();
+	}
+
+	//获取年月日
+	getNowFormatDate(time:Date) {
+        var date = new Date(time);
+        var seperator1 = "-";
+        var year = date.getFullYear();
+        var month:any = date.getMonth() + 1;
+        var strDate:any = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        return year + seperator1 + month + seperator1 + strDate;
+    }
+
+	//初始渲染数据
+	lineData(){
+		let that = this;
+		let params = {
+			startTime:this.startTime,
+			endTime:this.endTime
+		}
+		that.request.doPost({
+			url:"statisticalWhole",
+            data:params,
+            success:(res =>{
+                if(res && res.code == 200){
+					var keyMap = {
+						"customerCount" : "客户数",
+						"offerCount" : "报价数",
+						"signBillCount":"签单数",
+						"signBillAmount":"签单总额",
+						"withdrawalAmount":"退单数",
+						"withdrawalCount":"退单总额"
+					};
+					// 改变key值
+					for(let i = 0;i < res.data.length;i++){
+						var obj = res.data[i];
+						for(var key in obj){
+							var newKey = keyMap[key];
+							if(newKey){
+								obj[newKey] = obj[key];
+								delete obj[key];
+							}
+						}
+					}
+					this.data = res.data;
+					// 数据求和
+					let customerCount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['客户数'];
+					}, 0);
+					let offerCount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['报价数'];
+					}, 0);
+					let signBillCount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['签单数'];
+					}, 0);
+					let signBillAmount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['签单总额'];
+					}, 0);
+					let withdrawalAmount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['退单数'];
+					}, 0);
+					let withdrawalCount = res.data.reduce(function (total, currentValue) {
+						return total + currentValue['退单总额'];
+					}, 0);
+					let statistics = [customerCount,offerCount,signBillCount,signBillAmount,withdrawalAmount,withdrawalCount]
+					for(let i=0;i<statistics.length;i++){
+						this.overallList[i].num = statistics[i]
+					}
+					this.chartData();
+					this.clearView();
+                }else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+		})
+	}
+	//折线图的绘制
+  	chartData() {
+		const sliderDiv = document.createElement('div');
+		sliderDiv.id = 'slider';
+		const container = document.getElementById('container');
+		container.parentNode.appendChild(sliderDiv);
+		let start = this.getNowFormatDate(this.startTime);
+		let startDate = new Date(start);
+		let end = this.getNowFormatDate(this.endTime);
+		let endDate = new Date(end);
+		const ds = new DataSet({
+			state: {
+				start: startDate.getTime(),
+				end:endDate.getTime()
+			}
+		});
+		const dv = ds.createView('origin').source(this.data);
+		dv.transform({
+			type: 'fold',
+			fields:['客户数','报价数','签单数','签单总额','退单数','退单总额'],
+			key:'key',
+			value:'value',
+			retains:['date']
+		}).transform({
+			type: 'filter',
+			callback(obj:any) {
+				const date = new Date(obj.date).getTime(); // 时间格式，转换为时间戳进行比较
+				return date >= ds.state.start && date <= ds.state.end;
+			}
+		  });
+		this.chart = new G2.Chart({
+			container: 'container', // 指定图表容器 ID
+			forceFit:true,
+			width:1500,
+			padding: 80
+		});
+		this.chart.source(dv, {
+			date: {
+				type: 'time',
+				tickCount: 8
+			}
+		});
+		this.chart.tooltip({
+			crosshairs: {
+				type: 'line'
+			}
+		});
+		this.chart.axis('date',{
+			tickLine: {
+				lineWidth: 2, // 刻度线宽
+				stroke: '#ccc', // 刻度线的颜色
+				length: 7, // 刻度线的长度，可以为负值（表示反方向渲染）
+				alignWithLabel:true//设为负值则显示为category数据类型特有的样式
+			},
+			/* label: {
+				formatter: val => {
+					let index = val.indexOf('-');
+					let showVal = val.slice(index+1);
+					return showVal;
+				}
+			} */
+		})
+		this.chart.scale('date',{
+			range:[0,1]
+		})
+		this.chart.legend({
+			marker: 'square'
+		})
+		this.chart.filter('key',val=>{
+			if(this.idx !== '-1'){
+				if(val === this.overallList[this.idx].name){
+					return val === this.overallList[this.idx].name;
+				}
+			}else{
+				if(val === '客户数'){
+					return val === '客户数'
+				}else if(val === '报价数'){	
+					return val === '报价数'
+				}else if(val === '签单数'){
+					return val === '签单数'
+				}else{
+					return false;
+				}
+			}
+		})
+		const colorMap = {
+			'客户数': '#722ED1',
+			'报价数': '#2F54EB',
+			'签单数': '#FAAD14',
+			'签单总额': '#FA8C16',
+			'退单数': '#F5222D',
+			'退单总额': '#FA541C',
+		};
+		this.chart
+		  .line()
+		  .position('date*value')
+		  .color('key', value => {
+			return colorMap[value];
+		}).size(3)
+		
+		// 渲染图表
+		this.chart.render();
+		
+		// 设置滑块
+		this.chart.interact('slider', {
+			container: 'slider',
+			start: ds.state.start, // 和状态量对应
+			end: ds.state.end,
+			data:dv.rows,
+			xAxis: 'date',
+			yAxis: 'value',
+			padding:{ top: 0, right: 80, bottom: 0, left: 80 },
+			backgroundChart: {
+				type: 'line',
+				color: 'grey'
+			},
+			onChange(ev:any) {
+				const { startValue, endValue } = ev;
+				let date = new Date(endValue);
+				let seperator1 = "-";
+				let year = date.getFullYear();
+				let month:any = date.getMonth() + 1;
+				let strDate:any = date.getDate();
+				if (month >= 1 && month <= 9) {
+					month = "0" + month;
+				}
+				if (strDate >= 0 && strDate <= 9) {
+					strDate = "0" + strDate;
+				}
+				let end = year + seperator1 + month + seperator1 + strDate;
+				let endDate = new Date(end);
+				ds.setState('start', startValue);
+				ds.setState('end', endDate);
+			}
+		});
+	}
+	
+	//清除重复的图形
+	clearView(){
+		// canvas重复渲染 删除第一个子节点
+		let lineDraw = this.el.nativeElement.querySelector('#container');
+		// 滑块重复渲染 删除第一个子节点
+		let slider = this.el.nativeElement.querySelector('#slider');
+		let childs = slider.childNodes; 
+		if(lineDraw.children.length > 1){
+			lineDraw.removeChild(lineDraw.firstChild);
+			for(var i = 0; i < childs.length; i++) { 
+				slider.removeChild(childs[0]);
+			}
+		}else{
+			return;
+		}
+	}  
+
+	
+	//移入事件
+	enter(i:any){
+		if(this.ismouseenter){
+			return
+		}else{
+			this.idx = i;
+			switch (i) {
+				case 0:
+					this.backgroundColor  = "#722ED1";
+					break;
+				case 1:
+					this.backgroundColor  = "#2F54EB";
+					break;
+				case 2:
+					this.backgroundColor  = "#FAAD14";
+					break;
+				case 3:
+					this.backgroundColor  = "#FA8C16";
+					break;
+				case 4:
+					this.backgroundColor  = "#F5222D";
+					break;
+				case 5:
+					this.backgroundColor  = "#FA541C";
+					break;
+			}
+			this.chartData();
+			this.clearView();
+			this.ismouseenter = true;
+		}	
+	}
+	//移出事件
+	leave(){
+		if(this.ismouseenter == false){
+			return;
+		}else{
+			this.idx = '-1';
+			this.chartData();
+			this.clearView();
+			this.ismouseenter = false;
+		}	
+	}
+	//选择时间
+	onChange(result: Date){
+		this.timeFlag = false;
+		this.startTime = result[0];
+		this.endTime = result[1];	
+		this.lineData();
+		this.changeData();
+	}
+	//打开日期选择框
+	open(){
+		this.timeFlag = true;
+	}
+	//日期选择不能选今天之后的
+	disabledDate = (current: Date): boolean => {
+		return differenceInCalendarDays(current, this.today) > 0;
+	};
+	// 表格分页
+	changeData(){
+		let that = this;
+		let params = {
+			startTime:this.startTime,
+			endTime:this.endTime,
+			pageNo:this.pageNo,
+			pageSize:this.pageSize
+		}
+		that.request.doPost({
+			url:'statisticalWholeInfo',
+			data:params,
+			success:res=>{
+				if (res && res.code == 200) {
+                    that.tableList = res.data.pageSet;
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+			}
+		})
+	}
+	
+	//下载excel数据
+	exportToExcel(){
+		let that = this;
+		let params = {
+			startTime:this.startTime,
+			endTime:this.endTime,
+		}
+		that.request.doPost({
+			url:'statisticalWholeInfoDw',
+			data:params,
+			success:res=>{
+				if (res && res.code == 200) {
+					let excelData = res.data;
+					excelData.forEach(item=>{
+						if(item.state == '-2'){
+							item.state = '关闭'
+						}else if(item.state == '3'){
+							item.state = '已签单'
+						}else{
+							return;
+						}
+						switch (item.type) {
+							case 1:
+								item.type = '基装'
+								break;
+							case 2:
+								item.type = '套装'
+								break;
+							case 3:
+								item.type = '整装'
+								break;
+						}
+						let date = new Date(item.billTime);
+						let seperator1 = "-";
+						let year = date.getFullYear();
+						let month:any = date.getMonth() + 1;
+						let strDate:any = date.getDate();
+						if (month >= 1 && month <= 9) {
+							month = "0" + month;
+						}
+						if (strDate >= 0 && strDate <= 9) {
+							strDate = "0" + strDate;
+						}
+						let hour:any = date.getHours();
+						if(hour.toString().length !== 2){
+							hour = "0" + hour
+						}
+						let minute:any = date.getMinutes()
+						if(minute.toString().length !== 2 ){
+							minute =  "0" + minute
+						}
+						let second:any = date.getSeconds();
+						if(second.toString().length !== 2 ){
+							second =  "0" + second
+						}
+						item.billTime = year + seperator1 + month + seperator1 + strDate +'\xa0'+ hour + ':' + minute + ':' +second;
+						item.pausePrice = item.pausePrice.toFixed(2);
+					})
+					let keyMap = {
+						"billTime" : "签单时间",
+						"sourceInfo" : "客户来源",
+						"personLiableName":"负责人",
+						"designerName":"设计师",
+						"designerViceName":"其他设计师",
+						"customerName":"客户",
+						"customerHouseAddress":"楼盘房号",
+						"type":"装修类型",
+						"state":"订单状态",
+						"pausePrice":"金额",
+					};
+					// 改变key值
+					for(let i = 0;i < excelData.length;i++){
+						let obj = excelData[i];
+						for(let key in obj){
+							let newKey = keyMap[key];
+							if(newKey){
+								obj[newKey] = obj[key];
+								delete obj[key];
+							}
+						}
+					}
+					let json = excelData;
+					const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
+					const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+					const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+					this.saveAsExcelFile(excelBuffer, "整体状况");
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+			}
+		})
+	}
+	saveAsExcelFile(buffer: any, fileName: string) {
+	    const data: Blob = new Blob([buffer], {
+	    	type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+		});
+		// 下载Excel的名字
+ 		FileSaver.saveAs(data, fileName + '.xls');     
+	} 
+}
+
+

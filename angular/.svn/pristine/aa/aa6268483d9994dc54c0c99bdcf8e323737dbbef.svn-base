@@ -1,0 +1,98 @@
+<div class="cost">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="content" style='padding-top:0;'>
+        <div class="detail-list">
+            <div class="list-head">
+                <div class="head-bar">
+                    <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="radioSwitch[1]" (handleSwitch)="handleSwitch($event)"></radio-switch>
+                </div>
+                <div class="search-bar">
+                    <form method="post" [formGroup]="searchForm">
+                        <!-- <select [(ngModel)]="type" class="choice" [ngModelOptions]="{standalone: true}"
+                                (ngModelChange)="changeType()">
+                            <option *ngFor="let audit of auditStatus" [value]="audit.id">{{audit.content}}</option>
+                        </select> -->
+                        <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" nzPlaceHolder="请选择状态"
+                                   class="serchs" [(ngModel)]="type" [ngModelOptions]="{standalone: true}"
+                                   (ngModelChange)="changeType()">
+                            <nz-option *ngFor="let audit of auditStatus" [nzValue]="audit.id"
+                                       [nzLabel]="audit.content"></nz-option>
+
+                        </nz-select>
+                        <div class="inp">
+
+                            <input nz-input type="text" class="text" placeholder="请输入客户姓名/楼盘名称"
+                                   formControlName="info" name="info" autocomplete="off"
+                                   maxlength="32" [(ngModel)]="info"/>
+
+                            <button nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid"
+                                    (click)="changeData()">查询
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            <div class="list-group-rev">
+                <nz-table #nzTable [nzData]="costList" [nzBordered]="true" [nzFrontPagination]="false"
+                          [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" nzSize="middle"
+                          (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]='true' class="tables">
+                    <thead>
+
+                    <tr width='100%'>
+                        <th>客户姓名</th>
+                        <th width="8%">手机</th>
+                        <th>楼盘</th>
+                        <th width="5%">类型</th>
+                        <th>状态</th>
+                        <th>设计师</th>
+                        <th width="8%">签单日期</th>
+                        <th width="10%">报价总额</th>
+                        <th width="10%">实付金额</th>
+                        <th width="6%">工长</th>
+                        <th>成本审核</th>
+                        <th *ngIf="state === 0">成本员</th>
+                        <th width="10%">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let item of nzTable.data">
+                        <td [title]="item.customerName?item.customerName:''">
+                            <nz-badge [nzDot]="item.agendaCount > 0">{{item.customerName?item.customerName:'--'}}</nz-badge>
+                        </td>
+                        <td [title]="item.customerPhone?item.customerPhone:''">
+                            {{item.customerPhone?item.customerPhone:'--'}}
+                        </td>
+                        <td [title]="item.customerHouseAddress?item.customerHouseAddress:''">
+                            {{item.customerHouseAddress?item.customerHouseAddress:'--'}}
+                        </td>
+                        <td nz-td>{{getTypeName(item.type)}}</td>
+                        <td nz-td>{{getStateName(item.state)}}</td>
+                        <td [title]="item.designerName?item.designerName:''">
+                            {{item.designerName?item.designerName:'--'}}
+                        </td>
+                        <td nz-td>{{item.billTime?(item.billTime|date:'yyyy-MM-dd'):'--'}}</td>
+                        <td nz-td>{{item.totalPrice?(item.totalPrice|number:'1.2'):'--'}}</td>
+                        <td nz-td>{{item.finalPrice?(item.finalPrice|number:'1.2'):'--'}}</td>
+                        <td class="w5" [title]="item.foremanName?item.foremanName:''">
+                            {{item.foremanName?item.foremanName:'--'}}
+                        </td>
+                        <td [title]="getCostStateName(item.costState)">{{getCostStateName(item.costState)}}</td>
+                        <td *ngIf="state === 0">{{item.responsibleName?item.responsibleName:'--'}}</td>
+                        <td class="w10">
+                            <a href="javascript:void(0)" [routerLink]="['./../budget/price',6]"
+                               [queryParams]="{cid:item.quoteId,pid:item.id}">预算</a>
+                            <a href="javascript:void(0)" [routerLink]="['./../detail',6]"
+                               [queryParams]="{cid:item.quoteId,pid:item.id}">成本</a>
+                            <a href="javascript:void(0)" *ngIf="state === 0" (click)="openModal(item)">分发</a>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+    </div>
+
+</div>
+

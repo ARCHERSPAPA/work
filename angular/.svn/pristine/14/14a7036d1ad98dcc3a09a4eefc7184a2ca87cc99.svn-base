@@ -1,0 +1,30 @@
+<ul class="quick-item" [ngClass]="{'item-inline':rank > 0}" *ngIf="relate">
+    <li *ngFor="let depart of quickTree">
+        <span class="qk-btn qk-doc" *ngIf="!depart.ownSubset && depart.rank != 1"></span>
+        <span class="qk-btn" [ngClass]="{'qk-plus':!depart.show,'qk-minus':depart.show}"
+              *ngIf="depart.ownSubset && quickDepartType != 1" (click)="loadChild(depart,type)"></span>
+        <!--<span class="qk-btn qk-doc" *ngIf="depart-tree.ownSubset && quickDepartType == 1"></span>-->
+        <span class="qk-btn qk-empty" *ngIf="!depart.ownSubset"></span>
+        <a>
+            <span class="qk-btn" [ngClass]="{'qk-close':!depart.show,'qk-open':depart.show}" *ngIf="depart.ownSubset"></span>
+            <span class="qk-node" [ngClass]="{'qk-selected':quickId == depart.id}" (click)="selectDepart(depart.id)">{{depart.name}}</span>
+        </a>
+        <rev-quick-tree [quickTree]="depart.child" [rank]="depart.rank" [type]="type" (selectDepartmentId)="selectQuickId($event)"
+                        [hidden]="!depart.show" *ngIf="depart.child && depart.child.length > 0"></rev-quick-tree>
+    </li>
+</ul>
+<ul class="quick-item" [ngClass]="{'item-inline':rank > 0}" *ngIf="!relate">
+    <li *ngFor="let depart of quickTree">
+        <span class="qk-btn qk-doc" *ngIf="!depart.ownSubset && depart.rank != 1"></span>
+        <span class="qk-btn" [ngClass]="{'qk-plus':!depart.show,'qk-minus':depart.show}"
+              *ngIf="depart.ownSubset" (click)="loadChild(depart,type)"></span>
+        <span class="qk-btn qk-empty" *ngIf="!depart.ownSubset"></span>
+        <a>
+            <span class="qk-btn" [ngClass]="{'qk-close':!depart.show,'qk-open':depart.show}" *ngIf="depart.ownSubset"></span>
+            <span class="qk-node" [ngClass]="{'qk-selected':quickId == depart.id}" (click)="selectDepart(depart.id)">{{depart.name}}</span>
+        </a>
+        <rev-quick-tree [quickTree]="depart.child" [rank]="depart.rank" [type]="type"
+                        [hidden]="!depart.show" *ngIf="depart.child && depart.child.length > 0"
+                        (selectDepartmentId)="selectDepart($event)"></rev-quick-tree>
+    </li>
+</ul>

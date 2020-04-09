@@ -1,0 +1,267 @@
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, FormControlName, Validators, FormControl} from '@angular/forms';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {UserService} from "../../../../service/user.service";
+import {Messages} from "../../../../model/msg";
+import {compiledTplId,btoa} from "../../../../model/methods";
+import {Default} from "../../../../model/constant";
+import * as UserValidate from "../../../../validate/user-validate";
+
+
+@Component({
+    selector: 'rev-temp-meal-list',
+    templateUrl: './temp-meal-list.component.html',
+    styleUrls: ['./../../template.component.scss', './temp-meal-list.component.scss']
+})
+export class TempMealListComponent implements OnInit {
+
+    public title: string;
+    public buttons: Array<any>;
+
+    public dataSource: Array<any>;
+
+    public pageNo = Default.PAGE.PAGE_NO;
+    public pageSize = Default.PAGE.PAGE_SIZE;
+    public total = Default.PAGE.PAGE_TOTAL;
+
+
+    public loading: boolean = false;
+
+    public mealForm: FormGroup;
+    public mealName: string;
+    public price: number;
+    public areaStart: number;
+    public areaEnd: number;
+    //户型数组
+    public hxArray: Array<any> = [];
+    public isVisible: boolean = false;
+    public remark: string;
+
+
+    constructor(private req: RequestService,
+                private warn: WarningService,
+                private fb: FormBuilder,
+                private user: UserService) {
+    }
+
+    ngOnInit() {
+        this.title = "套装管理";
+        this.buttons = [
+            {
+                name: "新建",
+                color: "btn-primary"
+            }
+        ];
+        this.changeData();
+
+        this.mealForm = this.fb.group({
+            mealName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]
+            ],
+            price: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice,
+            ]
+            ],
+            areaStart: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            areaEnd: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            remark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+    }
+
+    changeData() {
+        let that = this;
+        that.loading = true;
+        this.req.doPost({
+            url: "packageList",
+            data: {
+                pageNo: this.pageNo,
+                pageSize: this.pageSize,
+                packageType: 3
+            },
+            success: function (res) {
+                that.loading = false;
+                if (res && res.code == 200) {
+                    if (res.data && res.data.pageSet && res.data.pageSet.length > 0) {
+                        res.data.pageSet.forEach(item => {
+                            item.roomType = JSON.parse(item.roomType);
+                        })
+                    }
+                    that.dataSource = res.data.pageSet;
+                    that.total = res.data.total;
+                }
+                else {
+                    that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        })
+    }
+
+    // 操作
+    handleOperate(str, item) {
+        let that = this, param = {id: item.id}, url;
+        switch (str) {
+            case 'del':
+                url = "packageUpd";
+                param['state'] = 2;
+                break;
+            case 'on':
+                url = "mealRack";
+                param['state'] = 1;
+                break;
+            case 'off':
+                url = "mealRack";
+                param['state'] = 0;
+                break;
+        }
+
+        this.req.doPost({
+            url: url,
+            data: param,
+            success: function (res) {
+                if (res.code === 200) {
+                    that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.changeData();
+                } else {
+                    that.warn.onMsgError(res.msg || Messages.SUCCESS.DATA);
+                }
+            }
+        })
+
+
+    }
+
+    /**
+     * 编译id显示
+     * @param {number} id
+     * @returns {any}
+     */
+    getCompileId(id: number) {
+        return compiledTplId(id);
+    }
+
+    /**
+     * title 回调函数
+     * @param e
+     */
+    handleName(e) {
+        if (e === this.buttons[0].name) {
+            this.showModal();
+        }
+    }
+
+    /**
+     * 打开弹出框
+     */
+    showModal() {
+        this.mealForm.reset();
+        this.hxArray = [];
+        this.mealName = '';
+        this.price = null;
+        this.areaStart = null;
+        this.areaEnd = null;
+        this.remark = '';
+        this.addHx();
+        this.isVisible = true;
+    }
+
+
+    /**
+     * 新增户型单元
+     */
+    addHx() {
+        let id = (this.hxArray.length > 0) ? this.hxArray[this.hxArray.length - 1].id + 1 : 0;
+        let control = {id, room: `room${id}`, bath: `bath${id}`};
+        let index = this.hxArray.push(control);
+        this.mealForm.addControl(this.hxArray[index - 1].room, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+        this.mealForm.addControl(this.hxArray[index - 1].bath, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+    }
+
+    /**
+     * 删除户型
+     * @param {number} index
+     */
+    delHx(control: any,index:number, e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.hxArray.length > 1) {
+            this.mealForm.removeControl(control.room);
+            this.mealForm.removeControl(control.bath);
+            this.hxArray.splice(index, 1);
+        }
+    }
+
+    /**
+     * 新增户型
+     */
+    handleOk(): void {
+        let that = this;
+        if (that.mealForm.valid) {
+            if (Number(that.areaStart) <= Number(that.areaEnd)) {
+                let companyId = this.user.getCompanyId();
+                let params = {
+                    companyId: companyId,
+                    packageType: 3,
+                    packageName: that.mealName,
+                    price: that.price,
+                    houseArea: that.areaStart + '㎡-' + this.areaEnd + '㎡',
+                    roomType: that.getHxByParams(this.mealForm.value),
+                    remark: that.remark
+                };
+                that.req.doPost({
+                    url: "packageUpd",
+                    data: params,
+                    success: (res => {
+                        that.handleCancel();
+                        if (res && res.code == 200) {
+                            that.changeData();
+                        } else {
+                            that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+            else {
+                that.warn.onMsgWarn(Messages.AREAS);
+            }
+        }
+    }
+
+    /**
+     * 取消添加户型
+     */
+    handleCancel(): void {
+        this.isVisible = false;
+    }
+
+    getHxByParams(values) {
+        let arr = [];
+        if (values) {
+            this.hxArray.forEach(item => {
+                arr.push(values[item.room] + '室' + values[item.bath] + '卫');
+            })
+        }
+        return arr;
+    }
+    btoa(id:string) {
+        return btoa(id)
+    }
+
+}

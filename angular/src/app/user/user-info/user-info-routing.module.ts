@@ -1,0 +1,39 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+
+import {ResetComponent} from "./reset/reset.component";
+import {ForgetComponent} from "./forget/forget.component";
+import {FindComponent} from "./find/find.component";
+
+
+const routes: Routes = [
+    {
+        path: "",
+        redirectTo: "find",
+        pathMatch: "full"
+    },
+    {
+        path:"find",
+        component:FindComponent
+    },
+    {
+        path:"forget",
+        component:ForgetComponent
+    },
+    {
+        path:"reset",
+        component:ResetComponent
+    }
+]
+
+@NgModule({
+  imports: [
+    CommonModule,
+      RouterModule.forChild(routes)
+  ],
+  exports: [
+      RouterModule
+  ]
+})
+export class UserInfoRoutingModule { }

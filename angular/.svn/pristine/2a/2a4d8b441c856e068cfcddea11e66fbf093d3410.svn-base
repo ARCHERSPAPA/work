@@ -1,0 +1,85 @@
+@charset "utf-8";
+/***兼容浏览器***/
+
+@mixin compatibility($name,$style){
+  -webkit-#{$name}: $style;
+  -moz-#{$name}:$style;
+  -ms-#{$name}:$style;
+  -o-#{$name}:$style;
+  #{$name}:$style;
+}
+
+@mixin hover($color){
+    background-color: $color;
+    opacity: 0.8;
+    filter:opacity(80);
+    &:hover{
+      background-color: $color;
+      opacity: 1;
+      filter:opacity(100);
+    }
+    &:active{
+      background-color: $color;
+      opacity: 0.9;
+      filter:opacity(90);
+    }
+}
+//rgb(10,141,233),rgb 输入框
+@mixin border($bc:rgb(10,141,233),$cc:rgb(16,16,16)){
+  opacity: 0.8;
+  filter:opacity(80);
+  color:$cc;
+  &:focus{
+    border-color: $bc;
+    opacity:1;
+    filter:opacity(100);
+    color:$cc;
+  }
+}
+@mixin  splitLine($T:318px) {
+  top: $T;
+  width: calc(100% - 48px);
+  height: 8px;
+  background: #f0f2f5;
+  opacity: 1;
+  position: absolute;
+  margin: 0px -24px 0px -24px;
+}
+
+@mixin tag($cc,$opacity:0.8){
+    opacity: $opacity;
+    filter:opacity($opacity*100);
+    color:$cc;
+    &:hover{
+        opcity:1;
+        filter:opacity(100);
+        color:$cc;
+    }
+    &:active{
+        opcity:1;
+        filter:opacity(100);
+        color:$cc;
+    }
+}
+
+// @mixin border-1px($bc:rgba(0, 120, 132, 0.2)){
+//   border: 1px solid $bc;
+// }
+
+
+@mixin clear(){
+    content:"";
+    clear: both;
+    zoom: 1;
+    visibility: hidden;
+    display: block;
+}
+
+@mixin ellipsis(){
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+

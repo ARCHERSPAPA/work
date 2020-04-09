@@ -1,0 +1,83 @@
+<div class="warranty">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <div class="warranty-edit">
+      <ul>
+        <li>
+          <label nz-col nzSpan='4'>保修起始时间</label>
+          <div class="inp">
+            <label nz-col nzSpan='11' [ngClass]="{'ant-radio-wrapper-checked':type === 1}">
+              <span class="ant-radio" [ngClass]="{'ant-radio-checked':type === 1}">
+                <input type="radio" class="ant-radio-input" value="1" name="warranty" (click)="warrantyType(1)"
+                  [disabled]="!warranty.finalPayment" />
+                <span class="ant-radio-inner"></span>
+              </span>
+              <span>尾款时间：<span
+                  class="time">{{warranty.finalPayment?(warranty.finalPayment|date:'yyyy-MM-dd'):'--'}}</span></span>
+            </label>
+            <label nz-col nzSpan='12' nzOffset="1" [ngClass]="{'ant-radio-wrapper-checked':type === 0}">
+              <span class="ant-radio" [ngClass]="{'ant-radio-checked':type === 0}">
+                <input type="radio" class="ant-radio-input" value="0" name="warranty" (click)="warrantyType(0)" />
+                <span class="ant-radio-inner"></span>
+              </span>
+              <span>竣工时间：<span class="time">{{warranty.finishTime|date:'yyyy-MM-dd'}}</span></span>
+            </label>
+            <label nz-col nzSpan='24' [ngClass]="{'ant-radio-wrapper-checked':type === 2}" style="margin-top: 8px;">
+              <span class="ant-radio" [ngClass]="{'ant-radio-checked':type === 2}">
+                <input type="radio" class="ant-radio-input" value="2" name="warranty" (click)="warrantyType(2)" />
+                <span class="ant-radio-inner"></span>
+              </span>
+              <span>其他时间： <nz-date-picker [nzShowToday] [(ngModel)]="diyDate" [nzStyle]="{'width':'274px'}" [nzAllowClear]=false
+                  (click)="warrantyType(2)" (ngModelChange)="onChange($event)"></nz-date-picker></span>
+            </label>
+          </div>
+        </li>
+        <li style="margin-top: 24px;" *ngFor="let date of warranty.customs;let i=index">
+          <label nz-col nzSpan='4'>{{date.customWarrantyName}}</label>
+          <div class="inp">
+            <nz-input-number [(ngModel)]="date.customYears" [nzMin]="0" (ngModelChange)="changeyear($event,i)"
+              [nzPrecision]="1" [nzMax]="99" [nzSize]="'middle'" [nzStep]="1" [nzPlaceHolder]="'请输入'" class="edit-inp">
+            </nz-input-number>
+            <!-- <input type="text" placeholder="请输入" class="text" maxlength="2" [(ngModel)]="warranty.warrantyYears" onkeyup="this.value=this.value.replace(/\D/g,'')"/> -->
+            <span class="year">年</span>
+            <span
+              class=" time date">保修时间：{{warranty.warrantyStartTime?(warranty.warrantyStartTime|date:'yyyy-MM-dd'):'--'}}&nbsp;&nbsp;至&nbsp;&nbsp;{{warranty.fixEndTime?(getYearTime(date.customYears,warranty.warrantyStartTime)|date:'yyyy-MM-dd'):'--'}}</span>
+          </div>
+        </li>
+        <!-- <li style="margin-top: 24px;">
+          <label nz-col nzSpan='4'>水电保修</label>
+          <div class="inp">
+              <nz-input-number [(ngModel)]="warranty.hydWarrantyYears" [nzMin]="1" [nzMax]="10" [nzSize]="'middle'" [nzStep]="1" [nzPlaceHolder]="'请输入'" class="edit-inp"></nz-input-number> -->
+        <!-- <input type="text" placeholder="请输入" class="text" maxlength="2" [(ngModel)]="warranty.hydWarrantyYears"
+                   onkeyup="this.value=this.value.replace(/\D/g,'')"/> -->
+        <!-- <span class="year">年</span>
+            <span class=" time date">保修时间：{{warranty.warrantyStartTime?(warranty.warrantyStartTime|date:'yyyy-MM-dd'):'--'}}&nbsp;&nbsp;至&nbsp;&nbsp;{{warranty.utilitiesEndTime?(warranty.utilitiesEndTime|date:'yyyy-MM-dd'):'--'}}</span>
+          </div>
+        </li> -->
+        <li style="margin-top: 24px;">
+          <label nz-col nzSpan='4'>保修说明</label>
+          <div class="inp">
+            <textarea nz-input name="warranty.warrantyExplain" [(ngModel)]="warranty.warrantyExplain" cols="15"
+              rows="10" maxlength="500" minlength="10"></textarea>
+            <span class="count"
+              *ngIf="warranty.warrantyExplain && warranty.warrantyExplain.length > 0"><span>{{warranty.warrantyExplain.length}}</span>/500</span>
+            <!-- <input type="text" placeholder="请输入" class="text" maxlength="2" [(ngModel)]="warranty.hydWarrantyYears"
+                   onkeyup="this.value=this.value.replace(/\D/g,'')"/> -->
+          </div>
+        </li>
+      </ul>
+      <div class="btns mt_50 ">
+        <button nz-button nzType="default" (click)="back()">
+          取消
+        </button>
+        <button nz-button nzType="primary" (click)="submit()">
+          提交
+        </button>
+        <!-- <a class="btn btn-primary" (click)="back()">取消</a>
+        <a class="btn btn-primary" (click)="submit()">提交</a> -->
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+import { Component, OnInit,Input,Output,EventEmitter,OnChanges } from '@angular/core';
+
+@Component({
+    selector: 'rev-page',
+    templateUrl: './page.component.html',
+    styleUrls: ['./page.component.scss']
+})
+export class PageComponent implements OnInit,OnChanges {
+    //总条数
+    @Input() totalItems:number;
+    //当前页码
+    @Input() current:number;
+    //当前显示页码数量
+    @Input() size:number;
+    //每页展示的条数
+    @Input() perPage:number;
+    //交互
+    @Output() changePage:EventEmitter<any> = new EventEmitter<any>();
+    //总共页码数
+    public total:number;
+
+    public pages:Array<any> = [];
+
+    constructor() { }
+
+    ngOnInit() {
+        //console.log(this.pages);
+        //console.log(this.current);
+    }
+
+
+    ngOnChanges(){
+        // console.log(this.totalItems);
+        this.total = Math.ceil(this.toInteger(this.totalItems)/this.toInteger(this.perPage));
+        this.getRange();
+    }
+
+
+    onClickPage(page:number){
+        this.current = this.toInteger(page);
+        this.getRange();
+        this.changePage.emit(this.current);
+    }
+
+
+    getRange(){
+        let that = this;
+        let start = that.toInteger(that.current) - that.toInteger(that.size/2);
+        let end = that.toInteger(that.current) + that.toInteger(that.size/2) + (that.size%2) -1;
+        that.pages = [];
+
+        if(start <= 0){
+            start = 1;
+            end = start + that.toInteger(that.size) -1;
+            if(end > that.total){
+                end = that.total;
+            }
+        }
+
+
+        if(end > that.total){
+            end = that.total;
+            start = end - that.toInteger(that.size) +1;
+            if(start <= 0){
+                start = 1;
+            }
+        }
+
+        for(let i = start; i <= end; i++){
+            that.pages.push(i);
+        }
+    }
+
+
+    toInteger(n:any){
+        return isNaN(n)?1:parseInt(n);
+    }
+
+
+    onClickPrev(e:any){
+        if(e.target && e.target.className === 'disabled') return;
+        else {
+            this.current = this.toInteger(this.current) - 1;
+            this.getRange();
+            this.changePage.emit(this.current);
+        }
+    }
+
+    onClickNext(e:any){
+        if(e.target && e.target.className === 'disabled') return;
+        else {
+            this.current = this.toInteger(this.current) + 1;
+            this.getRange();
+            this.changePage.emit(this.current);
+        }
+    }
+
+
+
+
+}

@@ -1,0 +1,104 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="stencil">
+    <!--<div class="list-head">-->
+    <!--<div class="search-bar" style="width: 100%;">-->
+    <!--<ul class="search-items">-->
+    <!--<li [ngClass]="{'active':activeId == 0}" (click)="selectItem(0)">总共{{total}}人</li>-->
+    <!--<li [ngClass]="{'active':activeId == 3}" (click)="selectItem(3)">已通过{{notPass}}人</li>-->
+    <!--<li [ngClass]="{'active':activeId == 2}" (click)="selectItem(2)">未通过{{pass}}人</li>-->
+    <!--<li [ngClass]="{'active':activeId == 1}" (click)="selectItem(1)">未考试{{notTest}}人</li>-->
+    <!--</ul>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--<div class="list-group-rev">-->
+    <!--<div class="list-items">-->
+    <!--<ul class="item-head ul-flex">-->
+    <!--<li class="w-flex1">姓名</li>-->
+    <!--<li class="w-flex1">手机号码</li>-->
+    <!--<li class="w-flex1">职位</li>-->
+    <!--<li class="w-flex1">部门</li>-->
+    <!--</ul>-->
+    <!--<div *ngIf="items && items.length > 0" class="item-content">-->
+    <!--<div class="item-overflow">-->
+    <!--<ul class="item-body ul-flex" *ngFor="let item of items">-->
+    <!--<li class="w-flex1">{{item.name}}</li>-->
+    <!--<li class="w-flex1">{{item.phone}}</li>-->
+    <!--<li class="w-flex1">{{item.workerType}}</li>-->
+    <!--<li class="w-flex1">{{item.departmentName}}</li>-->
+    <!--</ul>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--<div *ngIf="items && items.length == 0" class="item-content">-->
+    <!--<ul>-->
+    <!--<p>暂无数据</p>-->
+    <!--</ul>-->
+    <!--</div>-->
+    <!--</div>-->
+
+    <div style="height: 600px;">
+        <nz-tabset>
+            <nz-tab nzTitle="总共{{total}}人">
+                <nz-table #allTable [nzData]="items" [nzLoading]="loading" nzVirtualScroll
+                          [nzShowPagination]="false" [nzScroll]="{y:'500px'}" [nzPageSize]="total">
+                    <tbody>
+                    <tr *ngFor="let data of allTable.data">
+                        <td>{{data.name}}</td>
+                        <td>{{data.phone}}</td>
+                        <td>{{data.userType}}</td>
+                        <td>{{data.departmentName}}</td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </nz-tab>
+            <nz-tab nzTitle="已通过{{pass}}人">
+                <nz-table #passTable [nzData]="passItems" [nzLoading]="loading"nzVirtualScroll
+                          [nzShowPagination]="false" [nzScroll]="{y:'500px'}" [nzPageSize]="pass">
+                    <tbody>
+                    <tr *ngFor="let data of passTable.data">
+                        <td>{{data.name}}</td>
+                        <td>{{data.phone}}</td>
+                        <td>{{data.userType}}</td>
+                        <td>{{data.departmentName}}</td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </nz-tab>
+            <nz-tab nzTitle="未通过{{notPass}}人">
+                <nz-table #notPassTable [nzData]="notPassItems" [nzLoading]="loading"nzVirtualScroll
+                          [nzShowPagination]="false" [nzScroll]="{y:'500px'}" [nzPageSize]="notPass">
+                    <tbody>
+                    <tr *ngFor="let data of notPassTable.data">
+                        <td>{{data.name}}</td>
+                        <td>{{data.phone}}</td>
+                        <td>{{data.userType}}</td>
+                        <td>{{data.departmentName}}</td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </nz-tab>
+            <nz-tab nzTitle="未考试{{notTest}}人">
+                <nz-table #notTestTable [nzData]="notTestItems" [nzLoading]="loading"nzVirtualScroll
+                          [nzShowPagination]="false" [nzScroll]="{y:'500px'}" [nzPageSize]="notTest">
+                    <tbody>
+                    <tr *ngFor="let data of notTestTable.data">
+                        <td>{{data.name}}</td>
+                        <td>{{data.phone}}</td>
+                        <td>{{data.userType}}</td>
+                        <td>{{data.departmentName}}</td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </nz-tab>
+        </nz-tabset>
+    </div>
+
+    <div class="btns">
+        <button  nz-button nz-Type="default" (click)="cancel()">关闭</button>
+    </div>
+</div>
+

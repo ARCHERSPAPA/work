@@ -1,0 +1,110 @@
+import {Component, OnInit} from '@angular/core';
+import * as UserValidate from "../../../validate/user-validate";
+import {UserService} from "../../../service/user.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {RequestService} from "../../../service/request.service";
+import {Md5} from 'ts-md5';
+import {Validators, FormGroup, FormBuilder,FormControl} from '@angular/forms';
+import {Router, ActivatedRoute} from '@angular/router';
+
+@Component({
+    selector: 'rev-reset',
+    templateUrl: './reset.component.html',
+    styleUrls: ['./../user-info.component.scss']
+})
+export class ResetComponent implements OnInit {
+
+    public title:string;
+    public resetForm:FormGroup;
+    public breads:Array<any>;
+
+    public mobile:string;
+    public account:string;
+
+    public pwdForm:FormGroup;
+    constructor(private fb:FormBuilder,
+                private request:RequestService,
+                private warn:WarningService,
+                private userInfo:UserService,
+                private router:Router,
+                private activatedRoute:ActivatedRoute) { }
+
+    ngOnInit() {
+        this.breads = [
+            {
+                name: "登录页",
+                url:"/user/login"
+            },
+            {
+                name:"重置密码"
+            }
+        ];
+
+        this.activatedRoute.queryParams.subscribe(params =>{
+            if(params && params["mobile"]){
+                this.mobile = params["mobile"];
+            }
+            if(params && params["account"]){
+                this.account = params["account"];
+            }
+        });
+
+        this.resetForm = this.fb.group({
+            newPassword: [null, [
+                Validators.required,
+                Validators.minLength(8),
+                Validators.maxLength(32),
+                UserValidate.ValidatePassword
+            ]],
+            checkPassword: [null, [Validators.required, this.confirmationValidator]],
+        })
+    }
+
+    /**
+     * 检验密码是否一致
+     */
+    updateConfirmValidator(): void {
+        Promise.resolve().then(() => this.resetForm.controls.checkPassword.updateValueAndValidity());
+    }
+
+
+    confirmationValidator = (control: FormControl): { [s: string]: boolean } => {
+        if (!control.value) {
+            return { required: true };
+        } else if (control.value !== this.resetForm.controls.newPassword.value) {
+            return { confirm: true, error: true };
+        }
+        return {};
+    };
+
+
+    cancel(){
+        window.history.go(-1);
+    }
+
+    submit(){
+        let that = this;
+        if(that.resetForm.valid){
+            that.request.doPost({
+                url:"findPassword",
+                data:{
+                    password: Md5.hashStr(that.resetForm.value["checkPassword"]),
+                    phone: that.mobile,
+                    account: that.account
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.router.navigateByUrl("/user/login");
+                    }else{
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+
+        }
+
+    }
+
+}

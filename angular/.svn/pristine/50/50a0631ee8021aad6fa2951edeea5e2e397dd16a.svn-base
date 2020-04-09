@@ -1,0 +1,14 @@
+@import "./../../../../assets/scss/mixin";
+.case {
+  .head {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #dedede;
+    a {
+      font-size: 14px;
+    }
+  }
+  .split-line {
+    @include splitLine();
+  }
+}

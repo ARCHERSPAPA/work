@@ -1,0 +1,61 @@
+<div class="temp-head">
+    <rev-title [title]="versionName"></rev-title>
+</div>
+<div class="temp-warp mt-16">
+    <div nz-row nzSpan="24">
+        <div nz-col nzSpan="10" nzOffset="14">
+            <div nz-col nzSpan="10">
+                <nz-select style="width:100%" nzPlaceHolder="请选择类别" nzAllowClear [(ngModel)]="category"
+                           (ngModelChange)="changeData(true)">
+                    <nz-option *ngFor="let cate of categoryList" [nzValue]="cate" [nzLabel]="cate"></nz-option>
+                </nz-select>
+            </div>
+            <div nz-col nzSpan="11" class="ml-8">
+                <input type="text" nz-input placeholder="请输入查询内容" [(ngModel)]="projectName"/>
+            </div>
+            <div nz-col nzSpan="2" class="ml-8">
+                <button nz-button nzType="primary" (click)="changeData(true)">查询</button>
+            </div>
+        </div>
+    </div>
+    <div nz-row nzSpan="24" class="mt-8">
+        <nz-table #nzTable [nzData]="dataSource" [nzBordered]="true" [nzFrontPagination]="false"
+                  [nzShowPagination]="true" [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                  nzSize="middle" (nzPageIndexChange)='changeData()'>
+            <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                    (nzCheckedChange)="checkAll($event)"></th>
+                <th>类别</th>
+                <th>名称</th>
+                <th>品牌/规格/型号</th>
+                <th>单位</th>
+                <th>报价</th>
+                <th>说明</th>
+                <th>成本</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of nzTable.data;let i = index">
+                <td nzShowCheckbox [(nzChecked)]="data.checked"
+                    [nzDisabled]="data.disabled" (nzCheckedChange)="refreshStatus($event)"></td>
+                <td [title]="data.category">{{data.category?data.category:'--'}}</td>
+                <td [title]="data.projectName">{{data.projectName?data.projectName:'--'}}</td>
+                <td>{{data.specifications}}{{data.brand}}{{data.modelNum}}</td>
+                <td>{{data.unit}}</td>
+                <td>{{(data.univalent?data.univalent:0)|number:'1.2'}}</td>
+                <td nz-tooltip [nzTitle]="data.offerExplain" nzPlacement="topLeft">{{data.offerExplain}}</td>
+                <td>{{(data.primeCost?data.primeCost:0)|number:'1.2'}}</td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+    <div nz-row nzSpan>
+        <div nz-col nzSpan="8" nzOffset="16" class="text-right">
+            <button nz-button nzType="default" (click)="back($event)">返回</button>
+        <!--</div>-->
+        <!--<div nz-col nzSpan="8">-->
+            <button nz-button nzType="primary" class="ml-16" (click)="submit($event)">提交</button>
+        </div>
+    </div>
+</div>

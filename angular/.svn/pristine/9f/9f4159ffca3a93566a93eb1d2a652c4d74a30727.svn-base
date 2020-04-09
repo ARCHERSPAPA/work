@@ -1,0 +1,23 @@
+<div class="ant-modal-content">
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+    <div class="ant-modal-header">
+        <div class="ant-modal-title">{{name}}</div>
+    </div>
+    <div class="ant-modal-body clearfix" style="width:100%;height:340px;overflow:hidden;">
+        <div class="rev-file-btn">
+                <input type="file" id="file" (change)="changeFile($event.target.files)"
+                       accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+        </div>
+        <div class="rev-file-show" *ngIf="upload">
+            <p>当前文件大小：{{upload.size}}字节</p>
+            <p>当前文件名称：{{upload.name}}</p>
+            <p>最后修改时间：{{upload.lastModified|date:'yyyy-MM-dd HH:mm'}}</p>
+        </div>
+    </div>
+    <div class="ant-modal-footer">
+        <button type="button" class="ant-btn ant-btn-primary" (click)="getFile()">确定</button>
+    </div>
+</div>
+

@@ -1,0 +1,66 @@
+<div class="notice-list">
+  <div class="notice-list_head">
+    <!--<h2 class="notice-list_title">通知列表</h2>-->
+    <rev-title [title]="title"></rev-title>
+  </div>
+
+  <div nz-row class="mt-16 mb-16">
+    <div nz-col nzOffset="14">
+      <div nz-col nzSpan="16">
+        <input nz-input placeholder="通知标题" [(ngModel)]="noticeTitle">
+      </div>
+      <div nz-col nzSpan="2" nzOffset="1">
+        <button nz-button [nzType]="'primary'" (click)="loadNoticeList(true)">查询</button>
+      </div>
+      <div nz-col nzSpan="4" nzOffset="1">
+        <a nz-button [nzType]="'primary'" target="_blank" [routerLink]="['./../add']">新建通知</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-list-warp">
+    <nz-table #basicTable
+              [nzData]="dataSet"
+              [nzBordered]="true"
+              [(nzPageIndex)]='pageNo'
+              [(nzPageSize)]="pageSize"
+              [nzTotal]="total"
+              [nzFrontPagination]="false"
+              nzSize="middle"
+              (nzPageIndexChange)='loadNoticeList()'
+              [nzShowPagination]='true'
+    >
+      <thead>
+      <tr>
+        <th>公告标题</th>
+        <th>创建日期</th>
+        <th>发布日期</th>
+        <th>状态</th>
+        <th>创建人</th>
+        <th>公告部门</th>
+        <th>通知人数</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td [nzTitle]="data.title" nzPlacement="topLeft" nz-tooltip>{{data.title | NoticeTwentyPipe}}</td>
+        <td>{{data.createTime | date:'yyyy-MM-dd HH:mm'}}</td>
+        <td>{{data.sendTime | date:'yyyy-MM-dd HH:mm'}}</td>
+        <td [ngSwitch]="data.sendState">
+          <span *ngSwitchCase="0">待发送</span>
+          <span *ngSwitchCase="1">已发送</span>
+          <span *ngSwitchDefault>--</span>
+        </td>
+        <td title="{{data.createUserName}}">{{data.createUserName}}</td>
+        <td title="{{data.sendDepartment}}">{{data.sendDepartment}}</td>
+        <td>{{data.sendNums}}人</td>
+        <td>
+          <a href="javascript:void(0)" target="_blank" [routerLink]="['./../dtl']" [queryParams]="{noticeId:btoa(data.id)}">详情</a>
+          <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该通知吗？" nzOkText="删除" (nzOnConfirm)="deleteNotice(data.id)" (nzOnCancel)="cancelNotice()">删除</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

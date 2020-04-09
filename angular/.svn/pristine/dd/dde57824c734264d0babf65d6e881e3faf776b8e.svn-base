@@ -1,0 +1,124 @@
+.schedule {
+  margin-left: 50px;
+  display: flex;
+  height: 100%;
+  .schedule-detail {
+    width: 100%;
+    .detail-info:hover {
+      background: rgb(230, 247, 255);
+      // .schedule-icon{
+      //   right: -5px;
+      //   transition: .5s;
+      // }
+    }
+    .detail-info {
+      display: inline-block;
+      position: relative;
+      width: 33.33%;
+      .schedule-num {
+        color: rgba(24, 144, 255, 1);
+        font-size: 24px;
+      }
+      .schedule-icon {
+        position: absolute;
+        top: 38px;
+        right: 0;
+        margin-right: 78px;
+        color: rgba(0, 0, 0, 0.25);
+      }
+      height: 96px;
+      margin: 48px 0 0 0;
+
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .detail-info:nth-child(-n + 3) {
+      margin-top: 76px;
+    }
+    // .detail-info:hover {
+    //   transform: rotate3d(0, -60, -60, 30deg);
+    //   z-index: 20;
+    // }
+  }
+  .schedule-info {
+    width: 334px;
+    padding-left: 24px;
+    p {
+      font-size: 14px;
+    }
+    position: relative;
+    .company-top {
+      position: absolute;
+      top: -102px;
+      .company-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+      }
+      .company-name {
+        text-align: left;
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        width: 30em;
+        margin-bottom: 24px;
+      }
+    }
+    .company-detail {
+      border-right: 1px solid rgba(232, 232, 232, 1);
+      p {
+        margin-bottom: 8px;
+      }
+      margin-top: 76px;
+      .user-name {
+        font-size: 20px;
+        font-weight: bold;
+      }
+      .user-job {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.25);
+      }
+      p:last-child {
+        span {
+          display: inline-block;
+          padding-left: 0;
+        }
+        span:nth-child(n + 3) {
+          display: inline-block;
+          width: 92%;
+          padding-left: 69px;
+        }
+      }
+    }
+  }
+}
+.schedule-nodata {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  p {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    margin-top: 16px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.25);
+  }
+  .schedule-infoicon {
+    display: inline-block;
+    width: 180px;
+    height: 170px;
+    background: url("./air.png") no-repeat;
+  }
+}
+.schedule-head {
+  width: calc(100% + 48px);
+  margin: -24px -24px 0 -24px;
+  height: 160px;
+  background-size: cover !important;
+}
+// @keyframes rota {
+//     0%{transform: rotate3d(0,20,0,0deg);}
+//     100%{transform: rotate3d(0,20,60,90deg);}
+// }

@@ -1,0 +1,72 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.article {
+  overflow: hidden;
+  .content {
+    padding-top: 20px;
+  }
+}
+
+tr th, tr td {
+  font-size: 14px;
+  a {
+    padding-right: 4px;
+  }
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+tr th, tr td:not(.w10) {
+  max-width: 60px;
+}
+
+.del {
+  color: #007bff !important;
+  &:hover {
+    color: #0056b3 !important;
+    text-decoration: underline !important;
+  }
+}
+
+.serchs {
+  display: inline-block !important;
+  margin-right: 6px;
+}
+
+.meal_modal {
+  .error {
+    position: relative;
+    span {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+    }
+  }
+  .inp {
+    margin-top: 24px;
+  }
+  .label {
+    vertical-align: top;
+    margin-right: 10px;
+  }
+  .btns {
+    margin: 24px -24px -11px -24px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+      margin-right: 24px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }
+
+  .text {
+    width: 50%
+  }
+}
+.split-line{
+  @include splitLine($T:638px);
+}

@@ -1,0 +1,20 @@
+.btns {
+  text-align: left;
+  margin-top: 16px;
+  button:first-child {
+    margin-right: 8px;
+  }
+}
+.detail-list-head {
+  display: flex;
+  margin: 20px 0;
+  justify-content: space-between;
+  .search {
+    text-align: right;
+    width: 100%;
+    input {
+      width: 400px;
+      margin-right: 8px;
+    }
+  }
+}

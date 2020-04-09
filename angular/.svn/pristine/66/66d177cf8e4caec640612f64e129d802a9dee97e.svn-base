@@ -1,0 +1,120 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.detail-data{
+     margin:-1px 0 0 0;
+    .data-head{
+        border:1px solid #dedede;
+        padding: 10px 20px;
+        background: #efefef;
+        .data-title{
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 26px;
+            margin: 0;
+        }
+        .data-show{
+            font-size: 0;
+            margin: 0;
+            span{
+                display: inline-block;
+                vertical-align: top;
+                width: 33.3333%;
+                font-size: 12px;
+            }
+        }
+    }
+    dl{
+        border: 1px solid #dedede;
+        margin: 10px 0 0 0;
+        dt{
+            background: #efefef;
+            padding: 5px 10px;
+            border-bottom: 1px solid #dedede;
+            font-size: 0;
+            span{
+                display: inline-block;
+                vertical-align: top;
+                font-size: 13px;
+                font-weight: 500;
+                &.title{
+                    width: 60%;
+                }
+                &.total{
+                    width: 20%;
+                }
+                &.fix{
+                    width: 20%;
+                    a{
+                        margin-right: 10px;
+                        font-size: 12px;
+                        @include tag(#0a8ddf);
+                        &:last-child{
+                            margin-right: 0;
+                        }
+                    }
+                }
+            }
+        }
+        dd{
+            margin:0;
+            p{
+                margin: 0;
+                padding:5px 10px;
+                font-size: 12px;
+            }
+            ol{
+                margin: 0;
+                li{
+                    font-size: 0;
+                    &.head{
+                        background: #efefef;
+                        border-bottom: 1px solid #dedede;
+                        line-height: 26px;
+                        span{
+                            padding: 0;
+                        }
+                    }
+                    &.cnt{
+                        border-top: 1px solid #dedede;
+                        &:first-child{
+                            border-top: 0;
+                        }
+                    }
+                    span{
+                        display: inline-block;
+                        vertical-align: top;
+                        font-size: 12px;
+                        width: 5%;
+                        line-height: 26px;
+                        text-align: center;
+                        border-right: 1px solid #dedede;
+                        @include ellipsis;
+                        &.w10{
+                            width: 10%;
+                        }
+                        &.w15{
+                            width: 15%;
+                        }
+                        &.w20{
+                            width: 20%;
+                        }
+                        &:last-child{
+                            border-right: 0;
+                        }
+                        a{
+                            margin-right: 10px;
+                            font-size: 12px;
+                            @include tag(#0a8ddf);
+                            &:last-child{
+                                margin-right: 0;
+                            }
+                        }
+                    }
+                    p{
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,27 @@
+<div class="quantity" *ngIf="quantities && quantities.length > 0">
+  <div class="quantity-item"*ngFor="let quantity of quantities;let index = index">
+      <div nz-row>
+        <span class="mr-48 quantity-item-name" *ngIf="quantity.stageName">{{quantity.stageName}}</span>
+        <span class="quantity-item-date" *ngIf="quantity.createDate">{{quantity.createDate | date:'yyyy-MM-dd HH:mm'}}</span>
+        <a class="quantity-item-del" href="javascript:void(0)" *ngIf="showDelBtn()"
+           nz-popconfirm nzTitle="确认删除该内容吗?"
+           nzOkText="确定" nzCancelText="取消"
+           (nzOnConfirm)="delItem(quantity.id)">删除</a>
+      </div>
+      <p nz-row class="mt-8 quantity-item-remark" *ngIf="quantity.content">
+        {{quantity.content}}
+      </p>
+      <div nz-row class="quantity-item-imgs" *ngIf="quantity.imgList && quantity.imgList.length > 0">
+        <div class="quantity-item-imgs-item" *ngFor="let img of quantity.imgList;let i = index" [ngStyle]="styleImg(img.imgUrl)"
+             (click)="openLargeImg(quantity.imgList,i)"></div>
+      </div>
+  </div>
+  <div nz-row class="mt-16 text-right">
+    <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+    <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                   (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+  </div>
+</div>
+<div class="quantity" *ngIf="!quantities ||(quantities && quantities.length == 0)">
+  <p>暂无数据显示</p>
+</div>

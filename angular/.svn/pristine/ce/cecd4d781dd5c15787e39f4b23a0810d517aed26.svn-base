@@ -1,0 +1,136 @@
+<div class="notice-add">
+    <div class="notice-add_head">
+        <h2 class="notice-add_title">新建通知</h2>
+        <div class="notice-add_btn">
+            <button nz-button [nzType]="'primary'" (click)="showMaterialModal()">从素材库中添加</button>
+        </div>
+    </div>
+
+    <!--操作-->
+    <div class="notice-add_operation">
+        <div style="display: inline-block;float: left">
+            <span style="margin-right: 10px">发布时间</span>
+            <nz-date-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" [(ngModel)]="date"
+                            (ngModelChange)="onChange($event)"></nz-date-picker>
+        </div>
+        <span style="margin-right: 10px">通知对象</span>
+        <button style="margin: 0 auto" nz-button [nzType]="'default'" (click)="showPersonModal()">
+            <span *ngIf="storeData.length === 0">通知选择对象</span>
+            <span *ngIf="storeData.length !== 0">已选中<span
+                    style="color: #0a8ddf;margin: 0 5px"> {{storeData.length}}</span>人</span>
+        </button>
+        <div style="display: inline-block;float: right" (click)="handleResetVal()">
+            <label nz-radio [ngModel]="resetVal">通知需要回执</label>
+        </div>
+    </div>
+
+    <!--标题-->
+    <div>
+        <input nz-input type="text" maxlength="100" [(ngModel)]="noticeTitle" placeholder="请在这里填写素材标题">
+    </div>
+
+    <!--富文本编辑器-->
+    <div class="notice-add_wrap">
+        <quill-editor [(ngModel)]="content" minLength="10" maxLength="5000" placeholder="请填写内容"
+                      (onEditorCreated)="EditorCreated($event)"
+                      (onContentChanged)="contentChanged($event)"></quill-editor>
+        已输入{{quillLen}}字
+    </div>
+
+    <div nz-row>
+        <div nz-col nzOffset="10">
+            <div nz-col nzSpan="4">
+                <button nz-button [nzType]="'primary'" (click)="handleSub()">保存</button>
+            </div>
+            <div nz-col nzSpan="4"><a nz-button [nzType]="'default'" (click)="handlePreview()">预览</a></div>
+        </div>
+    </div>
+
+
+    <!--素材选择-->
+    <div class="notice-add_material">
+        <nz-modal nzClassName="vertical-center-modal" nzWidth="800px" [(nzVisible)]="isShowMaterial" nzTitle="选择素材"
+                  nzOkText="提交" nzCancelText="关闭" (nzOnCancel)="materialCancel()" (nzOnOk)="materialOk()">
+            <div class="notice-add_noticeHead">
+                <input nz-input placeholder="标题" [(ngModel)]="materialQuery" type="text">
+                <button nz-button [nzType]="'primary'" (click)="loadSourceList()">查询</button>
+            </div>
+            <nz-radio-group class="notice-add_radio" [(ngModel)]="materialItem">
+                <label nz-radio style="display: block;padding: 20px 0;" *ngFor="let data of materialList;index as i"
+                       nzValue="{{i}}">
+                    <div style="display:inline-block;width: 70%;word-break: break-all">
+                        <span style="width:100%;display: block;"
+                              title="{{data.title}}">{{data.title | NoticePipe}}</span>
+                        <!--<span ></span>-->
+                    </div>
+                </label>
+            </nz-radio-group>
+        </nz-modal>
+    </div>
+
+    <!--人员选择-->
+    <div class="depart-tree">
+        <nz-modal nzWidth="1000px" [(nzVisible)]="isPersonVisible" nzTitle="选择人员" nzOkText="提交" nzCancelText="关闭"
+                  (nzOnCancel)="PersonCancel()" (nzOnOk)="PersonOk()">
+            <div style="overflow: auto;min-height: 400px">
+                <div style="display:inline-block;width:65%;float: left">
+                    <nz-table
+                            nzWidth="width: 65%"
+                            #rowSelectionTable
+                            [nzData]="workerListCopy"
+                            (nzCurrentPageDataChange)="currentPageDataChange($event)"
+                            [nzBordered]="true"
+                            [(nzPageIndex)]='pageNo'
+                            [(nzPageSize)]="pageSize"
+                            [nzTotal]="total"
+                            [nzFrontPagination]="false"
+                            (nzPageIndexChange)='changeData()'
+                            nzSize="middle"
+                    >
+                        <thead>
+                        <tr>
+                            <th nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                                (nzCheckedChange)="checkAll($event)"></th>
+                            <th>姓名</th>
+                            <th>职位</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let data of rowSelectionTable.data;index as i;">
+                            <td nzShowCheckbox [(nzChecked)]="data.checked" [nzDisabled]="data.disabled"
+                                (nzCheckedChange)="refreshStatus()"></td>
+                            <td>{{data.name}}</td>
+                            <td>{{data.positionName}}</td>
+                        </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+                <div style="display:inline-block;width:30%;float: right">
+                    <div style="text-align:center;background: #fafafa;transition: background .3s ease;text-align: left;color: rgba(0,0,0,.85);font-weight: 500;border: 1px solid #e8e8e8;padding: 12px 8px;border-top-right-radius: 4px;">
+                        <nz-select style="width: 120px;" [(ngModel)]="userType" (ngModelChange)="handleUserType()"
+                                   nzAllowClear nzPlaceHolder="选择人员">
+                            <nz-option nzValue="1" nzLabel="员工"></nz-option>
+                            <nz-option nzValue="2" nzLabel="工人"></nz-option>
+                        </nz-select>
+                    </div>
+                    <div style="text-align:center;background: #fafafa;transition: background .3s ease;text-align: left;color: rgba(0,0,0,.85);font-weight: 500;border: 1px solid #e8e8e8;border-bottom:none;border-top:none;padding: 12px 8px;border-top-right-radius: 4px;">
+                        <span style="margin-left: 10px">部门</span>
+                    </div>
+                    <div style="background: #fafafa;transition: background .3s ease;text-align: left;color: rgba(0,0,0,.85);font-weight: 500;border: 1px solid #e8e8e8;padding: 12px 8px;border-top-right-radius: 4px;">
+                        <nz-tree
+                                [nzData]="nodes"
+                                nzAsyncData="true"
+                                nzShowLine="true"
+                                (nzClick)="onClick($event)"
+                                (nzExpandChange)="onExpandChange($event)">
+                        </nz-tree>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;padding: 20px;border: 1px #e8e8e8 solid">
+                <span style="font-size: 16px;">已选中<span
+                        style="color: #0a8ddf;margin: 0 10px"> {{storeData.length}}</span>人</span>
+            </div>
+        </nz-modal>
+    </div>
+</div>

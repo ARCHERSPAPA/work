@@ -1,0 +1,191 @@
+import {Component, OnInit} from "@angular/core";
+import {sideAnimate} from "../../../animation/transform.component";
+import {getDesignTitle} from "../../../model/methods";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {UserService} from "../../../service/user.service";
+import {Messages} from "../../../model/msg";
+import * as UserValidate from "../../../validate/user-validate";
+import { NzMessageService } from 'ng-zorro-antd';
+
+@Component({
+    selector: "rev-cost-design",
+    templateUrl: "./cost-design.component.html",
+    styleUrls: [
+        "./../../client/client-detail/client-detail.component.scss",
+        "./../../detail/detail.scss",
+        "./../cost.component.scss",
+        "./cost-design.component.scss"
+    ],
+    animations: [sideAnimate]
+})
+export class CostDesignComponent implements OnInit {
+    public title: string;
+    public switch: string;
+    public radioSwitch = [
+        {
+            key: 2,
+            text: "基装"
+        },
+        {
+            key: 4,
+            text: "整装"
+        },
+        {
+            key: 3,
+            text: "套装"
+        }
+    ];
+    //弹出框
+    public designVisible: boolean = false;
+    public type: number = 2;
+    public designTitle: string;
+    public designId: number;
+
+    public designForm: FormGroup;
+    public designName: string;
+    public designPrice;
+
+    public designList: any;
+
+    constructor(
+        private fb: FormBuilder,
+        private req: RequestService,
+        private warn: WarningService,
+        private user: UserService,
+        private msg: NzMessageService
+    ) {
+    }
+
+    ngOnInit() {
+        this.title = "设计费设置";
+        this.switch = "left";
+
+        this.designForm = this.fb.group({
+            designName: [this.designName, [Validators.required]],
+            designPrice: [
+                this.designPrice,
+                [Validators.required, UserValidate.ValidateNumDecimal]
+            ]
+        });
+
+        this.loadDesign();
+    }
+
+    handleSwitch(status: number) {
+        this.loadDesign(status);
+        this.type = status
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.switch = "right";
+        });
+    }
+
+    selectType(type) {
+        this.type = type;
+        this.loadDesign();
+    }
+
+    openModal() {
+        this.designVisible = true;
+        this.designId = null;
+        this.designTitle = "新建" + getDesignTitle(this.type);
+    }
+
+    editDesign(data) {
+        this.designVisible = true;
+        this.designTitle = "编辑" + getDesignTitle(this.type);
+        this.designId = data.id;
+        this.designName = data.projectName;
+        this.designPrice = data.univalent;
+    }
+
+    designOk() {
+        if (this.designForm.valid) {
+            if (this.designId) {
+                this.configDesign(this.designName, this.designPrice, this.type,this.designId);
+            } else {
+                this.configDesign(this.designName, this.designPrice, this.type);
+            }
+        }
+    }
+
+    designCancel() {
+        this.designVisible = false;
+      
+            this.designId = null;
+            this.designName = '';
+            this.designPrice = '';
+   
+     
+    }
+
+    delDesign(id) {
+        if (id) {
+            this.req.doPost({
+                url: "delDesignFee",
+                data: {id: id},
+                success: res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadDesign(this.type);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }
+    }
+// ngDoCheck(){
+//     console.log(this.designForm)
+// }
+    loadDesign(type = 2) {
+        if (this.type && this.user.getCompanyId()) {
+            this.req.doPost({
+                url: "listDesignFee",
+                data: {
+                    mouldType: type,
+                    companyId: this.user.getCompanyId()
+                },
+                success: res => {
+                    if (res && res.code == 200) {
+                        this.designList = res.data;
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }
+    }
+
+    configDesign(...args) {
+        if (args[0] && args[1]) {
+            let params = {
+                mouldType: args[2],
+                projectName: args[0],
+                univalent: args[1],
+                companyId: this.user.getCompanyId()
+            };
+            if (args[3]) {
+                params["id"] = args[3];
+            }
+            this.req.doPost({
+                url: "configDesignFee",
+                data: params,
+                success: res => {
+                        this.designCancel();
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.designList = res.data;
+                            this.loadDesign(this.type);
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                }
+            });
+        }
+    }
+}

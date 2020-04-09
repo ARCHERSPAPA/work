@@ -1,0 +1,104 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+
+.settle-detail {
+  font-family: 'PingFang SC';
+  .settle-title {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    color: rgba(0, 0, 0, 0.85);
+    .settle-cost-state {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      color: rgba(0, 0, 0, 0.45);
+    }
+  }
+  .settle-chart,
+  .settle-cost {
+    .settle-chart-data,
+    .settle-cost-data {
+      position: relative;
+      .settle-chart-info {
+        position: absolute;
+        left: 50%;
+        width: 120px;
+        top: 50%;
+        height: 50px;
+        margin-left: -30px;
+        margin-top: -66px;
+        z-index: 9;
+        dt, dd {
+          width: 100%;
+          text-align: center;
+          @include ellipsis;
+        }
+        dt {
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 28px;
+          color: rgba(0, 0, 0, 0.85);
+        }
+        dd {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 22px;
+          color: rgba(0, 0, 0, 0.45);
+        }
+
+      }
+      .settle-chart-side,
+      .settle-cost-side {
+        dt, dd {
+          padding-left: 30px;
+          @include ellipsis;
+        }
+        dt {
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 28px;
+          color: rgba(0, 0, 0, 0.85);
+          position: relative;
+          .data-circle {
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 8px;
+            position: absolute;
+            left: 0;
+            top: 10px;
+            &.circle-income {
+              background: #1890FF;
+            }
+            &.circle-expand {
+              background: #69C0FF;
+            }
+          }
+        }
+        dd {
+          margin-top: 8px;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 22px;
+          color: rgba(0, 0, 0, 0.45);
+        }
+      }
+
+      .settle-cost-side {
+        dt, dd {
+          padding: 0;
+        }
+      }
+
+      .settle-cost-line {
+        display: block;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.65);
+        word-break: break-all;
+      }
+    }
+  }
+}

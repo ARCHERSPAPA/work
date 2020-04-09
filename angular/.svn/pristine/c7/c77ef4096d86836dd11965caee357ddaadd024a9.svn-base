@@ -1,0 +1,107 @@
+<ul class="sketch-data">
+    <li>
+        <p>{{toBeDistributeCount}}</p>
+        <p>待派单</p>
+    </li>
+    <li>
+        <p>{{toBeStartedCount}}</p>
+        <p>待开工</p>
+    </li>
+    <li>
+        <p>{{constructionCount}}</p>
+        <p>施工中</p>
+    </li>
+    <li>
+        <p>{{acceptanceCheck}}</p>
+        <p>待验收</p>
+    </li>
+</ul>
+<div class="sketch-time" (click) = "open()">
+    <div class="time-left">
+        <p>{{startTime | date:'MM-dd'}}</p>
+        <p>{{startTime | date:'yyyy'}}</p>
+    </div>
+    <div class="line">
+        监理发布的动态数据
+    </div>
+    <div class="time-right">
+        <p>{{endTime | date:'MM-dd'}}</p>
+        <p>{{endTime | date:'yyyy'}}</p>
+    </div>
+    <nz-range-picker 
+        class="btn1" 
+        nzSize="large" 
+        [(ngModel)]="dateRange" 
+        [nzOpen]="timeFlag" 
+        (ngModelChange)="onChange($event)"
+        [nzDisabledDate]="disabledDate"
+    ></nz-range-picker>
+</div>
+<div class="vis">
+    <div id="container"></div>
+</div>
+<div class="sketch-table">
+    <div class="title">
+        <p>详细数据</p>
+        <p (click) = "exportToExcel()">下载报表</p>
+    </div>
+    <nz-table 
+        #nzTable
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+        (nzPageIndexChange)='changeData()'
+        [nzShowPagination]='true'
+        [nzData]="tableList"
+    >
+        <thead>
+            <tr>
+                <th>发布时间</th>
+                <th>监理</th>
+                <th>工长</th>
+                <th>客户</th>
+                <th>楼盘房号</th>
+                <th>户型</th>
+                <th>面积</th>
+                <th>装修类型</th>
+                <th>进度</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of nzTable.data">
+                <td nz-td title="{{item.createDate | date:'yyyy-MM-dd HH:mm:ss'}}" *ngIf="item.createDate">
+                    {{item.createDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                </td>
+                <td *ngIf="!item.createDate" title="--">--</td>
+                <td nz-td title="{{item.supervisorName?item.supervisorName:'--'}}">
+                    {{item.supervisorName?item.supervisorName:'--'}}
+                </td>
+                <td nz-td title="{{item.wokerName?item.wokerName:'--'}}">
+                    {{item.wokerName?item.wokerName:'--'}}
+                </td>
+                <td nz-td title="{{item.customerName?item.customerName:'--'}}">
+                    {{item.customerName?item.customerName:'--'}}
+                </td>
+                <td nz-td title="{{item.customerHouseAddress?item.customerHouseAddress:'--'}}">
+                    {{item.customerHouseAddress?item.customerHouseAddress:'--'}}
+                </td>
+                <td nz-td title="{{item.customerHouseType?item.customerHouseType:'--'}}">
+                    {{item.customerHouseType?item.customerHouseType:'--'}}
+                </td>
+                <td nz-td title="{{item.customerHouseArea?item.customerHouseArea:'--'}}">
+                    {{item.customerHouseArea?item.customerHouseArea:'--'}}
+                </td>
+                <td nz-td [ngSwitch]="item.type">
+                    <span *ngSwitchCase="1">基装</span>
+                    <span *ngSwitchCase="2">套装</span>
+                    <span *ngSwitchCase="3">整装</span>
+                    <span *ngSwitchDefault>--</span>
+                </td>
+                <td nz-td title="{{item.stageName?item.stageName:'--'}}">
+                    {{item.stageName?item.stageName:'--'}}
+                </td>
+            </tr>
+        </tbody>    
+    </nz-table>
+</div>

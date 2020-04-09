@@ -1,0 +1,187 @@
+import { Component, OnInit } from '@angular/core';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import * as UserValidators from '../../../validate/user-validate';
+import {Router, ActivatedRoute} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {UserService} from "../../../service/user.service";
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+
+import {ModalComponent} from "../../../plugins/modal/modal.component";
+import {BaseService} from "../../../service/base.service";
+
+@Component({
+    selector: 'rev-step-two',
+    templateUrl: './step-two.component.html',
+    styleUrls: ['./../steps.component.scss']
+})
+export class StepTwoComponent implements OnInit {
+    public fillForm:FormGroup;
+
+    public mobile:string = "";
+
+    public address:string = "";
+    public point:any;
+
+    public area:any;
+
+    constructor(private fb:FormBuilder,
+                private router:Router,
+                private activatedRoute:ActivatedRoute,
+                private modalService: NgbModal,
+                private userInfo: UserService,
+                private request: RequestService,
+                private warn:WarningService,
+                private base:BaseService){ }
+
+    ngOnInit() {
+        this.fillForm = this.fb.group({
+            mobile:[this.mobile,[
+                Validators.required,
+                Validators.minLength(6),
+                Validators.maxLength(13),
+                UserValidators.ValidateCommunicate
+            ]],
+            address:[this.address,[
+                Validators.required
+            ]],
+            area:[this.area,[
+                Validators.required
+            ]]
+        })
+
+        if(this.userInfo.getCompanyId()){
+            if(!this.base.getBaseCompanyId()){
+                this.base.loadCompany();
+            }
+        }
+
+    }
+
+    ngAfterViewInit(){
+        setTimeout(()=>{
+            if(this.userInfo.getCompanyId()){
+                this.mobile = this.base.getCompanyPhone();
+                this.address = this.base.getAddress();
+                this.point = this.base.getPoint();
+                this.area = {
+                    citys: this.combineArea(),
+                    districts: this.combineDistrict()
+                };
+            }
+        },1000)
+    }
+
+    combineDistrict(){
+        let districts = [],ids = this.base.getAreaId().split(","),
+            names = this.base.getAreaName().split(",");
+        for(let i = 0; i < ids.length; i++){
+            districts.push({
+                id:ids[i],
+                name:names[i]
+            });
+        }
+        return districts;
+    }
+    combineArea(){
+        let areas = [],ids = this.base.getCityId().split(","),
+            names = this.base.getCityName().split(",");
+        for(let i = 0; i < ids.length; i++){
+            areas.push({
+                id:ids[i],
+                name:names[i]
+            });
+        }
+        return areas;
+    }
+
+    openModal(type,val){
+        let that = this;
+        const modalRef = this.modalService.open(ModalComponent, {
+            centered: true,
+            keyboard: true
+        });
+        modalRef.componentInstance.type = type;
+        modalRef.componentInstance.value = val;
+        modalRef.componentInstance.name = "选择";
+        if(type === "address" && this.point){
+            modalRef.componentInstance.point = that.point;
+        }
+
+        modalRef.result.then((result) => {
+            let res = JSON.parse(result);
+            if(type === "address"){
+                that.address = res.address;
+                if(Array.isArray(res.point)){
+                    that.point = {lat:res.point[1],lng:res.point[0]};
+                }else{
+                    that.point = res.point;
+                }
+            }else if(type === "area"){
+                // console.log(res);
+                that.area = res;
+            }
+
+        }, (reason) => {
+            console.log(reason);
+        });
+    }
+
+    next(e){
+        e.stopPropagation();
+        e.preventDefault();
+        if(this.fillForm.valid){
+            this.router.navigate(["./../three"],{queryParams:this.combine(),relativeTo:this.activatedRoute});
+        }
+    }
+
+    combine(){
+        let param = {
+            address: this.address,
+            longitude: this.point["lng"],
+            latitude: this.point["lat"],
+            companyPhone: this.mobile
+        };
+
+        // let area = this.area;
+        if(this.area && this.area.citys && this.area.citys.length > 0){
+            param["serviceCityId"] = this.getDistricts(this.area,"citys").ids.join(",")
+            param["serviceCityName"] = this.getDistricts(this.area,"citys").names.join(",")
+        }
+        if(this.area && this.area.districts && this.area.districts.length > 0){
+            param["serviceAreaId"] = this.getDistricts(this.area,"districts").ids.join(",")
+            param["serviceAreaName"] = this.getDistricts(this.area,"districts").names.join(",")
+        }
+        // if(area["city"]){
+        //     param["serviceCityName"] = area["city"].name;
+        //     param["serviceCityId"] = area["city"].id;
+        // }
+        //
+        // if(area["districts"]){
+        //     let ids = [],names = [];
+        //     for(let i = 0; i < area["districts"].length; i++){
+        //         ids.push(area["districts"][i].id);
+        //         names.push(area["districts"][i].name);
+        //     }
+        //     param["serviceAreaId"] = ids.join(",");
+        //     param["serviceAreaName"] = names.join(",");
+        // }
+        // console.log(param);
+        return param;
+    }
+
+
+    getDistricts(areas,type){
+        let o = {ids:[],names:[]};
+        if(areas && areas[type]){
+            let as = areas[type];
+            for(let i=0; i<as.length;i++){
+                o.ids.push(as[i].id);
+                o.names.push(as[i].name);
+            }
+        }
+        return o;
+    }
+
+
+}

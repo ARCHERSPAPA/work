@@ -1,0 +1,140 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.com-title {
+  font-size: 0;
+  height: 40px;
+
+  padding-bottom: 24px;
+  position: relative;
+  &.com-nums {
+    height: 60px;
+  }
+  .com-name {
+    display: inline-block;
+    height: 40px;
+    width: 100%;
+    &.com-nums {
+      height: 60px;
+    }
+    .com-name-head,
+    .com-name-num {
+      height: 40px;
+      line-height: 40px;
+      display: block;
+      font-size: 0;
+      a {
+        font-size: 14px;
+      }
+      &.com-nums {
+        height: 30px;
+        line-height: 24px;
+        padding-bottom: 40px;
+      }
+    }
+    .com-name-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .com-name-num {
+      font-size: 14px;
+
+      span {
+        margin-right: 48px;
+        padding-bottom: 36px;
+      }
+    }
+  }
+  .btns {
+    display: inline-block;
+    vertical-align: top;
+    position: absolute;
+    right: 0;
+    top: 4.5px;
+    .btns-ctr {
+      button {
+        margin-right: 24px;
+      }
+    }
+    &.com-nums {
+      top: -62.5px;
+    }
+  }
+}
+.quest-edit {
+  .item{
+    margin: 8px 0px!important;
+  }
+  .ischk{
+    margin-left: 16px;
+  }
+  .dynamic-delete-button{
+    cursor: pointer;
+  }
+  .passenger-input{
+    width: 78%;
+  }
+  .quest-chk{
+    width: 74%;
+    margin-left: 63px;
+    label{
+      width: 50%;
+      text-align: center;
+    }
+  }
+  .add-button{
+    width: 82%;
+  }
+  .btn {
+    width: 110%;
+    margin: 24px -28px -17px -26px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+      margin-right: 12px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }
+  li{
+    margin-top: -22px;
+  }
+  li:last-child{
+    .box {
+        margin-right: -111px !important;
+      }
+  }
+  .inp {
+    display: inline-block;
+  }
+}
+.checkbox-box {
+  position: relative;
+  .checkbox-input {
+    position: absolute;
+    left: -1px;
+    top: 3px;
+    z-index: 100;
+    width: 20px;
+    height: 16px;
+    cursor: pointer;
+    opacity: 0;
+  }
+}
+.editModal {
+
+  .inp {
+    position: relative;
+    .label {
+      margin-right: 16px;
+    }
+    .count {
+      position: absolute;
+      right: 107px;
+      top: 11px;
+    }
+  }
+}

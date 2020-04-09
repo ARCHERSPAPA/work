@@ -1,0 +1,39 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {SettleWageListComponent} from "./settle-wage/wage-list/wage-list.component";
+import {SettleWageDetailComponent} from "./settle-wage/wage-detail/wage-detail.component";
+import {PublicModule} from "../../public/public.module";
+import {DetailModule} from "../../public/detail.module";
+import {SettleRoutingModule} from "./settle-routing.module";
+import { SettleAuditComponent } from './settle-audit/settle-audit.component';
+import { SettleWageComponent } from './settle-wage/settle-wage.component';
+import { AuditListComponent } from './settle-audit/audit-list/audit-list.component';
+import { AuditDetailComponent } from './settle-audit/audit-detail/audit-detail.component';
+import { SettleDetailHeadComponent } from './settle-detail/settle-detail-head/settle-detail-head.component';
+import { SettleDetailCostComponent } from './settle-detail/settle-detail-cost/settle-detail-cost.component';
+import { SettleDetailRecordComponent } from './settle-detail/settle-detail-record/settle-detail-record.component';
+//审核记录
+import { SettleDetailVerifyComponent } from './settle-detail/settle-detail-verify/settle-detail-verify.component';
+
+
+@NgModule({
+  imports: [
+    CommonModule,
+    PublicModule,
+    DetailModule,
+    SettleRoutingModule
+  ],
+  declarations: [
+      SettleWageDetailComponent,
+      SettleWageListComponent,
+      SettleAuditComponent,
+      SettleWageComponent,
+      AuditListComponent,
+      AuditDetailComponent,
+      SettleDetailHeadComponent,
+      SettleDetailCostComponent,
+      SettleDetailRecordComponent,
+      SettleDetailVerifyComponent
+  ]
+})
+export class SettleModule { }

@@ -1,0 +1,144 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../service/request.service";
+import {NzNotificationService} from 'ng-zorro-antd';
+import {Router, ActivatedRoute} from '@angular/router';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import * as UserValidate from "../../../validate/user-validate";
+
+@Component({
+    selector: 'app-bind',
+    templateUrl: './bind.component.html',
+    styleUrls: ['./bind.component.scss']
+})
+export class BindComponent implements OnInit {
+    public deviceList = [];
+    public pageNo = 1;
+    public pageSize = 20;
+    public total = 0;
+
+    // 模块相关
+    public isVisible: boolean = false;
+    public deviceName: string;
+    public deviceAcc: string;
+    public did;
+    public remark: string;
+
+    public BindForm: FormGroup;
+    public title = '绑定设备'
+
+    constructor(private request: RequestService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private _notification: NzNotificationService,
+                private fb: FormBuilder) {
+    }
+
+    ngOnInit() {
+        this.loadDeviceList()
+        this.BindForm = this.fb.group({
+            deviceName: [this.deviceName, [
+                Validators.required,
+                Validators.minLength(2),
+                Validators.maxLength(10),
+                UserValidate.ValidateAccount
+            ]],
+            remark: [this.remark, [
+                Validators.maxLength(200)
+            ]],
+            deviceAcc: [this.deviceAcc, [
+                Validators.required,
+            ]],
+            did: [this.did, [
+                Validators.required,
+            ]]
+        })
+    }
+
+    ngDoCheck() {
+
+    }
+
+    // 设备列表
+    loadDeviceList(): void {
+        let self = this;
+        this.request.doPost({
+            url: "deviceList",
+            data: {
+                page: this.pageNo,
+                pageSize: this.pageSize
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    self.deviceList = res.data.list;
+                    self.total = res.data.total;
+                } else {
+                    self._notification.create('error', '温馨提示', res.msg, {nzDuration: 2000});
+                }
+            })
+        })
+    }
+
+    // 解绑设备
+    unBindDevice(id, name): void {
+        let self = this;
+        this.request.doPost({
+            url: "unbindDevice",
+            data: {
+                did: id,
+                userName: name
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    self._notification.create('success', '温馨提示', res.msg, {nzDuration: 2000});
+                    self.loadDeviceList()
+                } else {
+                    self._notification.create('error', '温馨提示', res.msg, {nzDuration: 2000});
+                }
+            })
+        })
+    }
+
+    // 打开模块
+    handleCancel() {
+        this.isVisible = false
+    }
+
+    Newproduct() {
+        this.isVisible = true
+    }
+
+    handleAdd() {
+        let self = this;
+        this.deviceName = this.deviceName.replace(/(^\s*)|(\s*$)/g, "");
+        this.deviceAcc = this.deviceAcc.replace(/(^\s*)|(\s*$)/g, "");
+        this.did = this.did.replace(/(^\s*)|(\s*$)/g, "");
+
+
+        if (this.deviceName && this.deviceAcc && this.did) {
+            this.request.doPost({
+                url: "bindDevice",
+                data: {
+                    deviceName: this.deviceName,
+                    userName: this.deviceAcc,
+                    did: this.did,
+                    remark: this.remark
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        self._notification.create('success', '温馨提示', res.msg, {nzDuration: 2000});
+                        this.router.navigate(["./../bind"], {relativeTo: this.activatedRoute});
+                    } else {
+                        self._notification.create('error', '温馨提示', res.msg, {nzDuration: 2000});
+                    }
+                })
+            })
+        } else if (!this.deviceName) {
+            self._notification.create('error', '温馨提示', "请输入设备名称", {nzDuration: 2000});
+        } else if (!this.deviceAcc) {
+            self._notification.create('error', '温馨提示', "请输入设备账号", {nzDuration: 2000});
+        } else if (!this.did) {
+            self._notification.create('error', '温馨提示', "请输入设备号", {nzDuration: 2000});
+        }
+
+    }
+}

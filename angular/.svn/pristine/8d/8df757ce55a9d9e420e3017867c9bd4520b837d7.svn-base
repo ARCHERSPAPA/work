@@ -1,0 +1,56 @@
+<div class="temp">
+  <div class="temp-head">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleEvent($event)"></rev-title>
+    <input type='file' #uploadFile accept=".xlsx, .xls" id="import" style="visibility: hidden;height:0;" ngModel
+           (change)="handleFileChange($event)">
+  </div>
+
+  <div class="temp-warp">
+    <nz-table #nzTable [nzData]="dataSource" [nzFrontPagination]="false" [nzBordered]="true"
+              [nzShowPagination]="true" [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize"
+              [nzTotal]="total" (nzPageIndexChange)='changeData()' nzSize="middle">
+      <thead>
+      <tr>
+        <th width="5%">编号</th>
+        <th width="25%">报价表名</th>
+        <th>导入时间</th>
+        <th>是否默认</th>
+        <th>是否上架</th>
+        <th width="15%">操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let data of nzTable.data">
+        <td>{{getCompileId(data.id)}}</td>
+        <td nz-tooltip [nzTitle]="data.versionName" nzPlacement="topLeft">
+          {{data.versionName?data.versionName:'--'}}
+        </td>
+        <td>{{data.createTime | date:'yyyy-MM-dd HH:mm'}}</td>
+        <td [ngSwitch]="data.defaultVsersion">
+          <span *ngSwitchCase="0">--</span>
+          <span *ngSwitchCase="1">默认报价表</span>
+          <span *ngSwitchDefault>--</span>
+        </td>
+        <td class="col_w_10" [ngSwitch]="data.state">
+          <span *ngSwitchCase="0">未上架</span>
+          <span *ngSwitchCase="1">已上架</span>
+          <span *ngSwitchDefault>--</span>
+        </td>
+        <td>
+          <a href="javascript:void(0)" [routerLink]="['./../detail']"
+             [queryParams]="{state:btoa(data.state),versionType:btoa(data.versionType),sid:btoa(data.id),pageType:2,tempType:1}">详情</a>
+          <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('del',data)"
+             *ngIf="data.state === 0">删除</a>
+          <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('def',data)"
+             *ngIf="data.state === 1 && data.defaultVsersion === 0">设为默认</a>
+          <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('on',data)"
+             *ngIf="data.state === 0">上架</a>
+          <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('off',data)"
+             *ngIf="data.state === 1 && data.defaultVsersion === 0">下架</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+</div>

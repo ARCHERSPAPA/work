@@ -1,0 +1,105 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+
+.offer-list {
+  .list-head {
+    &:after {
+      content: "";
+      clear: both;
+      zoom: 1;
+      visibility: hidden;
+      display: block;
+    }
+    .search-bar {
+      margin-bottom: 20px;
+      width: 533px;
+      height: 30px;
+      float: right;
+      font-size: 0;
+      text-align: right;
+      .choice {
+        display: inline-block;
+        vertical-align: top;
+        width: 30%;
+        height: 30px;
+        outline: none;
+        font-size: 12px;
+        border: 1px solid #dedede;
+        margin-right: 2%;
+        text-indent: 10px;
+        @include border;
+      }
+      .inp {
+        width: 50%;
+        display: inline-block;
+        vertical-align: top;
+        .text {
+          display: inline-block;
+          vertical-align: top;
+          width: 78%;
+          height: 30px;
+          outline: none;
+          font-size: 12px;
+          border: 1px solid #dedede;
+          margin-right: 2%;
+          text-indent: 10px;
+          @include border;
+        }
+        .btn {
+          display: inline-block;
+          vertical-align: top;
+          width: 20%;
+          height: 30px;
+          outline: none;
+          border: 0;
+          color: #fff;
+          font-size: 12px;
+          cursor: pointer;
+          &.btn-primary {
+            @include hover(#0a8ddf);
+          }
+        }
+
+      }
+    }
+  }
+  .serchs {
+    display: inline-block !important;
+    margin-right: 6px;
+  }
+  .list-group-rev {
+    display: flex;
+    .w10{
+      min-width: 200px;
+    }
+    tr th, tr td{
+      font-size: 14px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      a {
+        padding-right: 4px;
+        color: #007bff;
+      }
+    }
+    width: 100%;
+    overflow: hidden;
+   
+    .list-quick {
+      width: 12%;
+      margin-left: 3%;
+      &-title {
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        background: #f2f2f2;
+        border: 1px solid #dedede;
+        padding: 4px;
+        width: 163px;
+        margin-bottom: 10px;
+      }
+    }
+  }
+
+}
+

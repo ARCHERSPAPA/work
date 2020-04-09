@@ -1,0 +1,93 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{name+title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<form [formGroup]="modifyForm" *ngIf="outType === 1 ">
+    <div class="ant-modal-body">
+        <div class="from-group relative-count" *ngIf="outType === 1">
+            <input type="text" class="ant-input" [(ngModel)]="val" formControlName="mobile" name="mobile"
+                autocomplete="off" placeholder="请输入..." maxLength="32" />
+            <div [hidden]="modifyForm.get('mobile').valid || modifyForm.get('mobile').pristine" class="error">
+                <span [hidden]="!modifyForm.hasError('communicate',['mobile'])">输入号码格式不正确</span>
+            </div>
+            <span class="count" *ngIf="val && val.length > 0"><span class="col-f00">{{val.length}}</span>/32</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="ant-modal-footer">
+        <button type="button" class="ant-btn ant-btn-primary" (click)="onClickOk()">确定</button>
+    </div>
+</form>
+
+<div class="ant-modal-body" *ngIf="outType !== 1">
+    <div class="form-group" *ngIf="msg">
+        <p class="col-f00 txt-center">{{msg}}</p>
+    </div>
+    <div class="form-group" *ngIf="outType === 2">
+        <rev-gps (gpsEmitter)="getGps($event)" [location]="location"></rev-gps>
+    </div>
+
+    <div nz-row *ngIf="outType === 4">
+        <!--<div class="rev-area">-->
+        <!--<div class="rev-area-side">-->
+        <!--<h4 class="ft-14 col-ff6 txt-center">选择开通城市</h4>-->
+        <!--<div class="rev-area-scroll">-->
+        <!--<ul class="rev-area-s-ul">-->
+        <!--<li *ngFor="let area of areas;let i = index;" (click)="onSelectArea(i,area)"-->
+        <!--class="rev-area-s-level" [ngClass]="{'on':i == areaIndex}">{{area.name}}</li>-->
+        <!--</ul>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="rev-area-cnt">-->
+        <!--<h4 class="ft-14 col-ff6 txt-left">选择相应的区（或县、或县级市）</h4>-->
+        <!--<ul class="rev-area-district">-->
+        <!--<li class="rev-area-d-level" *ngFor="let d of district;let j = index;"-->
+        <!--(click)="onSelectDistrict(j,d)" [ngClass]="{'on':onExistDistrict(d.id)}">{{d.name}}</li>-->
+        <!--</ul>-->
+        <!--</div>-->
+        <!--</div>-->
+
+        <div nz-col nzSpan="8">
+            <nz-select nzPlaceHolder="请选择开通城市" style="width:100%;" [(ngModel)]="selectArea"
+                (ngModelChange)="areaChange($event)">
+                <nz-option *ngFor="let a of areas" [nzValue]="a" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+        </div>
+        <div nz-col nzSpan="14" nzOffset="2">
+            <nz-select nzPlaceHolder="请选择相应的区/县/县级市" style="width:100%;" [(ngModel)]="multipleDistrict"
+                nzMode="multiple" (ngModelChange)="districtChange($event)">
+                <nz-option *ngFor="let d of districts" [nzValue]="d" [nzLabel]="d.name"></nz-option>
+            </nz-select>
+        </div>
+
+    </div>
+    <form [formGroup]="nameForm" *ngIf="outType === 8 ">
+        <div class="form-group relative-count" *ngIf="outType === 8">
+            <input nz-input [(ngModel)]="val" maxLength="10" formControlName="val" placeholder="请输入公司简称" />
+            <span class="count" *ngIf="val && val.length > 0"><span class="col-f00">{{val.length}}</span>/10</span>
+            <div [hidden]="nameForm.get('val').valid || nameForm.get('val').pristine" class="error">
+            </div>
+        </div>
+
+    </form>
+    <div class="form-group relative-count" *ngIf="outType === 5">
+        <textarea class="form-control" [(ngModel)]="val" style="height:260px;resize:none;" maxLength="2000"
+            placeholder="请输入..."></textarea>
+        <span class="count" *ngIf="val && val.length > 0"><span class="col-f00">{{val.length}}</span>/2000</span>
+    </div>
+
+
+    <div class="form-group relative-count" *ngIf="outType === 6">
+        <input type="text" class="form-control" [(ngModel)]="val" placeholder="请输入..." maxLength="32" />
+        <span class="count" *ngIf="val && val.length > 0"><span class="col-f00">{{val.length}}</span>/32</span>
+    </div>
+
+</div>
+<div class="ant-modal-footer" *ngIf="outType !== 1 && outType < 100">
+    <button type="button" class="ant-btn ant-btn-primary" (click)="onClickOk()">确定</button>
+</div>

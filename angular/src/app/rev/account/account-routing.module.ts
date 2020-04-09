@@ -1,0 +1,51 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {BaseComponent} from "./base/base.component";
+import {FreshComponent} from "./fresh/fresh.component";
+import {PwdComponent} from "./pwd/pwd.component";
+import {DefendService} from "../../service/guard.service";
+
+const routes: Routes = [
+    {
+        path: "",
+        redirectTo: "base",
+        pathMatch: "full"
+    },
+    {
+        path: "base",
+        component: BaseComponent,
+        canActivate: [DefendService],
+        data:{
+            breadcrumb:"手机号码验证"
+        }
+    },
+    {
+        path: "fresh",
+        component: FreshComponent,
+        canActivate: [DefendService],
+        data:{
+            breadcrumb:"短信验证"
+        }
+    },
+    {
+        path: "pwd",
+        component: PwdComponent,
+        canActivate: [DefendService],
+        data:{
+            breadcrumb:"更改密码"
+        }
+    }
+]
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class AccountRoutingModule {
+}

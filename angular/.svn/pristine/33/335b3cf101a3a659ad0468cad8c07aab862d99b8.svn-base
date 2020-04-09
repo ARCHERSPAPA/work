@@ -1,0 +1,203 @@
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { sideAnimate } from "../../../animation/transform.component";
+import { Router, ActivatedRoute } from '@angular/router';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+import { Messages } from "../../../model/msg";
+import { Default } from "../../../model/constant";
+
+
+@Component({
+    selector: 'rev-post',
+    templateUrl: './post.component.html',
+    styleUrls: ['./../personnel.component.scss', './post.component.scss'],
+    animations: [
+        sideAnimate
+    ]
+})
+export class PostComponent implements OnInit {
+    public title: string;
+    public buttons: Array<any>;
+    public switch: string;
+
+
+    public ModalTitle: string;
+    public ButtonText: string;
+    // 添加
+    public postForm: FormGroup;
+    public name: string;
+    public remarks: string;
+    //是否为修改
+    public isEdit: boolean = false;
+    //修改当前部门id
+    public id: number;
+    public isVisible: boolean = false;
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public showBtn: boolean = false;
+    public positionName: string;
+    public listPost: any;
+
+
+    constructor(private router: Router,
+        private fb: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+        private request: RequestService,
+        private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.changeData();
+        this.postForm = this.fb.group({
+            name: [this.name, [
+                Validators.required,
+                Validators.minLength(2),
+                Validators.maxLength(10),
+            ]],
+            remarks: [this.remarks, [
+                Validators.maxLength(120)
+            ]]
+        });
+        // this.switch = "left";
+        this.title = "职位管理";
+        this.buttons = [
+            {
+                name: "新建职位",
+
+                // type:"click",
+                // color:"btn-primary",
+                // method:() =>{
+                //     this.switch = "left";
+                //     setTimeout(() =>{
+                //       this.switch = "right";
+                //       this.router.navigate(["./add"],{relativeTo:this.activatedRoute});
+                //     },500)
+                // }
+            }
+        ];
+    }
+
+
+    submit() {
+        let that = this;
+        if (that.postForm.valid) {
+            let params = that.postForm.value;
+            if (this.isEdit) {
+                params["id"] = this.id;
+            }
+            that.request.doPost({
+                url: this.isEdit ? 'upPosition' : 'addPosition',
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.isVisible = false;
+                        if (!this.isEdit) {
+                            let item = {
+                                name: params["name"],
+                                id: res.data,
+                                departmentQueryType: 2
+                            };
+                            this.handleCancel();
+                            this.rolePost(item);
+                        }
+                        this.changeData();
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.name = '';
+        this.remarks = '';
+    }
+
+    handleName(name: string) {
+        this.ModalTitle = '新建职位'
+        this.ButtonText='提交'
+        this.isVisible = true;
+        this.isEdit = false;
+        // switch (name) {
+        //   case "新建职位":
+        //     // this.router.navigate(["./add"],{relativeTo:this.activatedRoute});
+        //     break;
+        //   default:
+        //     console.log("默认")
+        // }
+    }
+
+    editPost(item) {
+        this.ModalTitle = '编辑职位'
+        this.ButtonText='修改'
+        this.isVisible = true
+        this.name = item.name;
+        this.remarks = item.remarks;
+        this.isEdit = true;
+        this.id = item.id;
+    }
+
+    rolePost(item) {
+        this.router.navigate(["./role"], {
+            queryParams: { item: JSON.stringify(item) },
+            relativeTo: this.activatedRoute, skipLocationChange: true
+        });
+    }
+
+    ngDoCheck() {
+        let url = this.activatedRoute.snapshot["_routerState"].url.toString();
+        this.showBtn = url.indexOf("list") >= 0;
+    }
+
+    delPost(id) {
+        if (id) {
+            this.request.doPost({
+                url: "delPosition",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.changeData();
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+
+    exist() {
+        this.isVisible = false;
+    }
+
+    changeData(...args) {
+        let that = this;
+        if (args && args.length > 0) {
+            that.pageNo = Default.PAGE.PAGE_NO;
+            that.total = Default.PAGE.PAGE_TOTAL;
+        }
+        that.request.doPost({
+            url: "listPosition",
+            data: {
+                pageNo: that.pageNo,
+                pageSize: that.pageSize,
+                positionName: that.positionName
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.total = res.data.total;
+                    that.listPost = res.data.pageSet;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+}

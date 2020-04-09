@@ -1,0 +1,75 @@
+<div class="fileContent">
+    <div class="fileContent">
+        <nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="选择附件" [nzFooter]="null"
+            (nzOnCancel)="handleCancel()" class="meal_modal">
+            <!-- <form method="post" [formGroup]="uploaderForm" class="meal_modal"> -->
+                <div style="margin-top:24px;">
+                    <nz-table #chkTable [nzData]="addFileData" [nzBordered]="true" [nzFrontPagination]="false"
+            [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" nzSize="middle" [nzNoResult]="'请先添加合同附件'"
+            [nzShowPagination]="false"  >
+            <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>文件类型</th>
+                    <th >操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of chkTable.data,let i=index" >
+                    <td>{{data.attachName}}</td>
+                    <td [ngSwitch]="data.type">
+                        <span *ngSwitchCase="0">图片</span>
+                        <span *ngSwitchCase="1">文件</span>
+                        <span *ngSwitchDefault>----</span>
+                    </td>
+                    <td  [nzShowCheckbox]='true' [(nzChecked)]="data.checked" (nzCheckedChange)='addFiles(data,i)' >
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+                </div>
+                <div class="btns" style="text-align:right;" *ngIf='NoResult()'>
+                    <button nz-button nzType="primary" type='submit'(click)='submitAdd()'>
+                        提交
+                    </button>
+                </div>
+            <!-- </form> -->
+        </nz-modal>
+        <div style="text-align:right;" class='filesubmit'>
+            <span *ngIf='isFistSubmit==0 && filesData.length>0'>{{info}}</span>
+            <span> </span>
+            <a class="del" href="javascript:void(0)" (click)='openfileModel()' *ngIf='isClose==0 && isFistSubmit==0 && isDesigners'>
+                添加附件</a>
+        </div>
+        <nz-table #basicTable [nzData]="filesData" [nzBordered]="true" [nzFrontPagination]="false"
+            [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" nzSize="middle"
+            [nzShowPagination]="false">
+            <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>文件类型</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of basicTable.data,let i=index">
+                    <td>{{data.attachName}}</td>
+                    <td [ngSwitch]="data.type">
+                        <span *ngSwitchCase="0">图片</span>
+                        <span *ngSwitchCase="1">文件</span>
+                        <span *ngSwitchDefault>----</span>
+                    </td>
+                    <td>
+                            <a href="javascript:void(0)" class="template_a" [routerLink]="['../../../../../cost/accessory/detail']"
+                            [queryParams]="{id:btoa(data.id),isOfer:1,type:data.type,oferId:btoa(id),isClose:isClose,isFirst:isFistSubmit,isDesigners:isDesigners}">详情</a>
+                    <a href="javascript:void(0)" class="template_a" nz-popconfirm nzTitle="确定删除该附件？" nzOkText="删除"
+                        nzCancelText="取消"(nzOnConfirm)='delList(data.id,i)'  *ngIf='isClose==0 && isFistSubmit==0 && isDesigners'>删除</a>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+    <!-- <div class="btns" *ngIf='isFistSubmit==1'>
+        <button nz-button nzType="primary" (click)='submit()' >提交</button>
+    </div> -->
+</div>

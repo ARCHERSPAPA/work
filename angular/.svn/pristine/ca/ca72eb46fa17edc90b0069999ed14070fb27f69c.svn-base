@@ -1,0 +1,80 @@
+@charset "utf-8";
+.staff-chat{
+  padding:48px 20px;
+  .staff-chat-user{
+    .chat-user-img{
+      width: 120px;
+      height: 120px;
+      > img{
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+    }
+    .chat-user-info{
+      font-family:'PingFang SC';
+      font-weight:400;
+      color:rgba(0,0,0,0.85);
+      font-size: 14px;
+      line-height: 22px;
+      > span{
+        display: block;
+        &.user-info-name{
+          line-height: 28px;
+          font-size: 20px;
+          font-weight: bold;
+        }
+        &.user-info-phone{
+          line-height: 22px;
+        }
+        &.user-info-position{
+          color:rgba(0,0,0,0.25);
+        }
+      }
+
+    }
+  }
+  .chat-option-label{
+    font-size:16px;
+    font-family:'PingFang SC';
+    font-weight:400;
+    line-height:24px;
+    color:rgba(0,0,0,0.85);
+    text-align: right;
+    padding-right: 24px;
+  }
+  .chat-option-btn{
+    color: #0A8DDF;
+    font-size: 14px;
+  }
+  .staff-line{
+    width:1px;
+    height: 280px;
+    background:#E8E8E8;
+  }
+  .staff-chat-code{
+    width: 240px;
+    >.chat-code-img{
+      width: 160px;
+      height: 160px;
+      margin: 10px auto;
+      border:1px solid #E8E8E8;
+      overflow: hidden;
+      > img{
+        width: 100%;
+        height: 100%;
+      }
+      a{
+        font-size: 14px;
+      }
+    }
+    p{
+      word-break:break-all;
+      font-size:14px;
+      font-family:'PingFang SC';
+      font-weight:400;
+      line-height:22px;
+      color:rgba(0,0,0,0.45);
+    }
+  }
+}

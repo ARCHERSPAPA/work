@@ -1,0 +1,103 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.common-head{
+  width: 100%;
+  min-width: 1200px;
+  background: #4c5a5e;
+  .head-wrapper{
+    width: 1200px;
+    height: 52px;
+    margin: 0 auto;
+    .logo{
+      float:left;
+      width: 400px;
+      height: 52px;
+      background: url("./sub.png") no-repeat left center;
+    }
+    .user{
+      float:right;
+      width: 120px;
+      height: 52px;
+      line-height: 52px;
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      .name{
+          display: block;
+          width: 100%;
+          text-indent: 10px;
+          position: relative;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          padding-right: 10px;
+          span{
+              width: 8px;
+              height: 5px;
+              display: inline-block;
+              position: absolute;
+              top: 0;
+              right: 0;
+              margin-top: 23.5px;
+              background: url("./trigle.png") no-repeat;
+              transition: all 0.5s;
+          }
+      }
+      .user-wrapper{
+          position: absolute;
+          width: 100%;
+          background: #fff;
+          border: 1px solid #dedede;
+          z-index: 999;
+          @include compatibility(transform,translate3d(0,-500px,0));
+          @include compatibility(transition,all 0.5s);
+          a{
+              display: block;
+              font-size: 13px;
+              height: 36px;
+              line-height: 36px;
+              padding-right: 10px;
+              background-repeat: no-repeat;
+              background-position:left 10px center;
+              border-bottom: 1px solid #dedede;
+              text-indent: 30px;
+              text-align: left;
+              text-decoration: none;
+              color: rgba(0, 20, 25, 0.7);
+              @include compatibility(transition,all 0.2s);
+              &:hover{
+                  color: rgba(0,120,132,0.8);
+              }
+              &:active{
+                  color: rgba(0,120,132,0.5);
+              }
+              &.mobile{
+                background-image: url("./phone.png");
+              }
+              &.password{
+                  background-image: url("./pwd.png");
+              }
+              &.exit{
+                  background-image: url("./exit.png");
+              }
+              &:last-child{
+                  border: 0;
+              }
+
+          }
+      }
+      &:hover{
+          background: rgba(0, 20, 25, 0.2);
+          .name{
+              span{
+                  transform:rotate(180deg);
+              }
+          }
+          .user-wrapper{
+              @include compatibility(transform,translate3d(0,0,0));
+          }
+      }
+    }
+
+  }
+}

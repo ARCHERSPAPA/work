@@ -1,0 +1,45 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.wage-render{
+  dl{
+    font-family:'PingFang SC';
+    font-weight:400;
+    line-height:22px;
+    margin:14px 0 0 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #E8E8E8;
+    overflow: hidden;
+    dt,dd{
+      padding: 0;
+      margin: 0;
+    }
+    .wage-name{
+      font-size:14px;
+      color:rgba(0,0,0,0.45);
+    }
+    .wage-gray{
+      font-size:14px;
+      color:rgba(0,0,0,0.25);
+    }
+    .wage-time{
+      float: right;
+    }
+    .wage-content{
+      font-size:14px;
+      word-break: break-all;
+      color:rgba(0,0,0,0.65);
+    }
+    .wage-fix{
+      font-size:14px;
+      color:rgba(24,144,255,1);
+    }
+    .wage-img{
+      > div{
+        width: 150px;
+        height: 110px;
+        margin: 5px 5px 0 5px;
+        @include compatibility(display,inline-block);
+      }
+    }
+  }
+}

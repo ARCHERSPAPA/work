@@ -1,0 +1,28 @@
+<div class="productLog" >
+    <div class="userList">
+        <ul >
+            <li *ngFor='let data of productLogList'>
+                <div class="user-title">
+                    <span class="user-name">
+                        {{data.userName}}
+                        <span class="user-roleName" *ngIf='data.userRoleName'>
+                            ({{data.userRoleName}})
+                        </span>
+                    </span>
+                    <span class="user-time">
+                        {{data.createDate | date:'y-MM-dd HH:mm'}}
+                    </span>
+                </div>
+                <div class="user-detail">
+                    {{data.content}}
+                </div>
+            </li>
+        </ul>
+        <div *ngIf="!productLogList || (productLogList && productLogList.length == 0)">
+            <p>暂无数据信息显示</p>
+        </div>
+        <div style="text-align:right;"   *ngIf='productLogList && productLogList.length>0'>
+            <nz-pagination [(nzPageIndex)]="pageNo" [(nzTotal)]="total" [(nzPageSize)]="pageSize"(nzPageIndexChange)='loadList()'></nz-pagination>
+        </div>
+    </div>
+</div>

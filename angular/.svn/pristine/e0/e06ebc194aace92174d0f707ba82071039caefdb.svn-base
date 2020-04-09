@@ -1,0 +1,25 @@
+.filesubmit{
+    margin: 24px 0;
+    display: flex;
+    justify-content: space-between;
+}
+.btns{
+    margin: 24px 0 0 0;
+    text-align: right;
+}
+.template_a{
+    padding-right: 4px;
+}
+.fileContent{
+    tr th,
+    tr td {
+      font-size: 14px;
+      max-width: 60px;
+      // padding: 4px !important;
+      a {
+        padding-right: 4px;
+      }
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;}
+}

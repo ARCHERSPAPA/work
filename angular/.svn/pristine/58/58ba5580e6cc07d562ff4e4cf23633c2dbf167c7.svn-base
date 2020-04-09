@@ -1,0 +1,92 @@
+<div class="finance" style="padding: 0">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="content">
+        <div class="detail-list">
+            <div class="list-head">
+                <div nz-row>
+                    <form method="post" [formGroup]="searchForm">
+                        <div nz-col nzSpan="8" nzOffset="14">
+                            <input nz-input type="text" class="text"
+                                   placeholder="请输入客户姓名/客户手机号码/楼盘地址/设计师/工长/监理"
+                                formControlName="searchName" name="searchName" autocomplete="off" maxlength="32"
+                                [(ngModel)]="searchName" />
+                        </div>
+                        <div nz-col nzSpan="1" nzOffset="1" class="text-right">
+                            <button nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid"
+                                (click)="changeData(true)" style="margin-left:-10px">查询
+
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="list-group-rev">
+                <nz-table #nzTable [nzData]="financeList" [nzBordered]="true" [nzFrontPagination]="false"
+                    [nzShowPagination]="true" nzSize="middle" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                    [nzTotal]="total" (nzPageIndexChange)="changeData()">
+                    <thead>
+                        <tr>
+                            <th>客户姓名</th>
+                            <th>手机</th>
+                            <th width="15%">地址</th>
+                            <th>装修类型</th>
+                            <th>设计师</th>
+                            <th>工长</th>
+                            <th>监理</th>
+                            <th>签单日期</th>
+                            <th>签单总额</th>
+                            <th>收款计划</th>
+                            <th>收款进度</th>
+                            <th width="5%">备注</th>
+                            <th width="5%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of financeList">
+                            <td [title]="item.customerName?item.customerName:''">
+                                {{item.customerName?item.customerName:'--'}}
+                            </td>
+                            <td [title]="item.customerPhone?item.customerPhone:''">
+                                {{item.customerPhone?item.customerPhone:'--'}}
+                            </td>
+                            <td [title]="item.customerHouseAddress?item.customerHouseAddress:''">
+                                {{item.customerHouseAddress?item.customerHouseAddress:'--'}}<span
+                                    *ngIf="item && item.customerRoomNumber">{{item.customerRoomNumber}}</span>
+                            </td>
+                            <td>{{getTypeName(item.type)}}</td>
+                            <!-- <td [title]="item.creatorName?item.creatorName:''">
+              {{item.creatorName?item.creatorName:'--'}}</td> -->
+                            <td [title]="item.designerName?item.designerName:''">
+                                {{item.designerName?item.designerName:'--'}}
+                            </td>
+
+                            <td [title]="item.foreManName?item.foreManName:''">
+                                {{item.foreManName?item.foreManName:'--'}}
+                            </td>
+                            <td [title]="item.supervisorName?item.supervisorName:''">
+                                {{item.supervisorName?item.supervisorName:'--'}}
+                            </td>
+                            <td>{{item.billTime?(item.billTime|date:'yy-MM-dd'):'--'}}</td>
+                            <td [title]="item.finalPrice?item.finalPrice:''">
+                                {{item.finalPrice?(item.finalPrice|number:'1.2'):'--'}}
+                            </td>
+                            <td>{{item.payType}}期</td>
+                            <td>{{item.payState?item.payState:'--'}}</td>
+                            <td  [nzTitle]="item.remark?item.remark:'暂无备注信息'" nzPlacement="topCenter"
+                                nz-tooltip>{{item.remark?item.remark:'--'}}
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" [routerLink]="['./../detail/contract',2]"
+                                    [queryParams]="{cid:btoa(item.id)}">详情</a>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+    </div>
+</div>

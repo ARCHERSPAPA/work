@@ -1,0 +1,31 @@
+<div class="case">
+    <div class="head">
+        <rev-title [title]="title" [showBorder]='false'></rev-title>
+        <!-- <a href="javascript:void(0)"  nz-popconfirm [nzTitle]="'确定发布该项目信息吗'" nzOkText="确定"
+             nzCancelText="取消" *ngIf="state!=1"
+            (nzOnConfirm)="check(0)"> <button nz-button nzType="primary" type="button"
+                 >对外发布</button></a>
+                 <a href="javascript:void(0)"  nz-popconfirm [nzTitle]="'下架后项目将无法查看'" nzOkText="确定"
+                 nzCancelText="取消" *ngIf="state==1"
+                (nzOnConfirm)="check(1)"> 
+        <button nz-button nzType="primary" type="button"  *ngIf="state==1">下架</button></a> -->
+    </div>
+    <div class="split-line">
+    </div>
+    <div class="content">
+        <div nz-row>
+            <rev-case-tabs-head></rev-case-tabs-head>
+        </div>
+        <div nz-row >
+            <nz-tabset [nzSelectedIndex]="index" style="margin-top: 24px;">
+                <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url)" ></nz-tab>
+            </nz-tabset>
+            <div class="data">
+                <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+                <div [hidden]="loading">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

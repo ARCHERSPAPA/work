@@ -1,0 +1,47 @@
+<div class="another">
+  <div class="another-design">
+    <ul>
+      <li *ngFor='let img of imgList,let i=index' class="show-img "[ngStyle]="styleImg(img)"
+      (click)="openModal(i)">
+      <a class="del" href="javascript:void(0)" (click)="delAnotherDetail(i)"></a>
+      <span class="showDel"></span>
+    </li>
+      <!-- <li *ngFor='let img of imgList,let i=index' class="show-img">
+        <img [src]="img" alt="图片" *ngIf='img' (click)="openModal(i)">
+        <a class="del" href="javascript:void(0)" (click)="delAnotherDetail(i)"></a>
+        <span class="showDel"></span>
+      </li> -->
+    </ul>
+    <rev-uploader-new  [content]="'平面设计图'" class="uploader" (click)="addImg()"></rev-uploader-new>
+  </div>
+</div>
+<div class="another-content">
+  <form nz-form [formGroup]="anotherForm">
+    <ul>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="2">VR实景图</nz-form-label>
+        <nz-form-control class="layout" [nzSpan]="22">
+          <input id="realisticPicture" type="text" nz-input formControlName="realisticPicture" name="realisticPicture"
+            [(ngModel)]="realisticPicture" autocomplete="off" placeholder="请填写图片地址" />
+          <nz-form-explain>
+
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="2" >VR效果图</nz-form-label>
+        <nz-form-control class="layout" [nzSpan]="22">
+          <input id="effectPicture" type="text" nz-input formControlName="effectPicture" name="effectPicture"
+            [(ngModel)]="effectPicture" autocomplete="off" placeholder="请填写图片地址" />
+          <nz-form-explain>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+    </ul>
+  </form>
+  <div class=btn>
+    <button nz-button nzType="primary" (click)="submit()">
+      保存
+    </button>
+  </div>
+</div>

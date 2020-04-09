@@ -1,0 +1,46 @@
+@charset "utf-8";
+.quantity{
+  &-item{
+    font-family:'PingFang SC';
+    padding: 24px 0;
+    border-bottom: 1px solid #E8E8E8;
+    &-name{
+      font-size:16px;
+      font-weight:bold;
+      line-height:24px;
+      color:rgba(0,0,0,0.85);
+    }
+    &-date{
+      font-size:14px;
+      font-weight:400;
+      line-height:22px;
+      color:rgba(0,0,0,0.45);
+    }
+    &-del{
+      font-size:14px;
+      font-weight:400;
+      line-height:22px;
+      color:rgba(24,144,255,1);
+      float:right;
+    }
+    &-remark{
+      font-size:14px;
+      font-weight:400;
+      line-height:22px;
+      color:rgba(0,0,0,0.65);
+    }
+    &-imgs{
+      overflow: hidden;
+      &-item{
+        width:160px;
+        height:160px;
+        float:left;
+        background:rgba(0,0,0,0);
+        border:1px solid rgba(0,0,0,0.14901960784313725);
+        border-radius:4px;
+        margin:8px 16px 0 0;
+      }
+    }
+
+  }
+}

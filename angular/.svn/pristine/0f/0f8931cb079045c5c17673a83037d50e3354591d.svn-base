@@ -1,0 +1,83 @@
+<div class="contractdetail">
+    <h3 *ngIf='id'>详情</h3>
+    <div class="detail-Title">
+    <span>
+      {{detailTitle}}
+    </span>
+        <span>
+      <a href="javascript:void(0)" (click)='editTitle()' *ngIf='state!="1"'>修改</a>
+    </span>
+    </div>
+    <div class="contract-img" *ngIf='pageType=="0"'>
+        <div class="imgList">
+            <ul>
+                <li *ngFor='let img of contractList,let i=index' class="show-img">
+                    <img [src]="img.url" alt="图片" *ngIf='img.url' (click)="openLarge(img.url)">
+                    <a class="del" href="javascript:void(0)" (click)="delContractDetail(img.id,i)"></a>
+                    <span class="showDel"></span>
+                </li>
+                <li>
+                    <rev-uploader-new [content]="'上传图片'" class="uploader" (click)='addUserImg()'
+                                      *ngIf='state!="1"'></rev-uploader-new>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="contract-file" *ngIf='pageType=="1"'>
+        <div class="uploderFile">
+            <input type='file' #uploadFile accept=".doc,.docx,.xls,.xlsx,text/plain" id="import"
+                   (change)="handleFileChange($event)" class="fileBox">
+            <div>
+                <i nz-icon type="inbox" theme="outline" class="inbox"></i>
+            </div>
+            <p style="margin-top:20px;">点击上传文件</p>
+            <p style="color:rgba(0,0,0,0.43);">支持扩展名:.doc,.docx,.xls,.xlsx,.txt</p>
+        </div>
+        <p *ngIf='fileName && !id' class="fileName"><a [href]="addContractList.addFiles[0]"
+                                                       target="_blank">{{fileName}}</a></p>
+        <ul class="fileList" *ngFor='let file of contractList'>
+            <p class="fileName"><a [href]="file.url" target="_blank">预览下载文件</a></p>
+        </ul>
+    </div>
+    <div class="submit">
+        <button nz-button nzType="primary" (click)='saveContract()' *ngIf='!id'>
+            保存
+        </button>
+    </div>
+</div>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="修改附件标题" (nzOnCancel)="handleCancel()" [nzFooter]="null" nzWidth="33vw">
+    <form method="post" [formGroup]="contractForm" class="meal_modal">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="3">附件标题</nz-form-label>
+            <nz-form-control [nzSpan]="21" >
+                <input nz-input type="text" name="detailTitle" formControlName="detailTitle" autofocus
+                [(ngModel)]="detailTitle">
+                <nz-form-explain *ngIf="contractForm.get('detailTitle').dirty && contractForm.get('detailTitle').errors">
+                    <ng-container *ngIf="contractForm.get('detailTitle').hasError('maxlength')">
+                        标题最大长度为20
+                    </ng-container>
+                    <ng-container *ngIf="contractForm.get('detailTitle').hasError('required')">
+                        标题不可为空
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!-- <div class="inp">
+            <label>附件标题</label>
+            <input nz-input type="text" name="detailTitle" formControlName="detailTitle" autofocus
+                   [(ngModel)]="detailTitle">
+            <p style="color: red;" *ngIf='!contractForm.valid'>标题最大长度为20</p>
+        </div> -->
+        <div class="btns">
+            <button nz-button nzType="default" type="submit" (click)="handleCancel()">取消</button>
+            <button nz-button nzType="primary" type="submit" (click)="contractSubmitTitle()"
+                    [disabled]="!contractForm.valid">确认
+            </button>
+        </div>
+    </form>
+</nz-modal>
+<nz-modal [(nzVisible)]="showLargeImg" nzTitle="图片展示" (nzOnCancel)="handleCancel()" [nzFooter]="null" nzWidth="1000">
+    <div class="large-img" *ngIf="largeImg">
+        <img [src]="largeImg"/>
+    </div>
+</nz-modal>

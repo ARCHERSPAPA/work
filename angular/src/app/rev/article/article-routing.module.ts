@@ -1,0 +1,226 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule, Routes} from '@angular/router';
+import {GuardService} from "../../service/guard.service";
+import {PriceComponent} from "../detail/price/price.component";
+import {ContractComponent} from "../detail/contract/contract.component";
+import {ArticleSettingComponent} from "./article-setting/article-setting.component";
+import {ArticleNoticeComponent} from "./article-notice/article-notice.component";
+import {NoticeComponent} from "../detail/notice/notice.component";
+import {DynamicsComponent} from "../detail/dynamics/dynamics.component";
+import {AssessmentComponent} from "../detail/assessment/assessment.component";
+import {ArticleStayComponent} from "./article-stay/article-stay.component";
+import {SettleDetailAttendComponent} from "../settle/settle-detail/settle-detail-attend/settle-detail-attend.component";
+import {ProductLogComponent} from '../detail/product-log/product-log.component';
+import {DispatchComponent} from "../detail/dispatch/dispatch.component";
+import {ArticleItemComponent} from "./article-item/article-item.component";
+import {ArticleListComponent} from "./article-item/article-list/article-list.component";
+import {ArticleDetailComponent} from "./article-item/article-detail/article-detail.component";
+import {ArticleNoticeDetailComponent} from "./article-notice/article-notice-detail/article-notice-detail.component";
+import {ArticleNoticeListComponent} from "./article-notice/article-notice-list/article-notice-list.component";
+import {ArticleRegulationComponent} from "./article-regulation/article-regulation.component";
+import {ArticleRegulationListComponent} from "./article-regulation/article-regulation-list/article-regulation-list.component";
+import {ArticleRegulationDetailComponent} from "./article-regulation/article-regulation-detail/article-regulation-detail.component";
+import {ItemQuantityComponent} from '../detail/item-quantity/item-quantity.component';
+
+const routes: Routes = [
+    {
+        path: "",
+        redirectTo: "item",
+        pathMatch: "full"
+    },
+    {
+        path: "item",
+        component: ArticleItemComponent,
+        data: {
+            breadcrumb: "项目列表"
+        },
+        children: [
+            {
+                path: "",
+                redirectTo: "list",
+                pathMatch: "full"
+            },
+            {
+                path: "list",
+                component: ArticleListComponent,
+                canActivate: [GuardService]
+            },
+            {
+                path: "detail",
+                component: ArticleDetailComponent,
+                data: {
+                    breadcrumb: "详情"
+                },
+                children: [
+                    {
+                        path: "",
+                        redirectTo: "dispatch",
+                        pathMatch: "full"
+                    },
+                    {
+                        path: "dynamic/:state",
+                        component: DynamicsComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "assess/:state",
+                        component: AssessmentComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "log/:state",
+                        component: ProductLogComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "attend/:state",
+                        component: SettleDetailAttendComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "dispatch/:state",
+                        component: DispatchComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "quantity/:state",
+                        component: ItemQuantityComponent,
+                        canActivate: [GuardService]
+                    }
+                ]
+            },
+        ]
+    },
+    {
+        path: "setting",
+        component: ArticleSettingComponent,
+        canActivate: [GuardService],
+        data: {
+            breadcrumb: "验收设置"
+        },
+        // children: [
+        //     {
+        //         path: "",
+        //         redirectTo: "list",
+        //         pathMatch: "full"
+        //     },
+        //     {
+        //         path: "list",
+        //         component: ArticleSettingListComponent,
+        //         canActivate: [GuardService]
+        //     },
+        // ]
+    },
+    {
+        path: "reform",
+        component: ArticleNoticeComponent,
+        data: {
+            breadcrumb: "整改通知"
+        },
+        children: [
+            {
+                path: "",
+                redirectTo: "list",
+                pathMatch: "full"
+            },
+            {
+                path: "list",
+                component: ArticleNoticeListComponent,
+                canActivate: [GuardService]
+            },
+            {
+                path: "detail",
+                component: ArticleNoticeDetailComponent,
+                data:{
+                    breadcrumb:"详情"
+                },
+                children: [
+                    {
+                        path: "",
+                        redirectTo: "notice",
+                        pathMatch: "full"
+                    },
+                    {
+                        path: "price/:state",
+                        component: PriceComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "contract/:state",
+                        component: ContractComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "notice/:state",
+                        component: NoticeComponent,
+                        canActivate: [GuardService]
+                    }
+                ]
+            },
+        ]
+    },
+    {
+        path: "stay",
+        component: ArticleStayComponent,
+        canActivate: [GuardService],
+        data:{
+            breadcrumb:"待审项目"
+        }
+    },
+    {
+        path: "regulation",
+        component:ArticleRegulationComponent,
+        data:{
+            breadcrumb:"增减项目"
+        },
+        children: [
+            {
+                path: "",
+                redirectTo: "list",
+                pathMatch: "full"
+            },
+            {
+                path: "list",
+                component:ArticleRegulationListComponent,
+                canActivate: [GuardService]
+            },
+            {
+                path: "detail",
+                component: ArticleRegulationDetailComponent,
+                data:{
+                    breadcrumb:"详情"
+                },
+                children: [
+                    {
+                        path: "",
+                        redirectTo: "notice",
+                        pathMatch: "full"
+                    },
+                    {
+                        path: "price/:state",
+                        component: PriceComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: "contract/:state",
+                        component: ContractComponent,
+                        canActivate: [GuardService]
+                    },
+                ]
+            }
+        ]
+    }
+];
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class ArticleRoutingModule {
+}

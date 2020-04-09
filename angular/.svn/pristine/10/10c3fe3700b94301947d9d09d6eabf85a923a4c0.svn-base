@@ -1,0 +1,69 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.finance-list{
+    .list-head{
+        .search-bar{
+            width: 400px;
+            height: 30px;
+            float: right;
+            font-size: 0;
+           
+            .choice{
+                display: inline-block;
+                vertical-align: top;
+                width: 30%;
+                height: 30px;
+                outline: none;
+                font-size: 12px;
+                border:1px solid #dedede;
+                margin-right: 2%;
+                text-indent: 10px;
+                @include border;
+            }
+            .inp{
+                width: 68%;
+                display: inline-block;
+                vertical-align: top;
+                input{
+                    width: 200px !important;
+                }
+                .text{
+                    display: inline-block;
+                     vertical-align: top;
+                    width: 78%;
+                    height: 30px;
+                    outline: none;
+                    font-size: 12px;
+                    border:1px solid #dedede;
+                    margin-right: 2%;
+                    text-indent: 10px;
+                    @include border;
+                }
+                // .btn{
+                //     display: inline-block;
+                //     vertical-align: top;
+                //     width: 20%;
+                //     height: 30px;
+                //     outline: none;
+                //     border: 0;
+                //     color: #fff;
+                //     font-size: 12px;
+                //     cursor: pointer;
+                //     &.btn-primary{
+                //         @include hover(#0a8ddf);
+                //     }
+                // }
+
+            }
+        }
+    }
+    .serchs{
+        display: inline-block !important;
+        margin-right: 6px;
+      }
+    .list-group-rev{
+        width: 100%;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+}

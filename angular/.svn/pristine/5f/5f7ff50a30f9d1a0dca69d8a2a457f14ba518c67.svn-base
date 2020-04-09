@@ -1,0 +1,37 @@
+@charset "utf-8";
+.detail-list{
+    .list-head{
+        .head-bar{
+            width: 50%;
+            float: left;
+            a{
+                display: inline-block;
+                padding: 5px 30px;
+                border: 1px solid #3ba4e5;
+                text-decoration: none;
+                margin-right: -1px;
+                color: #3ba4e5;
+                &.active{
+                    color: #fff;
+                    background: #3ba4e5;
+                }
+            }
+        }
+        .search-bar{
+            div>div{
+                padding: 0 !important;
+            }
+            width: 40%;
+            float: right;
+            .inp{
+                width: 100%;
+            }
+        }
+    }
+    .list-group-rev{
+        .list-items{
+            width: 100%;
+            float: none;
+        }
+    }
+}

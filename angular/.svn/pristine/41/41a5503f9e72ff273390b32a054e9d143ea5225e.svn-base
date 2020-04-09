@@ -1,0 +1,245 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router'
+import { RequestService } from "../../../../service/request.service";
+import { QiNiuService } from "../../../../service/qi-niu.service";
+import { WarningService } from "../../../../service/warning.service";
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { Messages } from "../../../../model/msg";
+import { UploaderMultisComponent } from "../../../../plugins/uploader-multis/uploader-multis.component";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Lightbox } from 'ngx-lightbox';
+import { SettleService } from "../../../../service/settle.service";
+import { setStyleBg } from 'src/app/model/methods';
+
+@Component({
+  selector: 'rev-case-tabs-complete',
+  templateUrl: './case-tabs-complete.component.html',
+  styleUrls: ['./case-tabs-complete.component.scss']
+})
+export class CaseTabsCompleteComponent implements OnInit {
+  public config;
+  //富文本
+  public content;
+  public sourceId;
+  public title: string;
+  public quoteNo: any;
+  public imgList = [];
+  public cid:string;
+  //判断是否发布
+  public isDown:number;
+  constructor(private router: Router,
+    private route: ActivatedRoute,
+    private request: RequestService,
+    private settle: SettleService,
+    private qn: QiNiuService,
+    private _lightbox: Lightbox,
+    private modalService: NgbModal,
+    private warn: WarningService) {
+  }
+
+  ngOnInit() {
+    this.title = '素材详情';
+    this.route.queryParams.subscribe(params => {
+      if (params && params["quoteNo"]) {
+        this.quoteNo = atob(params["quoteNo"]);
+        this.cid=atob(params["aid"]);
+      }
+    })
+    this.loadCaseInfo()
+  }
+//获取发布状态
+  ngDoCheck(){
+    if(this.settle.getCaseData()){
+      this.isDown=this.settle.getCaseData().isDown;
+    }
+  }
+
+  openModal(index) {
+    let _albums = []
+    // this.isVisible = true;
+    // this.src = src;
+    this.imgList.forEach((i) => {
+      _albums.push({ src: i })
+
+    })
+    this._lightbox.open(_albums, index);
+  }
+  //删除图片
+  delImg(index: number) {
+    this.imgList.splice(index, 1)
+  }
+
+  loadCaseInfo() {
+    this.request.doPost({
+      url: "smallProgramDetails",
+      data: { quoteNo: this.quoteNo },
+      success: (res => {
+        if (res && res.code == 200) {
+          this.imgList = res.data.newCoverImg ? res.data.newCoverImg : [];
+          this.content = res.data.content;
+          // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    });
+  }
+
+  public quillLen: Number = 0
+
+  // 富文本
+  contentChanged(event) {
+    if (this.editor.getLength(3) - 1 > 5000) {
+      this.editor.deleteText(5000, this.editor.getLength(3) - 1)
+    } else {
+      this.quillLen = this.editor.getLength(3) - 1
+      this.content = event.html;
+    }
+  }
+
+  public editor;
+  EditorCreated(quill) {
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', this.imageHandler.bind(this));
+    this.editor = quill;
+  }
+
+  imageHandler() {
+    this.request.doPostImg({
+      url: "token",
+      success: (res => {
+        if (res && res.code == 200) {
+          let token = JSON.parse(res.data).uptoken;
+          let url = JSON.parse(res.data).url;
+          this.qn.setToken(token);
+          this.qn.setDataUrl(url);
+        } else {
+          this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    })
+    const Imageinput = document.createElement('input');
+    Imageinput.setAttribute('type', 'file');
+    Imageinput.setAttribute('accept', 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon');
+    // console.log(Imageinput)
+    Imageinput.addEventListener('change', () => {
+      const file = Imageinput.files[0];
+      this.qn.postImg(file, this.qn.getToken()).subscribe(event => {
+
+        if (event.type === HttpEventType.UploadProgress) {
+
+        } else if (event instanceof HttpResponse) {
+          let src = this.qn.getDataUrl() + "/" + event.body['key'];
+          const range = this.editor.getSelection(true);
+          const newRange = 0 + (range !== null ? range.index : 0)
+          // const index = range.index + range.length;
+          this.editor.insertEmbed(range.index, 'image', src);
+          this.editor.setSelection(1 + newRange)
+        }
+      }, error => {
+        console.log(JSON.stringify(error));
+      });
+    });
+    Imageinput.click();
+  }
+
+  getImageType(name) {
+    return name.substring(name.lastIndexOf("."));
+  }
+  
+  styleImg(img) {
+    return setStyleBg(img, 160, 160);
+}
+
+  //   handleSub() {
+  //     const self = this;
+  //  if (!this.content) {
+  //       // this._notification.create('error', '温馨提示', "请输入素材内容", {nzDuration: 2000});
+  //       this.warn.onMsgWarn("请输入素材内容");
+  //       return;
+  //     } else if (this.editor.getLength(3) - 1 < 10) {
+  //       // this._notification.create('error', '温馨提示', "素材内容长度至少为10", {nzDuration: 2000});
+  //       this.warn.onMsgWarn("素材内容长度至少为10");
+  //       return;
+  //     }
+
+  //     this.request.doPost({
+  //       url: "noticeSourceUpd",
+  //       data: {
+  //         id: this.sourceId,
+  //         content: this.content
+  //       },
+  //       success: (res => {
+  //         if (res && res.code == 200) {
+  //           this.router.navigate(["./../list"], { relativeTo: this.route })
+  //         } else {
+  //           this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+  //         }
+  //       })
+  //     })
+  //   }
+
+  handlePreview() {
+    localStorage.setItem("content", this.content);
+    window.open(window.location.href.replace(/detail\/complete/g, 'preview'), '_blank');
+  }
+
+  addImg() {
+    if (this.imgList && this.imgList.length > 4) {
+      this.warn.onWarn(Messages.ERROR.CASE_IMG_MAX)
+    } else {
+      const modalRef = this.modalService.open(UploaderMultisComponent, {
+        centered: true,
+        keyboard: false
+      });
+      modalRef.componentInstance.name = "新增图片";
+      modalRef.componentInstance.open = true;
+      modalRef.componentInstance.total= 6;
+      modalRef.componentInstance.cid= this.cid;
+      modalRef.componentInstance.split = "case";
+      modalRef.componentInstance.size = 2;
+      // modalRef.componentInstance.cid = this.id ? this.id : Math.ceil(Math.random() * 100);
+      modalRef.result.then((result) => {
+        result.forEach(item => {
+          if (this.imgList && this.imgList.length > 4) {
+            this.warn.onWarn(Messages.ERROR.CASE_IMG_MAX);
+          } else {
+            this.imgList.push(item);
+          }
+        })
+      })
+    }
+  }
+  //保存富文本和封面
+  save() {
+    // if(this.isDown!=0){
+    //   this.warn.onWarn(Messages.ERROR.EDIT_ERROR);
+    //   return;
+    // }
+    let img = [];
+    if (this.imgList && this.imgList.length > 0) {
+      this.imgList.forEach(item => {
+        img.push(item);
+      })
+    }
+    this.request.doPost({
+      url: "smallProgramSave",
+      data: {
+        quoteNo: this.quoteNo,
+        isSave:1,
+        coverImg: img,
+        content: this.content ? this.content : ''
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.settle.loadCaseHead(this.quoteNo).then(res => {
+            this.settle.setCaseData(res);
+          });
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+}

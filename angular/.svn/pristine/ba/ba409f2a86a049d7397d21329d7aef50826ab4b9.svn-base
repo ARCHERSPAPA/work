@@ -1,0 +1,117 @@
+import { Component, OnInit } from '@angular/core';
+import { Default } from "../../../../model/constant";
+import { RequestService } from "../../../../service/request.service";
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Messages } from "../../../../model/msg";
+import { WarningService } from "../../../../service/warning.service";
+import { btoa } from "../../../../model/methods";
+
+@Component({
+    selector: 'rev-question-list',
+    templateUrl: './question-list.component.html',
+    styleUrls: ['./../question.component.scss', './../../../detail/list.scss'],
+})
+export class QuestionListComponent implements OnInit {
+
+    public title: string;
+    public switch: string;
+    public atags: Array<any>;
+
+    //分页
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public qid: string;
+
+    //查询条件
+    public name: string;
+    public searchForm: FormGroup;
+
+    //题库
+    public quests: Array<any>;
+
+    constructor(
+        private req: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder) { }
+
+    ngOnInit() {
+        this.title = "题库";
+        this.switch = "left";
+        this.getQid();
+        this.searchForm = this.fb.group({
+            name: [this.name, [
+                Validators.maxLength(10)
+            ]]
+        })
+        this.changeData();
+    }
+
+    searchData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.changeData();
+    }
+
+    /**
+     * 删除题库
+     * @param id
+     */
+    deleteItem(id) {
+        if (id) {
+            this.req.doPost({
+                url: "deleteQuest",
+                data: { id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.changeData();
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+    getQid() {
+        this.req.doPost({
+            url: "createQuest",
+            data: {},
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.qid = res.data;
+                    this.atags = [
+                        {
+                            name: "新建题库",
+                            color: "btn-primary",
+                            link: `/rev/topic/quest/detail?qid=${btoa(this.qid)}`
+                        }
+                    ];
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+    changeData() {
+        this.req.doPost({
+            url: "listQuest",
+            data: {
+                page: this.pageNo,
+                pageSize: this.pageSize,
+                title: this.name
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.quests = res.data.list;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+    btoa(id: string) {
+        return btoa(id)
+    }
+}

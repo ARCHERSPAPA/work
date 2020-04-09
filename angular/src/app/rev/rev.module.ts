@@ -1,0 +1,136 @@
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {UploadModule} from "../public/upload.module";
+import {PublicModule} from "./../public/public.module";
+import {RevRoutingModule} from "./rev-routing.module";
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgxAmapModule} from 'ngx-amap';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+
+import {ImageCropperModule} from 'ngx-img-cropper';
+import {TimepickerModule} from 'ngx-bootstrap';
+
+import {GpsComponent} from "../plugins/gps/gps.component";
+import {ModalComponent} from "../plugins/modal/modal.component";
+import {UploaderComponent} from "../plugins/uploader/uploader.component";
+import {DepartService} from "../service/depart.service";
+import {SectorComponent} from "../plugins/sector/sector.component";
+import {SectorTreeComponent} from "../plugins/sector/sector-tree.component";
+import {ItemComponent} from "../plugins/item/item.component";
+import {InfoComponent} from "../plugins/info/info.component";
+import {InfoDepartTreeComponent} from "../plugins/info/info-depart-tree/info-depart-tree.component";
+import {InfoDesignersComponent} from "../plugins/info/info-designers/info-designers.component";
+import {InfoUserComponent} from "../plugins/info/info-user/info-user.component";
+import {BsDatepickerModule} from 'ngx-bootstrap';
+import {QuoteService} from "../service/quote.service";
+import {ArticleService} from "../service/article.service";
+import {RelevantComponent} from "../plugins/relevant/relevant.component";
+import {UpfileComponent} from "../plugins/upfile/upfile.component";
+import {LocationComponent} from "../plugins/location/location.component";
+import {EquipComponent} from "../plugins/equip/equip.component";
+import {EngineesComponent} from "../plugins/enginees/enginees.component";
+import {UploaderMultisComponent} from "../plugins/uploader-multis/uploader-multis.component";
+import {InfoStrategyComponent} from "../plugins/info/info-strategy/info-strategy.component";
+import {ItemCartComponent} from "../plugins/item-cart/item-cart.component";
+import {ImgLargeComponent} from "../plugins/img-large/img-large.component";
+import {RichTextService} from "../service/rich-text.service";
+import {ItemQuestComponent} from "../plugins/item-quest/item-quest.component";
+import {ItemApplicantsComponent} from "../plugins/item-applicants/item-applicants.component";
+import {ItemUserComponent} from "../plugins/item-user/item-user.component";
+import {ItemDispatcherComponent} from "../plugins/item-dispatcher/item-dispatcher.component";
+import {MapComponent} from "../plugins/map/map.component";
+import {StepsComponent} from "./steps/steps.component";
+import {ItemPublishComponent} from "../plugins/item-publish/item-publish.component";
+import {CopyrightModule} from "../public/copyright.module";
+import {MasterComponent} from "./master/master.component";
+// import { StatsComponent } from './stats/stats.component';
+
+
+
+
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        CopyrightModule,
+        UploadModule,
+        PublicModule,
+        RevRoutingModule,
+        NgbModule.forRoot(),
+        ImageCropperModule,
+         /***导入面包屑***/
+        // NzBreadCrumbModule,
+        NgxAmapModule.forRoot({
+            apiKey: "f765d6b350eb0744f00d395812e98ffc"
+        })
+    ],
+    declarations: [
+        GpsComponent,
+        MapComponent,
+        ModalComponent,
+        UploaderComponent,
+        UpfileComponent,
+        SectorComponent,
+        SectorTreeComponent,
+        ItemComponent,
+
+        ItemCartComponent,
+        InfoComponent,
+        InfoDepartTreeComponent,
+        InfoDesignersComponent,
+        InfoUserComponent,
+        /****合并功能人员选择****/
+        InfoStrategyComponent,
+        RelevantComponent,
+        LocationComponent,
+        EquipComponent,
+        EngineesComponent,
+        UploaderMultisComponent,
+        ImgLargeComponent,
+        ItemQuestComponent,
+        ItemApplicantsComponent,
+        ItemUserComponent,
+        ItemDispatcherComponent,
+        StepsComponent,
+        ItemPublishComponent,
+        // StatsComponent,
+        MasterComponent,
+    ],
+    entryComponents: [
+        ModalComponent,
+        UploaderComponent,
+        UpfileComponent,
+        SectorComponent,
+        SectorTreeComponent,
+        ItemComponent,
+        ItemCartComponent,
+        InfoComponent,
+        InfoDepartTreeComponent,
+        InfoDesignersComponent,
+        InfoUserComponent,
+        InfoStrategyComponent,
+        RelevantComponent,
+        LocationComponent,
+        EquipComponent,
+        EngineesComponent,
+        UploaderMultisComponent,
+        ImgLargeComponent,
+        ItemQuestComponent,
+        ItemApplicantsComponent,
+        ItemUserComponent,
+        ItemDispatcherComponent,
+        ItemPublishComponent,
+    
+    ],
+    providers: [
+        DepartService,
+        QuoteService,
+        // ContractService,
+        ArticleService,
+        RichTextService,
+        // DepartmentService
+    ]
+})
+export class RevModule {
+}

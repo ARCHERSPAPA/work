@@ -1,0 +1,45 @@
+<div class="schedule-head" [ngStyle]="styleImg(userInfo.headImg)"></div>
+<div class="schedule">
+    <div class="schedule-info">
+        <div class="company-top">
+            <h3 class="company-name">{{companyName?companyName:''}}</h3>
+            <img class="company-avatar" [src]="userInfo.headImg" alt="" />
+        </div>
+        <div class="company-detail">
+            <!-- <p>当前登录账号:<span>admin</span><a href="javascript:void(0)" (click)="edit()">修改</a></p> -->
+            <p class="user-name">{{userInfo.name?userInfo.name:'无'}}</p>
+            <p class="user-job">{{userInfo.positionName?userInfo.positionName:'无'}}</p>
+            <p>性别：<span *ngIf='userInfo.sex || userInfo.sex===0'>{{userInfo.sex===0?'女':'男'}}</span>  <span *ngIf='!userInfo.sex && userInfo.sex!==0'>--</span> </p>
+            <p>手机号：<span *ngIf='userInfo.phone'>{{userInfo.phone | FourPipe}}</span>
+                <span *ngIf='!userInfo.phone'>--</span>
+            </p>
+            <p>工号：{{userInfo.empNo?userInfo.empNo:'无'}}</p>
+            <p>身份证：<span *ngIf='userInfo.idCard'>{{userInfo.idCard | FourPipe}}</span><span
+                    *ngIf='!userInfo.idCard'>--</span></p>
+            <p><span style="vertical-align: top;">所属部门：</span><span
+                    *ngFor='let dep of userInfo.deps'>{{dep.name}}</span> <span *ngIf='!userInfo.deps'>--</span></p>
+        </div>
+    </div>
+    <div class="schedule-detail" *ngIf='scheduleList && scheduleList.length>0'>
+        <ul>
+            <li class="detail-info" *ngFor='let data of scheduleList' (click)='pageChange(data.permissionId)'>
+                <div style="margin-left: 70px;">
+                    <p class="schedule-num">
+                        {{data.count}}
+                    </p>
+                    <span>{{data.name}}</span>
+                </div>
+                <i nz-icon type="right" theme="outline" class="schedule-icon"></i>
+            </li>
+        </ul>
+    </div>
+    <div class="schedule-nodata" *ngIf="scheduleList && scheduleList.length == 0">
+        <div>
+            <div class="schedule-infoicon">
+            </div>
+            <p>
+                暂无待办事项
+            </p>
+        </div>
+    </div>
+</div>

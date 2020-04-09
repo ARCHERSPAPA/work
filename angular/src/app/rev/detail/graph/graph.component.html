@@ -1,0 +1,38 @@
+<div class="detail-graph">
+    <!--项目图纸-->
+    <dl>
+        <dt>
+            <span class="title">{{graphName}}</span>
+            <span *ngIf="graphInfo && graphInfo.submitedDrawingTime" class="ml-8">上传时间：{{graphInfo.submitedDrawingTime|date:'yy-MM-dd HH:mm'}}</span>
+            <span *ngIf="graphInfo && graphInfo.customConfirmDrawingTime" class="ml-8">确认时间：{{graphInfo.customConfirmDrawingTime|date:'yy-MM-dd HH:mm'}}</span>
+        </dt>
+        <dd class="graph-list">
+            <ul>
+                <li *ngFor="let graph of graphList;let i = index">
+                    <span class="img" [ngStyle]="styleBg(graph)" (click)="openModal($event,graph)"></span>
+                    <a class="del" *ngIf="showBtnByState()" (click)="delDraw($event,i)">
+                        <i nz-icon type="delete"></i>
+                    </a>
+                    <!---nz-popconfirm nzTitle="确定删除照片?" (nzOnConfirm)="delDraw($event,i)" nzOkText="确定" nzCancelText="取消" --->
+                </li>
+                <li *ngIf="showBtnByState()">
+                    <rev-uploader-new [content]="'上传图片'" class="uploader" (click)='addDrawList()'></rev-uploader-new>
+                </li>
+            </ul>
+        </dd>
+    </dl>
+    <!--按钮控制-->
+
+    <div nz-row class="text-right">
+        <button nz-button nzType="primary" (click)="doGraph($event)" *ngIf="showBtnByState()">保存</button>
+    </div>
+</div>
+
+
+<!--图片放大-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" nzWidth="1000"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>

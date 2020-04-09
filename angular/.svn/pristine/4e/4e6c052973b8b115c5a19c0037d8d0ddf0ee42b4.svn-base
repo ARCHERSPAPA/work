@@ -1,0 +1,38 @@
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RandomService {
+
+  public rand:Array<any> = [];
+  constructor() {
+    /***
+     * 0-9数字组合
+     ***/
+    for(let i = 0; i < 10; i++){
+      this.rand.push(i);
+    };
+
+    /***
+     * A-Z字母组合
+     ***/
+    for(let i = 65; i < 91; i++){
+      this.rand.push(String.fromCharCode(i));
+    }
+
+    for(let i = 97; i < 123; i++){
+      this.rand.push(String.fromCharCode(i));
+    }
+  }
+
+  create(num){
+    let str = [];
+    for(let i = 0; i < num; i++){
+      str.push(this.rand[Math.floor(Math.random()*61+1)]);
+    }
+    return str.join("");
+  }
+
+
+}

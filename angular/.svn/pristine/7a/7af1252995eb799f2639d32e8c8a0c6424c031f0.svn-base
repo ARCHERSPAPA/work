@@ -1,0 +1,89 @@
+<div class="article">
+    <div class="head">
+        <rev-title [title]="title" ></rev-title>
+        <nz-alert
+                nzType="info"
+                [nzMessage]="''+total+'条动态等待审核'"
+                nzShowIcon
+                [nzCloseable]='true'
+                *ngIf="stays && stays.length > 0"
+                class="showCount"
+        ></nz-alert>
+    </div>
+    <div class="content">
+        <div class="detail-list" *ngIf="stays && stays.length > 0">
+            <dl *ngFor="let stay of stays" class="stay-dl">
+                <dd class="stay_head">
+                    <span class="stay_title">{{stay.addressName?stay.addressName:'--'}}<span *ngIf="stay.customerRoomNumber">{{stay.customerRoomNumber}}</span>
+                        <!--<span *ngIf="stay.roomType">{{stay.roomType}}室</span><span *ngIf="stay.parlourType">{{stay.parlourType}}厅</span>-->
+                        <!--<span *ngIf="stay.restaurant">{{stay.restaurant}}餐</span><span *ngIf="stay.toiletType">{{stay.toiletType}}卫</span>-->
+                        <!--<span *ngIf="stay.kitchenType">{{stay.kitchenType}}厨</span><span *ngIf="stay.balcony">{{stay.balcony}}阳台</span>-->
+                    </span>
+
+                    <span class="stay_time">{{stay.createDate?(stay.createDate|date:"yyyy-MM-dd HH:mm")+'上传':'--'}} 
+                            <a nz-popconfirm [nzTitle]="'是否删除该项目动态'" (nzOnConfirm)="delItem(stay.id)"
+                            nzPlacement="top">删除</a>
+                        </span>
+                </dd>
+                <dd class="stay_info stat_layout">
+                        <span *ngIf="showHouseType(stay)">户型:{{showHouseType(stay)}}</span>
+                    <span>面积:{{stay.customerHouseArea?stay.customerHouseArea+'m²':'--'}}</span>
+                    <span>工程监理：{{stay.memberName?stay.memberName:'--'}}
+                        <span class="stay_phone">({{stay.phone?stay.phone:'--'}})</span>
+                    </span>
+                    <span *ngIf="stay.newName">项目工长:{{stay.newName}}<span class="stay_phone">({{stay.newPhone}})</span></span>
+                </dd>
+                <dd class="stay_content stat_layout" *ngIf="stay.verifyState == 0">
+                    {{stay.content}}
+                </dd>
+             
+                <dd class="stay-list stat_layout">
+                        <p *ngIf='stay.imgList && stay.imgList.length>0'>请审核该项目图片</p>
+                    <ul>
+                        <li *ngFor="let img of stay.imgList;let i=index" class="stay-item"
+                            (mouseenter)="showImgMark(img,true)" (mouseleave)="showImgMark(img,false)">
+                            <div class="stay-checkbox" [hidden]="!img.state">
+                                <span class="stay-unchecked" (click)="auditImg(img,2)">不合格</span>
+                                <span class="stay-checked" (click)="auditImg(img,1)">合格</span>
+                            </div>
+                            <div class="stay-confirm" [hidden]="img.state">
+                                <span [ngClass]="{'showYes':img.verifyState === 1,'showNo':img.verifyState === 2}">{{img.verifyState === 1?'合格':'不合格'}}</span>
+                            </div>
+                            <span class="item-img" (click)="openModal(stay.imgList,i)">
+                                <img [src]="img.imgUrl"/>
+                            </span>
+                            <span class="item-remark" [title]="img.remark?img.remark:''">
+                                <input nz-input type="text" placeholder="请输入备注信息" [(ngModel)]="img.remark" maxlength="32"/>
+                                <span *ngIf="img.remark && img.remark.length > 0" class="item-count"><span
+                                ></span>{{32 - img.remark.length}}</span>
+                            </span>
+                        </li>
+                    </ul>
+                    <div class="stay-dt">
+                            <span class="dt-right btns" *ngIf="stay.verifyState == 0">
+                                <button nz-button nzType="primary" (click)="submit(stay)">提交</button>
+                            </span>
+                        </div>
+                </dd>
+             
+            </dl>
+        </div>
+        <div class="detail-list" *ngIf="!stays||(stays && stays.length == 0)">
+            <p>暂无数据信息显示</p>
+        </div>
+        <div class="page" *ngIf="stays && stays.length > 0">
+            <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+            <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                           (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+        </div>
+    </div>
+
+</div>
+
+
+<!--放大图片-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>

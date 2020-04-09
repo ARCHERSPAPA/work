@@ -1,0 +1,19 @@
+.case {
+  .head {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #dedede;
+    a {
+      font-size: 14px;
+    }
+  }
+  .split-line{
+    width: calc(100% + 48px);
+    height: 8px;
+    background: #f0f2f5;
+    opacity: 1;
+    position: absolute;
+    top: 318px;
+    margin: 0px -24px 0px -24px;
+  }
+}

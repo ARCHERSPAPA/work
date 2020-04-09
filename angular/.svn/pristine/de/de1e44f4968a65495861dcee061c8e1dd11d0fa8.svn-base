@@ -1,0 +1,64 @@
+<div class="case" style="padding: 0">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <div class="detail-list">
+      <div class="detail-list-head">
+        <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        <div class="search">
+          <input nz-input [(ngModel)]="searchType" (keyup)="($event.which === 13) ? changeData(true) : 0"
+            onkeyup="this.value = this.value.replace(/^\s+/g,'')" placeholder="请输入项目ID/楼盘房号/客户/设计师/工长/监理" />
+          <button nz-button nzType="primary" (click)="changeData(true)">查询</button>
+        </div>
+      </div>
+
+      <div class="list-group-rev">
+        <nz-table #nzTable [nzData]="caseList" [nzBordered]="true" [nzFrontPagination]="false" [(nzPageIndex)]='pageNo'
+          [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changeData()' nzSize="middle"
+          [nzShowPagination]='true'>
+          <thead>
+            <tr>
+              <th>项目ID</th>
+              <th>楼盘房号</th>
+              <th>项目状态</th>
+              <th>完工日期</th>
+              <th>客户</th>
+              <th>设计师</th>
+              <th>工长</th>
+              <th>监理</th>
+              <th>操作</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let case of nzTable.data">
+              <td [title]="case.quoteNo?case.quoteNo:''">
+                <nz-badge >{{case.quoteNo?case.quoteNo:'--'}}</nz-badge>
+              </td>
+              <td [title]="case.customerHouseAddress?case.customerHouseAddress:''">{{case.customerHouseAddress?case.customerHouseAddress:'--'}}{{case.customerRoomNumber?case.customerRoomNumber:'--'}}</td>
+              <td >
+                {{getcaseName(case.state)}}</td>
+              <td [title]="case.completionTime?case.completionTime:''">{{case.completionTime?(case.completionTime|date:'yy-MM-dd'):'--'}}</td>
+              <td [title]="case.customerName?case.customerName:''">{{case.customerName?case.customerName:'--'}}
+              </td>
+              <td [title]="case.designerName?case.designerName:''">{{case.designerName?case.designerName:'--'}}
+              </td>
+              <td [title]="case.foremanName?case.foremanName:''">{{case.foremanName?case.foremanName:'--'}}
+              </td>
+              <td [title]="case.supervisorName?case.supervisorName:''">
+                {{case.supervisorName?case.supervisorName:'--'}}
+              </td>
+             
+              <td>
+                <a href="javascript:void(0)" [routerLink]="['./../detail/real']"
+                  [queryParams]="{aid:btoa(case.id),quoteNo:btoa(case.quoteNo)}">详情</a></td>
+
+            </tr>
+          </tbody>
+        </nz-table>
+
+      </div>
+    </div>
+  </div>
+</div>

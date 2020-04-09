@@ -1,0 +1,20 @@
+<div class="com-title">
+  <h2 class="com-name">{{title}}<span *ngIf="num !== undefined">（{{num?num:0}}）</span></h2>
+  <div class="btns" *ngIf="buttons && buttons.length > 0 && show">
+    <div style="display: inline-block;margin-left: 8px;" *ngFor="let btn of buttons">
+      <button nz-button [nzType]="'primary'" (click)="handleNameClick(btn.name)">{{btn.name}}</button>
+    </div>
+  </div>
+  <div class="btns" *ngIf="atags && atags.length > 0 && show">
+    <a *ngFor="let tag of atags" target="_blank" [href]="tag.link"
+       style="color:#FFF" class="ant-btn ant-btn-primary"
+       rel="noopener noreferrer">{{tag.name}}</a>
+  </div>
+  <p class="text" *ngIf="text !== undefined">
+    <span>{{text?text:''}}</span>
+  </p>
+  <div *ngIf="showBorder">
+    <nz-divider ></nz-divider>
+  </div>
+
+</div>

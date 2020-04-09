@@ -1,0 +1,45 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.detail-head{
+    padding: 24px 0;
+    .head-name{
+        span{
+            font-size:20px;
+            font-family:"PingFang SC";
+            font-weight:500;
+            line-height:28px;
+            color:rgba(0,0,0,0.85);
+        }
+    }
+    .head-pad{
+        font-size:14px;
+        font-family:"PingFang SC";
+        font-weight:400;
+        line-height:22px;
+        color:rgba(0,0,0,0.85);
+        position: relative;
+        word-break: break-all;
+    }
+    .head-pad-gray{
+        font-size:14px;
+        font-family:"PingFang SC";
+        font-weight:400;
+        line-height:22px;
+        color:rgba(0,0,0,0.45)
+    }
+    a{
+        text-decoration: none;
+        color: #1890ff;
+    }
+    .head-fix{
+        position:absolute;
+        right: 24px;
+        top: 0;
+        font-size: 14px;
+        .fix-del{
+            color: #f5222d;
+            margin-right: 16px;
+        }
+    }
+}
+

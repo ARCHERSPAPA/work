@@ -1,0 +1,65 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div>
+        <div class="list-group-rev">
+            <div class="list-quick">
+                <div class="list-quick-title">快速查询</div>
+                <rev-depart-tree [type]="1" (handleChangeData)="selectDepart($event)"></rev-depart-tree>
+            </div>
+            <div class="list-items">
+                <nz-table #nzTable [nzData]="addressList" [nzBordered]="true" [nzFrontPagination]="false"
+                          [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                          (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]='true'
+                >
+                    <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>工号</th>
+                        <th>职位</th>
+                        <th>实名认证</th>
+                        <th>性别</th>
+                        <th>部门</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let data of nzTable.data;let i = index">
+                        <td [title]="data.name?data.name:''">{{data.name?data.name:'--'}}</td>
+                        <td [title]="data.empNo?data.empNo:''">{{data.empNo?data.empNo:'--'}}</td>
+                        <td [title]="data.positionName?data.positionName:''">
+                            {{data.positionName?data.positionName:'--'}}
+                        </td>
+                        <td [ngSwitch]="data.wokerSupplier">
+                            <span *ngSwitchCase="0">否</span>
+                            <span *ngSwitchCase="1">是</span>
+                            <span *ngSwitchDefault>--</span>
+                        </td>
+                        <td [ngSwitch]="data.sex">
+                            <span *ngSwitchCase="0">女</span>
+                            <span *ngSwitchCase="1">男</span>
+                            <span *ngSwitchDefault>--</span>
+                        </td>
+                        <td [nzTitle]="data.departmentName?data.departmentName:''"
+                            nzPlacement="leftTop" nz-tooltip>
+                            {{data.departmentName?data.departmentName:'--'}}
+                        </td>
+                        <td nz-td [ngSwitch]="data.state">
+                            <span *ngSwitchCase="0">在职</span>
+                            <span *ngSwitchCase="1">离职</span>
+                            <span *ngSwitchCase="2">删除</span>
+                            <span *ngSwitchDefault>--</span>
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" [routerLink]="['./../detail']" [queryParams]="{id:btoa(data.id)}">查看</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+
+    </div>
+</div>

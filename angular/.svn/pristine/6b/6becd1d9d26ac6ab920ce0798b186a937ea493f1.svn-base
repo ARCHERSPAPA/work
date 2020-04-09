@@ -1,0 +1,54 @@
+<div class="info-user">
+    <!-- <div class="list-group-rev">
+        <div class="list-items">
+            <ul class="item-head">
+                <li>姓名</li>
+                <li class="w40">部门</li>
+                <li>手机号</li>
+            </ul>
+            <div class="item-content">
+                <ul class="item-body" *ngFor="let staff of staffList">
+                    <li><a href="javascript:void(0)" (click)="selectDesigner(staff)">{{staff.name}}</a></li>
+                    <li class="w40">{{staff.departmentName}}</li>
+                    <li>{{staff.phone}}</li>
+                </ul>
+                <ul class="item-body" *ngIf="!staffList || (staffList && staffList.length == 0)">
+                    <p>暂无数据信息</p>
+                </ul>
+            </div>
+            <div class="page" *ngIf="staffList && staffList.length > 0">
+                <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                               (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+            </div>
+        </div> -->
+    <div class="list-group-rev">
+        <nz-table #rowSelectionTable [nzData]="staffList" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                  [nzScroll]="{ y: '290px'}" [nzTotal]="total" [nzShowPagination]="true" [nzFrontPagination]="false"
+                  (nzPageIndexChange)="changeData()" [nzSize]="'middle'">
+            <thead>
+                <tr>
+                    <th>选择</th>
+                    <th>姓名</th>
+                    <th>部门</th>
+                    <th>手机号</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of rowSelectionTable.data">
+                    <td nzShowCheckbox [(nzChecked)]="item.checked" (click)="selectDesigner($event,item)"></td>
+                    <td [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+                    <td [title]="item.departmentName?item.departmentName:''">{{item.departmentName?item.departmentName:'--'}}</td>
+                    <td>{{item.phone?item.phone:'--'}}</td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+    <!-- <div class="list-quick">
+            <rev-quick [type]="2" (selectId)="changeDepart($event)"></rev-quick>
+        </div> -->
+    <div class="list-quick">
+        <div class="list-quick-title">快速查询</div>
+        <rev-depart-tree [type]="departType" (handleChangeData)="changeDepart($event)"></rev-depart-tree>
+    </div>
+</div>

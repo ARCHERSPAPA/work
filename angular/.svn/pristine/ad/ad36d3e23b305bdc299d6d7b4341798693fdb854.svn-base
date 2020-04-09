@@ -1,0 +1,300 @@
+import { Component, OnInit, Input } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { WarningService } from "../../service/warning.service";
+import { Messages } from "../../model/msg";
+import { RequestService } from "../../service/request.service";
+import { QiNiuService } from "../../service/qi-niu.service";
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { Default } from "../../model/constant";
+
+import { of } from 'rxjs';
+import 'rxjs/add/operator/catch';
+
+@Component({
+    selector: 'rev-uploader-multis',
+    templateUrl: './uploader-multis.component.html',
+    styleUrls: ['./uploader-multis.component.scss']
+})
+export class UploaderMultisComponent implements OnInit {
+
+    @Input() name: string;
+
+    //上传报价id(或者当前项目id)
+    @Input() cid: string;
+
+    //控制上传数据当前数量
+    @Input() num: number;
+    //是否打开控制
+    @Input() open: boolean;
+    //控制上传总数量
+    @Input() total: number;
+
+    //控制上传地址分类
+    @Input() split: string;
+
+    //控制上传图片的大小
+    @Input() size: number;
+
+
+    public fileList: Array<any> = [];
+
+    public images: Array<any> = [];
+
+    public loading: boolean = false;
+
+    constructor(public activeModal: NgbActiveModal,
+        private warn: WarningService,
+        private req: RequestService,
+        private qn: QiNiuService) {
+    }
+
+    ngOnInit() {
+        this.getToken("normal");
+    }
+    //报错时重新获取token
+    getToken(type) {
+        if (!this.qn.getToken() || type == "err") {
+            this.req.doPostImg({
+                url: "token",
+                success: (res => {
+                    if (res && res.code == 200) {
+                        let token = JSON.parse(res.data).uptoken;
+                        let url = JSON.parse(res.data).url;
+                        this.qn.setToken(token);
+                        this.qn.setDataUrl(url);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+        if (!this.total) {
+            this.total = Default.UPLOAD.MAX_NUM;
+        }
+        if (!this.num) {
+            this.num = 0;
+        }
+        if (!this.open) {
+            this.open = false;
+        }
+    }
+
+    change(e: any) {
+        if (e.target.files.length >= Default.UPLOAD.MAX_NUM) {
+            this.warn.onWarn(Messages.ERROR.UPLOAD_IMG_MAX);
+            return;
+        }
+        if (e.target.files && e.target.files.length < Default.UPLOAD.MAX_NUM) {
+            let files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                {
+                    if (Number(this.coverSize(files[i].size)) > Default.UPLOAD.MAX_SIZE) {
+                        this.warn.onWarn(files[i].name + ",文件超过10M，无法上传");
+                        continue;
+                    }
+                }
+                files[i]["cid"] = this.cid;
+                files[i]["progress"] = 0;
+                files[i]["show"] = true;
+                files[i]["success"] = false;
+                files[i]["uploadString"] = this.split;
+                this.fileList.push(files[i]);
+            }
+            if (this.qn.getToken()) {
+                if (!this.loading) {
+                    let uploadIndex = 0;
+                    for (let i = 0; i < this.fileList.length; i++) {
+                        if (!this.fileList[i].success) {
+                            uploadIndex = i;
+                            break;
+                        }
+                    }
+                    this.uploadFile(this.fileList, uploadIndex, this.qn.getToken());
+                }
+            }
+
+        }
+        e.target.value = "";
+    }
+
+    changeFile(e: any) {
+        let verify = ['jpg', 'jpeg', 'gif', 'png'];
+        //校验上传之后的文件格式
+        if (this.total) {
+            if ((e.target.files.length + this.num + this.computedFileShow(this.fileList)) >= this.total) {
+                this.warn.onWarn(`最多上传${this.total - 1}张图片`);
+                return;
+            }
+        } else {
+            if ((e.target.files.length + this.num + this.computedFileShow(this.fileList)) > Default.UPLOAD.MAX_NUM) {
+                this.warn.onWarn(Messages.ERROR.IMG_MAX);
+                return;
+            }
+        }
+
+        if (e.target.files.length >= Default.UPLOAD.MAX_NUM) {
+            this.warn.onWarn(Messages.ERROR.UPLOAD_IMG_MAX);
+            return;
+        }
+
+
+        if (e.target.files && e.target.files.length < Default.UPLOAD.MAX_NUM) {
+            let files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                //默认不穿size的时候限制上传10M
+                if (this.size) {
+                    if (Number(this.coverSize(files[i].size)) > this.size) {
+                        this.warn.onWarn(files[i].name + `,文件超过${this.size}M，无法上传`);
+                        continue;
+                    }
+                } else {
+                    if (Number(this.coverSize(files[i].size)) > Default.UPLOAD.MAX_SIZE) {
+                        this.warn.onWarn(files[i].name + ",文件超过10M，无法上传");
+                        continue;
+                    }
+                }
+                files[i]["cid"] = this.cid;
+                files[i]["progress"] = 0;
+                files[i]["show"] = true;
+                files[i]["success"] = false;
+                files[i]["uploadString"] = this.split;
+                if (verify.indexOf(files[i]['name'].split('.').slice(-1)[0]) == -1) {
+                    this.warn.onMsgError(`文件格式不正确,支持${verify.join()}图片格式`);
+                    return
+                }
+                this.fileList.push(files[i]);
+            }
+            if (this.qn.getToken()) {
+                if (!this.loading) {
+                    let uploadIndex = 0;
+                    for (let i = 0; i < this.fileList.length; i++) {
+                        if (!this.fileList[i].success) {
+                            uploadIndex = i;
+                            break;
+                        }
+                    }
+                    this.uploadFile(this.fileList, uploadIndex, this.qn.getToken());
+                }
+            }
+
+        }
+        e.target.value = "";
+    }
+
+    uploadFile(files, index, token) {
+        if (index >= files.length) return;
+        if (!files[index].success) {
+            files[index]["request"] = this.qn.postFile(files[index], token)
+                .catch(err => {
+                    this.loading = false;
+                    files[index].success = false;
+                    let tip = err.toString().toLowerCase();
+                    switch (tip) {
+                        case "unauthorized":
+                            this.warn.onMsgError(Messages.UPLOAD.NOT_AUTH);
+                            this.getToken("err");
+                            break;
+                        case "bad request":
+                            this.warn.onMsgError(Messages.UPLOAD.NET_BUSY);
+                            break;
+                        default:
+                            this.warn.onMsgError(Messages.UPLOAD.FAIL);
+                            break;
+                    }
+                    // this.warn.onMsgError(Messages.PARAM_EMPTY);
+                    console.error(err);
+                    return of(err);
+                })
+                .subscribe(event => {
+                    if (event && event.type === HttpEventType.UploadProgress) {
+                        this.loading = true;
+                        files[index].progress = Math.round(100 * event.loaded / event.total);
+                    } else if (event && event instanceof HttpResponse) {
+                        this.loading = false;
+                        files[index].success = true;
+                        files[index]["src"] = this.qn.getDataUrl() + "/" + event.body["key"];
+                        this.images.push(files[index]["src"]);
+                        index++;
+                        this.uploadFile(files, index, token);
+                    }
+                })
+        } else {
+            index++;
+            this.uploadFile(files, index, token);
+        }
+
+    }
+
+    deleteImage(e, img) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (img && this.images.length > 0) {
+            if (this.images.indexOf(img) > -1) {
+                for (let i = 0; i < this.images.length; i++) {
+                    if (this.images[i] === img) {
+                        this.images.splice(i, 1);
+                    }
+                }
+            }
+            if (this.fileList && this.fileList.length > 0) {
+                for (let i = 0; i < this.fileList.length; i++) {
+                    if (this.fileList[i].src && this.fileList[i].src === img) {
+                        // this.fileList.splice(i,1);
+                        this.fileList[i].show = false;
+                    }
+                }
+            }
+        }
+        // console.log(this.images)
+        // console.log(this.fileList);
+    }
+
+    removeImage(e, i) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.fileList[i].request) {
+            this.fileList[i].request.unsubscribe();
+            this.loading = false;
+        }
+        this.fileList.splice(i, 1);
+        // if(this.fileList.length > 0){
+        // this.uploadFile(this.fileList,i,this.qn.getToken());
+        // }
+        if (!this.loading) {
+            this.uploadFile(this.fileList, i, this.qn.getToken());
+        }
+    }
+
+    coverSize(size) {
+        return Number((size / 1000) / 1024).toFixed(2);
+    }
+
+    clickImage(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.images && this.images.length > 0) {
+            this.activeModal.close(this.images);
+        } else {
+            this.warn.onWarn(Messages.UPLOAD.EMPTY);
+        }
+    }
+
+    computedFileShow(file) {
+        let count = 0;
+        if (file && file.length > 0) {
+            for (let f of file) {
+                if (f.show) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    ngOnDestroy() {
+        this.num = null;
+        this.total = null;
+        this.open = false;
+        this.size = null;
+    }
+}

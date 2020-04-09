@@ -1,0 +1,66 @@
+import { Component, OnInit } from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../service/request.service";
+import { NzNotificationService } from 'ng-zorro-antd';
+
+@Component({
+    selector: 'app-bind-add',
+    templateUrl: './bind-add.component.html',
+    styleUrls: ['./bind-add.component.scss']
+})
+export class BindAddComponent implements OnInit {
+    public deviceName = '';
+    public deviceAcc = '';
+    public did = '';
+    public remark = '';
+
+    constructor(
+        private router:Router,
+        private activatedRoute:ActivatedRoute,
+        private request:RequestService,
+        private _notification: NzNotificationService
+    ) { }
+
+    ngOnInit() {}
+
+    // 返回列表页面
+    exist(){
+        this.router.navigate(["./../bind"],{relativeTo:this.activatedRoute});
+    }
+    // 添加设备
+    handleAdd(){
+        let self = this;
+        this.deviceName = this.deviceName.replace(/(^\s*)|(\s*$)/g,"");
+        this.deviceAcc = this.deviceAcc.replace(/(^\s*)|(\s*$)/g,"");
+        this.did = this.did.replace(/(^\s*)|(\s*$)/g,"");
+
+
+        if(this.deviceName && this.deviceAcc && this.did){
+            this.request.doPost({
+                url:"bindDevice",
+                data:{
+                    deviceName: this.deviceName,
+                    userName: this.deviceAcc,
+                    did: this.did,
+                    remark: this.remark
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        self._notification.create('success', '温馨提示',res.msg,{nzDuration: 2000});
+                        this.router.navigate(["./../bind"],{relativeTo:this.activatedRoute});
+                    }else{
+                        self._notification.create('error', '温馨提示',res.msg,{nzDuration: 2000});
+                    }
+                })
+            })
+        }else if(!this.deviceName){
+            self._notification.create('error', '温馨提示',"请输入设备名称",{nzDuration: 2000});
+        }else if(!this.deviceAcc){
+            self._notification.create('error', '温馨提示',"请输入设备账号",{nzDuration: 2000});
+        }else if(!this.did){
+            self._notification.create('error', '温馨提示',"请输入设备号",{nzDuration: 2000});
+        }
+
+    }
+
+}

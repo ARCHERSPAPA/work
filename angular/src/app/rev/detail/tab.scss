@@ -1,0 +1,22 @@
+@charset "utf-8";
+.tab{
+    font-size: 0;
+    .tab-item{
+        display: inline-block;
+        vertical-align: top;
+        font-size: 13px;
+        padding: 5px 40px;
+        border-left:1px solid #dedede;
+        border-top: 1px solid #dedede;
+        border-bottom: 1px solid #dedede;
+        color: #353535;
+        text-decoration: none;
+        letter-spacing: 3px;
+        &.active{
+            background: #efefef;
+        }
+        &:last-child{
+            border-right: 1px solid #dedede;
+        }
+    }
+}

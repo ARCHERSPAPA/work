@@ -1,0 +1,198 @@
+<div class="product">
+    <!--<nz-tabset [(nzSelectedIndex)]="index" (nzSelectChange)="handleFun(index)">-->
+    <nz-tabset [(nzSelectedIndex)]="index">
+        <nz-tab nzTitle="产品介绍">
+            <div class="product_info">
+                <ul>
+                    <form [formGroup]="workerForm">
+                        <li style="text-align: center;margin: 20px 0">
+                            <div class="inp">
+                                <img *ngIf="headImg" [src]="headImg" class="worker_headImg"/>
+                                <img *ngIf="!headImg"
+                                     src="https://qiniu.madrock.com.cn/sys/img/diy_large_product_head_img_default.png"
+                                     class="worker_headImg"/>
+                                <a href="javascript:void(0)" class="image-fix" style="vertical-align: bottom"
+                                   (click)="openModal()">修改</a>
+                            </div>
+                        </li>
+                        <li>
+                            <nz-form-label class="label" nzRequired>产品</nz-form-label>
+                            <div class="inp">
+                                <input  nz-input type="text" class="com_input" placeholder="" autocomplete="off"
+                                       [(ngModel)]="name"
+                                       formControlName="name" name="name" maxlength="10"/>
+                                <div [hidden]="workerForm.get('name').valid || workerForm.get('name').pristine"
+                                     class="error">
+                                    <span [hidden]="!workerForm.hasError('required',['name'])">产品为必填选项</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <nz-form-label class="label" nzRequired>原价</nz-form-label>
+                            <div class="inp">
+                                <input  nz-input type="text" class="com_input" placeholder="" autocomplete="off"
+                                       [(ngModel)]="price"
+                                       formControlName="price" name="price" maxlength="6"/>
+                                <div [hidden]="workerForm.get('price').valid || workerForm.get('price').pristine"
+                                     class="error">
+                                    <span [hidden]="!workerForm.hasError('required',['price'])">原价为必填选项</span>
+                                    <span [hidden]="!workerForm.hasError('nonInt',['price'])">只能输入非0正整数</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <nz-form-label class="label" >描述</nz-form-label>
+                            <div class="inp">
+                                <textarea nz-input class="com_input" rows="6" placeholder=""
+                                          [ngModelOptions]="{standalone: true}" autocomplete="off" maxlength="120"
+                                          name="info" [(ngModel)]="info"></textarea>
+                                <span class="count"
+                                      *ngIf="info && info.length > 0"><span>{{info.length}}</span>/120</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="btns">
+                                <button  nz-button nzType="default" nz-b (click)="exist()">关闭</button>
+                                <button nz-button nzType="primary" [ngClass]="{'disabled':!workerForm.valid}"
+                                        (click)="submit()" *ngIf="!isEdit" [disabled]="!workerForm.valid">提交
+                                </button>
+                                <button type="submit" nz-button nzType="primary" (click)="modify()" *ngIf="isEdit"
+                                        [ngClass]="{'disabled':!workerForm.valid}" [disabled]="!workerForm.valid">修改
+                                </button>
+                            </div>
+                        </li>
+                    </form>
+                </ul>
+            </div>
+        </nz-tab>
+        <nz-tab nzTitle="图片编辑" *ngIf="isEdit">
+            <div class="product_pic">
+                <ul>
+                    <li *ngFor="let item of images;let i = index" class="img-item">
+                        <span [ngStyle]="styleBg(item.imgUrl)" (click)="openLarge($event,item.imgUrl)" class="img"></span>
+                        <a class="del" href="javascript:void(0)" (click)="delImg($event,item.id)">
+                            <i nz-icon type="delete" theme="outline"></i>
+                        </a>
+                    </li>
+                    <li class="product_upload" *ngIf="images.length < 30">
+                        <div class="product_upload_add" (click)="addImg()">
+                           <rev-uploader-new [content]="'上传图片'"></rev-uploader-new>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nz-tab>
+        <nz-tab nzTitle="关联项目" *ngIf="isEdit">
+            <div class="product_item">
+                <div class="product_item_add">
+                    <button nz-button [nzType]="'primary'" (click)="showModal()">添加</button>
+                </div>
+                <nz-table #nzTable [nzData]="relatedData" [nzBordered]="true" [nzFrontPagination]="false"
+                [(nzPageIndex)]='pageNo' [(nzPageSize)]="ProductPageSize" [nzTotal]="total" (nzPageIndexChange)='loadProductProject()'
+                          [nzShowPagination]="true" nzSize="middle">
+                    <thead nz-thead>
+                    <tr>
+                        <th nz-th><span>地址</span></th>
+                        <th nz-th><span>装修类型</span></th>
+                        <th nz-th><span>签单金额</span></th>
+                        <th nz-th><span>项目状态</span></th>
+                        <th nz-th><span>面积</span></th>
+                        <th nz-th><span>客户评价</span></th>
+                        <th nz-th><span>关联时间</span></th>
+                        <th nz-th><span>操作</span></th>
+                    </tr>
+                    </thead>
+                    <tbody nz-tbody>
+                    <tr nz-tbody-tr *ngFor="let data of nzTable.data;let i = index">
+                        <td nz-td title="{{data.customerHouseAddress}}">{{data.customerHouseAddress}}</td>
+                        <td nz-td [ngSwitch]="data.type">
+                            <span *ngSwitchCase="1">基装</span>
+                            <span *ngSwitchCase="2">套装</span>
+                            <span *ngSwitchCase="3">整装</span>
+                            <span *ngSwitchDefault>----</span>
+                        </td>
+                        <td nz-td title="{{data.finalPrice}}">{{data.finalPrice}}</td>
+                        <td nz-td>{{getState(data.state)}}</td>
+                        <td nz-td title="{{data.customerHouseArea}}">{{data.customerHouseArea}}</td>
+                        <td nz-td *ngIf="data.evaStatus == 1">
+                            <div [ngSwitch]="data.evaLevel">
+                                <span *ngSwitchCase="-1">差评</span>
+                                <span *ngSwitchCase="0">中评</span>
+                                <span *ngSwitchCase="1">好评</span>
+                                <span *ngSwitchDefault>----</span>
+                            </div>
+                        </td>
+                        <td nz-td *ngIf="!(data.evaStatus == 1)">----</td>
+                        <td nz-td title="{{data.relationTime | date:'y-MM-dd'}}">{{data.relationTime |
+                            date:'y-MM-dd'}}
+                        </td>
+                        <td nz-td>
+                            <div>
+                                <a href="javascript:void(0)" [routerLink]="['./../pic']"
+                                   [queryParams]="{quoteId:data.id,productId:productId,coverImg:data.coverImg?data.coverImg:null}">
+                                    封面
+                                </a>
+                                <a href="javascript:void(0)"
+                                   nz-popconfirm nzTitle="确定取消关联该项目？"
+                                   (nzOnConfirm)="removeProject(data.id)">取消关联
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </nz-tab>
+    </nz-tabset>
+    <nz-modal [(nzVisible)]="isVisibleImage" nzTitle="图片展示" (nzOnCancel)="handleCancelImage()"
+              [nzFooter]="null" nzWidth="1000">
+        <div class="large-img" style="text-align: center" *ngIf="largeImg">
+            <img style="width: 50%;" [src]="largeImg"/>
+        </div>
+    </nz-modal>
+    <nz-modal nzWidth="1000px" [(nzVisible)]="isVisible" nzTitle="添加项目" (nzOnCancel)="handleCancel()"
+              (nzOnOk)="handleOk()">
+        <nz-table
+            #nzTable [nzData]="data" (nzCurrentPageDataChange)="currentPageDataChange($event)"
+            [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+            [nzFrontPagination]="false" (nzPageIndexChange)="loadProductToAddProject()">
+            <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                    (nzCheckedChange)="checkAll($event)"></th>
+                <th nz-th><span>地址</span></th>
+                <th nz-th><span>装修类型</span></th>
+                <th nz-th><span>签单金额</span></th>
+                <th nz-th><span>项目状态</span></th>
+                <th nz-th><span>面积</span></th>
+                <th nz-th><span>客户评价</span></th>
+            </tr>
+            </thead>
+            <tbody nz-tbody style="font-size: 12px">
+            <tr nz-tbody-tr *ngFor="let data of data;let i = index">
+                <td nzShowCheckbox [(nzChecked)]="data.checked" [nzDisabled]="data.disabled"
+                    (nzCheckedChange)="refreshStatus()"></td>
+                <td nz-td title="{{data.customerHouseAddress}}">{{data.customerHouseAddress}}</td>
+                <td nz-td [ngSwitch]="data.type">
+                    <span *ngSwitchCase="1">基装</span>
+                    <span *ngSwitchCase="2">套装</span>
+                    <span *ngSwitchCase="3">整装</span>
+                    <span *ngSwitchDefault>----</span>
+                </td>
+                <td nz-td title="{{data.finalPrice}}">{{data.finalPrice}}</td>
+                <td nz-td>{{getState(data.state)}}</td>
+                <td nz-td title="{{data.customerHouseArea}}">{{data.customerHouseArea}}</td>
+                <td nz-td *ngIf="data.evaStatus == 1">
+                    <div [ngSwitch]="data.evaLevel">
+                        <span *ngSwitchCase="-1">差评</span>
+                        <span *ngSwitchCase="0">中评</span>
+                        <span *ngSwitchCase="1">好评</span>
+                        <span *ngSwitchDefault>----</span>
+                    </div>
+                </td>
+                <td nz-td *ngIf="!(data.evaStatus == 1)">----</td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </nz-modal>
+</div>

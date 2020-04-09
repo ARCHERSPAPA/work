@@ -1,0 +1,46 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="person-content">
+        <nz-skeleton [nzLoading]="loading" [nzActive]="true" [nzAvatar]="true"></nz-skeleton>
+        <div nz-row class="address-detail mt-24" *ngIf="details">
+            <div nz-row class="address-head">
+                <div class="address-img" [ngStyle]="setStyleBg(details.headImg)"></div>
+                <dl nz-col nzSpan="16" class="ml-24">
+                    <dt class="address-name" [title]="details.name">{{details.name}}</dt>
+                    <dd class="gray mt-8">{{details.positionName?details.positionName:'--'}}</dd>
+                    <dd class="mt-16"  nz-row nzType="flex" nzJustify="space-between">
+                        <span nz-col nzSpan="8">性别：{{details.sex === 1?'男':'女'}}</span>
+                        <span nz-col nzSpan="8">手机号：{{details.phone?details.phone:'****'}}</span>
+                        <span nz-col nzSpan="8">帐号：{{details.account?details.account:'--'}}</span>
+                    </dd>
+                </dl>
+            </div>
+
+            <div nz-row class="address-body">
+                <dl nz-col nzSpan="24">
+                    <dt>所在部门</dt>
+                    <dd *ngFor="let ds of details.depsTrue;" class="mt-16">
+                        {{renderTree(ds,1)}}
+                    </dd>
+                    <dd class="mt-16" *ngIf="details && details.depsTrue && details.depsTrue.length == 0">暂无所在部门数据</dd>
+                    <!--<dd class="mt-16">鑫佰利/总经办</dd>-->
+                    <!--<dd class="mt-16">鑫佰利/总经办/设计部/市场一区</dd>-->
+                </dl>
+                <dl nz-col nzSpan="24" class="mt-24">
+                    <dt>查看权限</dt>
+                    <dd *ngFor="let vs of details.simpleList;" class="mt-16">
+                        {{renderTree(vs,2)}}
+                    </dd>
+                    <dd class="mt-16" *ngIf="details && details.simpleList && details.simpleList.length == 0">暂无权限数据</dd>
+                    <!--<dd class="mt-24">鑫佰利（全部）</dd>-->
+                    <!--<dd class="mt-16">鑫佰利/总经办（设计师、助理）</dd>-->
+                    <!--<dd class="mt-16">鑫佰利/总经办/设计师（总经理、设计师、助理）</dd>-->
+                </dl>
+            </div>
+
+        </div>
+
+    </div>
+</div>

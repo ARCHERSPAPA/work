@@ -1,0 +1,224 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+
+.detail-list {
+  .list-head {
+    &:after {
+      content: "";
+      clear: both;
+      zoom: 1;
+      visibility: hidden;
+      display: block;
+    }
+    .head-bar {
+      width: 50%;
+      float: left;
+      a {
+        display: inline-block;
+        padding: 5px 30px;
+        border: 1px solid #3ba4e5;
+        text-decoration: none;
+        margin-right: -1px;
+        color: #3ba4e5;
+        &.active {
+          color: #fff;
+          background: #3ba4e5;
+        }
+      }
+    }
+    .search-bar {
+      width: 200px;
+      min-width: 40%;
+      height: 30px;
+      float: right;
+      font-size: 0;
+      text-align: right;
+      .choice {
+        display: inline-block;
+        vertical-align: top;
+        width: 30%;
+        height: 30px;
+        outline: none;
+        font-size: 12px;
+        border: 1px solid #dedede;
+        margin-right: 2%;
+        text-indent: 10px;
+        @include border;
+      }
+      .inp {
+        width: 68%;
+        display: inline-block;
+        vertical-align: top;
+        .text {
+          display: inline-block;
+          vertical-align: top;
+          width: 82%;
+          height: 30px;
+          outline: none;
+          font-size: 12px;
+          border: 1px solid #dedede;
+          margin-right: 2%;
+          text-indent: 10px;
+          @include border;
+        }
+        .btn {
+          display: inline-block;
+          vertical-align: top;
+          width: 20%;
+          height: 30px;
+          outline: none;
+          border: 0;
+          color: #fff;
+          font-size: 12px;
+          cursor: pointer;
+          &.btn-primary {
+            @include hover(#0a8ddf);
+          }
+        }
+
+      }
+    }
+  }
+  .list-group-rev {
+    width: 100%;
+    margin-top: 20px;
+    overflow: hidden;
+    .list-items {
+      width: 100%;
+      &.w85 {
+        width: 85%;
+        float: left;
+      }
+      .item-content {
+        margin: 1rem 0;
+        ul {
+          border-top: 0;
+          margin: 0;
+          &:first-child {
+            border-top: 1px solid #dedede;
+          }
+        }
+      }
+      ul {
+        width: 100%;
+        text-align: center;
+        border: 1px solid #dedede;
+        margin: 0;
+        &.ul-flex {
+          display: flex;
+        }
+        li {
+          display: inline-block;
+          vertical-align: top;
+          width: 9%;
+          font-size: 12px;
+          line-height: 30px;
+          word-break: break-all;
+          border-right: 1px solid #dedede;
+          white-space: nowrap;
+          @include ellipsis;
+          @include compatibility(box-sizing, border-box);
+          &.strength {
+            white-space: normal;
+            word-break: break-all;
+            padding: 0 5px;
+            line-height: 24px;
+            text-align: left;
+          }
+          &.flex1 {
+            flex: 1;
+          }
+          &.flex2 {
+            flex: 2;
+          }
+          &.flex7 {
+            flex: 7;
+          }
+          &.w5 {
+            width: 5%;
+          }
+          &.w10 {
+            width: 10%;
+          }
+          &.w15 {
+            width: 15%;
+          }
+          &.w20 {
+            width: 20%;
+          }
+          &.w50 {
+            width: 50%;
+          }
+          &.w60 {
+            width: 60%;
+          }
+          &.w70 {
+            width: 70%;
+          }
+          &.w75 {
+            width: 75%;
+          }
+          &.border_0 {
+            border-right: 0;
+          }
+          &:last-child {
+            border-right: 0;
+          }
+          .name {
+            display: block;
+            white-space: nowrap;
+            @include ellipsis;
+          }
+        }
+        &.item-head {
+          background: #f2f2f2;
+          li {
+            font-weight: 600;
+            &last-child {
+              border-right: 0;
+            }
+          }
+        }
+        &.item-body {
+          li {
+            .item-block {
+              display: block;
+            }
+            .item-icon-block {
+              display: block;
+              padding-left: 30px;
+              width: 98%;
+              word-break: break-all;
+              text-align: left;
+              white-space: nowrap;
+              @include ellipsis;
+              &.item-icon-checked {
+                background: url("./../../../assets/images/check.png") no-repeat left top -3px;
+              }
+            }
+          }
+          li:last-child {
+            border-right: 0;
+            font-size: 0;
+            a {
+              display: inline-block;
+              vertical-align: top;
+              font-size: 12px;
+              color: #0a8ddf;
+              margin-right: 5px;
+              &:last-child {
+                margin-right: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+    .list-quick {
+      width: 12%;
+      float: right;
+    }
+  }
+
+}
+

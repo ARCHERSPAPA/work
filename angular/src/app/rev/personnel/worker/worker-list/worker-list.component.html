@@ -1,0 +1,77 @@
+<div class="worker-list">
+  <div class="list-head">
+    <div class="search-bar">
+      <input nz-input placeholder="工人姓名/手机号" [(ngModel)]="searchInfo"/>
+      <button nz-button [nzType]="'primary'" (click)="changeData()">查询</button>
+    </div>
+  </div>
+  <div class="list-group-rev">
+    <div class="list-quick">
+      <div class="list-quick-title">快速查询</div>
+      <rev-depart-tree [type]="departType" (handleChangeData)="selectDepart($event)"></rev-depart-tree>
+    </div>
+    <div class="list-items">
+      <nz-table #nzTable [nzData]="workerList" [nzBordered]="true" [nzFrontPagination]="false"
+                [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]='true'
+      >
+        <thead nz-thead>
+        <tr>
+          <th nz-th><span>头像</span></th>
+          <th nz-th><span>姓名</span></th>
+          <th nz-th><span>手机号</span></th>
+          <th nz-th><span>籍贯</span></th>
+          <th nz-th><span>身份证号</span></th>
+          <th nz-th><span>性别</span></th>
+          <th nz-th><span>部门</span></th>
+          <th nz-th><span>工种</span></th>
+          <th nz-th><span>员工状态</span></th>
+          <th nz-th><span>备注</span></th>
+          <th nz-th><span>操作</span></th>
+        </tr>
+        </thead>
+        <tbody nz-tbody style="font-size: 12px">
+        <tr nz-tbody-tr *ngFor="let data of nzTable.data;let i = index">
+          <td nz-td>
+            <img class="worker_portrait"
+                 src="{{data.headImg?data.headImg:'http://img.zcool.cn/community/01460b57e4a6fa0000012e7ed75e83.png'}}"
+                 alt="图片加载失败">
+          </td>
+          <td nz-td title="{{data.name}}">{{data.name | FourPipe}}</td>
+          <td nz-td title="{{data.phone}}">{{data.phone}}</td>
+          <td nz-td title="{{data.nativePlace}}">{{data.nativePlace | FourPipe}}</td>
+          <td nz-td title="{{data.idCard | FourPipe}}">{{data.idCard | FourPipe}}</td>
+          <td nz-td [ngSwitch]="data.sex">
+            <span *ngSwitchCase="0">女</span>
+            <span *ngSwitchCase="1">男</span>
+            <span *ngSwitchDefault>----</span>
+          </td>
+          <td nz-td title="{{data.departmentName}}">{{data.departmentName | FourPipe}}</td>
+          <td nz-td title="{{data.workerType}}">{{data.workerType | FourPipe}}</td>
+          <td nz-td [ngSwitch]="data.state">
+            <span *ngSwitchCase="0">在职</span>
+            <span *ngSwitchCase="1">离职</span>
+            <span *ngSwitchCase="2">删除</span>
+            <span *ngSwitchDefault>----</span>
+          </td>
+          <td nz-td>
+            <nz-tooltip [nzTitle]="data.remarks"><span nz-tooltip>{{data.remarks | MaxPipe}}</span>
+            </nz-tooltip>
+          </td>
+          <td nz-td>
+            <div>
+              <a href="javascript:void(0)" class="worker_a" *ngIf="data.state != 1"
+                 (click)="quitWorker(data.id)">离职</a>
+              <a href="javascript:void(0)" class="worker_a" *ngIf="data.state == 1" nz-popconfirm
+                 nzTitle="删除工人账号后，该账号将无法登录" nzOkText="删除" nzCancelText="取消"
+                 (nzOnConfirm)="delWorker(data.id)">删除</a>
+              <a class="worker_a" href="javascript:void(0)" (click)="editWorker(data.id)"
+                 *ngIf="data && data.state == 0">修改</a>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>

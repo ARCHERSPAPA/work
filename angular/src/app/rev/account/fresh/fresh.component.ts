@@ -1,0 +1,127 @@
+import {Component, OnInit} from '@angular/core';
+import {bounceAnimate} from "../../../animation/transform.component";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import * as UserValidate from '../../../validate/user-validate';
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {UserService} from "../../../service/user.service";
+
+@Component({
+  selector: 'rev-fresh',
+  templateUrl: './fresh.component.html',
+  styleUrls: ['./../account.component.scss'],
+  animations: [
+    bounceAnimate
+  ]
+})
+export class FreshComponent implements OnInit {
+
+  public title:string;
+  public switch:string;
+
+  public isOpen:boolean = false;
+
+  public freshForm:FormGroup;
+
+  constructor(private fb:FormBuilder,
+              private request:RequestService,
+              private warn:WarningService,
+              private userInfo:UserService) {
+  }
+
+  ngOnInit() {
+    this.title = "基础信息更新";
+    this.switch = "bottom";
+    this.freshForm = this.fb.group({
+      mobile: ['', [
+        Validators.required,
+        UserValidate.ValidatePhone
+      ]],
+      code: ['', [
+        Validators.required,
+        UserValidate.ValidateCode
+      ]]
+    })
+  }
+
+  ngAfterViewInit() {
+    setTimeout(()=> {
+      this.switch = "down";
+    })
+  }
+
+  openTimer($e) {
+    // console.log($e);
+  }
+
+  closeTimer($e) {
+    if (!$e) {
+      this.isOpen = false;
+    }
+  }
+
+  send() {
+    let that = this;
+    if (that.freshForm.controls["mobile"].valid) {
+      that.isOpen = true;
+      that.request.doPost({
+        url: "phoneCaptcha",
+        data: {
+          phone: that.freshForm.value["mobile"],
+          type: 7
+        },
+        success: (res => {
+          if (res && res.code == 200) {
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    } else {
+      that.warn.onWarn(Messages.EMPTY);
+    }
+
+  }
+
+  cancel() {
+    window.history.go(-1);
+  }
+
+  submit() {
+    let that = this;
+    if (that.freshForm.valid) {
+      that.request.doPost({
+        url: "codeMatching",
+        data: {
+          code: that.freshForm.value["code"]
+        },
+        success: (res => {
+          if (res && res.code == 200) {
+            that.request.doPost({
+              url: "upUser",
+              data: {
+                id: that.userInfo.getId(),
+                phone: that.freshForm.value["mobile"]
+              },
+              success: (res => {
+                if (res && res.code == 200) {
+                  that.userInfo.setPhone(that.freshForm.value["mobile"]);
+                  that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                  window.history.go(-2);
+                } else {
+                  that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+              })
+            });
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+
+    }
+  }
+
+}

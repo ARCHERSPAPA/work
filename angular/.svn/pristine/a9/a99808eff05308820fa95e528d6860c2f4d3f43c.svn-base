@@ -1,0 +1,104 @@
+<div class="detail-list">
+    <div class="list-head">
+        <div class="search-bar">
+            <form method="post" [formGroup]="searchForm">
+                <nz-select style="width: 160px;" [(ngModel)]='type' nzAllowClear='false' (ngModelChange)="changeType()"
+                           [ngModelOptions]="{standalone: true}" nzPlaceHolder="按客户姓名查询" class="serchs">
+                    <nz-option nzValue="1" nzLabel="按客户姓名查询"></nz-option>
+                    <nz-option nzValue="2" nzLabel="按手机号码查询"></nz-option>
+                </nz-select>
+                <div class="inp" style="width:57%">
+                    <input nz-input type="text" class="text" [hidden]="type === '2'" placeholder="请输入客户姓名"
+                           formControlName="name" name="name" autocomplete="off" maxlength="32"
+                           [(ngModel)]="customerName"/>
+                    <input nz-input type="text" class="text" [hidden]="type === '1'" placeholder="请输入手机号码"
+                           formControlName="phone" name="phone" autocomplete="off" maxlength="16"
+                           [(ngModel)]="customerPhone"/>
+                    <button nz-button nzType="primary" type="submit" class="btns" [disabled]="!searchForm.valid"
+                            (click)="changeData(true)">查询
+                    </button>
+                    <div [hidden]="searchForm.get('name').valid || searchForm.get('name').pristine || type === '2'"
+                         class="error">
+                        <span [hidden]="!searchForm.hasError('account',['name'])">输入客户姓名的格式不正确</span>
+                    </div>
+                    <div [hidden]="searchForm.get('phone').valid || searchForm.get('phone').pristine || type === '1'"
+                         class="error">
+                        <span [hidden]="!searchForm.hasError('maxLength',['phone'])">输入电话号码的位数不能过长</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="list-group-rev">
+        <div class="list-quick">
+            <div class="list-quick-title">快速查询</div>
+            <rev-depart-tree [type]="departType" (handleChangeData)="changeDepart($event)" [isModal]=false></rev-depart-tree>
+        </div>
+        <div class="table-content">
+            <nz-table #nzTable [nzData]="demandList" [nzBordered]="true" [nzFrontPagination]="false" class="tables"
+                      [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                      (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]="true">
+                <thead>
+                <tr>
+                    <th>客户姓名</th>
+                    <th>手机</th>
+                    <th>项目地址</th>
+                    <th>面积</th>
+                    <th>创建日期</th>
+                    <th>创建人</th>
+                    <th>负责人</th>
+                    <th>设计师</th>
+                    <th>客户来源</th>
+                    <th>状态</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr nz-tbody-tr *ngFor="let demand of demandList">
+                    <td nz-td [title]="demand.customerName?demand.customerName:''">
+                        {{demand.customerName?demand.customerName:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.customerPhone?demand.customerPhone:''">
+                        {{demand.customerPhone?demand.customerPhone:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.address?demand.address:''" class="w1">
+                        {{demand.address?demand.address:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.houseArea?demand.houseArea:''">{{demand.address?demand.houseArea:'--'}}
+                    </td>
+                    <td nz-td>{{demand.createTime|date:'yy-MM-dd'}}</td>
+                    <td nz-td [title]="demand.createUserEmName?demand.createUserEmName:''">
+                        {{demand.createUserEmName?demand.createUserEmName:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.personLiableName?demand.personLiableName:''">
+                        {{demand.personLiableName?demand.personLiableName:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.designerName?demand.designerName:''">
+                        {{demand.designerName?demand.designerName:'--'}}
+                    </td>
+                    <td nz-td [title]="demand.sourceInfo?demand.sourceInfo:''">{{demand.sourceInfo}}</td>
+                    <td nz-td [title]="getStateName(demand.quoteState)">{{getStateName(demand.quoteState)}}</td>
+                    <td nz-td [nzTitle]="demand.remarks?demand.remarks:'暂无备注显示'"
+                        nzPlacement="topCenter" nz-tooltip>{{demand.remarks?demand.remarks:'--'}}
+                    </td>
+                    <td nz-td *ngIf="demand.myCreate" class="w10">
+                        <a href="javascript:void(0)" [routerLink]="['./../add']" [queryParams]="{id:btoa(demand.id)}"
+                           *ngIf="editUserByState(demand.quoteState)">编辑</a>
+                        <a href="javascript:void(0)" *ngIf="deleteUserByState(demand.quoteState)"
+                           nz-popconfirm [nzTitle]="'确定删除客户（'+demand.customerName+'）'"
+                           nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="stateDemand(demand.id,1)">删除</a>
+                        <a href="javascript:void(0)" *ngIf="isChild !== 0 && demand.state != 3"
+                           (click)="offerDetail(demand.id)">报价</a>
+                    </td>
+                    <td nz-td *ngIf="!demand.myCreate">--</td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+        <!-- <div class="list-quick">
+             <rev-quick [type]="departType"></rev-quick>
+          </div> -->
+
+    </div>
+</div>

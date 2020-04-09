@@ -1,0 +1,11 @@
+<div class="depart-tree" [ngStyle]="{'height':isModal ? '350px' : '550px' }">
+  <nz-tree
+    [nzData]="nodes"
+    nzAsyncData="true"
+    nzShowLine="true"
+    (nzClick)="changeDataClick($event)"
+    [nzShowExpand] = "permit !== 1"
+    >
+  </nz-tree>
+</div>
+

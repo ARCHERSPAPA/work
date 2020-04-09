@@ -1,0 +1,289 @@
+<div class="master">
+    <div class="master-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+        <div nz-row class="master-name mt-8">
+            <div nz-col nzSpan="22" class="mt-8">版本名称：{{versionName?versionName:'暂无名称'}}</div>
+            <a class="master-fix" href="javascript:void(0)" (click)="showModal(versionName)">修改</a>
+        </div>
+    </div>
+
+    <div nz-row class="mt-16">
+        <div class="master-warp">
+            <div nz-row class="mb-16">
+                <div nz-col nzOffset="16" nzSpan="8" class="text-right">
+                    <div nz-col nzSpan="10">
+                        <nz-select style="width: 100%;" nzPlaceHolder="请选择类别" nzAllowClear [(ngModel)]="category"
+                                   (ngModelChange)="loadData(true)">
+                            <nz-option *ngFor="let cate of categoryList" [nzValue]="cate" [nzLabel]="cate"></nz-option>
+                        </nz-select>
+                    </div>
+                    <div nz-col nzSpan="10" class="ml-8">
+                        <input nz-input type="text" placeholder="查询内容" [(ngModel)]="projectName">
+                    </div>
+                    <div nz-col nzSpan="2" class="ml-8">
+                        <button nz-button [nzType]="'primary'" (click)="loadData(true)">查询</button>
+                    </div>
+                </div>
+            </div>
+            <nz-table #nzTable [nzData]="dataSource" [nzBordered]="true" [nzFrontPagination]="false"
+                      [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                      (nzPageIndexChange)="loadData()"
+                      [nzShowPagination]="true" nzSize="middle">
+                <thead>
+                <tr>
+                    <th width="10%">类别</th>
+                    <th width="10%">名称</th>
+                    <th width="10%">品牌</th>
+                    <th width="10%">规格</th>
+                    <th width="10%">型号</th>
+                    <th width="5%">材质</th>
+                    <th width="10%">颜色</th>
+                    <th width="5%">单位</th>
+                    <th width="5%">报价</th>
+                    <th width="10%">说明</th>
+                    <th>成本</th>
+                    <th *ngIf="state == '0'" width="10%">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let data of nzTable.data">
+                    <td nz-tooltip [nzTitle]="data.category" nzPlacement="topLeft">
+                        {{data.category?data.category:'--'}}
+                    </td>
+                    <td nz-tooltip [nzTitle]="data.projectName" nzPlacement="topLeft">
+                        {{data.projectName?data.projectName:'--'}}
+                    </td>
+                    <td nz-tooltip [nzTitle]="data.brand" nzPlacement="topLeft">{{data.brand?data.brand:'--'}}
+                    </td>
+                    <td nz-tooltip [nzTitle]="data.specifications" nzPlacement="topLeft">
+                        {{data.specifications?data.specifications:'--'}}
+                    </td>
+                    <td nz-tooltip [nzTitle]="data.modelNum" nzPlacement="topLeft">
+                        {{data.modelNum?data.modelNum:'--'}}
+                    </td>
+
+                    <td [title]="data.material">{{data.material?data.material:'--'}}</td>
+                    <td [title]="data.colours">{{data.colours?data.colours:'--'}}</td>
+
+                    <td [title]="data.unit">{{data.unit}}</td>
+
+                    <td [title]="data.univalent">{{(data.univalent?data.univalent:0)|number:'1.2'}}</td>
+                    <td nz-tooltip [nzTitle]="data.offerExplain" nzPlacement="topLeft">
+                        {{data.offerExplain?data.offerExplain:'--'}}
+                    </td>
+                    <td [title]="data.primeCost">{{(data.primeCost?data.primeCost:0)|number:'1.2'}}</td>
+                    <td *ngIf="state == '0'">
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="删除后数据无法恢复" nzOkText="删除"
+                           (nzOnConfirm)="handleDel(data.id)">删除</a>
+                        <a href="javascript:void(0)" class="ml-8" (click)="showEditModal(data)">编辑</a>
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+</div>
+
+<!---修改版本名称--->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="编辑版本信息" [nzFooter]="null" (nzOnCancel)="handleItemCancel()">
+    <form nz-form [formGroup]="itemForm">
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="2">名称</nz-form-label>
+            <nz-form-control [nzSpan]="22">
+                <input nz-input name="itemName" formControlName="itemName" [(ngModel)]="itemName" maxlength="30"
+                       autocomplete="off" placeholder="请输入名称"/>
+                <nz-form-explain *ngIf="itemForm.get('itemName').dirty && itemForm.get('itemName').errors">
+                    <ng-container *ngIf="itemForm.get('itemName').hasError('required')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="itemForm.get('itemName').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <div class="btns">
+            <button nz-button nzType="default" (click)="handleItemCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleItemOk($event)" [disabled]="!itemForm.valid">提交
+            </button>
+        </div>
+    </form>
+</nz-modal>
+
+<!---修改详情---->
+<nz-modal [(nzVisible)]="isEditVisible" nzTitle="编辑信息" [nzFooter]="null" (nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="editForm" *ngIf="item" class="master-modal">
+        <!---类别-->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">类别</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <nz-select name="category" formControlName="category" [(ngModel)]="item.category">
+                    <nz-option *ngFor="let cate of categoryList" [nzValue]="cate" [nzLabel]="cate"></nz-option>
+                </nz-select>
+                <nz-form-explain *ngIf="editForm.get('category').dirty && editForm.get('category').errors">
+                    <ng-container *ngIf="editForm.get('category').hasError('required')">
+                        必选选项
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---名称--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3" nzRequired>名称</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="projectName" formControlName="projectName" [(ngModel)]="item.projectName"
+                       maxlength="30" autocomplete="off" placeholder="请输入名称"/>
+                <nz-form-explain *ngIf="editForm.get('projectName').dirty && editForm.get('projectName').errors">
+                    <ng-container *ngIf="editForm.get('projectName').hasError('required')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="editForm.get('projectName').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---品牌--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">品牌</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="brand" formControlName="brand" [(ngModel)]="item.brand" maxlength="30"
+                       autocomplete="off" placeholder="请输入品牌"/>
+                <nz-form-explain *ngIf="editForm.get('brand').dirty && editForm.get('brand').errors">
+                    <ng-container *ngIf="editForm.get('brand').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---规格--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">规格</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="specifications" formControlName="specifications"
+                       [(ngModel)]="item.specifications"
+                       autocomplete="off" placeholder="请输入规格"/>
+                <!--<nz-form-explain *ngIf="editForm.get('specifications').dirty && editForm.get('specifications').errors">-->
+                <!--<ng-container *ngIf="editForm.get('specifications').hasError('maxLength')">-->
+                <!--至多输入30位字符-->
+                <!--</ng-container>-->
+                <!--</nz-form-explain>-->
+            </nz-form-control>
+        </nz-form-item>
+        <!---型号--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">型号</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="modelNum" formControlName="modelNum" [(ngModel)]="item.modelNum" maxlength="30"
+                       autocomplete="off" placeholder="请输入型号"/>
+                <nz-form-explain *ngIf="editForm.get('modelNum').dirty && editForm.get('modelNum').errors">
+                    <ng-container *ngIf="editForm.get('modelNum').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+
+        <!---材质--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">材质</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="material" formControlName="material" [(ngModel)]="item.material" maxlength="30"
+                       autocomplete="off" placeholder="请输入材质"/>
+                <nz-form-explain *ngIf="editForm.get('material').dirty && editForm.get('material').errors">
+                    <ng-container *ngIf="editForm.get('material').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+
+        <!---颜色--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">颜色</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="colours" formControlName="colours" [(ngModel)]="item.colours" maxlength="30"
+                       autocomplete="off" placeholder="请输入颜色"/>
+                <nz-form-explain *ngIf="editForm.get('colours').dirty && editForm.get('colours').errors">
+                    <ng-container *ngIf="editForm.get('colours').hasError('maxlength')">
+                        至多输入30位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+
+        <!---单位--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3" nzRequired>单位</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="unit" formControlName="unit" [(ngModel)]="item.unit" maxlength="30"
+                       autocomplete="off" placeholder="请输入名称"/>
+                <nz-form-explain *ngIf="editForm.get('unit').dirty && editForm.get('unit').errors">
+                    <ng-container *ngIf="editForm.get('unit').hasError('required')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="editForm.get('unit').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---报价--->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3" nzRequired>报价</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="univalent" formControlName="univalent" [(ngModel)]="item.univalent" maxlength="10"
+                       autocomplete="off" placeholder="请输入报价"/>
+                <nz-form-explain *ngIf="editForm.get('univalent').dirty && editForm.get('univalent').errors">
+                    <ng-container *ngIf="editForm.get('univalent').hasError('required')">
+                        必填选项
+                    </ng-container>
+                    <ng-container *ngIf="editForm.get('univalent').hasError('price')">
+                        只能输入数字且保留小数后3位
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---成本--->
+        <nz-form-item>
+            <nz-form-label [nzSpan]="3" nzRequired>成本</nz-form-label>
+            <nz-form-control [nzSpan]="21">
+                <input nz-input name="primeCost" formControlName="primeCost" [(ngModel)]="item.primeCost" maxlength="10"
+                       autocomplete="off" placeholder="请输入成本"/>
+                <nz-form-explain *ngIf="editForm.get('primeCost').dirty && editForm.get('primeCost').errors">
+                    <ng-container *ngIf="editForm.get('primeCost').hasError('required')">
+                        必填选项
+                    </ng-container>
+                    <ng-container *ngIf="editForm.get('primeCost').hasError('price')">
+                        只能输入数字且保留小数后3位
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <!---说明---->
+        <nz-form-item class="layout">
+            <nz-form-label [nzSpan]="3">说明</nz-form-label>
+            <nz-form-control [nzSpan]="21" class="textarea">
+                <textarea nz-input type="text" name="offerExplain" [(ngModel)]="item.offerExplain"
+                          formControlName="offerExplain" maxlength="1000" autocomplete="off" placeholder="请输入备注信息"
+                          rows="5"></textarea>
+                <span class="count"
+                      *ngIf="item && item.offerExplain && item.offerExplain.length > 0"><span>{{item.offerExplain.length}}</span>/1000</span>
+                <nz-form-explain *ngIf="editForm.get('offerExplain').dirty && editForm.get('offerExplain').errors">
+                    <ng-container *ngIf="editForm.get('offerExplain').hasError('maxLength')">
+                        最多输入1000个字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+
+        <div class="btns">
+            <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleOk($event)" [disabled]="!editForm.valid">提交
+            </button>
+        </div>
+    </form>
+</nz-modal>

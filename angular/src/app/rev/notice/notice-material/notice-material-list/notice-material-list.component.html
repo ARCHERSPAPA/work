@@ -1,0 +1,46 @@
+<div class="material-list">
+    <div class="material-list-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div nz-row class="mt-16 mb-16">
+        <div nz-col nzOffset="14">
+            <div nz-col nzSpan="16">
+                <input nz-input placeholder="通知标题" [(ngModel)]="materialQuery">
+            </div>
+            <div nz-col nzSpan="2" nzOffset="1">
+                <button nz-button [nzType]="'primary'" (click)="loadSourceList(true)">查询</button>
+            </div>
+            <div nz-col nzSpan="4" nzOffset="1">
+                <a nz-button [nzType]="'primary'" target="_blank" [routerLink]="['./../add']">新建素材</a>
+            </div>
+        </div>
+    </div>
+    <div class="material-warp">
+        <nz-table #basicTable [nzData]="materialList" [nzBordered]="true"
+                  [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                  [nzFrontPagination]="false" nzSize="middle" (nzPageIndexChange)="loadSourceList()"
+                  [nzShowPagination]='true'>
+            <thead>
+            <tr>
+                <th width="40%">名称</th>
+                <th>更新时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of basicTable.data">
+                <td [nzTitle]="data.title" nzPlacement="topLeft" nz-tooltip>{{data.title?data.title:'--'}}</td>
+                <td>{{data.modifyTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                <td>
+                    <!--<a [routerLink]="['../materialDtl']" [queryParams]="{sourceId:data.id}" >详情</a>-->
+                    <a href="javascript:void(0)" target="_blank" [routerLink]="['./../dtl']"
+                       [queryParams]="{sourceId:btoa(data.id)}">详情</a>
+                    <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该素材吗？"
+                       nzOkText="删除" (nzOnConfirm)="deleteMaterial(data.id)"
+                       (nzOnCancel)="cancelMaterial()">删除</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>

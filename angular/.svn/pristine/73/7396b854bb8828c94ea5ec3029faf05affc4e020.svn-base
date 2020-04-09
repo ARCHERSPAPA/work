@@ -1,0 +1,189 @@
+<div class="settle" style="padding: 0">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="content">
+        <div class="detail-list">
+            <div class="detail-list-head">
+                <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+                <div class="search">
+                    <input nz-input [(ngModel)]="searchType" placeholder="请输入客户/楼盘/工长/监理"
+                    (keyup)="($event.which === 13) ? changeData(true) : 0"
+                        onkeyup="this.value = this.value.replace(/^\s+/g,'')" />
+                    <button nz-button nzType="primary" (click)="changeData(true)">查询</button>
+                </div>
+            </div>
+            <div class="btns" *ngIf="costState===1 && wageList && wageList.length>0">
+                <!-- <div class="btns" *ngIf="costState===1 && wageList && wageList.length>0"> -->
+                <button nz-button nzSize="middle" nzType="primary" [disabled]="showBtnByData()"
+                    (click)="showCostModal('all')">结算</button>
+                <button nz-button nzSize="middle" nzType="default" [disabled]="showBtnByData()"
+                    (click)="export($event)">导出表格
+                </button>
+            </div>
+            <div class="list-group-rev" style="margin-top: 8px;">
+                <nz-table #nzTable [nzData]="wageList" [nzBordered]="true" [nzFrontPagination]="false"
+                    [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                    (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]='true'
+                    *ngIf="costState === 1">
+                    <thead>
+                        <tr>
+                            <th nzShowCheckbox [(nzChecked)]="allChecked" (nzCheckedChange)="updateAllChecked()"></th>
+                            <th>申请人</th>
+                            <th>工种</th>
+                            <th>金额</th>
+                            <th>工长</th>
+                            <th>监理</th>
+                            <th>客户</th>
+                            <th>楼盘</th>
+                            <th width="10%">项目总额</th>
+                            <th width="10%">申请时间</th>
+                            <th>类型</th>
+                            <th>部门审核人</th>
+                            <th width="8%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr *ngFor="let wage of nzTable.data">
+                            <td nzShowCheckbox [(nzChecked)]="wage.checked" (nzCheckedChange)="updateSingleChecked()">
+                            </td>
+                            <td [title]="wage.workerName?wage.workerName:''">
+                                {{wage.workerName?wage.workerName:'--'}}
+                            </td>
+                            <td [title]="wage.workerType?wage.workerType:''">
+                                {{wage.workerType?wage.workerType:'--'}}
+                            </td>
+                            <td [title]="wage.price?wage.price:''">
+                                {{wage.price?(wage.price|number:'1.2'):'--'}}
+                            </td>
+                            <td [title]="wage.foremanName?wage.foremanName:''">
+                                {{wage.foremanName?wage.foremanName:'--'}}
+                            </td>
+                            <td [title]="wage.supervisorName?wage.supervisorName:''">
+                                {{wage.supervisorName?wage.supervisorName:'--'}}
+                            </td>
+                            <td [title]="wage.customerName?wage.customerName:''">
+                                {{wage.customerName?wage.customerName:'--'}}
+                            </td>
+                            <td [title]="wage.customerHouseAddress?wage.customerHouseAddress:''">
+                                {{wage.customerHouseAddress?wage.customerHouseAddress:'--'}}
+                            </td>
+                            <td [title]="wage.finalPrice?wage.finalPrice:''">
+                                {{wage.finalPrice?(wage.finalPrice|number:'1.2'):'--'}}
+                            </td>
+                            <td>{{wage.submitTime?(wage.submitTime|date:'yy-MM-dd HH:mm'):'--'}}</td>
+                            <td>
+                                {{getWageType(wage.type)}}
+                            </td>
+                            <td [title]="wage.auditName?wage.auditName:''">
+                                {{wage.departmentAuditName?wage.departmentAuditName:'--'}}
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" (click)="showCostModal('single',wage.id)">结算</a>
+                                <a href="javascript:void(0)" [routerLink]="['./../detail/cost']"
+                                    [queryParams]="{cid:btoa(wage.quoteId),aid:btoa(wage.id)}">详情</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+                <nz-table #nzTable [nzData]="wageList" [nzBordered]="true" [nzFrontPagination]="false"
+                    [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" [nzShowPagination]='true'
+                    (nzPageIndexChange)='changeData()' nzSize="middle" *ngIf="costState === 0">
+                    <thead>
+                        <tr>
+                            <th>申请人</th>
+                            <th>工种</th>
+                            <th width="10%">金额</th>
+                            <th>工长</th>
+                            <th>监理</th>
+                            <th>客户</th>
+                            <th>楼盘</th>
+                            <th width="10%">项目总额</th>
+                            <th width="10%">申请时间</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                            <th>审核人</th>
+                            <th width="10%">提交时间</th>
+                            <th>操作人</th>
+                            <th width="5%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let wage of nzTable.data">
+                            <td [title]="wage.workerName?wage.workerName:''">
+                                {{wage.workerName?wage.workerName:'--'}}
+                            </td>
+
+                            <td [title]="wage.workerType?wage.workerType:''">
+                                {{wage.workerType?wage.workerType:'--'}}
+                            </td>
+                            <td [title]="wage.price?wage.price:''">
+                                {{wage.price?(wage.price|number:'1.2'):'--'}}
+                            </td>
+                            <td [title]="wage.foremanName?wage.foremanName:''">
+                                {{wage.foremanName?wage.foremanName:'--'}}
+                            </td>
+                            <td [title]="wage.supervisorName?wage.supervisorName:''">
+                                {{wage.supervisorName?wage.supervisorName:'--'}}
+                            </td>
+                            <td [title]="wage.customerName?wage.customerName:''">
+                                {{wage.customerName?wage.customerName:'--'}}
+                            </td>
+                            <td [title]="wage.customerHouseAddress?wage.customerHouseAddress:''">
+                                {{wage.customerHouseAddress?wage.customerHouseAddress:'--'}}
+                            </td>
+                            <td [title]="wage.finalPrice?wage.finalPrice:''">
+                                {{wage.finalPrice?(wage.finalPrice|number:'1.2'):'--'}}
+                            </td>
+                            <td>
+                                {{wage.submitTime?(wage.submitTime|date:'yy-MM-dd HH:mm'):'--'}}
+                            </td>
+                            <td [title]="getWageType(wage.type)">{{getWageType(wage.type)}}</td>
+                            <td [title]="getWageState(wage.state)">{{getWageState(wage.state)}}</td>
+                            <td [title]="wage.departmentAuditName">
+                                {{wage.departmentAuditName?wage.departmentAuditName:'--'}}
+                            </td>
+                            <td>
+                                {{wage.financeAuditTime?(wage.financeAuditTime |
+                            date:'yy-MM-dd HH:mm'):'--'}}
+                            </td>
+                            <td>
+                                {{wage.financeUserName?wage.financeUserName:'--'}}
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" [routerLink]="['./../detail/cost']"
+                                    [queryParams]="{aid:btoa(wage.id),cid:btoa(wage.quoteId)}">详情</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!----结算弹出框---->
+<nz-modal [(nzVisible)]="costVisible" nzTitle="结算备注" nzOkText="提交" nzCancelText="关闭" (nzOnCancel)="costCancel()"
+    (nzOnOk)="costOk()">
+    <div class="modify">
+        <form [formGroup]="costForm" nz-form>
+            <nz-form-item>
+                <!-- <nz-form-label [nzSpan]="5" nzFor="costAccount">付款帐户</nz-form-label> -->
+                <nz-form-control>
+                    <!-- <input nz-input type="text" placeholder="请输入付款帐号" autocomplete="off" [(ngModel)]="costAccount"
+                        formControlName="costAccount" name="costAccount" maxlength="100" /> -->
+                    <textarea rows="4" nz-input placeholder="写点备注吧" [(ngModel)]="costAccount" autocomplete="off" maxlength="300" formControlName="costAccount"></textarea>
+                    <nz-form-explain *ngIf="costForm.get('costAccount').dirty && costForm.get('costAccount').errors">
+                        <ng-container *ngIf="costForm.get('costAccount').hasError('maxlength')">
+                            至多输入300个字符
+                        </ng-container>
+                        <!-- <ng-container *ngIf="costForm.get('costAccount').hasError('account')">
+                            输入格式错误
+                        </ng-container> -->
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>

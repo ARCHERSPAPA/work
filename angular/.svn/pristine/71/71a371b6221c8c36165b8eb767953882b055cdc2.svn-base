@@ -1,0 +1,60 @@
+<div class="associate">
+    <!-- <div class="person-head">
+        <rev-title [title]="title" ></rev-title>
+      </div> -->
+      <div class="btns">
+        <button nz-button nzType="primary" type="submit" (click)='personChange(0,1)'>选择交接人员</button>
+      </div>
+      <div class="associate_list">
+          <nz-table
+          #rowSelectionTable
+          [nzData]="associateList"
+          [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+          [nzShowPagination]="true"
+          [nzFrontPagination]="false"
+          (nzPageIndexChange)='changeData()' 
+          nzSize="middle"
+        >
+          <thead>
+            <tr>
+                  <th nzShowCheckbox  [(nzChecked)]="isAllDisplayDataChecked"  (nzCheckedChange)="checkAll($event)"></th>
+              <th>订单ID</th>
+              <th>客户姓名</th>
+              <th>楼盘</th>
+              <th>装修类型</th>
+              <th>报价状态</th>
+              <th>签单日期</th>
+              <th>负责职位</th>
+              <th>设计师</th>
+              <th>工长</th>
+              <th>监理</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+              <td nzShowCheckbox [(nzChecked)]="item.checked" (nzCheckedChange)="refreshStatus(item,i)"></td>
+              <td  [nzTitle]="item.quoteNo?item.quoteNo:'暂无数据显示'"
+          nz-tooltip>{{item.quoteNo?item.quoteNo:'--'}}</td>
+              <td>{{item.customerName?item.customerName:'--'}}</td>
+              <td>{{item.customerHouseAddress?item.customerHouseAddress:'--'}}</td>
+              <td [ngSwitch]="item.type">
+                  <span *ngSwitchCase="1">基装</span>
+                  <span *ngSwitchCase="2">套装</span>
+                  <span *ngSwitchCase="3">整装</span>
+                  <span *ngSwitchDefault>----</span>
+              </td>
+              <td >
+                 {{getStateName(item.state)}}
+              </td>
+              <td>{{item.billTime?(item.billTime|date:'yyyy-MM-dd'):'--'}}</td>
+              <td>{{item.responsiblePosition?item.responsiblePosition:'--'}}</td>
+              <td>{{item.designerName?item.designerName:'--'}}</td>
+              <td>{{item.foreManName?item.foreManName:'--'}}</td>
+              <td>{{item.supervisorName?item.supervisorName:'--'}}</td>
+              <td> <a href="javascript:void(0)" (click)='personChange(item.id)'>选择交接人员</a></td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+</div>

@@ -1,0 +1,199 @@
+import { Component, OnInit } from '@angular/core';
+import * as UserValidate from "../../../validate/user-validate";
+import { WarningService } from "../../../service/warning.service";
+import { Messages } from "../../../model/msg";
+import { RequestService } from "../../../service/request.service";
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UserService } from "../../../service/user.service";
+
+@Component({
+    selector: 'rev-cost-engineer',
+    templateUrl: './cost-engineer.component.html',
+    styleUrls: ['./../cost.component.scss', './../../offer/offer-setting/offer-setting.component.scss', './cost-engineer.component.scss'],
+
+})
+export class CostEngineerComponent implements OnInit {
+
+    public title: string;
+    public switch: string;
+    public lock: boolean = false;
+    public pageLock: boolean = false;
+    public costLock:boolean=false;
+    public modify: boolean = false;
+
+    public modifyForm: FormGroup;
+    public percentage: number;
+    public addRatioType: string = '1';
+    public addPercentage: number = 0;
+    public id: number;
+    public symbol: string = '+'
+
+    constructor(private req: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder,
+        private user: UserService) {
+    }
+
+    ngOnInit() {
+        this.title = "工程管理费用设置";
+        this.switch = "left";
+        this.modifyForm = this.fb.group({
+            percentage: [this.percentage, [
+                Validators.required,
+                UserValidate.ValidateNumDecimalPoint
+            ]],
+            addPercentage: [this.addPercentage, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]]
+        });
+        this.loadEngineerRatio();
+    }
+
+    setOpen(type:number) {
+        if(type===0){
+            this.pageLock = true;
+        }else{
+            this.costLock=true;
+        }
+        
+    }
+
+    submit(type:number) {
+        if(type===6){
+            clearTimeout(me)
+        }else{
+            if(this.percentage){
+                this.percentage=+this.percentage.toFixed(2)
+            }
+            if(this.addPercentage){
+                this.addPercentage=+this.addPercentage.toFixed(2)
+            }
+            if (this.pageLock || this.costLock) {
+                if (this.lock) {
+                    clearTimeout(me)
+                } else {
+                    var me = setTimeout(() => {
+                        if(type===0){
+                                this.loadRatio(this.percentage, this.id, type);
+                        }else{
+                                this.loadRatio(this.addPercentage, this.id, type);
+                        }
+                        this.lock = false
+                    }, 1000);
+                }
+                this.lock = true
+            }
+        }
+    }
+
+    loadEngineerRatio() {
+        if (this.user.getCompanyId()) {
+            this.req.doPost({
+                url: "detailRatio",
+                data: {
+                    companyId: this.user.getCompanyId(),
+                    ratioType: 0
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        if (res.data) {
+                            if ( res.data.ratio) {
+                                this.percentage = res.data.ratio.ratio;
+                            } else {
+                                this.percentage = 0.08;
+                            }
+                            if(res.data.pause){
+                                if(Math.sign(res.data.pause.ratio)===-1){
+                                    this.symbol="-";
+                                    this.addRatioType='2';
+                                    this.addPercentage=-res.data.pause.ratio;
+                                }else{
+                                    this.addPercentage=res.data.pause.ratio;
+                                }
+                              
+                            }else{
+                                this.addPercentage=0;
+                            }
+                            this.id = res.data.id;
+                        } else {
+                            this.percentage = 0.08;
+                        }
+                        // this.percentage = res.data && res.data.ratio?res.data.ratio:0;
+                        // this.id = res.data && res.data.id?res.data.id:null;
+                    } else {
+                        this.modify = false;
+                        this.percentage = 0;
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+    addTypechange() {
+        if (this.addRatioType === '1') {
+            this.symbol = "+"
+        } else {
+            this.symbol = "-"
+        }
+    }
+
+    modifySetting() {
+        if (this.modifyForm.valid) {
+            this.modify = !this.modify;
+            if (!this.modify) {
+                this.loadRatio(this.modifyForm.value.percentage, this.id);
+            }
+        } else {
+            this.warn.onWarn(Messages.EMPTY)
+        }
+    }
+
+    loadRatio(...args) {
+        let params
+        if (args[0] || args[0]===0) {
+            if(this.symbol==='-' && args[2]==1){
+                 params = {
+                    companyId: this.user.getCompanyId(),
+                    ratio: -args[0],
+                    ratioType: args[2]
+                };
+
+            }else{
+                params = {
+                    companyId: this.user.getCompanyId(),
+                    ratio: args[0],
+                    ratioType: args[2]
+                };
+            }
+            if (args[1]) {
+                params["id"] = args[1];
+            }
+
+            this.req.doPost({
+                url: "configRatio",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.percentage = 0;
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+    ngOnDestroy() {
+        this.submit(6)
+        if (this.pageLock && (this.percentage + '').length < 5 ) {
+            this.loadRatio(this.modifyForm.value.percentage, this.id,0);
+        }
+        if(this.costLock){
+            this.loadRatio(this.modifyForm.value.addPercentage, this.id,1);
+        }
+    }
+
+
+}

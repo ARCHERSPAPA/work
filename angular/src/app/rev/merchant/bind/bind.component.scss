@@ -1,0 +1,109 @@
+.bind {
+  //margin: 12px;
+  font-size: 16px;
+
+  &_head {
+    position: relative;
+    //border-bottom: 1px solid #e1e1e1;
+    .bind_title {
+      font-size: 18px;
+      white-space: nowrap;
+      width: 100%;
+      line-height: 64px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #666;
+      a {
+        font-size: 14px;
+      }
+    }
+    .bind_btn {
+      position: absolute;
+      top: 4.5px;
+      right: 0px;
+      a {
+        display: inline-block;
+        margin-right: 10px;
+      }
+      input {
+        display: none;
+        z-index: -999;
+      }
+    }
+  }
+  &_wrap {
+    margin-top: 10px;
+    tr th,tr td{
+      font-size: 14px;
+      // padding: 4px !important;
+      a{
+          padding-right: 4px;
+      }
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+     }
+      tr th,tr td:not(.w10){    
+              max-width: 60px;
+        }
+    
+  }
+  .titles {
+    font-size: 24px;
+  }
+}
+.bind_a {
+  color: #0099ff;
+  display: inline-block;
+  margin: 2.5px;
+}
+.head-title {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.85);
+  height: 46px;
+  span {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.meal_modal{
+
+.com_input{
+  width: 210px;
+}
+  .btns{
+    margin: 1em 0 -10px 0;
+    padding-top:10px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    button:first-child{
+      margin-right: 8px;
+    }
+  }
+  .inp{
+ margin-top: 10px;
+ width: 100%;
+ position: relative;
+ .count{
+  position: absolute;
+  bottom: 5px;
+  right: 113px;
+}
+    .label{
+      vertical-align: top;
+      padding-right: 1em;
+      text-align: right;
+      span{
+        color: red;
+      }
+    }
+  }
+}
+.bind_inp{
+  margin-bottom: 0;
+  span{
+    color: red;
+  }
+}

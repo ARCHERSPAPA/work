@@ -1,0 +1,117 @@
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import {Default} from "../../../model/constant";
+import {Messages} from "../../../model/msg";
+import {WarningService} from "../../../service/warning.service";
+import {RequestService} from "../../../service/request.service";
+import {UserService} from "../../../service/user.service";
+import {
+    transformQuickDepartType
+} from '../../../model/methods';
+
+@Component({
+  selector: 'rev-info-designers',
+  templateUrl: './info-designers.component.html',
+  styleUrls: ['./info-designers.component.scss','../info.component.scss']
+})
+export class InfoDesignersComponent implements OnInit {
+    /***查询***/
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+    public departmentId:string;
+    public departType:number;
+
+    public staffList:any;
+
+    public departList:any;
+
+    //当前已存在的设计师
+    @Input() designers:Array<any>;
+    //选中设计师后回调
+    @Output() selectDesignerListener:EventEmitter<any> = new EventEmitter<any>();
+
+    constructor(private request:RequestService,
+                private warn:WarningService,
+                private user:UserService) {
+    }
+
+    ngOnInit() {
+        this.departType = transformQuickDepartType(this.user.getQuickQueryDepartType());
+    }
+
+
+    changeDepart(e:any){
+        this.departmentId = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    // ngAfterContentChecked(){
+    //     console.log(this.designers);
+    //     if(this.designers && this.designers.length > 0){
+    //         this.renderStaff(this.staffList,this.designers);
+    //     }
+    // }
+
+
+    changeData(){
+        this.request.doPost({
+            url:"listEmployeeByPermit",
+            data:{
+                pageNo: this.pageNo,
+                pageSize: this.pageSize,
+                departmentId: this.departmentId,
+                nameSort:1,
+                state: 0
+            },
+            success:(res =>{
+                if(res && res.code == 200){
+                    this.staffList = res.data.pageSet;
+                    this.renderStaff(this.staffList,this.designers);
+                    this.total = res.data.total;
+                }else{
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    checkedChange(checked:boolean){
+        console.log(checked);
+    }
+
+    selectDesigner(e:any,design:any){
+         e.stopPropagation();
+         e.preventDefault();
+
+         if(this.designers && this.designers.length >= Default.DATA.DESIGNER_MAX){
+             let exist = this.designers.filter(des => des.id === design.id);
+             if(exist && exist.length === 1){
+                 this.selectDesignerListener.emit(design);
+             }else{
+                 design["checked"] = false;
+                 this.warn.onMsgWarn(Messages.ERROR.DESIGNER_MAX);
+                 return;
+             }
+        }else{
+             // design["checked"] = e;
+            this.selectDesignerListener.emit(design);
+        }
+    }
+
+
+    renderStaff(staffList,designers){
+        if(staffList && staffList.length > 0 ){
+            staffList.map(staff =>{
+                staff["checked"] = false;
+                if(designers && designers.length > 0){
+                    let exist = designers.filter(des => des.id === staff.id);
+                    staff.checked = (exist && exist.length === 1);
+                }
+                return staff;
+            })
+        }
+    }
+
+}

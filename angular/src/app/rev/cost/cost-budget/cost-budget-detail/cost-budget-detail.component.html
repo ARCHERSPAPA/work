@@ -1,0 +1,22 @@
+<div class="cost">
+  <div class="head">
+    <rev-detail-head></rev-detail-head>
+  </div>
+  <div class="content">
+    <div nz-row>
+      <div nz-col nzSpan="24" class="text-center">
+        <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="radioSwitch[0]"
+                      (handleSwitch)="handleSwitch($event)"></radio-switch>
+      </div>
+    </div>
+    <nz-tabset [nzSelectedIndex]="index">
+      <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url,tab.params)"></nz-tab>
+    </nz-tabset>
+    <div class="data">
+      <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+      <div [hidden]="loading">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</div>

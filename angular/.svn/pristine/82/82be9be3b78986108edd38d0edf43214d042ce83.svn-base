@@ -1,0 +1,73 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.another {
+  margin-top: 16px;
+  &-design {
+    display: flex;
+  }
+  &-content {
+    width: 65%;
+    margin-top: 24px;
+    form {
+      position: relative;
+      top: 50%;
+    }
+    .btn {
+    padding: 0;
+    margin-top: 8px;
+    float: right;
+    }
+  }
+
+  ul {
+    display: inline-block;
+  }
+  .show-img {
+    border-radius: 4px;
+    position: relative;
+    margin-right: 24px;
+    display: inline-block;
+    img {
+      width: 160px;
+      height: 160px;
+    }
+    .showDel {
+      position: absolute;
+      display: inline-block;
+      opacity: 0;
+      width: 160px;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 0px 0px 4px 4px;
+      top: 130px;
+      left: 0;
+      transition: 0.2s;
+      z-index: 1;
+    }
+    .del {
+      position: absolute;
+      top: 135px;
+      opacity: 0;
+      left: 50%;
+      transform: translate(-50%);
+      color: #dedede;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      background: url("../del.png") no-repeat;
+      @include compatibility(background-size, 100% 100%);
+      @include compatibility(transition, all 0.5s);
+      z-index: 2;
+    }
+    &:hover {
+      .del,
+      .showDel {
+        opacity: 1;
+      }
+    }
+  }
+
+   
+}
+

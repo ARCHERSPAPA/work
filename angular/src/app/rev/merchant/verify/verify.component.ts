@@ -1,0 +1,185 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../service/request.service";
+import { UserService } from "../../../service/user.service";
+import { WarningService } from "../../../service/warning.service";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Messages } from "../../../model/msg";
+import { UploaderComponent } from "../../../plugins/uploader/uploader.component";
+import { Aptitude } from "../../../model/aptitude";
+import { setStyleBg } from 'src/app/model/methods';
+import { Lightbox } from 'ngx-lightbox';
+
+
+
+
+@Component({
+    selector: 'rev-verify',
+    templateUrl: './verify.component.html',
+    styleUrls: ['./../merchant.component.scss', './verify.component.scss']
+})
+export class VerifyComponent implements OnInit {
+    public title: string;
+    public content: string = '上传照片';
+ public index;
+    public _albums=[];
+    /***所有图片存储***/
+    public images: any = {
+        qualification: [],
+        honor: [],
+        others: [],
+
+    };
+
+    private count: any = {
+        qualification: 0,
+        honor: 0,
+        others: 0
+    }
+
+    public largeImg: string;
+    public isVisible: boolean = false;
+
+    constructor(private request: RequestService,
+        private userInfo: UserService,
+        private modalService: NgbModal,
+        private _lightbox: Lightbox,
+        private warn: WarningService) { }
+
+    ngOnInit() {
+        let that = this;
+        that.title = "企业资质";
+        that.request.doPost({
+            url: "loadAptitude",
+            data: {
+                companyId: that.userInfo.getCompanyId()
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.dealImages(res.data);
+                    // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+
+    }
+
+
+    addVerify(type) {
+        let that = this, flag = true;
+        if (type === Aptitude.QUALIFICATION) {
+            flag = that.count.qualification < Aptitude.MAX;
+        } else if (type === Aptitude.HONOR) {
+            flag = that.count.honor < Aptitude.MAX;
+        } else {
+            flag = that.count.others < Aptitude.MAX;
+        }
+
+        if (flag) {
+            const modalRef = this.modalService.open(UploaderComponent, {
+                centered: true,
+                keyboard: false
+            });
+            modalRef.componentInstance.name = "新增证书";
+            modalRef.componentInstance.width = 10;
+            modalRef.componentInstance.height = 10;
+            modalRef.result.then((result) => {
+                if (result && result.image) {
+                    that.reqVerify(type, result.image);
+                } else {
+                    that.warn.onError(Messages.ERROR.IMG_LARGE);
+                }
+
+            }, (reason) => {
+                console.log(reason);
+            });
+        } else {
+            that.warn.onWarn(Messages.ERROR.IMG_MAX);
+        }
+    }
+
+    delVerify(type, id, index, e) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        that.request.doPost({
+            url: "delAptitude",
+            data: {
+                id: id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.changeImages("del", type, index);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    reqVerify(type, img) {
+        let that = this;
+        that.request.doPost({
+            url: "addAptitude",
+            data: {
+                imgUrl: img,
+                type: type
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.changeImages("add", type, res.data);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    dealImages(result) {
+        let that = this;
+        for (let res of result) {
+            that.changeImages("add", res["type"], res);
+        }
+    }
+
+    changeImages(...args) {
+        let that = this;
+        if (args[1] === Aptitude.QUALIFICATION) {
+            args[0] === "add" ? that.images.qualification.push(args[2]) : that.images.qualification.splice(args[2], 1);
+            that.count.qualification = that.images.qualification.length;
+        } else if (args[1] === Aptitude.HONOR) {
+            args[0] === "add" ? that.images.honor.push(args[2]) : that.images.honor.splice(args[2], 1);
+            that.count.honor = that.images.honor.length;
+        } else {
+            args[0] === "add" ? that.images.others.push(args[2]) : that.images.others.splice(args[2], 1);
+            that.count.others = that.images.others.length;
+        }
+    }
+
+
+    openLarge(e: any, src,index) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log(src)
+        this.index=index;
+        this._albums=[]
+        // this.isVisible = true;
+        // this.src = src;
+        src.forEach((i)=>{
+            this._albums.push({src: i.imgUrl,thumb: i.imgUrl})
+           
+        })
+        // this._lightbox.open(this._albums, index);
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+    }
+    styleImg(img) {
+        return setStyleBg(img, 160, 160);
+    }
+
+}

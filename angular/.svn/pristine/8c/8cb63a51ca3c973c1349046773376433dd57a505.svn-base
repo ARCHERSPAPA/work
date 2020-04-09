@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "http://test.decoration.com/",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite":{
+      "^/api":""
+    }
+  }
+}

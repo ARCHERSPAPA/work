@@ -1,0 +1,41 @@
+.verifyContent{
+    li{
+        width: 100%;
+        border-bottom: 1px solid #E8E8E8;
+        padding: 24px 0;
+        font-size:14px;
+        font-family:'PingFang SC';
+        font-weight:400;
+        color:rgba(0,0,0,0.65);
+        word-break: break-all;
+        white-space: normal;
+        &:first-child{
+            padding-top: 0;
+        }
+        p{
+            word-break: break-all;
+            white-space: normal;
+            &:first-child{
+                color:rgba(0,0,0,0.85);
+                font-weight: bold;
+                margin-bottom: 8px;
+                span{
+                    font-weight: 400;
+                    color:rgba(0,0,0,0.45);
+                    &:last-child{
+                        color:rgba(0,0,0,0.25);
+                        float: right;
+                    }
+                }
+            }
+        }
+    }
+}
+.verifyNoContent{
+    li{
+        width: 100%;
+        font-size:16px;
+        font-family:'PingFang SC';
+        font-weight:400;
+    }
+}

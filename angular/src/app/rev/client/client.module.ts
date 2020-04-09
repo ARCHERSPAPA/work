@@ -1,0 +1,27 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {PublicModule} from "./../../public/public.module";
+import {ClientRoutingModule} from "./client-routing.module";
+
+import { ClientDetailComponent } from './client-detail/client-detail.component';
+import {DetailListComponent} from './client-detail/detail-list/detail-list.component';
+import { DetailAddComponent } from './client-detail/detail-add/detail-add.component';
+
+import { ClientSourceComponent } from './client-source/client-source.component';
+
+
+
+@NgModule({
+  imports: [
+    CommonModule,
+    PublicModule,
+    ClientRoutingModule
+  ],
+  declarations: [
+      ClientDetailComponent,
+      DetailListComponent,
+      DetailAddComponent,
+      ClientSourceComponent
+  ]
+})
+export class ClientModule { }

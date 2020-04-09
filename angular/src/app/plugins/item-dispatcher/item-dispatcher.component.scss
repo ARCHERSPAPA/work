@@ -1,0 +1,29 @@
+@charset "utf-8";
+.depart-tree{
+    .search-bar{
+        padding: 12px 24px;
+        overflow: hidden;
+        .search-select{
+            width: 25%;
+            float: left;
+            transition: background .3s ease;
+            text-align: left;
+            color: rgba(0,0,0,.85);
+            font-weight: 500;
+            border: 1px solid #e8e8e8;
+            border-top-right-radius: 4px;
+        }
+        .search-form{
+            width: 70%;
+            float: left;
+            margin-top:-4px;
+            margin-left: 5%;
+        }
+    }
+    .select-data{
+        select-delete{
+            color: #f92650;
+            font-size: 16px;
+        }
+    }
+}

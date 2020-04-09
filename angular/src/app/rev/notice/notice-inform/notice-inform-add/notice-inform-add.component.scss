@@ -1,0 +1,105 @@
+.notice-add{
+  margin: 12px;
+  font-size: 16px;
+  &_head{
+    position: relative;
+    border-bottom: 1px solid #e1e1e1;
+  }
+  &_title{
+    font-size: 18px;
+    white-space: nowrap;
+    width: 100%;
+    line-height: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #666;
+    a{
+      font-size: 14px;
+    }
+  }
+  &_btn{
+    position: absolute;
+    top: 16px;
+    right: 5px;
+    input,button{
+      margin-right: 10px;
+    }
+    input{
+      display: inline-block;
+      width: 150px;
+    }
+    button{
+    }
+  }
+
+  &_operation{
+    margin: 24px 0;
+    text-align: center;
+  }
+
+  &_wrap{
+    margin-top: 24px;
+    height: 600px;
+    padding-bottom: 100px;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+  &_footer{
+    text-align: center;
+    button{
+      margin-right: 10px;
+    }
+  }
+
+  &_noticeHead{
+    position: fixed;
+    z-index: 999;
+    background-color: white;
+    input{
+      width: 200px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+  }
+  [nz-radio] {
+    display: block;
+  }
+  .depart-tree{
+    .depart-tree-head{
+      list-style-type: none;
+      li{
+        display: inline-block;
+      }
+    }
+    .depart-tree-cnt{
+
+    }
+    .depart-tree-data,.depart-tree-tree{
+      display: inline-block;
+    }
+    .depart-tree-data{
+      width: 70%;
+      float: left;
+    }
+    .depart-tree-tree{
+      width: 30%;
+      float: right;
+    }
+  }
+  .notice-add-tree{
+    position: absolute;
+
+  }
+}
+tr th,tr td{
+  text-align: center;
+  padding: 4px !important;
+}
+.notice-add_radio{
+  width:100%;
+  margin-top: 50px;
+}
+::ng-deep .vertical-center-modal .ant-modal-body .notice-add_radio{
+  max-height: 500px;
+  overflow: auto;
+}

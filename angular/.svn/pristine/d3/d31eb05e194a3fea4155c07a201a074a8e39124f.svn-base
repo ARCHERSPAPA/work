@@ -1,0 +1,19 @@
+.contracts {
+  .file-list {
+    tr th,
+    tr td {
+      font-size: 14px;
+      // padding: 4px !important;
+      a {
+        padding-right: 4px;
+      }
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    tr th,
+    tr td:not(.w10) {
+      max-width: 60px;
+    }
+  }
+}

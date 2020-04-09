@@ -1,0 +1,27 @@
+<div class="article" >
+    <div class="head">
+        <rev-detail-head></rev-detail-head>
+    </div>
+    <!-- <div class="content">
+        <div class="tab">
+            <a href="javascript:void(0)" class="tab-item"
+            [routerLink]="['./price',5]" [queryParams]="{cid:cid}" [routerLinkActive]="'active'">预算</a>
+            <a href="javascript:void(0)" class="tab-item"
+            [routerLink]="['./contract',5]" [queryParams]="{cid:cid}" [routerLinkActive]="'active'">合同</a>
+        </div>
+        <div class="data">
+            <router-outlet><p *ngIf="msg">{{msg}}</p></router-outlet>
+        </div>
+    </div> -->
+    <div class="content">
+            <nz-tabset [nzSelectedIndex]="index">
+                <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url,tab.params)"></nz-tab>
+            </nz-tabset>
+            <div class="data">
+                <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+                <div [hidden]="loading">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+        </div>
+</div>

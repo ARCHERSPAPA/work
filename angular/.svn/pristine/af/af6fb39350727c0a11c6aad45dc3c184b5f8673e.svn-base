@@ -1,0 +1,56 @@
+@import "./../../examine/examine.component.scss";
+
+.exam-head{
+    display: flex;
+    justify-content: space-between;
+    .exam-li{
+        width: 100%;
+        .label{
+            text-align: right;
+            margin-right: 24px;
+            font-size: 14px;
+            vertical-align: top;
+            padding-top: 4px;
+        }
+        .inp{
+            width: 44%;
+            display: inline-block;
+            vertical-align:text-bottom;
+        }
+    }
+}
+.quest{
+    h3{
+        border-bottom: 1px solid rgba(232, 232, 232, 1);
+        padding-bottom: 24px;
+    }
+}
+.list-group-rev{
+    margin-top: 54px;
+    font-size: 14px;
+    .item-content{
+        .item-body{
+            .item-block{
+                a{
+                    padding-left: 16px;
+                }
+            }
+            border-bottom: 1px solid rgba(232,232,232,1);
+            padding-bottom: 24px;
+            .flex7{
+                display: flex;
+                justify-content: space-between;
+                font-weight: bold;
+                margin-top: 24px;
+            }
+            .flex2{
+                >span{
+                    display: inline-block;
+                    width: 33%;
+                }
+                color: rgba(0, 0, 0, 0.65);
+                margin-top: 16px;
+            }
+        }
+    }
+}

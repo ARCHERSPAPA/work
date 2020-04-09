@@ -1,0 +1,53 @@
+<div class="warranty">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <div class="warranty_operation">
+      <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+    </div>
+    <div class="warranty_table">
+      <nz-table #nzTable [nzData]="auditList" [nzBordered]="true" [nzFrontPagination]="false"
+                [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total"
+                (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]="true"
+      >
+        <thead>
+        <tr >
+          <th>客户姓名</th>
+          <th>手机号</th>
+          <th>地址</th>
+          <th>装修类型</th>
+          <th>面积</th>
+          <th>实付总额</th>
+          <th>竣工日期</th>
+          <th>尾款日期</th>
+          <th>保修起始时间</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let data of nzTable.data">
+          <td [title]="data.firstRep?data.firstRep:''">
+            <nz-badge [nzDot]="data.agendaCount > 0">{{data.firstRep?data.firstRep:'--'}}</nz-badge>
+          </td>
+          <td title="{{data.firstPhone?data.firstPhone:'--'}}">{{data.firstPhone?data.firstPhone:'--'}}</td>
+          <td [title]="data.address?data.address:'--'">{{data.address?data.address:'--'}}</td>
+          <td [title]="getTypeName(data.decorationType)">{{getTypeName(data.decorationType)}}</td>
+          <td [title]="data.houseArea?data.houseArea:'--'">{{data.houseArea?data.houseArea+'m²':'--'}}</td>
+          <td>{{data.totlePrice?(data.totlePrice|number:'1.2'):'--'}}</td>
+          <td>{{data.finishTime?(data.finishTime|date:'yyyy-MM-dd'):'--'}}</td>
+          <td>{{data.finalPayment?(data.finalPayment|date:'yyyy-MM-dd'):'--'}}</td>
+          <td>{{data.warrantyStart===2?(data.customTime|date:'yyyy-MM-dd'):(!data.warrantyStart?(data.finalPayment?(data.finalPayment|date:'yyyy-MM-dd'):(data.finishTime|date:'yyyy-MM-dd')):(data.finishTime|date:'yyyy-MM-dd'))}}</td>
+
+          <td>
+            <div>
+              <a href="javascript:void(0)" [routerLink]="['./../edit']"
+                 [queryParams]="{aid:btoa(data.id)}">{{data.status === 0?'审核':'修改'}}</a>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>

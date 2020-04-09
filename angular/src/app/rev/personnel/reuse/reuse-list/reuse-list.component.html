@@ -1,0 +1,38 @@
+<div class="staff-list">
+    <div class="list-group-rev">
+        <nz-table #nzTable [nzData]="reUsers" [nzBordered]="true" [nzFrontPagination]="false" [nzShowPagination]="false"
+                  nzSize="middle" class="tables">
+            <thead nz-thead>
+            <tr nzWidth='600px'>
+                <th nz-th><span>职位</span></th>
+                <th nz-th><span>姓名</span></th>
+                <th nz-th><span>帐号</span></th>
+                <th nz-th><span>性别</span></th>
+                <th nz-th><span>操作</span></th>
+            </tr>
+            </thead>
+            <tbody nz-tbody style="font-size: 12px">
+            <tr nz-tbody-tr *ngFor="let item of nzTable.data">
+                <td nz-td class="w20" [title]="item.roleInfo">{{item.roleInfo?item.roleInfo:'--'}}</td>
+                <td nz-td class="w20" [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+                <td nz-td class="w20" [title]="item.account?item.account:''">{{item.account?item.account:'--'}}</td>
+                <td nz-td class="w20" [ngSwitch]="item.sex">
+                    <span *ngSwitchCase="1">男</span>
+                    <span *ngSwitchCase="0">女</span>
+                    <span *ngSwitchDefault>男</span></td>
+                <td nz-td class="w20">
+                    <a href="javascript:void(0)" (click)="editItem(item)">编辑</a>
+                    <a href="javascript:void(0)"
+                       nz-popconfirm nzTitle="你确定要删除该人员吗?"
+                       nzOkText="删除" nzCancelText="取消"
+                       (nzOnConfirm)="delItem(item.reuseId)"
+                       nzPopconfirmPlacement="center"
+                       *ngIf="item.type !== 1">删除</a></td>
+
+
+            </tr>
+            </tbody>
+        </nz-table>
+
+    </div>
+</div>

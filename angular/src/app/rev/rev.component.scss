@@ -1,0 +1,74 @@
+@charset "utf-8";
+@import "./../../assets/scss/mixin";
+.rev{
+  .logo {
+    float: left;
+    width:200px;
+    text-align: center;
+    height: 64px;
+    line-height: 64px;
+    background: url("../../assets/images/sub.png") no-repeat center #001529;
+  }
+  .user{
+    float:right;
+    padding: 0 24px;
+    cursor: pointer;
+    text-align: center;
+    .user-name{
+      width: 160px;
+      padding-right: 15px;
+      height: 48px;
+      text-align: right;
+      position: relative;
+      @include ellipsis;
+      > span{
+        display: inline-block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: 12px;
+      }
+    }
+  }
+  .bread{
+    width: 500px;
+    float:left;
+    margin:21.5px 10px;
+  }
+}
+a{
+  display: inline-block;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ant-layout-header{
+  background-color: #fff;
+  padding: 0;
+  box-shadow: 0 10px 10px #e8e8e8;
+}
+
+.ant-layout-sider{
+  position: fixed;
+  top: 64px;
+  bottom: 0;
+  overflow: auto;
+}
+ .ant-layout-content{
+  position: fixed;
+  top: 64px;
+  left: 200px;
+  bottom: 0;
+  width: calc(100% - 200px);
+  background:#F0F2F5;
+  padding: 24px;
+  min-height: 280px;
+}
+
+.ant-form-item{
+  margin: 0;
+}
+
+button:focus{
+  border: none;
+  outline: none;
+}

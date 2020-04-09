@@ -1,0 +1,93 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {ActivatedRoute} from '@angular/router';
+import {atob, setStyleBg} from "../../../../model/methods";
+import {Messages} from "../../../../model/msg";
+import {QuoteService} from "../../../../service/quote.service";
+
+@Component({
+    selector: 'rev-warranty-record-detail',
+    templateUrl: './warranty-record-detail.component.html',
+    styleUrls: ['./../../../detail/detail.scss','./../../warranty.component.scss','./warranty-record-detail.component.scss']
+})
+export class WarrantyRecordDetailComponent implements OnInit {
+
+    public records: Array<any> = [];
+
+    /**
+     * 放大图片功能
+     * @type {boolean}
+     */
+    public isVisible: boolean = false;
+    public src: string;
+
+    //报价id
+    public cid: string;
+    //记录id
+    public rid: string;
+
+    constructor(private req: RequestService,
+                private warn: WarningService,
+                private quote:QuoteService,
+                private activatedRoute: ActivatedRoute) {
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["rid"]) {
+                this.rid = atob(params["rid"]);
+                this.renderRecord(this.rid);
+            }
+        });
+    }
+
+
+    /**
+     * 使用promise 加载动态
+     * @param rid
+     * @returns {Promise<any>}
+     */
+    loadRecord(rid): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "recordDynamicCard",
+                data: {recordId: rid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    renderRecord(rid){
+        if(rid){
+            this.loadRecord(rid).then(res =>{
+                this.records = res && res.dynamics && res.dynamics.length > 0?res.dynamics:[];
+                this.quote.setRecords(res);
+            }).catch(err =>{
+                this.warn.onMsgError(err);
+            })
+        }else{
+            this.warn.onMsgError(Messages.PARAM_EMPTY)
+        }
+    }
+
+    showLargeImg(url) {
+        this.isVisible = true;
+        this.src = url;
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+    }
+
+    shoWageImgBg(src) {
+        return setStyleBg(src, 150, 110);
+    }
+
+}

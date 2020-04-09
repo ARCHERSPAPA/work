@@ -1,0 +1,82 @@
+import { Component, OnInit } from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Default} from "../../../../model/constant";
+import {Messages} from "../../../../model/msg";
+import {btoa, getTypeName} from "../../../../model/methods";
+
+@Component({
+  selector: 'rev-warranty-record-list',
+  templateUrl: './warranty-record-list.component.html',
+  styleUrls: ['../../warranty.component.scss', './warranty-record-list.component.scss'],
+})
+export class WarrantyRecordListComponent implements OnInit {
+
+  // 组件相关
+  public title: string = "保修记录";
+  public radioSwitch = [{
+    key:0,
+    text:'申请维修'
+  },{
+    key:1,
+    text:'维修中'
+  },{
+    key:3,
+    text:'已完成'
+  }];
+
+  public records:Array<any>;
+
+  // 分页
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total:number = Default.PAGE.PAGE_TOTAL;
+
+  constructor(
+    private req:RequestService,
+    private warn:WarningService
+  ) {}
+
+  ngOnInit() {
+    this.changeData();
+  }
+
+  handleSwitch(key: any) {
+    this.pageNo = Default.PAGE.PAGE_NO;
+    this.total = Default.PAGE.PAGE_TOTAL;
+    this.changeData(key);
+  }
+
+  changeData(key = 0){
+    this.req.doPost({
+      url:"recordCard",
+      data:{
+        pageNo: this.pageNo,
+        pageSize: this.pageSize,
+        state: key
+      },
+      success:(res =>{
+        if(res && res.code == 200){
+          this.records = res.data.pageSet;
+          this.total = res.data.total;
+        }else{
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    })
+  }
+
+  getTypeName(type){
+    return getTypeName(type);
+  }
+
+    /**
+     * 加密url
+     * @param {string} id
+     * @returns {any}
+     */
+  btoa(id:string){
+    return btoa(id);
+  }
+
+}

@@ -1,0 +1,51 @@
+<div class="equip">
+    <div class="list-head">
+        <div class="list-title">{{title}}</div>
+    </div>
+    <div class="list-group-rev">
+        <div class="list-items">
+            <ul class="item-head">
+                <li class="w20">设备机器码</li>
+                <li class="w15">帐户名</li>
+                <li class="w15">账户标识</li>
+                <li class="w15">设备供应商</li>
+                <li class="w15">状态</li>
+                <li class="w20">备注</li>
+            </ul>
+            <div class="item-content" *ngIf="equipList && equipList.length > 0">
+                <ul class="item-body" *ngFor="let equip of equipList">
+                    <li class="w20" style="text-align: left;" (click)="selectEquip(equip.deviceNo)">
+                        <span class="chn" [ngClass]="{'chn-unchecked':selectId !== equip.deviceNo,'chn-checked': selectId === equip.deviceNo}"></span>
+                        <span class="name" [title]="equip.deviceNo">{{equip.deviceNo?equip.deviceNo:'--'}}</span>
+                    </li>
+                    <!--<li class="w20" *ngIf="!equip.bindStatus">-->
+                        <!--<span class="chn chn-disabled"></span>-->
+                        <!--<span class="name" [title]="equip.deviceNo">{{equip.deviceNo?equip.deviceNo:'&#45;&#45;'}}</span>-->
+                    <!--</li>-->
+                    <li class="w15" [title]="equip.devicename?equip.devicename:''">{{equip.devicename?equip.devicename:'--'}}</li>
+                    <li class="w15" [title]="equip.bindAccouId">{{equip.bindAccouId?equip.bindAccouId:'--'}}</li>
+                    <li class="w15" [title]="equip.deviceSupplier">{{equip.deviceSupplier?equip.deviceSupplier:'--'}}</li>
+                    <li class="w15" [title]="showBindNameByState(equip.bindStatus)">{{showBindNameByState(equip.bindStatus)}}</li>
+                    <li class="w20" [nzTitle]="equip.remark?equip.remark:'暂无备注信息'"
+                        nzPlacement="topCenter"  nz-tooltip>{{equip.remark?equip.remark:'暂无备注信息'}}</li>
+                </ul>
+                <div class="page">
+                    <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                    <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                                   (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+                </div>
+            </div>
+
+            <div class="item-content" *ngIf="!equipList || (equipList && equipList.length <= 0)">
+                <ul class="item-body">
+                    <p>暂无数据信息</p>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="btns" *ngIf="equipList && equipList.length > 0">
+        <a class="btn btn-default" (click)="cancel()">取消</a>
+        <a class="btn btn-primary" (click)="send()">提交</a>
+    </div>
+</div>
+

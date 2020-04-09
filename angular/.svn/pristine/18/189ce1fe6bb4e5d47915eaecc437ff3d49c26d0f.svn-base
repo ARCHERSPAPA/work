@@ -1,0 +1,146 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.rev {
+    width: 100%;
+    overflow: hidden;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+  'Segoe UI Emoji', 'Segoe UI Symbol';
+    .head {
+        width: 100%;
+        h1 {
+            background: url("./logo.png") no-repeat left center transparent;
+            width: 1200px;
+            height: 50px;
+            margin: 0 auto;
+        }
+    }
+    .content {
+        height: 560px;
+        min-width: 1200px;
+        background: url("./bg.png") no-repeat;
+        background-size: 100% 100%;
+        padding-top: 100px;
+        position: relative;
+        /**
+            v1.3.4前版本form样式表
+         */
+        .form {
+            width: 340px;
+            height: 320px;
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            margin-top: -160px;
+            background: rgb(255, 255, 255);
+            border: 1px solid #dedede;
+            @include compatibility(border-radius, 3px);
+            li {
+                font-size: 0;
+                height: 55px;
+                overflow: hidden;
+                &.tip {
+                    font-size: 12px;
+                    height: 20px;
+                    line-height: 20px;
+                    margin-bottom: 0;
+                }
+                &.title {
+                    display: inline-block;
+                    vertical-align: top;
+                    width: 100%;
+                    font-size: 20px;
+                    height: 32px;
+                    line-height: 32px;
+                    font-weight: 700;
+                    text-align: center;
+                    margin: 10px auto;
+                }
+                &.forget {
+                    height: 20px;
+                    line-height: 20px;
+                    .text{
+                        display: block;
+                        text-align: right;
+                        color: #0a8ddf;
+                        font-size: 12px;
+                        cursor: pointer;
+                    }
+                }
+                label {
+                    display: inline-block;
+                    vertical-align: top;
+                    font-size: 14px;
+                    height: 32px;
+                    line-height: 32px;
+                    outline: none;
+                    text-indent: 5px;
+                    &.label {
+                        width: 70px;
+                        text-align: right;
+                        padding-right: 10px;
+                    }
+                }
+                .inp {
+                    display: inline-block;
+                    width: 230px;
+                    input {
+                        display: inline-block;
+                        vertical-align: top;
+                        font-size: 14px;
+                        height: 32px;
+                        line-height: 32px;
+                        outline: none;
+                        text-indent: 5px;
+                        &.text {
+                            width: 100%;
+                            border: 1px solid #dedede;
+                            box-sizing: border-box;
+                        }
+                        &.code {
+                            width: 120px;
+                            letter-spacing: 5px;
+                            cursor: pointer;
+                            background: transparent;
+                            font-size: 14px;
+                            letter-spacing: 0;
+                            cursor: text;
+                        }
+                    }
+                    .code {
+                        display: inline-block;
+                        vertical-align: top;
+                        width: 110px;
+                        height: 32px;
+                        line-height: 32px;
+                        letter-spacing: 5px;
+                        padding-left: 10px;
+                        background: rgba(10, 120, 110, 0.15);
+                        font-size: 14px;
+                        cursor: pointer;
+                    }
+                }
+
+                button {
+                    width: 230px;
+                    height: 30px;
+                    line-height: 30px;
+                    background: rgba(0, 120, 12, 0.7);
+                    color: #fff;
+                    outline: none;
+                    border: 0;
+                    display: inline-block;
+                    cursor: pointer;
+                    font-size: 14px;
+                    &.disabled {
+                        background: rgb(222, 222, 222);
+                        color: #f2f2f2;
+                        cursor: not-allowed;
+                    }
+                }
+            }
+        }
+
+    }
+}
+

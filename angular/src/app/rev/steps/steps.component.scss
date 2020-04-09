@@ -1,0 +1,204 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.steps{
+  width: 100%;
+  padding: 48px 102px;
+  > h2{
+    height:32px;
+    font-size:22px;
+    font-family:"PingFang SC";
+    font-weight:bold;
+    line-height:32px;
+    color:#000;
+    text-align: center;
+  }
+}
+.step{
+  width: 100%;
+  overflow: hidden;
+  background: transparent;
+  .step-com-head{
+    width: 100%;
+    padding: 20px 0;
+    background: #fff;
+  }
+  .content{
+    width: 100%;
+    background: #fff;
+    margin-bottom: 20px;
+    /***第一步***/
+    .notice{
+      height: 313px;
+      background: #fff;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.14);
+      padding: 24px;
+      overflow: auto;
+      dl,ul,ol,p{
+        font-size: 16px;
+        color: rgba(0,0,0,0.65);
+        line-height: 24px;
+      }
+      .bold{
+        font-weight: 500;
+        color:rgba(0,0,0,1);
+      }
+    }
+  }
+  .form{
+    width: 65%;
+    margin: 0 auto;
+  }
+  .btns{
+     margin: 48px 400px;
+  }
+}
+
+.step-overflow{
+  width: 100%;
+  height: 30px;
+  position: absolute;
+  left: 0;
+  top:-5px;
+}
+.ant-form-item{
+  margin: 0;
+}
+.ant-form label{
+  font-size: 16px;
+}
+.large-img{
+    width: 100%;
+    height: 500px;
+    text-align: center;
+    img{
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
+.info-img {
+  width: 96px;
+  height: 144px;
+  border-radius: 4px;
+  text-align: center;
+  &:after {
+    content: "示例";
+    position: absolute;
+    left: -8px;
+    top: 0;
+    z-index: 9;
+    width: 100%;
+    height: 100%;
+    line-height: 144px;
+    font-size: 18px;
+    background:rgba(0,0,0,0.22);
+    border:1px dashed #f9f9f9;
+    color: #fff;
+  }
+  > img {
+    max-width: 100%;
+    height: 100%;
+  }
+}
+.img-license{
+  width: 120px;
+  height: 180px;
+  border-radius: 4px;
+  text-align: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-repeat: no-repeat;
+  background-position: center center;
+  //background-size:cover;
+  .license-del{
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+    color: #f5222d;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+  }
+  &:hover{
+    .license-del{
+      display: block;
+    }
+  }
+  > img{
+    max-width: 100%;
+    height: 100%;
+  }
+}
+
+.info-text{
+  font-size: 14px;
+  color: rgba(0,0,0,0.25);
+  line-height: 22px;
+}
+.info-label{
+  font-size:16px;
+  font-family:'PingFang SC';
+  font-weight:400;
+  line-height:24px;
+  color:rgba(0,0,0,0.85);
+}
+.info-label-bold{
+  font-weight: bold;
+}
+
+/****上传图片专用****/
+.rev-upload-wrapper{
+  display: table;
+  float: left;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  text-align: center;
+  vertical-align: top;
+  background-color: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 120px;
+  height: 180px;
+  transition: border-color .3s ease;
+  .rev-upload{
+    display: table-cell;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+    margin: 0;
+    color: rgba(0,0,0,.65);
+    font-size: 14px;
+    font-variant: tabular-nums;
+    line-height: 1.5;
+    list-style: none;
+    font-feature-settings: 'tnum';
+    outline: 0;
+    position: relative;
+    .rev-upload-file{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+    }
+    i{
+      font-size: 32px;
+      color: #999;
+    }
+    .rev-upload-text{
+      margin-top: 8px;
+      color: #666;
+    }
+  }
+}

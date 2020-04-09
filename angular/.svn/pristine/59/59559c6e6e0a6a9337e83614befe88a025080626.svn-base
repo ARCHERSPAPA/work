@@ -1,0 +1,679 @@
+import {Injectable} from '@angular/core';
+import {RequestService} from "./request.service";
+import {WarningService} from "./warning.service";
+import {Messages} from "../model/msg";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class QuoteService {
+    public quoteInfo: any;
+    private quoteData: any;
+    // private quotePrice:any;
+
+    private contract: any;
+
+    //所选设计师
+    private selectQuoteDesigners: Array<any> = [];
+    //所有职位人员
+    private selectQuoteMembers: Array<any> = [];
+
+    //拉取设计费的列表
+    private designList: Array<any> = [];
+
+    // //所选总监
+    // private selectLeader:any;
+    // //所选工长
+    // private selectChief:any;
+    // //所选监理
+    // private selectSupervisor:any;
+
+    private financeInfo: any;
+
+    private submitInfo: any;
+
+    /**
+     * 维修动态数据
+     */
+    private records: any;
+
+
+    private changeData = {
+        //body数据变化时为置为true，默认为false
+        data: false,
+        //终端价格变化置为true,默认为false
+        price: false,
+        //设计师相关
+        design:false,
+        //成员相关
+        member:false,
+        //head 公共头部数据
+        head:false,
+        //合同数据变化
+        contract:false
+    }
+
+    constructor(private request: RequestService,
+                private warn: WarningService) {
+    }
+
+    //公共头部数据加载
+    loadQuoteHeadById(id):Promise<any> {
+        return new Promise((resolve,reject) =>{
+            this.request.doPost({
+                url: "headQuote",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    //财务管理中的公共头部
+    loadFinanceHeadById(id):Promise<any> {
+       return new Promise((resolve,reject) =>{
+           this.request.doPost({
+               url: "headFinance",
+               data: {id: id},
+               success: (res => {
+                   if (res && res.code == 200) {
+                       resolve(res.data);
+                       // that.financeInfo = res.data;
+                       // if (that.financeInfo["members"]) {
+                       //     that.setSelectQuoteMembers(that.financeInfo["members"]);
+                       // }
+                   } else {
+                       reject(res.msg || Messages.FAIL.DATA);
+                   }
+               })
+           })
+       })
+    }
+
+    //财务管理中的合同详情
+    loadFinanceContract(cid):Promise<any> {
+        return new Promise((resolve,reject) =>{
+            this.request.doPost({
+                url: "receiveFinanceDetail",
+                data: {id: cid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+
+    }
+
+    //一般合同加载
+    loadQuoteContract(cid):Promise<any> {
+        return new Promise((resolve,reject) =>{
+            this.request.doPost({
+                url: "detailContractQuote",
+                data: {id: cid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                       resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+
+
+    //一般加载预算中的数据
+    loadData(cid,...args): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let params = {id :cid};
+            if(args && args.length > 0){
+                params["type"] = args[0]
+            }
+            this.request.doPost({
+                url: "bodyQuote",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+
+    /**
+     * 独立加载
+     * @param cid
+     * @param resolve
+     * @param reject
+     */
+    loadDataSimple(cid, resolve, reject) {
+        if (cid) {
+            this.request.doPost({
+                url: "bodyQuote",
+                data: {id: cid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        } else {
+            reject(Messages.FAIL.DATA);
+        }
+
+    }
+
+    // loadPrice(cid,resolve,reject){
+    //     this.request.doPost({
+    //         url:"detailPrice",
+    //         data:{id:cid},
+    //         success:(res =>{
+    //             if(res && res.code == 200){
+    //                 this.quotePrice = res.data;
+    //                 resolve(res.data);
+    //             }
+    //             else{
+    //                 this.warn.onError(res.msg || Messages.FAIL.DATA);
+    //                 reject(res.msg);
+    //             }
+    //         })
+    //     })
+    // }
+
+
+    // resetQuotePrice(){
+    //     this.quotePrice = null;
+    // }
+
+    // getQuotePrice(){
+    //     return this.quotePrice;
+    // }
+
+    // setQuoteInfo(info) {
+    //     this.quoteInfo = info;
+    // }
+
+    // getQuoteInfo() {
+    //     return this.quoteInfo;
+    // }
+
+    // getDataId() {
+    //     return this.financeInfo ? this.financeInfo["quoteBase"].id : (this.quoteInfo ? this.quoteInfo["quoteBase"].id : 0);
+    // }
+
+    getQuoteState() {
+        return this.financeInfo ? this.financeInfo["quoteBase"].state : (this.quoteInfo ? this.quoteInfo["quoteBase"].state : 0);
+    }
+
+    getCustomerId() {
+        return this.financeInfo ? this.financeInfo["quoteBase"].id : (this.quoteInfo ? this.quoteInfo["quoteBase"].customerId : 0);
+    }
+
+    setQuoteData(data) {
+        this.quoteData = data;
+        this.addPropertyOnType();
+    }
+
+    getQuoteData() {
+        return this.quoteData;
+    }
+
+    setMultipleDataByType(...args) {
+        let info = this.quoteData;
+        if (this.existDataByType(args[1])) {
+            for (let i = 0; i < info.length; i++) {
+                if (args.length > 2) {
+                    if (args[1] !== 1) {
+                        if (info[i].type === args[1]) {
+                            info[i] = args[0];
+                        }
+                    } else {
+                        if (info[i].type === args[1]) {
+                            info[0].infoMaps[args[2]].infos = args[0];
+                        }
+                    }
+                }
+                else {
+                    if (info[i].type === args[1]) {
+                        info[i] = args[0];
+                    }
+                }
+            }
+        } else {
+            if (args.length > 2) {
+                if (args[1] !== 1) {
+                    info.push(args[0]);
+                } else {
+                    info[0].infoMaps[args[2]].infos.push(args[0]);
+                }
+            } else {
+                info.push(args[0]);
+            }
+
+        }
+        this.addPropertyOnType();
+    }
+
+
+    addPropertyOnType() {
+        let info = this.quoteData;
+        if (this.existDataByType(1)) {
+            for (let i = 0; i < info.length; i++) {
+                if (info[i].type === 1) {
+                    if (info[i]["infoMaps"] && info[i]["infoMaps"].length > 0) {
+                        for (let j of info[i]["infoMaps"]) {
+                            j["isShow"] = true;
+                        }
+                    }
+
+                }
+            }
+        }
+        // console.log(info);
+    }
+
+    existDataByType(type) {
+        let info = this.quoteData;
+        if (info && info.length > 0) {
+            if (type != 1) {
+                for (let i of info) {
+                    if (i.type === type) return true;
+                }
+            } else {
+                return info[0] && info[0].infoMaps && info[0].infoMaps.length > 0;
+            }
+
+        }
+        return false;
+    }
+
+    removeQuoteData(id, type) {
+        let info = this.quoteData;
+        if (info && info.length > 0) {
+            if (info && info.length > 0) {
+                for (let i = 0; i < info.length; i++) {
+                    if (info[i].type === type) {
+                        if (type === 1) {
+                            this.removeQuoteDataById2(id, info[i].infoMaps);
+                        } else {
+                            this.removeQuoteDataById(id, info[i].infos);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    removeQuoteDataById2(id, infos) {
+        if (infos && infos.length > 0) {
+            for (let i = 0; i < infos.length; i++) {
+                if (infos[i].infos && infos[i].infos.length > 0) {
+                    this.removeQuoteDataById(id, infos[i].infos);
+                }
+            }
+        }
+    }
+
+    removeQuoteDataById(id, info) {
+        if (info && info.length > 0) {
+            for (let i = 0; i < info.length; i++) {
+                if (info[i].id === id) {
+                    info.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    updateQuoteData(id, type, num) {
+        let info = this.quoteData;
+        for (let i = 0; i < info.length; i++) {
+            if (info[i].type === type) {
+                this.updateQuoteDataById(id, info[i].infos, num);
+            }
+        }
+    }
+
+    updateQuoteDataForColumn(id, type, num) {
+        let info = this.quoteData;
+        if (info && info.length > 0) {
+            for (let i of info) {
+                if (i.type === type) {
+                    if (i["infoMaps"] && i["infoMaps"].length > 0) {
+                        for (let j of i["infoMaps"]) {
+                            if (j["infos"] && j["infos"].length > 0) {
+                                for (let k of j["infos"]) {
+                                    if (k["id"] == id) {
+                                        k["num"] = num;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    updateQuoteDataById(id, info, num) {
+        if (info && info.length > 0) {
+            for (let i = 0; i < info.length; i++) {
+                if (info[i].id === id) {
+                    info[i].num = num;
+                }
+            }
+        }
+    }
+
+    setQuoteDepart(depart) {
+        let that = this;
+        if (that.quoteInfo) {
+            if (that.quoteInfo["quoteBase"] && depart) {
+                that.quoteInfo["quoteBase"]["quoteDepartmentName"] = depart.departmentName;
+                that.quoteInfo["quoteBase"]["quoteDepartmentId"] = depart.departmentId;
+            }
+        }
+    }
+
+    getQuoteDepart() {
+        let that = this;
+        if (that.quoteInfo) {
+            if (that.quoteInfo["quoteBase"])
+                return {
+                    departmentName: that.quoteInfo["quoteBase"]["quoteDepartmentName"],
+                    departmentId: that.quoteInfo["quoteBase"]["quoteDepartmentId"]
+                }
+        }
+        return {
+            departmentId: null,
+            departmentName: null
+        }
+    }
+
+    getQuoteSelectDesigners() {
+        return this.selectQuoteDesigners;
+    }
+
+    // setQuoteSelectDesigners(designers) {
+    //     if (designers && designers.length > 0) {
+    //         for (let des of designers) {
+    //             if (des && des["memberId"]) {
+    //                 des["id"] = des["memberId"];
+    //                 des["name"] = des["memberName"];
+    //             }
+    //         }
+    //     } else {
+    //         if (designers && designers["memberId"]) {
+    //             designers["id"] = designers["memberId"];
+    //             designers["name"] = designers["memberName"];
+    //         }
+    //     }
+    //     this.selectQuoteDesigners = designers;
+    // }
+
+
+    /**
+     * 判断当前设计师是否为选中状态
+     * @param des
+     * @returns {boolean}
+     */
+    existQuoteDesigner(des,designers:Array<any>) {
+        if (designers && designers.length > 0) {
+            for (let designer of designers) {
+                if (designer.id == des.id || designer.id == des.sysUserId) return true;
+            }
+        }
+        return false;
+    }
+
+    // updateQuoteDesigner(des) {
+    //     let designers = this.selectQuoteDesigners;
+    //     if (!this.existQuoteDesigner(des)) {
+    //         designers.push({
+    //             name: des.name,
+    //             id: des.id,
+    //             departmentName: des.departmentName,
+    //             phone: des.phone,
+    //             percentage: 0
+    //         });
+    //     }
+    //     this.calcPercentage();
+    // }
+
+    // calcPercentage() {
+    //     let designers = this.selectQuoteDesigners,
+    //         total = 0;
+    //     if (designers && designers.length > 0) {
+    //         for (let designer of designers) {
+    //             designer["percentage"] = Math.floor(100 / (designers.length));
+    //             total += parseFloat(designer["percentage"]);
+    //         }
+    //         if (total !== 100) {
+    //             designers[0]["percentage"] = (designers[0]["percentage"] + (100 - total));
+    //         }
+    //
+    //     }
+    // }
+
+    // removeQuoteDesigner(des) {
+    //     let designers = this.selectQuoteDesigners;
+    //     if (designers && designers.length > 0) {
+    //         if (this.existQuoteDesigner(des)) {
+    //             for (let i = 0; i < designers.length; i++) {
+    //                 if (designers[i].id == des.id) {
+    //                     designers.splice(i, 1);
+    //                     this.calcPercentage();
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // removeAllQuoteDesigner() {
+    //     this.selectQuoteDesigners = [];
+    // }
+
+    // justiceRadio() {
+    //     let designers = this.selectQuoteDesigners;
+    //     let total = 0;
+    //     for (let i of designers) {
+    //         total += parseFloat(i["percentage"]);
+    //     }
+    //     if (total < 100 || total > 100) return false;
+    //     return true;
+    // }
+
+    setQuoteBase(data) {
+        let that = this;
+        if (that.quoteInfo && that.quoteInfo["quoteBase"]) {
+            that.quoteInfo["quoteBase"] = Object.assign(that.quoteInfo["quoteBase"], data);
+        }
+    }
+
+    // getContract() {
+    //     return this.contract;
+    // }
+
+    // setContract(data) {
+    //     this.contract = data;
+    // }
+
+    setPayType(pays) {
+        this.contract["pays"] = pays;
+    }
+
+    setFinanceInfo(info) {
+        this.financeInfo = info;
+    }
+
+    getFinanceInfo() {
+        return this.financeInfo;
+    }
+
+    // setSelectQuoteMembers(members) {
+    //     if (members && members.length > 0) {
+    //         this.selectQuoteMembers = members;
+    //     } else {
+    //         this.selectQuoteMembers = [];
+    //     }
+    // }
+
+    updateSelectQuoteMembers(member: any) {
+        if (!this.selectQuoteMembers || (this.selectQuoteMembers && this.selectQuoteMembers.length == 0)) {
+            this.selectQuoteMembers.push(member);
+        } else {
+            let isAdd = false, members = this.selectQuoteMembers;
+            for (let i = 0; i < members.length; i++) {
+                if (members[i].type === member.type) {
+                    isAdd = true;
+                    members.splice(i, 1, member);
+                    // console.log(members);
+                }
+            }
+            if (!isAdd) {
+                members.push(member);
+            }
+            // this.setSelectQuoteMembers(members);
+        }
+        // this.setSelectQuoteMembers(this.selectQuoteMembers);
+        // console.log(this.selectQuoteMembers);
+    }
+
+    // removeQuoteMember(member) {
+    //     let members = this.getSelectQuoteMembers();
+    //     for (let i = 0; i < members.length; i++) {
+    //         if (member["memberId"] === members[i]["memberId"]) {
+    //             members.splice(i, 1);
+    //         }
+    //     }
+    // }
+
+    // getSelectQuoteMembers() {
+        // console.log(this.selectQuoteMembers);
+        // return this.selectQuoteMembers;
+    // }
+
+    // divideMemberByType(type: number) {
+    //     let members = this.selectQuoteMembers;
+    //     if (members && members.length > 0) {
+    //         for (let m of members) {
+    //             if (m.type === type)
+    //                 return m;
+    //         }
+    //     }
+    //     return null;
+    // }
+
+    loadDesign(id):Promise<any> {
+
+        // if (id) {
+        //     this.equest.doPost({
+        //         url: "listDesign",
+        //         data: {id: id},
+        //         success: (res => {
+        //             if (res && res.code == 200) {
+        //                 this.setDesignList(res.data);
+        //                 resolve(res.data);
+        //             } else {
+        //                 reject(res.msg);
+        //             }
+        //         })
+        //     })
+        // }
+        return new Promise((resolve,reject) =>{
+            this.request.doPost({
+                url:"listDesign",
+                data:{id:id},
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.data);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    // getDesignList() {
+    //     return this.designList;
+    // }
+    //
+    // setDesignList(list) {
+    //     this.designList = list;
+    // }
+
+    loadSubmitInfo(id) {
+        if (id) {
+            this.request.doPost({
+                url: "submitQuoteDetail",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.setSubmitInfo(res.data);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 维修动态数据(不用维护)
+     * @param rid 维修id
+     */
+    loadRecordDynamic(rid) {
+        this.request.doPost({
+            url: "recordDynamicCard",
+            data: {recordId: rid},
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.records = res.data;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    setRecords(records) {
+        this.records = records;
+    }
+
+    getRecords() {
+        return this.records;
+    }
+
+    setSubmitInfo(submitInfo:any){
+        this.submitInfo = submitInfo;
+    }
+
+    getSubmitInfo() {
+        return this.submitInfo;
+    }
+
+    setTypeByParam(type: string, bool: boolean) {
+        this.changeData[type] = bool;
+    }
+
+    getTypeByParam(type: string) {
+        return this.changeData[type];
+    }
+
+}

@@ -1,0 +1,60 @@
+<div class="user-info">
+    <div class="head">
+        <rev-breadcrumb [breads]="breads"></rev-breadcrumb>
+    </div>
+    <div class="content">
+        <rev-user-info-step [currentIndex]="1"></rev-user-info-step>
+        <div class="form">
+            <form nz-form [formGroup]="findForm">
+                <nz-form-item>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="account">帐号</nz-form-label>
+                    <nz-form-control [nzSm]="14" [nzXs]="24">
+                        <input nz-input type="text" formControlName="account" id="account" autocomplete="off" maxlength="32"/>
+                        <div *ngIf="!findForm.get('account').valid && !findForm.get('account').pristine"
+                             class="ant-form-explain ng-star-inserted">
+                            <span *ngIf="findForm.hasError('required',['account'])" class="ng-trigger ng-trigger-helpMotion">帐号必填</span>
+                            <span *ngIf="findForm.hasError('code',['account'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;只能输入数字、字母</span>
+                            <span *ngIf="findForm.hasError('minlength',['account'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至少输入6位字符</span>
+                            <span *ngIf="findForm.hasError('maxlength',['account'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入20位字符</span>
+                        </div>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="code">验证码</nz-form-label>
+                    <nz-form-control
+                            [nzSm]="14"
+                            [nzXs]="24"
+                            nzErrorTip="Please input the captcha you got!"
+                            nzExtra="We must make sure that your are a human."
+                    >
+                        <div nz-row [nzGutter]="10">
+                            <div nz-col [nzSpan]="18">
+                                <input nz-input formControlName="code" id="code" autocomplete="off" maxlength="10"/>
+                                <div *ngIf="!findForm.get('code').valid && !findForm.get('code').pristine"
+                                     class="ant-form-explain ng-star-inserted">
+                                    <span *ngIf="findForm.hasError('required',['code'])" class="ng-trigger ng-trigger-helpMotion">帐号必填</span>
+                                    <span *ngIf="findForm.hasError('code',['code'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;只能输入数字、字母</span>
+                                    <span *ngIf="findForm.hasError('minlength',['code'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至少输入4位字符</span>
+                                    <span *ngIf="findForm.hasError('maxlength',['code'])" class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入6位字符</span>
+                                </div>
+                            </div>
+                            <div nz-col [nzSpan]="6" class="text-center">
+                                <button nz-button nzBlock nzType="primary" (click)="changeCode($event)">{{randCode}}</button>
+                            </div>
+                        </div>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item nz-row>
+                    <nz-form-control [nzSpan]="5" [nzOffset]="6">
+                        <button nz-button nzType="default" nzBlock (click)="cancel()">取消</button>
+                    </nz-form-control>
+                    <nz-form-control [nzSpan]="5" [nzOffset]="4">
+                        <button nz-button nzType="primary" nzBlock (click)="next($event)" [disabled]="!findForm.valid">下一步</button>
+                    </nz-form-control>
+                </nz-form-item>
+            </form>
+        </div>
+    </div>
+</div>
+
+

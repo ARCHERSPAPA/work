@@ -1,0 +1,21 @@
+@charset "utf-8";
+.quest{
+    // padding: 10px 20px;
+    overflow: hidden;
+    .content{
+        padding-top: 24px;
+    }
+}
+tr th,tr td{
+    font-size: 14px;
+    a{
+        padding-right: 4px;
+    }
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 60px;
+   }
+   .w1{
+    width: 40%;
+       }

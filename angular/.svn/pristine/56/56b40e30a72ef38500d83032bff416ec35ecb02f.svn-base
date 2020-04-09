@@ -1,0 +1,101 @@
+<div class="client" style="padding:0">
+    <div class="head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleOpen($event)"></rev-title>
+    </div>
+    <div class="content">
+        <div class="source-list">
+            <nz-table #nzTable [nzData]="listSource" [nzBordered]="true" [nzFrontPagination]="false"
+                [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changeData()'
+                nzSize="middle" [nzShowPagination]="true">
+                <thead nz-thead>
+                    <tr nzWidth='600px'>
+                        <th nz-th><span>来源名称</span></th>
+                        <th nz-th><span>备注</span></th>
+                        <th nz-th><span>操作</span></th>
+                    </tr>
+                </thead>
+                <tbody nz-tbody style="font-size: 12px">
+                    <tr nz-tbody-tr *ngFor="let item of nzTable.data">
+                        <td nz-td [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+                        <td nz-td [nzTitle]="item.remarks?item.remarks:'暂无备注显示'" nzPlacement="topCenter" nz-tooltip>
+                            {{item.remarks?item.remarks:'--'}}</td>
+                        <td nz-td> <a href="javascript:void(0)" (click)="editSource(item)">
+                                编辑
+                            </a>
+                            <a href="javascript:void(0)" nz-popconfirm [nzTitle]="'确定删除来源数据【'+item.name+'】?'"
+                                nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="delSource(item.id)" class="del">
+                                删除
+                            </a></td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="客户来源" [nzFooter]="null" (nzOnCancel)="handleCancel()"
+    class="source-modal">
+    <form nz-form [formGroup]="clientForm">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6" required>来源名称</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+                <input nz-input [(ngModel)]="name" name="name" formControlName="name" maxlength="32"
+                    placeholder="请输入来源名称" />
+                <nz-form-explain *ngIf="clientForm.get('name').dirty && clientForm.get('name').errors">
+                    <ng-container *ngIf="clientForm.get('name').hasError('required')">
+                        项目必填
+                    </ng-container>
+                    <ng-container *ngIf="clientForm.get('name').hasError('minlength')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="clientForm.get('name').hasError('maxlength')">
+                        至多输入32位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6">备注</nz-form-label>
+            <nz-form-control [nzSpan]="18" class="textarea">
+                <textarea nz-input [(ngModel)]="remarks" name="remarks" formControlName="remarks" rows="4"
+                    maxlength="120" placeholder="请输入来源备注"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                <nz-form-explain *ngIf="clientForm.get('remarks').dirty && clientForm.get('remarks').errors">
+                    <ng-container *ngIf="clientForm.get('remarks').hasError('maxlength')">
+                        至多输入120位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <div nz-row>
+            <div class="btns">
+                <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+                <button nz-button nzType="primary" [disabled]="!clientForm.valid" (click)="handleOk($event)">提交
+                </button>
+            </div>
+        </div>
+    </form>
+
+
+    <!--<ul class="addModel">-->
+    <!--<li>-->
+    <!--<div>-->
+    <!--<label>{{sourceTitle}}</label>-->
+    <!--<input nz-input type="text" [(ngModel)]="mealName" class="com_input" maxlength="30" autocomplete="off">-->
+    <!--</div>-->
+
+    <!--</li>-->
+    <!--<li class="remark">-->
+    <!--<label class="top">{{sourceContent}}</label>-->
+    <!--<textarea nz-textarea type="text" name="remark" [(ngModel)]="remark" class="com_input" maxlength="120"-->
+    <!--style="height: 140px;"-->
+    <!--autocomplete="off">-->
+
+    <!--</textarea>-->
+    <!--<span class="currentNo" *ngIf="remark && remark.length > 0"><span style="color:red">{{remark.length}}</span>/120</span>-->
+    <!--</li>-->
+    <!--<li class="meal_sub">-->
+    <!--<button nz-button [nzType]="'default'" (click)="handleCancel()">关闭</button>-->
+    <!--<button nz-button [nzType]="'primary'" (click)="handleOk()" [disabled]='!mealName'>提交</button>-->
+    <!--</li>-->
+    <!--</ul>-->
+</nz-modal>

@@ -1,0 +1,22 @@
+.associate{
+    .btns{
+        margin-top: 24px;
+    }
+    tr th,tr td{
+        a{
+            padding-right: 4px;
+            color: #1890ff;
+        }
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+       }
+        tr th,tr td:not(.w10){    
+                max-width: 60px;
+          }
+      
+      tr td{
+        font-size: 14px;
+    
+      }
+}

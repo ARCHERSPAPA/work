@@ -1,0 +1,65 @@
+import { Component, OnInit, Input } from '@angular/core';
+import {Router} from '@angular/router';
+import {UserService} from "../../service/user.service";
+import {RequestService} from "../../service/request.service";
+import {WarningService} from "../../service/warning.service";
+import {Messages} from "../../model/msg";
+import {CheckService} from "../../service/check.service";
+import {CookieService} from "ngx-cookie-service";
+
+@Component({
+  selector: 'rev-head',
+  templateUrl:'./head.component.html',
+  styleUrls: ['./head.component.scss']
+})
+export class HeadComponent implements OnInit {
+  @Input() visible:boolean = true;
+  public name:string;
+  constructor(private router:Router,
+              private userInfo:UserService,
+              private request:RequestService,
+              private warn:WarningService,
+              private cookieService:CookieService,
+              private check:CheckService) { }
+
+  ngOnInit() {
+     if(this.visible){
+         if(this.userInfo.getAccount()){
+             this.name = this.userInfo.getAccount()
+         }else{
+             this.check.check();
+         }
+     }
+  }
+
+
+  ngDoCheck(){
+      if(this.visible){
+          if(this.userInfo.getAccount()){
+              this.name = this.userInfo.getAccount();
+          }
+      }
+
+  }
+
+  exit(){
+      let that = this;
+      that.request.doPost({
+          url:"logout",
+          data:{},
+          success:(res =>{
+              if(res && res.code == 200){
+                  that.userInfo.clearCookie();
+                  that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                  that.check.isLogin = false;
+                  that.router.navigateByUrl("/");
+              }else{
+                  that.warn.onError(res.msg || Messages.FAIL.DATA);
+              }
+          })
+      });
+  }
+
+
+
+}

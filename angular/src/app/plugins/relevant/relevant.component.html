@@ -1,0 +1,122 @@
+<div class="ant-modal-content">
+    <div class="ant-modal-header">
+        <div class="ant-modal-title">{{title}}</div>
+        <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+            <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+        </button>
+    </div>
+    <div class="ant-modal-body">
+        <div class="info">
+            <div class="info-content">
+                <div class="info-data">
+                    <div class="info-user">
+                        <!-- <div class="list-group-rev">
+                            <div class="list-items">
+                                <ul class="item-head">
+                                    <li>姓名</li>
+                                    <li class="w40">部门</li>
+                                    <li>手机号</li>
+                                </ul>
+                                <div class="item-content">
+                                    <ul class="item-body" *ngFor="let staff of staffList">
+                                        <li><a href="javascript:void(0)"
+                                               (click)="selectRelevant(staff)">{{staff.name}}</a>
+                                        </li>
+                                        <li class="w40">{{staff.departmentName}}</li>
+                                        <li>{{staff.phone}}</li>
+                                    </ul>
+                                    <ul class="item-body" *ngIf="!staffList || (staffList && staffList.length == 0)">
+                                        <p>暂无数据信息</p>
+                                    </ul>
+                                </div>
+                                <div class="page" *ngIf="staffList && staffList.length > 0">
+                                    <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                                    <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                                                   [nzTotal]="total"
+                                                   (nzPageIndexChange)="changeData()"
+                                                   [nzShowTotal]="totalTemplate"></nz-pagination>
+                                </div>
+                            </div>
+                            <div class="list-quick">
+                                <rev-quick [type]="3" relate="1" (selectId)="selectDepartmentId($event)"></rev-quick>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                        <div class="list-group-rev">
+                            <nz-table #rowSelectionTable [nzData]="staffList" [(nzPageIndex)]="pageNo"
+                                [nzScroll]="{ y: '270px' }" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                                [nzShowPagination]="true" nzSize="middle" [nzFrontPagination]="false"
+                                (nzPageIndexChange)="changeData()">
+                                <thead>
+                                    <tr>
+                                        <th>选择</th>
+                                        <th>姓名</th>
+                                        <th class="w40">部门</th>
+                                        <th>手机号</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+                                        <td nzShowCheckbox [(nzChecked)]="item.checked"
+                                            (nzCheckedChange)='selectRelevant(item,i)'> </td>
+                                        <td>{{item.name}}</td>
+                                        <td class="w40">{{item.departmentName}}</td>
+                                        <td>{{item.phone}}</td>
+                                    </tr>
+                                </tbody>
+                            </nz-table>
+                        </div>
+                        <div class="list-quick">
+                            <div class="list-quick-title">快速查询</div>
+                            <rev-depart-tree [type]="departType" (handleChangeData)="selectDepartmentId($event)">
+                            </rev-depart-tree>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-show">
+                <!-- <ul class="info-multi" *ngIf="design">
+          <li>
+          <span class="w10"><a href="javascript:void(0)" (click)="removeRelevant()" class="del"
+                               title="删除"><span nz-icon type="delete"></span></a></span>
+              <span [title]="design.name?design.name:''">{{design.name?design.name:'--'}}</span>
+              <span
+                      [title]="design.departmentName?design.deparmentName:''">{{design.departmentName?design.departmentName:'--'}}</span>
+              <span [title]="design.phone?design.phone:''">{{design.phone?design.phone:'--'}}</span>
+          </li>
+      </ul>
+      <ul class="info-multi" *ngIf="!design">
+          <li>
+              <p>暂无人员数据</p>
+          </li>
+      </ul> -->
+
+                <nz-table #borderedTable nzBordered nzTitle="已选" class="info-multi" [nzNoResult]="'暂无人员数据'"
+                    nzSize="middle" [nzShowPagination]="false" [nzData]="design">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of borderedTable.data,let i=index">
+                            <td [title]="data.name?data.name:'--'">{{data.name?data.name:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+
+        <div class="ant-modal-footer">
+            <button type="button" class="ant-btn ant-btn-default" (click)="activeModal.close()">取消</button>
+            <button type="button" class="ant-btn ant-btn-primary" (click)="relevantOk()">确定</button>
+        </div>
+    </div>
+</div>

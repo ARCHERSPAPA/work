@@ -1,0 +1,96 @@
+//@charset "utf-8";
+//@import "./../../../../assets/scss/mixin";
+//.step-head{
+//  width: 100%;
+//  .title{
+//    font-size: 16px;
+//    font-weight: 500;
+//    line-height: 36px;
+//    color: #000;
+//  }
+//  .steps{
+//    width:100%;
+//    height:80px;
+//    background: #fff;
+//    font-size: 0;
+//    @include compatibility(display,flex);
+//    .item{
+//      display:inline-block;
+//      vertical-align: top;
+//      margin-right:40px;
+//      padding-left: 40px;
+//      @include compatibility(box-sizing,border-box);
+//      position: relative;
+//      &.arrow-left:before{
+//        content: '';
+//        position: absolute;
+//        left: 0;
+//        top: 0;
+//        z-index: 1;
+//        border-width:40px;
+//        border-style:solid;
+//        border-color:transparent transparent transparent #fff;
+//      }
+//      &.arrow-left:after{
+//        content: '';
+//        position: absolute;
+//        right: -40px;
+//        top: 0;
+//        z-index: 1;
+//        border-width:40px;
+//        border-style:solid;
+//        border-color:transparent transparent transparent #f2f3f7;
+//      }
+//      &.arrow{
+//        background-color:#75b0df;
+//        &:after{
+//          content: '';
+//          position: absolute;
+//          right: -80px;
+//          top: 0;
+//          z-index: 1;
+//          border-width:40px;
+//          border-style:solid;
+//          border-color:transparent transparent transparent #75b0df;
+//        }
+//      }
+//      &.active{
+//        background: #0a8ddf;
+//        color: #fff;
+//        &:after{
+//          border-color:transparent transparent transparent #0a8ddf;
+//        }
+//      }
+//      &:last-child{
+//        margin:0;
+//        &:after{
+//          content: '';
+//          position: absolute;
+//          right:0;
+//          top: 0;
+//          z-index: 1;
+//          border-width:40px;
+//          border-style:solid;
+//          border-color:transparent;
+//        }
+//      }
+//      @include compatibility(flex,1);
+//      .number{
+//        display: inline-block;
+//        vertical-align: top;
+//        font-size: 30px;
+//        font-weight: 600;
+//        padding:16px 10px;
+//      }
+//      .desc{
+//        display:inline-block;
+//        vertical-align: top;
+//        padding:22px 10px;
+//        .line,.sub{
+//          display: block;
+//          font-size: 12px;
+//        }
+//      }
+//    }
+//  }
+//}

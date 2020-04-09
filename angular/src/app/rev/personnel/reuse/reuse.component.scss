@@ -1,0 +1,63 @@
+.meal_modal{
+.acconut{
+    text-align: left !important;
+    margin: 0 41px;
+}
+    .label{
+        // vertical-align: top;
+        margin-right: 10px;
+    }
+    .inp{
+        .error{
+            margin-top: -7px;
+        }
+
+        input{
+            width: 49% !important
+        }
+    margin-top: 10px;
+    }
+    .btns {
+        margin:40px -24px -11px -24px;
+        text-align: right;
+        border-top: 1px solid #dedede;
+        padding-top: 10px;
+        button{
+          margin-right: 24px;
+        }
+        button:first-child {
+          margin-right: 8px;
+        }
+      }
+
+} 
+tr th,tr td{
+    a{
+        padding-right: 4px;
+        color: #1890ff;
+    }
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+   }
+    tr th,tr td:not(.w10){    
+            max-width: 60px;
+      }
+  
+  tr td{
+    font-size: 14px;
+  }
+.reuse_inp{
+    margin-bottom: 0;
+    .reuse_chk{
+        position: relative;
+        .overflow{
+            height: 30px;
+            width: 460px;
+            position: absolute;
+            top: -6px;
+            left: 0px;
+        }
+    }
+  
+}

@@ -1,0 +1,29 @@
+<div class="ant-modal-content">
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+    <div class="ant-modal-header">
+        <div class="ant-modal-title">{{title}}</div>
+    </div>
+    <!--<div class="ant-modal-body clearfix">-->
+        <!--<a href="javascript:void(0)" (click)="onReset($event)">复位</a>-->
+        <!--<div class="image-large-wrapper" *ngIf="src">-->
+            <!--<div class="image-large" (mousemove)="onMove($event)" id="moveLarge"-->
+                 <!--(mousedown)="onDown($event)" (mouseup)="onUp($event)" (mouseleave)="onLeave($event)">-->
+                <!--<img [src]="src" (mousewheel)="onMouseWheel($event)" id="imageLarge"/>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+
+
+    <div class="ant-modal-body clearfix">
+        <!--<a href="javascript:void(0)" (click)="onReset($event)">复位</a>-->
+        <div class="image-large-wrapper">
+            <div class="image-large" id="moveLarge"  (mousemove)="onMove($event)" id="moveLarge"
+                (mousedown)="onDown($event)" (mouseup)="onUp($event)" (mouseleave)="onLeave($event)">
+               <img [src]="src" (mousewheel)="onMouseWheel($event)" (dblclick)="onZoom($event)" id="imageLarge"/>
+           </div>
+       </div>
+   </div>
+
+</div>

@@ -1,0 +1,15 @@
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'compile'
+})
+export class CompilePipe implements PipeTransform {
+
+  transform(value: any, args?: any): any {
+       if(value){
+           return  value.replace(/(\d{3})(\d+)(\d{4})/,'$1****$3');
+       }
+      return '****';
+  }
+
+}

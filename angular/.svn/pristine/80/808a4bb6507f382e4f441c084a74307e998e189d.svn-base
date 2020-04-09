@@ -1,0 +1,101 @@
+<div class="warranty">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="content">
+    <form>
+      <div class="warranty-edit" style="border: none">
+        <ul>
+          <nz-form-item class="info">
+            <nz-form-label [nzSpan]="4">保修起始时间</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <input type="hidden" [(ngModel)]="warrantyStart" name="warrantyStart" />
+              <div class="ant-radio-group ant-radio-group-outline" style="width: 60%;">
+                <label nz-col [nzSpan]="4" [ngClass]="{'ant-radio-wrapper-checked':warrantyStart === 1}">
+                  <span class="ant-radio" [ngClass]="{'ant-radio-checked':warrantyStart === 1}">
+                    <input type="radio" class="ant-radio-input" checked="{{warrantyStart === 1}}" value="1"
+                      name="warranty" (click)="warrantyType(1)" />
+                    <span class="ant-radio-inner"></span>
+                  </span>
+                  <span>尾款时间</span>
+                </label>
+                <label nz-col [nzSpan]="4" [ngClass]="{'ant-radio-wrapper-checked':warrantyStart === 0}">
+                  <span class="ant-radio" [ngClass]="{'ant-radio-checked':warrantyStart === 0}">
+                    <input type="radio" class="ant-radio-input" checked="{{warrantyStart === 0}}" value="0"
+                      name="warranty" (click)="warrantyType(0)" />
+                    <span class="ant-radio-inner"></span>
+                  </span>
+                  <span>竣工时间</span>
+                </label>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="info" *ngFor="let option of settingOption;let i = index;">
+            <nz-form-label [nzSpan]="4"> <i nz-icon type="edit" title="修改" *ngIf="!option.checked"></i><input maxlength="10"
+                (click)='hiddenEdit(option)' (blur)="hiddenAll(option.customWarrantyName,i)" name="option.customWarrantyName" minlength="1"
+                class="text" class="info-content" [ngModelOptions]="{standalone: true}"
+                [(ngModel)]="option.customWarrantyName">
+            </nz-form-label>
+            <nz-form-control [nzSpan]="15">
+              <nz-input-number placeholder="请输入" class="text" maxlength="4" [(ngModel)]="option.customYears" [nzMin]="0"[nzPrecision]="1" 
+               [ngModelOptions]="{standalone: true}" [nzMax]="99" [nzSize]="'middle'" [nzStep]="1"(ngModelChange)="numberCheck(option.customYears,i)"
+                [nzPlaceHolder]="'请输入'">
+              </nz-input-number>
+              <span class="year">年</span>
+              <span class="checkbox-inner" style="margin-left: 8px;"></span>
+              <i nz-icon type="minus-circle-o" class="dynamic-delete-button" (click)="removeOptions(i)"></i>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-control [nzXs]="{ span: 24, offset: 0 }" [nzSm]="{ span: 20, offset: 4}">
+              <button nz-button nzType="dashed" class="add-button text" (click)="addOptions()">
+                <i nz-icon type="plus" style="vertical-align: top;"></i>
+                添加保修
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="4">保修说明</nz-form-label>
+            <nz-form-control [nzXs]="{ span: 24, offset: 0 }" [nzSm]="{ span: 20, offset: 0}">
+              <textarea nz-input maxlength="500" minlength="10" name="remarks" class="text" rows="11" (blur)="remarkCheck(remarks)"
+                [(ngModel)]="remarks"></textarea>
+              <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/500</span>
+            </nz-form-control>
+          </nz-form-item>
+          <!-- <nz-form-item class="info">
+            <nz-form-label [nzSpan]="4">   <a href="javascript:void(0)" style="text-align: right;"><i nz-icon type="edit"
+              title="修改"></i></a>水电保修和全屋防护</nz-form-label>
+            <nz-form-control [nzSpan]="15">
+              <nz-input-number  placeholder="请输入" class="text" maxlength="4" [(ngModel)]="hydWarrantyYears"
+                onkeyup="this.value=this.value.replace(/\D/g,'')" name="hydWarrantyYears"
+                formControlName="hydWarrantyYears" [nzMin]="1" [nzMax]="10" [nzSize]="'middle'" [nzStep]="1"
+                [nzPlaceHolder]="'请输入'" name="warrantyYears" >
+              </nz-input-number>
+              <span class="checkbox-inner" style="margin-left: 8px;"></span>
+              <nz-form-explain
+                *ngIf="warrantyForm.get('hydWarrantyYears').dirty && warrantyForm.get('hydWarrantyYears').errors">
+                <ng-container *ngIf="warrantyForm.get('hydWarrantyYears').hasError('required')">
+                  必填项目
+                </ng-container>
+                <ng-container *ngIf="warrantyForm.get('hydWarrantyYears').hasError('number')">
+                  &nbsp;&nbsp;输入格式有误
+                </ng-container>
+                <ng-container *ngIf="warrantyForm.get('hydWarrantyYears').hasError('maxlength')">
+                  &nbsp;&nbsp;最多输入两位有效数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item> -->
+        </ul>
+        <nz-form-item>
+          <nz-form-control [nzXs]="{ span: 24, offset: 0 }" [nzSm]="{ span: 20, offset: 4}">
+            <button nz-button [nzType]="'default'" (click)="back()" style="margin-right: 24px;">取消</button>
+            <button nz-button [nzType]="'primary'" (click)="submit()">提交
+            </button>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+  </div>
+</div>

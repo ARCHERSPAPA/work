@@ -1,0 +1,35 @@
+import {Injectable} from '@angular/core';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class HeaderService {
+
+    /**
+     * 判断head 里面的值是否变化
+     * @type {boolean}
+     */
+    private headBool: boolean = false;
+
+    private headerInfo: any;
+
+    constructor() {
+    }
+
+
+    setHeaderInfo(data: any) {
+        this.setHeadBool(true);
+        this.headerInfo = data;
+    }
+
+    getHeaderInfo() {
+        return this.headerInfo;
+    }
+
+    setHeadBool(bool:boolean){
+        this.headBool = bool;
+    }
+    getHeadBool(){
+        return this.headBool;
+    }
+}

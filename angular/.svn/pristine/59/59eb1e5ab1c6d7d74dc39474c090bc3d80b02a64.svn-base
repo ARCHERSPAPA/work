@@ -1,0 +1,21 @@
+@charset "utf-8";
+
+.info-user{
+    display: flex;
+  
+}
+.list-group-rev{
+    width: 70%;
+    height: 350px;
+}
+.list-quick{
+    flex: 1;
+   margin: 14px 0 0 18px;
+    &-title{
+        margin-bottom: 8px;
+    }
+
+}
+.ant-modal-footer{
+    padding: 20px 0 0 0;
+}

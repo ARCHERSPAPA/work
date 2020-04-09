@@ -1,0 +1,180 @@
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {Messages} from "../../../model/msg";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import * as UserValidate from "../../../validate/user-validate";
+
+import {WarningService} from "../../../service/warning.service";
+import {Default} from "../../../model/constant";
+import {RequestService} from "../../../service/request.service";
+
+@Component({
+  selector: 'rev-client-source',
+  templateUrl: './client-source.component.html',
+  styleUrls: ['./../client.component.scss','./client-source.component.scss']
+})
+export class ClientSourceComponent implements OnInit {
+
+  public title:string;
+  public content:string;
+  public isVisible:Boolean;
+
+  
+  public buttons:Array<any>;
+
+  public clientForm:FormGroup;
+  public name:string;
+  public remarks:string;
+
+  //分页
+  public pageNo:number = Default.PAGE.PAGE_NO;
+  public pageSize:number = Default.PAGE.PAGE_SIZE;
+  public total:number = Default.PAGE.PAGE_TOTAL;
+  public listSource:any;
+
+  //编辑时的item.id
+  public id:number = -1;
+
+
+  constructor(
+    private router:Router,
+    private activatedRoute:ActivatedRoute,
+    private fb:FormBuilder,
+    private req:RequestService,
+    private warn:WarningService
+  ) {}
+
+
+
+  ngOnInit() {
+    this.title = "客户来源";
+    this.content = "备注";
+    this.buttons = [{
+      color: "btn-primary",
+      name: "添加来源"
+    }];
+
+    this.clientForm = this.fb.group({
+        name:[this.name,[
+            Validators.required,
+            Validators.minLength(1),
+            Validators.maxLength(30),
+            UserValidate.ValidateAccount
+        ]],
+        remarks:[this.remarks,[
+            Validators.maxLength(120)
+        ]]
+    });
+    this.changeData();
+  }
+
+
+    changeData() {
+        let that = this;
+        that.req.doPost({
+            url: "listSource",
+            data: {
+                pageNo: that.pageNo,
+                pageSize: that.pageSize
+            },
+            success: (res => {
+                // console.log(res);
+                if (res && res.code == 200) {
+                    that.listSource = res.data.pageSet;
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    delSource(id) {
+        let that = this;
+        that.req.doPost({
+            url: "delSource",
+            data: {
+                id: id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.changeData();
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    editSource(item) {
+        this.remarks = item.remarks;
+        this.name = item.name;
+        this.id = item.id;
+        this.isVisible = true;
+    }
+
+
+
+  handleOpen(e:any){
+      console.log(e);
+    this.isVisible = true;
+    this.name = null;
+  }
+
+
+    handleCancel() {
+        this.isVisible = false;
+        this.remarks = "";
+        this.name = "";
+        this.id = -1;
+    }
+    handleOk(e:any) {
+      e.stopPropagation();
+      e.preventDefault();
+        let that = this;
+        if(this.clientForm.valid){
+          let params = this.clientForm.value;
+          if(this.id > 0){
+            params["id"] = this.id;
+          }
+          this.req.doPost({
+              url:this.id > 0?"upSource":"addSource",
+              data:params,
+              success:(res =>{
+                 if(res && res.code == 200){
+                   if(this.id < 0){
+                     this.pageNo = Default.PAGE.PAGE_NO;
+                   }
+                     this.changeData();
+                     this.handleCancel();
+                 }else{
+                   this.warn.onError(res.msg || Messages.FAIL.DATA);
+                 }
+
+              })
+          })
+
+        }
+        // let params = { "name": this.name, "remarks": this.remarks }
+        // if (this.id) {
+        //     params['id'] = this.id;
+        // }
+        // this.req.doPost({
+        //     url: this.sourceUrl,
+        //     data: params,
+        //     success: (res => {
+        //
+        //         if (res && res.code == 200) {
+        //             that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+        //             that.handleCancel();
+        //         } else {
+        //             that.warn.onError(res.msg || Messages.FAIL.DATA);
+        //         }
+        //
+        //     })
+        // })
+    }
+
+
+}

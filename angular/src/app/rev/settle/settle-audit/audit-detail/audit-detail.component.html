@@ -1,0 +1,28 @@
+<div class="settle">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="content">
+        <!--<rev-settle-detail-head></rev-settle-detail-head>-->
+        <!--<div class="tab">-->
+        <!--<a href="javascript:void(0)" class="tab-item"-->
+        <!--[routerLink]="['./attend']" [queryParams]="{aid:aid,cid:cid}" [routerLinkActive]="'active'">考勤详情</a>-->
+        <!--<a href="javascript:void(0)" class="tab-item"-->
+        <!--[routerLink]="['./record']" [queryParams]="{aid:aid,cid:cid}" [routerLinkActive]="'active'">申请记录</a>-->
+        <!--</div>-->
+        <div nz-row>
+            <rev-settle-detail-head></rev-settle-detail-head>
+        </div>
+        <div nz-row>
+            <nz-tabset [nzSelectedIndex]="index">
+                <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url)"></nz-tab>
+            </nz-tabset>
+            <div class="data">
+                <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+                <div [hidden]="loading">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

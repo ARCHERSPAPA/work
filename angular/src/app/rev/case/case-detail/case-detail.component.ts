@@ -1,0 +1,143 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, NavigationStart, NavigationEnd, NavigationCancel } from '@angular/router';
+import { getIndexByUrl } from '../../../model/methods';
+import { atob, btoa } from "../../../model/methods";
+import { RequestService } from "../../../service/request.service";
+import { SettleService } from "../../../service/settle.service";
+import { WarningService } from "../../../service/warning.service";
+import { Messages } from "../../../model/msg";
+@Component({
+    selector: 'rev-case-detail',
+    templateUrl: './case-detail.component.html',
+    styleUrls: ['./case-detail.component.scss']
+})
+export class CaseDetailComponent implements OnInit {
+
+    public title: string;
+
+    public quoteNo: string;
+    public cid: string;
+    public tabs: Array<any>;
+    public loading: boolean = false;
+    public index: number = 0;
+    public state: number;
+
+    constructor(private activatedRoute: ActivatedRoute,
+        private settle: SettleService,
+        private req: RequestService,
+        private warn: WarningService,
+        private router: Router) {
+    }
+
+    ngOnInit() {
+        this.title = '案例详情';
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['quoteNo']) {
+                this.quoteNo = atob(params['quoteNo']);
+                this.cid = params['aid'];
+            }
+        });
+
+        this.tabs = [
+            {
+                name: '工地实况',
+                url: 'real'
+            },
+            {
+                name: '完工照',
+                url: 'complete'
+            },
+            {
+                name: '材料品牌',
+                url: 'materials'
+            },
+            {
+                name: '其他图片',
+                url: 'another'
+            }];
+
+
+        //判断当前url
+        let url = this.router.url.split('detail');
+        this.index = getIndexByUrl(url[1], this.tabs);
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationStart) {
+                this.loading = true;
+            } else if (event instanceof NavigationEnd) {
+                setTimeout(() => {
+                    this.loading = false;
+                }, 1500);
+            } else if (event instanceof NavigationCancel) {
+                this.loading = false;
+            }
+        });
+    }
+    ngDoCheck() {
+        if (this.settle.getCaseData()) {
+            this.state = this.settle.getCaseData().isDown;
+        }
+    }
+    check(type: number) {
+        if (type === 0) {
+            if (this.settle.getCaseData().decorateType && this.settle.getCaseData().style) {
+                if (this.settle.getCaseData().customerGpsAddress) {
+                    if (this.settle.getCaseData().newCoverImg && this.settle.getCaseData().newCoverImg.length > 0 && this.settle.getCaseData().content) {
+                        this.publish().then(res => {
+                            this.settle.loadCaseHead(this.quoteNo).then(res => {
+                                this.settle.setCaseData(res);
+                            });
+                        });
+                    } else {
+                        this.warn.onWarn('请上传完工照片')
+                    }
+                } else {
+                    this.warn.onWarn('请完善案例地址')
+                }
+            } else {
+                this.warn.onWarn('请完善装修类型/风格等信息')
+            }
+        } else {
+            this.publish().then(res => {
+                this.settle.loadCaseHead(this.quoteNo).then(res => {
+                    this.settle.setCaseData(res);
+                });
+            });
+        }
+    }
+
+
+    publish(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "smallProgramRelease",
+                data: {
+                    id: Number(atob(this.cid)),
+                    isDown: this.state,
+                    decorateType: this.settle.getCaseData().decorateType ? this.settle.getCaseData().decorateType : '',
+                    style: this.settle.getCaseData().style ? this.settle.getCaseData().style : '',
+                    longitude: this.settle.getCaseData().longitude ? this.settle.getCaseData().longitude : '',
+                    latitude: this.settle.getCaseData().latitude ? this.settle.getCaseData().latitude : '',
+                    newCoverImg: this.settle.getCaseData().newCoverImg ? this.settle.getCaseData().newCoverImg : '',
+                    content: this.settle.getCaseData().content ? this.settle.getCaseData().content : ''
+                },
+                success: res => {
+                    if (res && res.code == 200) {
+                        resolve(res)
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject("err")
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            })
+        })
+    }
+
+    btoa(id: string) {
+        return btoa(id);
+    }
+
+    tabClick(url: string) {
+        this.router.navigate(['./' + url + ''], { queryParams: { aid: this.cid, quoteNo: this.btoa(this.quoteNo) }, relativeTo: this.activatedRoute });
+    }
+}

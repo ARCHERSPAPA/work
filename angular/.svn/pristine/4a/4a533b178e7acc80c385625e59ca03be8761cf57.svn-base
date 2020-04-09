@@ -1,0 +1,71 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+
+</div>
+<div class="stencil">
+    <div class="list-head">
+        <div class="search-bar">
+            <input nz-input type="text" class="text" style="width:75%;" placeholder="请输入查询标题" [(ngModel)]="name"
+                (change)="searchData()" />
+            <button     nz-button nzSize="middle" nzType="primary" (click)="searchData()">查询</button>
+        </div>
+    </div>
+    <div class="list-group-rev">
+        <nz-table #rowSelectionTable [nzData]="items" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"[nzScroll]="{ y: '350px'}"
+            [nzTotal]="total" [nzShowPagination]="true" [nzFrontPagination]="false" (nzPageIndexChange)="changeData()">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>标题</th>
+                    <th>数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+                    <td nzShowCheckbox [(nzChecked)]="item.checked" (nzCheckedChange)="refreshStatus(item)"></td>
+                    <td>{{item.title?item.title:'--'}}</td>
+                    <td>{{item.choiceNum + item.clozeNum}}</td>
+                </tr>
+            </tbody>
+        </nz-table>
+        <!-- <div class="list-items">
+            <ul class="item-head ul-flex">
+                <li class="w-flex5">标题</li>
+                <li class="w-flex1">数量</li>
+            </ul>
+            <div *ngIf="items && items.length > 0" class="item-content">
+        
+                    <ul class="item-body ul-flex" [ngClass]="{'border-bottom':last}" *ngFor="let item of items;let last = last">
+                        <li class="w-flex5" (click)="selectItem(item)">
+                            <span class="chn"
+                                  [ngClass]="{'chn-unchecked': selectId != item.id,'chn-checked':selectId == item.id}"></span>
+                            <span class="name">{{item.title?item.title:'--'}}</span>
+                        </li>
+                        <li class="w-flex1">{{item.choiceNum + item.clozeNum}}</li>
+                    </ul>
+       
+                <div class="page">
+                    <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                    <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                                   [nzTotal]="total"
+                                   (nzPageIndexChange)="changeData()"
+                                   [nzShowTotal]="totalTemplate"></nz-pagination>
+                </div>
+            </div>
+            <div *ngIf="!items || items.length == 0" class="item-content">
+                <ul class="item-body">
+                    <p>暂无数据显示</p>
+                </ul>
+            </div>
+        </div>
+    </div> -->
+        <div class="btns" style="text-align: right;">
+            <button type="button" nz-button nzType="default" (click)="cancel()">取消</button>
+            <button type="button" nz-button nzType="primary" [ngClass]="{'disabled': !this.selectId}"
+                [disabled]="!this.selectId" (click)="ok()">添加</button>
+        </div>
+    </div>
+</div>

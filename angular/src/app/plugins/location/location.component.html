@@ -1,0 +1,15 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"></span>
+    </button>
+</div>
+<div class="ant-modal-content">
+    <ngx-amap style="width:100%;height:360px;"  [resizeEnable]="true" [zoom]="13">
+        <amap-info-window [isOpen]="true" [position]="position">{{info}}</amap-info-window>
+    </ngx-amap>
+
+</div>
+<div class="ant-modal-footer">
+    <button type="button" class="ant-btn ant-btn-primary" (click)="sure()">确定</button>
+</div>

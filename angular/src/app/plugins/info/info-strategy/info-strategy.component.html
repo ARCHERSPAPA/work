@@ -1,0 +1,79 @@
+<div class="info-user">
+    <div class="search-bar">
+        <form method="post" [formGroup]="searchForm">
+            <div class="inp">
+                <input type="text" nz-input placeholder="可按姓名和手机号查询" formControlName="searchInfo" name="searchInfo"
+                       autocomplete="off"/>
+                <div [hidden]="searchForm.get('searchInfo').valid || searchForm.get('searchInfo').pristine"
+                     class="error">
+                    <span [hidden]="!searchForm.hasError('minlength',['searchInfo'])">&nbsp;&nbsp;至少输入1个字符</span>
+                    <!--<span [hidden]="!searchForm.hasError('minlength',['searchInfo'])">&nbsp;&nbsp;至少输入1个字符</span>-->
+                    <span [hidden]="!searchForm.hasError('maxlength',['searchInfo'])">&nbsp;&nbsp;至多输入32个字符</span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="!searchForm.valid"
+                    (click)="searchData()">查询
+            </button>
+        </form>
+    </div>
+    <div class="list-group-rev">
+        <div style="width: 80%">
+            <nz-table #rowSelectionTable [nzData]="staffList" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+            [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                      [nzScroll]="{ y: '350px'}" [nzTotal]="total" [nzShowPagination]="true" [nzFrontPagination]="false"
+                      (nzPageIndexChange)="changeData()" [nzSize]="'small'">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>姓名</th>
+                        <th>部门</th>
+                        <th >手机号</th >
+                        <th>在建项目</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+                        <td nzShowCheckbox [(nzChecked)]="item.checked" (nzCheckedChange)='selectMember(item,i)'></td>
+                        <td [title]="item.name?item.name:''">{{item.name?item.name:'--'}}</td>
+                        <td [title]="item.departmentName?item.departmentName:''">{{item.departmentName?item.departmentName:'--'}}</td>
+                        <td class="w6">{{item.phone?item.phone:'--'}}</td>
+                        <td [title]="item.projectCount?item.projectCount:''">{{item.projectCount?item.projectCount:'--'}}</td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        <!-- <div class="list-items">
+            <ul class="item-head">
+                <li>姓名</li>
+                <li>部门</li>
+                <li>手机号</li>
+                <li>在建项目</li>
+            </ul>
+            <div class="item-content">
+                <ul class="item-body" *ngFor="let staff of staffList">
+                    <li><a href="javascript:void(0)" (click)="selectMember(staff)">{{staff.name?staff.name:'--'}}</a>
+                    </li>
+                    <li>{{staff.departmentName?staff.departmentName:'--'}}</li>
+                    <li>{{staff.phone?staff.phone:'--'}}</li>
+                    <li>{{staff.projectCount?staff.projectCount:'--'}}</li>
+                </ul>
+                <ul class="item-body" *ngIf="!staffList || (staffList && staffList.length == 0)">
+                    <p>暂无数据信息</p>
+                </ul>
+            </div>
+            <div class="page" *ngIf="staffList && staffList.length > 0">
+                <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                               (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+            </div>
+        </div> -->
+    
+        <!-- <div class="list-quick">
+            <rev-quick [type]="3" [relate]="1" (selectId)="selectDepartmentId($event)"></rev-quick>
+        </div> -->
+    </div>
+    <div class="list-quick">
+        <div class="list-quick-title">快速查询</div>
+        <rev-depart-tree [type]="1" (handleChangeData)="changeDepart($event)" ></rev-depart-tree>
+    </div>
+</div>
+

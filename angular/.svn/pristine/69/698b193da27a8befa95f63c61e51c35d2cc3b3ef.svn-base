@@ -1,0 +1,6 @@
+<div class="radioSwitch">
+  <nz-radio-group [(ngModel)]="radioValue" [nzButtonStyle]="'solid'" (ngModelChange)="handleClick()">
+    <label nz-radio-button [nzValue]="radio.key"
+           *ngFor="let radio of radioSwitch">{{radio.text}}</label>
+  </nz-radio-group>
+</div>

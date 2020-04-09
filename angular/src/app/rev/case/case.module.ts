@@ -1,0 +1,38 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {PublicModule} from "../../public/public.module";
+import {CaseRoutingModule} from "./case-routing.module";
+import { CaseListComponent } from './case-list/case-list.component';
+import { CaseDetailComponent } from './case-detail/case-detail.component';
+import { CaseTabsMaterialsComponent } from './case-tabs/case-tabs-materials/case-tabs-materials.component';
+import { CaseTabsAnotherComponent } from './case-tabs/case-tabs-another/case-tabs-another.component';
+import { CaseTabsCompleteComponent } from './case-tabs/case-tabs-complete/case-tabs-complete.component';
+import { CaseTabsRealComponent } from './case-tabs/case-tabs-real/case-tabs-real.component';
+import { CaseTabsHeadComponent } from './case-tabs/case-tabs-head/case-tabs-head.component';
+import { QuillModule } from 'ngx-quill';
+import {UploadModule} from "../../public/upload.module";
+import { CaseTabPreviewComponent } from './case-tabs/case-tab-preview/case-tab-preview.component';
+// import {UploaderNewComponent} from "../../plugins/uploader-new/uploader-new.component";
+
+@NgModule({
+    imports: [
+        CommonModule,
+        PublicModule,
+        QuillModule,
+        UploadModule,
+        CaseRoutingModule
+    ],
+    declarations: [
+        CaseListComponent,
+        CaseDetailComponent,
+        CaseTabsMaterialsComponent,
+        CaseTabsAnotherComponent,
+        CaseTabsCompleteComponent,
+        CaseTabsRealComponent,
+        // UploaderNewComponent,
+        CaseTabsHeadComponent,
+        CaseTabPreviewComponent,
+]
+})
+export class CaseModule {
+}

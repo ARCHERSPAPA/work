@@ -1,0 +1,52 @@
+<div nz-row *ngIf="audit" class="audit-head">
+    <div nz-col nzSpan="8" style="float: none;">
+        <div nz-col nzSpan="24" style="height: 64px;float: none;">
+            <div nz-col nzSpan="4">
+                <nz-avatar nzIcon="anticon anticon-user" style="width:64px;height:64px;border-radius: 50%;"
+                           [nzShape]="'circle'" [nzSrc]="audit.headImg"></nz-avatar>
+            </div>
+            <div nz-col nzSpan="18" class="ml-8">
+                <span nzSpan="24">{{audit && audit.workerName?audit.workerName:'--'}}</span>
+                <span class="gray mt-16" nzSpan="24">{{audit && audit.workerType?audit.workerType:'--'}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="audit-head-left">
+        <p nz-col nzSpan="24" class="mt-16">
+            <span nz-col nzSpan="8">类型：{{getWageType(audit.type)}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span nz-col nzSpan="8" class="state">状态：{{getWageState(audit.state)}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span class="gray">{{audit && audit.submitTime?(audit.submitTime|date:'yyyy-MM-dd HH:mm'):'--'}}</span>
+        </p>
+    </div>
+    <div class="audit-head-right">
+        <p nz-col nzSpan="24" class="mt-16">
+            <span class="large" nzSpan="24">{{audit && audit.price?(audit.price|number:'1.2'):'0'}}</span>
+            <span class="gray mt-16 money" nzSpan="24">申请金额</span>
+        </p>
+    </div>
+    <div class="line"></div>
+    <div class="audit-head-left">
+        <p nz-col nzSpan="24" class="mt-16" [title]="audit.customerHouseAddress?audit.customerHouseAddress:''">
+            <span class="blue">{{audit && audit.customerHouseAddress?audit.customerHouseAddress:'--'}}{{audit && audit.customerRoomNumber?audit.customerRoomNumber:''}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>
+                监理：{{audit && audit.supervisorInfo? audit.supervisorInfo:'--'}}
+            </span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>客户：{{audit && audit.customerName? audit.customerName:'--'}}</span>
+        </p>
+    </div>
+    <div class="audit-head-right">
+        <p nz-col nzSpan="24" class="mt-16 middle">
+            <span>
+                工长：{{audit && audit.foremanInfo? audit.foremanInfo:'--'}}
+            </span>
+        </p>
+    </div>
+</div>

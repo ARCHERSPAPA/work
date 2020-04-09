@@ -1,0 +1,50 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.master{
+  .master-name{
+    position:relative;
+    .master-fix{
+      position: absolute;
+      right: 0;
+      top: 10px;
+      font-size: 14px
+    }
+  }
+}
+.master-warp{
+  tr th,tr td{
+    max-width: 60px;
+    @include ellipsis;
+  }
+}
+
+.master-modal {
+
+  .textarea {
+    position: relative;
+    .count {
+      position: absolute;
+      right: 5px;
+      bottom: -20px;
+      font-size: 12px;
+      > span {
+        color: #F92650;
+      }
+    }
+  }
+}
+.layout{
+  margin-bottom: 12px !important;
+}
+.btns {
+  margin: 24px -24px -11px -24px;
+  text-align: right;
+  border-top: 1px solid #dedede;
+  padding-top: 10px;
+  button{
+    margin-right: 24px;
+  }
+  button:first-child {
+    margin-right: 8px;
+  }
+}

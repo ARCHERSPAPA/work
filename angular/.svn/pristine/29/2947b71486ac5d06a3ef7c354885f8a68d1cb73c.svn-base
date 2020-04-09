@@ -1,0 +1,90 @@
+@charset "utf-8";
+@import "../../../../../assets/scss/mixin";
+.warranty-edit{
+  .count{
+    position: absolute;
+    bottom: 1px;
+    right: 7px;
+    span{
+      color:red;
+    }
+  }
+  .time{
+    color: rgba(0, 0, 0, 0.45);
+  }
+  .date{
+      position: absolute;
+      left: 97px;
+      top: 6px;
+     }
+  .btns{
+    margin-left: 254px;
+    margin-top: 24px !important;
+    button{
+      margin-right: 24px;
+    }
+  }
+  ul li{
+    margin: 5px 0;
+    >label{
+      text-align: right;
+      margin-right: 24px;
+      font-size: 14px;
+    }
+    .title,.inp{
+      display: inline-block;
+      font-size: 14px;
+    }
+ 
+    .title{
+      width: 10%;
+      padding-right: 24px;
+      text-align: right;
+      color: #000;
+
+    }
+    .start{
+      vertical-align: top;
+    }
+
+    .inp{
+      width: 60%;
+      position: relative;
+     
+      .text{
+        width: 80px;
+        line-height: 22px;
+        outline: none;
+        border: 1px solid #dedede;
+        text-indent: 10px;
+        margin-right: 10px;
+        @include border();
+      }
+      .year{
+        position: absolute;
+        left: 40px;
+        top: 6px;
+        color: #9d9d9d;
+      }
+      .edit-inp{
+        margin-right: 24px;
+        width: 44%;
+      }
+    
+    }
+  }
+  ul li:first-child{
+    .inp{
+      width: 410px;
+      .ant-calendar-picker span:first-child{
+        width: 100%;
+      }
+    }
+  }
+  ul li:last-child{
+    .inp{
+      width:26.5%;
+    }
+   
+  }
+}

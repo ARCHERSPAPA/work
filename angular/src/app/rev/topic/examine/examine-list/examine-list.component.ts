@@ -1,0 +1,133 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Default } from "../../../../model/constant";
+import { Messages } from "../../../../model/msg";
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { btoa } from "../../../../model/methods";
+@Component({
+    selector: 'rev-examine-list',
+    templateUrl: './examine-list.component.html',
+    styleUrls: ['./../examine.component.scss', './../../../detail/list.scss'],
+})
+export class ExamineListComponent implements OnInit {
+
+    public title: string;
+    public switch: string;
+    public atags: Array<any>;
+
+    //查询
+    public searchForm: FormGroup;
+    public name: string;
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public eid: string;
+
+    public exams: Array<any>;
+
+    constructor(
+        private fb: FormBuilder,
+        private req: RequestService,
+        private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.getNewEid();
+        this.title = "考试列表";
+        this.switch = "left";
+    
+
+        this.searchForm = this.fb.group({
+            name: [this.name, [
+                Validators.maxLength(10)
+            ]]
+        });
+        this.changeData();
+    }
+    getNewEid() {
+        this.req.doPost({
+            url: "createExam",
+            data: {},
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.eid = res.data;
+                        this.atags = [
+            {
+                name: "新建考试",
+                color: "btn-primary",
+                link: `/rev/topic/exam/detail?eid=${btoa(this.eid)}`,
+            }
+        ];
+                    // this.router.navigate(["./"], { queryParams: { eid: btoa(res.data) }, relativeTo: this.activatedRoute, replaceUrl: true });
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+        
+    }
+
+    searchData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.changeData();
+    }
+
+    changeData() {
+        this.req.doPost({
+            url: "listExam",
+            data: {
+                page: this.pageNo,
+                pageSize: this.pageSize,
+                title: this.name
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.exams = res.data.list;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    /**
+     * 返回试题状态
+     * @param state
+     * @returns {string}
+     */
+    getExamState(exam) {
+        if (exam.startTime && exam.endTime) {
+            if (exam.currentTime > exam.startTime && exam.currentTime < exam.endTime) {
+                return "进行中";
+            }
+            if (exam.currentTime > exam.endTime) {
+                return "已结束";
+            }
+        }
+        return "未开始";
+    }
+
+    deleteItem(id) {
+        if (id) {
+            this.req.doPost({
+                url: "deleteExam",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.changeData();
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+    btoa(id: string) {
+        return btoa(id)
+    }
+}

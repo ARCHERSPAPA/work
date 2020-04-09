@@ -1,0 +1,224 @@
+import { Component, OnInit } from '@angular/core';
+import {bounceAnimate} from "../../../animation/transform.component";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router, ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {QuoteService} from "../../../service/quote.service";
+import {getWageState, getWageType} from "../../../model/methods";
+
+@Component({
+  selector: 'rev-data',
+  templateUrl: './data.component.html',
+  styleUrls: ['./../detail.scss','./data.component.scss'],
+  animations:[
+      bounceAnimate
+  ]
+})
+export class DataComponent implements OnInit {
+
+    public switch: string;
+
+    public state:string;
+    public cid:number;
+    public wageList: any;
+    public wageTotal:number = 0;
+
+    public wageForm: FormGroup;
+    public isWage:boolean = false;
+    // public wageType:boolean = false;
+    public wageBankName:string = "";
+    public wageBatchNum:string = "";
+    public wid:number;
+
+
+    constructor(private fb: FormBuilder,
+                private router:Router,
+                private quote:QuoteService,
+                private activatedRoute:ActivatedRoute,
+                private request:RequestService,
+                private warn:WarningService) {
+    }
+
+    ngOnInit() {
+        this.switch = "bottom";
+
+        this.activatedRoute.queryParams.subscribe(params =>{
+            if(params && params["cid"]){
+                this.cid = params["cid"];
+                this.loadData(this.cid);
+                if(this.state <= '2'){
+                    this.quote.loadQuoteHeadById(this.cid);
+                }
+                // this.quote.loadQuoteHeadById(this.cid);
+            }
+        })
+
+
+
+        // this.wageList = [
+        //     {
+        //         id: 1,
+        //         name: "张三",
+        //         position: 1,
+        //         total: 12300,
+        //         verifyTime: new Date().getTime() - 24 * 60 * 60 * 1000,
+        //         state: 1,
+        //         type: 2,
+        //         settleTime: new Date().getTime(),
+        //         bank: "成都银行",
+        //         bankNo: 1954215884621,
+        //         signer: "研爱真"
+        //     },
+        //     {
+        //         id: 2,
+        //         name: "李辉",
+        //         position: 2,
+        //         total: 12300,
+        //         verifyTime: new Date().getTime() - 24 * 60 * 60 * 1000,
+        //         state: 1,
+        //         type: 2,
+        //         settleTime: new Date().getTime(),
+        //         bank: "广州银行",
+        //         bankNo: 1954215884621,
+        //         signer: "研爱真"
+        //     },
+        //     {
+        //         id: 3,
+        //         name: "吴天来",
+        //         position: 3,
+        //         total: 28400,
+        //         verifyTime: new Date().getTime() - 24 * 60 * 60 * 1000,
+        //         state: 2,
+        //         type: 1,
+        //         settleTime: new Date().getTime(),
+        //         bank: "中国农业银行",
+        //         bankNo: 1954215884621,
+        //         signer: "研爱真"
+        //     }
+        // ];
+
+
+
+        this.wageForm = this.fb.group({
+            id:[this.wid,[
+               Validators.required
+            ]],
+            bankName: [this.wageBankName, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(20)
+            ]],
+            batchNum: [this.wageBatchNum, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(20)
+            ]]
+        })
+    }
+
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.switch = "down"
+        }, 1000);
+    }
+
+
+    getWageState(state){
+        return getWageState(state);
+    }
+
+    getWageType(type){
+        return getWageType(type);
+    }
+
+
+    openWage(data){
+        this.isWage = true;
+        this.wid = data.id;
+        // this.wageType = type === 1?true:false;
+        if(data["bankName"] && data["batchNum"]){
+            this.wageBankName = data.bankName;
+            this.wageBatchNum = data.batchNum;
+        }
+    }
+
+    wageOk(){
+        if(this.wageForm.valid){
+            // debugger
+            // if(this.wageType){
+            //     console.log(this.wageForm.value);
+                this.agreeData(this.wageForm.value);
+            // }else{
+            //     this.
+            // }
+            this.wageCancel();
+        }
+    }
+
+    wageCancel(){
+        this.isWage = false;
+        this.wageBankName = "";
+        this.wageBatchNum = "";
+    }
+
+    loadData(id){
+        let that = this;
+        that.request.doPost({
+            url:"detailLabourExpenses",
+            data:{id:id},
+            success:(res =>{
+                if(res && res.code == 200){
+                    that.wageList = res.data.list;
+                    this.wageTotal = res.data.total;
+                }else{
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    agreeData(obj){
+        let that = this;
+        that.request.doPost({
+            url:"agreeLabourExpenses",
+            data:{
+                id:obj["id"],
+                bankName:obj["bankName"],
+                batchNum:obj["batchNum"]
+            },
+            success:(res =>{
+                if(res && res.code == 200){
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.loadData(that.cid);
+                }else{
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    rejectData(id){
+        let that = this;
+        if(id){
+            that.request.doPost({
+                url:"rejectLabourExpenses",
+                data:{id:id},
+                success:(res =>{
+                    if(res && res.code == 200){
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.loadData(that.cid);
+                    }else{
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }else{
+            that.warn.onWarn(Messages.PARAM_EMPTY);
+        }
+
+    }
+
+}

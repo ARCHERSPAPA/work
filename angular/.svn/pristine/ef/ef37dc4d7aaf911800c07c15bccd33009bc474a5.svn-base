@@ -1,0 +1,65 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {atob, getWageState, getWageType} from "../../../../model/methods";
+import {Messages} from "../../../../model/msg";
+import {SettleService} from "../../../../service/settle.service";
+
+@Component({
+    selector: 'rev-settle-detail-head',
+    templateUrl: './settle-detail-head.component.html',
+    styleUrls: ['./settle-detail-head.component.scss']
+})
+export class SettleDetailHeadComponent implements OnInit {
+
+    public audit: any;
+    public aid: string;
+    public cid:string;
+    public loading: string;
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private warn: WarningService,
+                private settle: SettleService) {
+    }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["aid"]) {
+                this.aid = atob(params["aid"]);
+                this.loadSettleHead(this.aid);
+            }
+
+        });
+    }
+
+    ngDoCheck(){
+        if(this.settle.getTypeByParam("head")){
+            this.settle.setTypeByParam("head",false);
+            this.loadSettleHead(this.aid);
+        }
+    }
+
+
+    getWageType(t) {
+        return getWageType(t);
+    }
+
+    getWageState(s) {
+        return getWageState(s);
+    }
+
+    loadSettleHead(aid){
+        this.settle.loadSettleHead(aid)
+            .then(res =>{
+                this.settle.setSettleData(res);
+                this.audit = res;
+                console.log(this.audit)
+            }).catch(err =>{
+                this.warn.onError(err);
+        })
+    }
+
+}

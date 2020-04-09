@@ -1,0 +1,26 @@
+.user-title{
+    display: flex;
+    justify-content: space-between
+}
+.productLog{
+    .userList{
+        li{
+            padding: 8px 0;
+            border-bottom:1px solid rgba(232,232,232,1);
+            .user-name{
+             color: rgba(0, 0, 0, 0.85);
+             font-weight: bold;
+             padding: 8px 0;
+             .user-roleName{
+                color:rgba(0,0,0,0.45);
+            }
+            }
+            .user-time{
+                color:rgba(0,0,0,0.45);
+            }
+         .user-detail{
+            color:rgba(0,0,0,0.65);
+         }    
+        }
+    }
+}

@@ -1,0 +1,38 @@
+<div class="detail-notice">
+    <div *ngIf="notices">
+        <dl>
+            <dt class="notice-head">
+                <div>
+                        <nz-tag [nzColor]="color(notices.urgentLevel)" class="notice-urgency"> {{getUrgency(notices.urgentLevel)}}</nz-tag>
+                        <!-- <span class="notice-urgency"><span [ngClass]="{'bg-success':notices.urgentLevel === 1,'bg-warning':notices.urgentLevel === 2,'bg-error':notices.urgentLevel === 3}">{{getUrgency(notices.urgentLevel)}}</span></span> -->
+                        <span class="notice-date">提交时间&nbsp;&nbsp;&nbsp;&nbsp;{{notices.createTime|date:'yyyy-MM-dd HH:mm'}}</span>
+                </div>
+              
+            <span class="notice-state">{{getState(notices.state)}}</span>
+        </dt>
+        <dd class="notice-remark" *ngIf="notices.info">
+            <p>{{notices.info}}</p>
+        </dd>
+        <dd class="notice-imgs" *ngIf="notices.ims && notices.ims.length > 0">
+            <ul>
+            <li (click)="openModal(img.url)" *ngFor="let img of notices.ims"><img [src]="(img.url.indexOf('?') > -1)?img.url:img.url+'?imageView2/2/w/150/h/110'"/></li>
+            </ul>
+        </dd>
+        <dd class="btns txt-right" *ngIf="notices.state === 0" style="margin-top:24px">
+            <button nz-button nzType="primary" (click)="handleNotice(notices.id)">置为已处理</button>
+        </dd>
+        </dl>
+    </div>
+    <div class="" *ngIf="!notices">
+        <p>暂无数据信息显示</p>
+    </div>
+
+</div>
+
+<!--放大图片-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" nzWidth="1000"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>

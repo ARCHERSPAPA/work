@@ -1,0 +1,26 @@
+<div class="complete">
+  <div class="cover">
+    <div *ngFor='let img of imgList,let i=index' class="show-img "[ngStyle]="styleImg(img)"
+    (click)="openModal(i)">
+    <a class="del" href="javascript:void(0)" (click)="delImg(i)"></a>
+    <span class="showDel"></span>
+  </div>
+    <!-- <div *ngFor='let img of imgList,let i=index' class="show-img">
+      <img [src]="img" alt="图片" *ngIf='img' (click)="openModal(i)">
+      <a class="del" href="javascript:void(0)" (click)="delImg(i)"></a>
+      <span class="showDel"></span>
+    </div> -->
+    <rev-uploader-new [content]="'上传封面'" class="uploader" (click)="addImg()"
+    ></rev-uploader-new>
+  </div>
+  <div class="complete-content">
+    <quill-editor [(ngModel)]="content" placeholder="请填写内容"
+    [style]="{height: '500px'}"
+    (onEditorCreated)="EditorCreated($event)"
+    (onContentChanged)="contentChanged($event)"></quill-editor>
+  </div>
+  <div class="btns">
+    <button nz-button nzType="primary" (click)="save()">保存</button>
+    <button nz-button nzType="default" (click)="handlePreview()">预览</button>
+    </div>
+</div>

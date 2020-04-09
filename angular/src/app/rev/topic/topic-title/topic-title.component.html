@@ -1,0 +1,147 @@
+<div class="com-title" [ngClass]="{'com-nums':nums && nums.length > 0}">
+    <h2 class="com-name" [ngClass]="{'com-nums':nums && nums.length > 0}">
+        <div class="btns" [ngClass]="{'com-nums':nums && nums.length > 0}" [hidden]="!show">
+            <span class="btns-ctr">
+                <button nz-button nzType="default" (click)='openAdd(0)'>添加选择题</button>
+                <button nz-button nzType="default" (click)='openAdd(1)'>添加填空题</button>
+            </span>
+            <span #btns>
+                <button nz-button nzType="primary" class="btn-me" *ngFor="let btn of buttons"
+                    (btn.type)="btn.method()">{{btn.name}}
+                </button>
+            </span>
+        </div>
+        <div class="com-name-head">
+            <span [ngClass]="{'com-nums':nums && nums.length > 0}"
+                [title]="title">{{title?(title.length > 20?title.substr(0,20)+'...':title):''}}
+            </span>
+            <a href="javascript:void(0)" (click)="open()" [hidden]="!show">修改</a>
+        </div>
+        <span class="com-name-num" [ngClass]="{'com-nums':nums && nums.length > 0}" *ngIf="nums && nums.length > 0">
+            <span *ngFor="let num of nums">{{num.name}}&nbsp;&nbsp;{{num.count}}</span>
+        </span>
+    </h2>
+</div>
+
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="'修改'" nzOkText="确定" nzCancelText="取消" (nzOnCancel)="cancel()"
+    (nzOnOk)="ok()" class="editModal">
+    <div class="modify">
+        <form [formGroup]="modifyForm" style="text-align: center;" nz-form>
+            <ul>
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">名称</nz-form-label>
+                    <nz-form-control [nzSpan]="17" style="width: 60%;text-align: left;">
+                        <input nz-input type="text" class="text" placeholder="请输入修改名称"
+                            style="padding-right: 52px; width: 80%;" formControlName="name" [(ngModel)]="name"
+                            maxLength="100" />
+                        <nz-form-explain *ngIf="modifyForm.get('name').dirty && modifyForm.get('name').errors">
+                            <ng-container *ngIf="modifyForm.get('name').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="modifyForm.get('name').hasError('minlength')">
+                                至少输入1个字符
+                            </ng-container>
+                            <ng-container *ngIf="modifyForm.get('name').hasError('maxlength')">
+                                至多输入100个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </ul>
+        </form>
+    </div>
+</nz-modal>
+<nz-modal [(nzVisible)]="addVisible" [nzTitle]="getName()" nzWidth="33vw" [nzFooter]="null" (nzOnCancel)="cancel()">
+    <div class="quest-edit">
+        <ul> 
+            <form [formGroup]="questForm" nz-form>
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="3">问题：</nz-form-label>
+                    <nz-form-control [nzSpan]="21">
+                        <input nz-input type="text" class="text" placeholder="请输入问题" autocomplete="off" maxLength="100"
+                            formControlName="questName" [(ngModel)]="questName" style="width: 78%;"
+                            onkeyup="this.value = this.value.replace(/^\s+/g,'')" />
+                        <nz-form-explain *ngIf="questForm.get('questName').dirty && questForm.get('questName').errors">
+                            <ng-container *ngIf="questForm.get('questName').hasError('required')">
+                                问题名称为必填选项
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('questName').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1个字符
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('questName').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入100个字符
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('questName').hasError('trim')">
+                                &nbsp;&nbsp;两端不能输入空白字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item *ngIf="type === 1 || type === 3" style="margin-bottom: 16px;">
+                    <nz-form-control [nzSpan]="22">
+                        <nz-radio-group formControlName="radioValue" [(ngModel)]="radioValue" class="quest-chk">
+                            <label nz-radio-button [nzValue]="'1'" >单选</label>
+                            <label nz-radio-button [nzValue]="'2'">多选</label>
+                        </nz-radio-group>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item *ngFor="let option of checkboxOptions;let i = index;let last = last;" class="item">
+                    <nz-form-label [nzSpan]="3" *ngIf="type === 1 || type === 3" style="text-align: center;">{{getOptionLetter(i)}}</nz-form-label>
+                    <nz-form-label [nzSpan]="3" *ngIf="type === 2 || type === 4">{{getOptionTag(type)}}{{getOptionName(i)}}</nz-form-label>
+                    <nz-form-control [nzXs]="24" [nzSm]="21"
+                        >
+                        <input class="passenger-input" nz-input placeholder="请输入选项值" [attr.id]="i"
+                            [(ngModel)]="option.content" [formControlName]="['option'+i]" name="['option'+i]"
+                            onkeyup="this.value = this.value.replace(/^\s+/g,'')" />
+                        <nz-form-explain *ngIf="questForm.get('option'+i).dirty && questForm.get('option'+i).errors">
+                            <ng-container *ngIf="questForm.get('option'+i).hasError('required')">
+                                {{getOptionTag(type)}}{{getOptionName(i)}}为必填选项
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('option'+i).hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1个字符
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('option'+i).hasError('maxlength')">
+                                至多输入32位字符
+                            </ng-container>
+                            <ng-container *ngIf="questForm.get('option'+i).hasError('trim')">
+                                &nbsp;&nbsp;两端不能输入空白字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <a href="javascript:void(0)" (click)="check(option)" class='ischk'>
+                            <label class="checkbox-wrapper" *ngIf="type === 1 || type === 3">
+                                <span class="checkbox-box" [ngClass]="{'checkbox-box-checked':option.checked}">
+                                    <label  nz-radio [(ngModel)]="option.checked"
+                                    style="width: 24px;vertical-align: middle;"
+                                    *ngIf='radioValue==="1"'
+                                    [ngModelOptions]="{standalone: true}"></label>
+                                    <label nz-checkbox [(ngModel)]="option.checked"
+                                    style="width: 32px;"
+                                    *ngIf='radioValue==="2"'
+                                        [ngModelOptions]="{standalone: true}"></label>
+                                    <input nz-input type="checkbox" [(ngModel)]="option.checked" class="checkbox-input"
+                                       [ngModelOptions]="{standalone: true}" />
+                                    <span class="checkbox-inner" style="margin-left: 8px;"></span>
+                                </span>
+                            </label>
+                        </a>
+                     <i nz-icon type="minus-circle-o" class="dynamic-delete-button"
+                                *ngIf="i > 0 && last" (click)="removeOptions(i)"></i>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                    <nz-form-control [nzXs]="{ span: 24, offset: 0 }" [nzSm]="{ span: 20, offset: 3}">
+                        <button nz-button nzType="dashed" class="add-button" (click)="addOptions(type)">
+                            <i nz-icon type="plus" style="vertical-align: top;"></i>
+                            添加选项
+                        </button>
+                    </nz-form-control>
+                </nz-form-item>
+            </form>
+        </ul>
+        <div class="btn">
+            <button nz-button [nzType]="'default'" (click)="cancel()">取消</button>
+            <button nz-button [nzType]="'primary'" (click)="submit()"
+                [disabled]="!questForm.valid">确认</button>
+        </div>
+    </div>
+</nz-modal>

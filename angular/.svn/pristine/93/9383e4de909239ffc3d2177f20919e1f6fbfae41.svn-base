@@ -1,0 +1,191 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{getTitle(type)}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="item">
+    <div class="item-form" *ngIf="type === 1" >
+        <form [formGroup]="itemForm">
+            <nz-form-item *ngIf="hasEmptyData">
+                <nz-form-control [nzOffset]="5" [nzSpan]="14">
+                    <p style="color:#F00">修改版本将删除已录入的数据</p>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="5" nzFor="versionType" nzRequired>装修类型</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                    <nz-select id="versionType" formControlName="versionType" nzPlaceHolder="请选择装修类型"
+                               (ngModelChange)="changeChildOptions($event)" [ngModel]="selectType">
+                        <nz-option [nzValue]="cb.type" [nzLabel]="cb.name"
+                                   *ngFor="let cb of configBase"
+                                   [nzDisabled]="cb.type === 1"></nz-option>
+                    </nz-select>
+                    <nz-form-explain *ngIf="itemForm.get('versionType').dirty && itemForm.get('versionType').errors">
+                        <ng-container *ngIf="itemForm.get('versionType').hasError('required')">
+                            当前为必选选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="5" nzFor="versionId" nzRequired>选择版本</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                    <nz-select id="versionId" formControlName="versionId" nzPlaceHolder="请选择版本"
+                               [(ngModel)]="selectVersionId">
+                        <nz-option [nzValue]="co.versionId" [nzLabel]="co.name"
+                                   *ngFor="let co of changeOptions"
+                                    [hidden]="!(changeOptions && changeOptions.length > 0)"></nz-option>
+                        <nz-option nzValue="" nzLabel="暂无数据" nzDisabled="true"
+                                   *ngIf="changeOptions && changeOptions.length == 0"></nz-option>
+                    </nz-select>
+                    <nz-form-explain *ngIf="itemForm.get('versionId').dirty && itemForm.get('versionId').errors">
+                        <ng-container *ngIf="itemForm.get('versionId').hasError('required')">
+                            当前为必选选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+                    <div class="btns">
+                            <button nz-button nzType="default" (click)="cancel($event)">取消</button>
+                            <button nz-button nzType="primary" (click)="store($event)" [disabled]="!itemForm.valid">提交</button>
+                    </div>
+        </form>
+    </div>
+
+    <div class="item-form" *ngIf="type === 4">
+        <form nz-form [formGroup]="itemForm">
+            <!---名称--->
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">名称</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input formControlName="name" autocomplete="off"
+                           name="name" maxlength="100" placeholder="请输入名称"/>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('name').dirty && itemForm.get('name').errors">
+                        <ng-container *ngIf="itemForm.get('name').hasError('required')">
+                            必填项目
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('name').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('name').hasError('maxlength')">
+                            至多输入100位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!---单价--->
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">单价</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input formControlName="univalent" autocomplete="off"
+                           name="univalent" maxlength="16" placeholder="请输入单价"
+                           (change)="fillCount()"/>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('univalent').dirty && itemForm.get('univalent').errors">
+                        <ng-container *ngIf="itemForm.get('univalent').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('univalent').hasError('decimal')">
+                            输入格式错误,精确到小数后2位
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('univalent').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('univalent').hasError('maxlength')">
+                            至多输入10位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!---单位--->
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">单位</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input formControlName="unit" autocomplete="off"
+                           name="unit" maxlength="16" placeholder="请输入单位"/>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('unit').dirty && itemForm.get('unit').errors">
+                        <ng-container *ngIf="itemForm.get('unit').hasError('required')">
+                            必填项目
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('unit').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('unit').hasError('maxlength')">
+                            至多输入10位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!---数量--->
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">数量</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input formControlName="num" autocomplete="off"
+                           name="num" maxlength="16" placeholder="请输入数量"
+                           (change)="fillCount()"/>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('num').dirty && itemForm.get('num').errors">
+                        <ng-container *ngIf="itemForm.get('num').hasError('required')">
+                            输入格式错误,精确到小数后2位
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('num').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('num').hasError('maxlength')">
+                            至多输入10位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!---实收--->
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">实收</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input formControlName="discountPrice" autocomplete="off"
+                           name="discountPrice" maxlength="16" placeholder="请输入实收"/>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('discountPrice').dirty && itemForm.get('discountPrice').errors">
+                        <ng-container *ngIf="itemForm.get('discountPrice').hasError('decimal')">
+                            输入格式错误,精确到小数后2位
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('discountPrice').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                        <ng-container *ngIf="itemForm.get('discountPrice').hasError('maxlength')">
+                            至多输入10位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="7">备注</nz-form-label>
+                <nz-form-control [nzSpan]="12" style="position: relative">
+                    <textarea nz-input rows="5" formControlName="offerExplain"
+                              autocomplete="off" name="offerExplain" maxlength="500"
+                              placeholder="请输入备注信息" [(ngModel)]="offerExplain"></textarea>
+                    <span style="position:absolute;right:10px;bottom:-20px" *ngIf="offerExplain && offerExplain.length > 0">
+                                 <span style="color:#f00">{{offerExplain.length}}</span>/500</span>
+                    <nz-form-explain
+                            *ngIf="itemForm.get('offerExplain').dirty && itemForm.get('offerExplain').errors">
+                        <ng-container *ngIf="itemForm.get('offerExplain').hasError('maxlength')">
+                            至多输入500位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <div class="btns">
+                        <button nz-button [nzType]="'default'" (click)="cancel($event)">取消</button>
+                        <button nz-button [nzType]="'primary'" (click)="modify($event)"
+                                [disabled]="!itemForm.valid" *ngIf="aid">提交
+                        </button>
+                        <button nz-button [nzType]="'primary'" (click)="submit($event)"
+                                [disabled]="!itemForm.valid" *ngIf="!aid">提交
+                        </button>
+                </div>
+        </form>
+    </div>
+</div>
+

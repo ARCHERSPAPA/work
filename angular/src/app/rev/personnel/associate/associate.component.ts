@@ -1,0 +1,159 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../service/request.service";
+import { Default } from "../../../model/constant";
+import { UserService } from '../../../service/user.service';
+import { getProductState, atob } from '../../../model/methods';
+import { Router, ActivatedRoute } from '@angular/router';
+import { WarningService } from "../../../service/warning.service";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
+import { Messages } from "../../../model/msg";
+import { RelevantComponent } from "../../../plugins/relevant/relevant.component";
+@Component({
+  selector: 'rev-associate',
+  templateUrl: './associate.component.html',
+  styleUrls: ['./associate.component.scss']
+})
+export class AssociateComponent implements OnInit {
+  public title: string;
+  //员工ID
+  public employeeId: number;
+
+  public lock: boolean = true;
+
+  public currentPage: number;
+  public currentTotal: number;
+
+  public associateList: any;
+  //被交接人员ID
+  public associateId: string;
+  //提交的项目ID
+  public quoteIds: Array<any> = [];
+  //选择全部的判断
+  public isAllDisplayDataChecked: boolean;
+  //查询条件
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+
+  constructor(private req: RequestService,
+    private user: UserService,
+    private route: ActivatedRoute,
+    private warn: WarningService,
+    private modal: NgbModal) {
+  }
+
+  ngOnInit() {
+    this.title = '交接项目';
+    this.employeeId = this.user.getEmployeeId();
+    this.route.queryParams.subscribe(queryParams => {
+      this.associateId = atob(queryParams.id);
+      this.changeData();
+    })
+
+  }
+
+  changeData() {
+    this.req.doPost({
+      url: "associateList",
+      data: {
+        employeeId: this.associateId,
+        pageNo: this.pageNo,
+        pageSize: this.pageSize
+      },
+      success: (res => {
+        if (res && res.code === 200) {
+          this.currentPage = res.data.pageNo;
+          this.isAllDisplayDataChecked = false;
+          this.associateList = res.data.pageSet;
+          if (this.lock) {
+            this.quoteIds = new Array(res.data.total).fill('');
+            this.lock = false;
+          }
+          this.associateList.forEach((item, i) => {
+            item['checked'] = false;
+            this.quoteIds.forEach((items, t) => {
+              if (items === item.id) {
+                item['checked'] = true;
+              }
+            })
+          });
+          this.total = res.data.total;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    })
+  }
+
+  getStateName(state) {
+    return getProductState(state)
+  }
+
+  personChange(productId, type) {
+    let quoteIds = [];
+    if (type === 1) {
+      quoteIds = this.quoteIds.filter(item => {
+        return item !== '';
+      });
+    } else {
+      quoteIds.push(productId);
+    }
+    if (quoteIds && quoteIds.length > 0) {
+      let info = this.modal.open(RelevantComponent, {
+        centered: true,
+        keyboard: false,
+        backdrop: "static"
+      });
+      info.componentInstance.type = 5;
+      info.result.then(res => {
+        this.req.doPost({
+          url: 'submitAssociate',
+          data: {
+            employeeId: this.associateId,
+            toEmployeeId: JSON.parse(res).id,
+            quoteIds: quoteIds
+          },
+          success: (res => {
+            if (res && res.code == 200) {
+              this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+              this.changeData();
+              // this.router.navigate(["../staff/list"], {relativeTo: this.route});
+            } else {
+              this.warn.onWarn(res.msg || Messages.FAIL.DATA);
+            }
+          })
+        })
+
+
+      }, reason => {
+        console.log(reason);
+      });
+    } else {
+      this.warn.onWarn('请先选择需要添加的项目');
+    }
+  }
+  refreshStatus(item, i) {
+    if (item.checked === true) {
+      this.quoteIds.splice(i + ((this.currentPage - 1) * 20), 1, item.id);
+    } else {
+      this.quoteIds.splice(i + ((this.currentPage - 1) * 20), 1, '');
+    }
+  }
+
+  checkAll(event) {
+    if (event) {
+      this.associateList.filter((item, i) => {
+        item['checked'] = true;
+        this.quoteIds.splice(i + ((this.currentPage - 1) * 20), 1, item.id);
+      })
+    } else {
+      this.associateList.filter(item => {
+        item['checked'] = false;
+      })
+      this.quoteIds.splice(20 * (this.currentPage - 1), 20, '')
+      for (let i = 0; i < 19; i++) {
+        this.quoteIds.push('')
+      }
+    }
+  }
+}

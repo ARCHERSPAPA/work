@@ -1,0 +1,47 @@
+import {Component, OnInit, Input, ViewChild } from '@angular/core';
+import * as d3 from "d3";
+import {LigatureChart} from "./ligatureChart";
+
+@Component({
+    selector: 'rev-ligature',
+    template:`
+        <svg #target width="100%" [ngStyle]="{height:(height+100)+'px'}"></svg>
+    `,
+    styleUrls: ['./ligature.component.scss']
+})
+export class LigatureComponent implements OnInit {
+
+    //获取渲染的高度
+    @Input() height:number;
+    //获得渲染时的数据
+    @Input() data:Array<any>;
+    //当前选中的id
+    @Input() activatedId:number;
+    //获取子组件引用
+    @ViewChild("target") target;
+
+    public chart:any;
+
+    constructor() {
+    }
+
+    ngOnInit() {
+    }
+
+    ngOnChanges(changes){
+        if(this.chart){
+            this.chart.destroy();
+            if(changes.data && changes.data.currentValue && changes.data.currentValue.length > 0){
+                this.chart.render(changes.data.currentValue,this.activatedId);
+            }
+        }
+    }
+
+    ngAfterViewInit(){
+        this.chart = new LigatureChart(this.target.nativeElement);
+        if(this.data && this.data.length > 0){
+            this.chart.render(this.data,this.activatedId);
+        }
+    }
+
+}

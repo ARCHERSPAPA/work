@@ -1,0 +1,87 @@
+.salecs {
+  //margin: 12px;
+  font-size: 16px;
+  &_head {
+    position: relative;
+    //border-bottom: 1px solid #e1e1e1;
+    .salecs_title {
+      font-size: 18px;
+      white-space: nowrap;
+      width: 100%;
+      line-height: 64px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #666;
+      a {
+        font-size: 14px;
+      }
+    }
+    .salecs_btn {
+      position: absolute;
+      top: 4.5px;
+      right: 0px;
+   a{
+     color: white;
+   }
+      input {
+        display: none;
+        z-index: -999;
+      }
+    }
+    .salecs_wrap_ctr {
+      text-align: center;
+    }
+  }
+  &_wrap {
+    margin-top: 10px;
+    tr th,
+    tr td {
+      font-size: 14px;
+      a {
+        padding-right: 4px;
+        color: #007bff;
+      }
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    tr th,
+    tr td:not(.w10) {
+      max-width: 60px;
+    }
+    td.salecs_move {
+      div {
+        margin: 0 auto;
+        span {
+          display: inline-block;
+          width: 25px;
+          height: 25px;
+          line-height: 25px;
+          cursor: pointer;
+          margin: 0 12px;
+          i {
+            font-size: 20px;
+          }
+          &:hover {
+            color: #0a8ddf;
+          }
+        }
+      }
+    }
+  }
+}
+.salecs_a {
+  color: #0099ff;
+  display: inline-block;
+  margin: 2.5px;
+}
+
+.salecs_modal {
+  input {
+    width: 100%;
+    margin: 12px 0;
+  }
+  p {
+    color: red;
+  }
+}

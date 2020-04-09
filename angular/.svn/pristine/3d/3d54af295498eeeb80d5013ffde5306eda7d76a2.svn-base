@@ -1,0 +1,78 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { RequestService } from "../../../../service/request.service";
+import { UserService } from "../../../../service/user.service";
+import { WarningService } from "../../../../service/warning.service";
+import { Messages } from "../../../../model/msg";
+import { Router, ActivatedRoute } from '@angular/router';
+import { atob } from "../../../../model/methods";
+import * as UserValidate from "../../../../validate/user-validate";
+@Component({
+  selector: 'rev-sale-add',
+  templateUrl: './sale-add.component.html',
+  styleUrls: ['./sale-add.component.scss']
+})
+export class SaleAddComponent implements OnInit {
+  public salecsPhone: any;
+  public inputValue: any;
+  public SaleForm: FormGroup;
+  public id;
+  public isAdd: number;
+  constructor(
+    private fb: FormBuilder,
+    private request: RequestService,
+    private route: ActivatedRoute,
+    private warn: WarningService,
+    private userInfo: UserService,
+  ) { }
+
+  ngOnInit() {
+    this.SaleForm = this.fb.group({
+      salecsPhone: [this.salecsPhone, [
+        Validators.required,
+        UserValidate.ValidatePhone
+      ]],
+    });
+    this.route.queryParams.subscribe(params => {
+      console.log(params)
+      if (params && params["customId"]) {
+        this.id = atob(params["customId"]);
+        this.salecsPhone=atob(params["phone"]);
+      }
+      this.isAdd = params["isAdd"];
+    })
+  }
+  back() {
+    history.go(-1);
+  }
+  submit() {
+    let self = this;
+    let param={};
+    let url;
+    param["phone"]=this.salecsPhone;
+    param["companyId"]=this.userInfo.getCompanyId();
+    console.log(this.isAdd)
+    if(this.isAdd==1){
+      url="createCustom";
+    }else{
+      url="editCustom";
+      param["id"]=this.id;
+    }
+
+    if (this.salecsPhone) {
+      this.request.doPost({
+        url: url,
+        data: param,
+        success: (res => {
+          if (res && res.code == 200) {
+            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    } else {
+      self.warn.onError('温馨提示,请填写客服手机号');
+    }
+  }
+}

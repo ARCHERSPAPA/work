@@ -1,0 +1,130 @@
+import { Component, OnInit, DoCheck, Input, Output, EventEmitter } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { DepartService } from "../../service/depart.service";
+
+@Component({
+    selector: 'rev-sector',
+    templateUrl: './sector.component.html',
+    styleUrls: ['./sector.component.scss']
+})
+export class SectorComponent implements OnInit {
+    //区别单选和多选
+    @Input() type: string;
+    //拉取地址区别
+    @Input() url: number;
+    @Input() id: number;
+    @Output() selectDepartHandler: EventEmitter<any> = new EventEmitter<any>();
+    public departList: any;
+    public showList: any; //用于展示的数据
+    public lock = true; //NGdocheck时只执行一次赋值，初始化
+
+    public selectDepartInfo: Array<any> = [];
+
+    constructor(private activeModal: NgbActiveModal,
+        private depart: DepartService) {
+
+    }
+
+    ngOnInit() {
+        this.depart.loadDepart(0, this.url);
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.departList = this.renderList(this.depart.getDepartList(this.url)); //获取数据，列表数据在showlist前面
+            if (this.id) {
+                this.showList = this.id;
+            } else {
+                this.showList = null;
+            }
+        }, 500);
+
+    }
+test(i){
+console.log(i)
+}
+    renderList(items) {                                         //items是tree中的关键词，用于区分。点击传的值也是这个
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                item['key'] = item['id'];
+                item['title'] = item['name'];
+                item['expanded'] = false;
+                if (item['children']) {
+                    item['children'] = this.renderList(item['children'])
+                }
+            })
+        }
+        return items
+    }
+
+    select(depart) {
+        this.lock = false;
+        this.showList = depart;
+        // if (this.type === "checkbox") {
+        //   this.depart.showDeparts(depart);
+        // }else{
+        //   this.showList = depart;
+        // }
+    }
+
+    cancel() {
+        this.depart.clearDisplayDeparts();
+        this.activeModal.dismiss();
+    }
+
+    ok() {
+        if (this.type === "checkbox") {     //多选时提交的是数组
+            // this.recursionDepart(this.showList, this.departList, this.selectDepartInfo, true);
+            // console.log(this.selectDepartInfo)
+            // this.activeModal.close(this.selectDepartInfo);
+
+            // console.log(this.depart.getTreeByIdAndName(List))
+            this.depart.getTreeByIdAndName(this.rendListCheck(this.departList))
+            this.activeModal.close(this.selectDepartInfo);
+        } else {
+            this.recursionDepart(this.showList, this.departList, this.selectDepartInfo, true);
+            this.activeModal.close(this.selectDepartInfo);
+        }
+    }
+    rendListCheck(items) {
+     
+        items.forEach(item => {
+            this.showList.forEach(key => {
+                if (item['key'] === key) {
+                    this.selectDepartInfo.push(item)
+                }
+            })
+            if (item['children']) {
+                this.rendListCheck(item['children'])
+            }
+        })
+    }
+
+    recursionDepart(id, arr, result, bool) {
+        if (arr && arr.length > 0) {
+            let item = arr.filter(a => a.id === id);
+            if (item && item.length === 1) {
+                if (bool) {
+                    if (result && result.length > 0) {
+                            result.splice(0, 1, item[0]);
+                    } else {
+                        
+                            result.push(item[0]);
+                        
+                    }
+                }
+            }
+            arr.forEach(a => {
+                this.recursionDepart(id, a.children, result, bool);
+
+            })
+        }
+    }
+
+    ngOnDestroy() {
+        console.log("destroy");
+        this.selectDepartInfo = null;
+    }
+
+
+}

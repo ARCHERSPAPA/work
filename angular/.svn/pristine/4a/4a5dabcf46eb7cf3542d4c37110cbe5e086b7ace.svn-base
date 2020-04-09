@@ -1,0 +1,22 @@
+<div class="material-dtl">
+  <rev-title [title]="title"></rev-title>
+  <div nz-row class="mt-16 mb-16">
+    <div nz-col nzSpan="24">
+        <input nz-input type="text" maxlength="100" [(ngModel)]="materialTitle" placeholder="请在这里填写素材标题">
+    </div>
+  </div>
+  <div class="material-dtl-wrap">
+    <quill-editor [(ngModel)]="content" placeholder="请填写内容"
+                  [style]="{height: '500px'}"
+                  (onEditorCreated)="EditorCreated($event)"
+                  (onContentChanged)="contentChanged($event)"></quill-editor>
+    已输入{{quillLen}}字
+  </div>
+  <div nz-row>
+    <div nz-col nzOffset="10">
+      <div nz-col nzSpan="4"><button nz-button [nzType]="'primary'" (click)="handleSub()">保存</button></div>
+      <div nz-col nzSpan="4"><a nz-button [nzType]="'default'" target="_blank" (click)="handlePreview()">预览</a></div>
+    </div>
+  </div>
+
+</div>

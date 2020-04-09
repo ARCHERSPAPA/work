@@ -1,0 +1,32 @@
+<!-- <div class="item" *ngFor="let depart of departTree;let isFirst = first;let i = index;let isLast = last;">
+    
+    <dl class="item-dl">
+        <dd>
+            <span class="choice">
+                <span class="chn-btn chn-empty" *ngIf="!depart.ownSubset"></span>
+                <span class="chn-btn" [ngClass]="{'chn-plus':!depart.show,'chn-minus':depart.show}"
+                      *ngIf="depart.ownSubset" (click)="loadChild(depart)"></span>
+                <span class="chn-btn" [ngClass]="{'chn-close':!depart.show,'chn-open':depart.show}"
+                      *ngIf="depart.ownSubset"></span>
+            </span>
+            <span class="name" [title]="depart.name" [ngClass]="{'selected':selectId == depart.id}" (click)="selectDepart(depart)">（{{depart.rank}}级目录）{{depart.name}}</span>
+        </dd>
+    </dl>
+    <rev-info-depart-tree [departTree]="depart.child"
+                     [hidden]="!depart.show" *ngIf="depart.child && depart.child.length > 0"></rev-info-depart-tree>
+</div> -->
+
+    <!-- <nz-tree [nzData]="departTree" nzDraggable nzBlockNode (nzClick)="nzClick($event)" > </nz-tree> -->
+    <nz-tree-select
+    style="width: 600px;"
+    [nzNodes]="departTree"
+    nzShowSearch
+    nzPlaceHolder="选择部门"
+    [(ngModel)]="showDepart"
+    (ngModelChange)="nzClick($event)"
+    [nzDropdownStyle]="{'height':'300px','overflow-y':'scroll'}"
+  >
+  </nz-tree-select>
+
+
+

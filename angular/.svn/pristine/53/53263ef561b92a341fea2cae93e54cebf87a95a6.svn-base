@@ -1,0 +1,358 @@
+import Stack from "./stack";
+
+export class Calculate {
+    public operand: Stack;
+    public operator: Stack;
+
+    public tempNum: string;
+    public tempSymbol: string;
+
+    constructor() {
+        this.operand = new Stack();
+        this.operator = new Stack();
+        this.tempNum = "";
+        this.tempSymbol = "";
+    }
+
+    /**
+     * 单独乘除计算
+     * @param symbol
+     */
+    computedMultiOrDivs(symbol) {
+        let oc1 = this.operand.pop();
+        let oc2 = this.operand.pop();
+        console.log(symbol);
+        this.operand.push(Arith.selectOperatorRule(symbol, oc1, oc2));
+    }
+
+    /**
+     * 优先括号运算
+     * @param exp
+     * @returns {any}
+     */
+    matchInBracket(exp) {
+        let braReg = /\([\+|\-|\*|\.|\d]+\)?/g;
+        let brackets = exp.match(braReg);
+        if (brackets) {
+            brackets.forEach(item => {
+                let tempRes = this.computed(item.replace(/[\(|\)]/g, ''));
+                exp = exp.replace(item, tempRes);
+            });
+        }
+        brackets = exp.match(braReg);
+        return brackets ? this.matchInBracket(exp) : exp;
+    }
+
+    /**
+     * 实现运算
+     * @param exp
+     */
+    computed(exp) {
+        exp = this.matchInBracket(exp);
+        for (let i = exp.length - 1; i >= 0; i--) {
+            // for(let i = 0; i < exp.length; i++){
+            // let numReg = /[\.|\d|(\d+\/\d+)]/;
+            let numReg =  /[\.|\d|(\d{1,}\/\d{1,})]/;
+            let char = exp[i];
+            if (numReg.test(char)) {
+                //当前数字组合
+                this.tempNum = char + this.tempNum;
+                if (i === 0) {
+                    if (this.tempSymbol) {
+                        this.computedMultiOrDivs(this.tempSymbol);
+                        this.tempSymbol = "";
+                    }
+                    if (this.tempNum) {
+                        this.operand.push(this.tempNum);
+                    }
+                    break;
+                }
+            }
+            else {
+                if (i === 0) {
+                    if (this.tempSymbol) {
+                        this.computedMultiOrDivs(this.tempSymbol);
+                        this.tempSymbol = "";
+                    }
+                    if (this.tempNum) {
+                        this.operand.push(this.tempNum);
+                    }
+                    this.operator.push(char);
+                    break;
+                }
+
+                if (this.tempSymbol) {
+                    this.computedMultiOrDivs(this.tempSymbol);
+                    this.tempSymbol = "";
+                }
+                let peekSymbol = this.operator.peek();
+                let nextChar = exp[i - 1];
+                let symbolReg = /[\+|\-|\*]/;
+
+                if (peekSymbol) {
+                    if (this.tempNum) {
+                        if (symbolReg.test(nextChar) && "-" === char) {
+                            this.operand.push(char + this.tempNum);
+                            char = "";
+                        } else {
+                            this.operand.push(this.tempNum);
+                        }
+                        this.tempNum = "";
+                    }
+                    //优先级算法
+                    switch (Arith.priority(peekSymbol, char)) {
+                        case 2:
+                            this.tempSymbol = this.operator.pop();
+                            break;
+                        case 1:
+                            this.computedMultiOrDivs(this.operator.pop());
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (!peekSymbol && this.tempNum) {
+                    if (symbolReg.test(nextChar) && "-" === char) {
+                        this.operand.push(char + this.tempNum);
+                        char = "";
+                    } else {
+                        this.operand.push(this.tempNum);
+                    }
+                    this.tempNum = "";
+                }
+
+                if (char) {
+                    this.operator.push(char);
+                }
+            }
+        }
+        return this.computedReverse();
+    }
+
+    /**
+     * 实现逆推导
+     */
+    computedReverse() {
+        let result = 0;
+        while (0 < this.operand.getLength()) {
+            if (this.operator.getLength() === this.operand.getLength()) {
+                let oc1 = result;
+                let oc2 = this.operand.pop();
+                let symbol = this.operator.pop();
+                result = ("+" === symbol) ? Arith.addition(oc1, oc2) : Arith.subtraction(oc1, oc2);
+            } else {
+                if (this.operand.getLength() === 1) {
+                    let p = this.operand.pop();
+                    if(Arith.isFraction(p)){
+                        let f = p.split("/");
+                        if(f.length > 2){
+                            let fra = f.splice(2);
+                            result = Number(Arith.division(f[0],f[1])*Arith.multiFraction(fra));
+                        }else{
+                            result = Number(Arith.division(f[0],f[1]));
+                        }
+                    }else{
+                        result = Number(p);
+                    }
+                    break;
+                }
+                let oc1 = this.operand.pop();
+                let oc2 = this.operand.pop();
+                let symbol = this.operator.pop();
+                result = Arith.selectOperatorRule(symbol, oc1, oc2);
+            }
+            this.operand.push(result);
+        }
+
+        this.operand.reset();
+        this.operator.reset();
+        this.tempNum = "";
+        this.tempSymbol = "";
+        return Arith.substring(result);
+    }
+}
+
+class Arith {
+    /**
+     * 精度置换(小数)
+     * @param num
+     * @param pow
+     * @returns {number}
+     */
+    static conver(num, pow) {
+        return num * Math.pow(10, pow);
+    }
+
+    /**
+     * 求最小公倍数
+     * @param nums
+     */
+    static getLcm(...nums) {
+        let L1 = nums[0].split("/")[1];
+        let L2 = nums[1].split("/")[1];
+        if (L1 && L2) {
+            return this.division((L1 * L2),this.getGcd(L1, L2));
+        }
+        if (L1 && !L2) return L1;
+        if (!L1 && L2) return L2;
+    }
+
+    /**
+     * 求最大公约数
+     * @param nums
+     */
+    static getGcd(...nums) {
+        let max = Math.max(nums[0], nums[1]);
+        let min = Math.min(nums[0], nums[1]);
+        if (max % min === 0) {
+            return min;
+        } else {
+            return this.getGcd(max % min, min);
+        }
+    }
+
+    /**
+     * 判断当前数据是否为分数
+     * @param num
+     * @returns {any}
+     */
+    static isFraction(num) {
+        return /\d+\/\d+/.test(num);
+    }
+
+    /**
+     * 转成分数形式
+     * @param num 当前数字
+     * @param lcm 最小公倍数
+     * @returns 返回分子
+     */
+    static getFraction(num, lcm) {
+        let a = num.split("/");
+        if (a[1]) {
+            return a[0] * (lcm / a[1]);
+        }
+        return a[0] * lcm;
+    }
+
+    /**
+     * 加法
+     * @param nums
+     * @returns {number}
+     */
+    static addition(...nums) {
+        if (this.isFraction(nums[0]) || this.isFraction(nums[1])) {
+            let lcm = this.getLcm(...nums);
+            let a1 = this.getFraction(nums[0], lcm);
+            let a2 = this.getFraction(nums[1], lcm);
+            return this.division(a1 + a2, lcm);
+        } else {
+            let a1 = this.conver(nums[0], 2);
+            let a2 = this.conver(nums[1], 2);
+            return (a1 + a2) / Math.pow(10, 2);
+        }
+    }
+
+    /**
+     * 减法
+     * @param nums
+     * @returns {number}
+     */
+    static subtraction(...nums) {
+        if (this.isFraction(nums[0]) || this.isFraction(nums[1])) {
+            let lcm = this.getLcm(...nums);
+            let a1 = this.getFraction(nums[0], lcm);
+            let a2 = this.getFraction(nums[1], lcm);
+            return this.division(a1 - a2, lcm);
+        } else {
+            let a1 = this.conver(nums[0], 2);
+            let a2 = this.conver(nums[1], 2);
+            return (a1 - a2) / Math.pow(10, 2);
+        }
+
+    }
+
+    /**
+     * 乘法
+     * @param nums
+     * @returns {number}
+     */
+    static multiplication(...nums) {
+        if (this.isFraction(nums[0]) || this.isFraction(nums[1])) {
+            let lcm = this.getLcm(...nums);
+            let a1 = this.getFraction(nums[0], lcm);
+            let a2 = this.getFraction(nums[1], lcm);
+            return this.division(a1*a2, lcm*lcm);
+        } else {
+            let a1 = this.conver(nums[0], 2);
+            let a2 = this.conver(nums[1], 2);
+            return (a1 * a2) / Math.pow(10, 4);
+        }
+    }
+
+    /**
+     * 除法
+     * @param nums
+     * @returns {number}
+     */
+    static division(...nums) {
+        let a1 = this.conver(nums[0], 2);
+        let a2 = this.conver(nums[1], 2);
+        return (a1 / a2);
+    }
+
+    static multiFraction(nums){
+        if(nums && nums.length > 1){
+            let val = 1;
+            nums.map(n =>{
+                val *= ( n * (1/Math.pow(n,2)));
+            })
+            return val;
+        }
+        return nums[0]*(1/Math.pow(nums[0],2));
+    }
+
+    /**
+     * 比较运算符优先级
+     * @param ocA
+     * @param ocB
+     * @returns {number}
+     */
+    static priority(ocA, ocB) {
+        let ocReg = /[\*]/;
+        if (ocReg.test(ocA) && !ocReg.test(ocB)) {
+            return 2;
+        } else if (ocReg.test(ocA) && ocReg.test(ocB)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 根据运算符计算数据
+     * @param symbol
+     * @param nums
+     * @returns {any}
+     */
+    static selectOperatorRule(symbol, ...nums) {
+        // console.log(symbol);
+        switch (symbol) {
+            case "+":
+                return this.addition(...nums);
+            case "*":
+                return this.multiplication(...nums);
+            // case "/":
+            //     return this.division(...nums);
+            default:
+                return this.subtraction(...nums);
+        }
+    }
+
+    static substring(num) {
+        if (num) {
+            return Number(num.toString().match(/^(-)?\d+(\.\d{1,2})?/)[0]);
+        }
+        return "";
+    }
+}
+

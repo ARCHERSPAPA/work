@@ -1,0 +1,5 @@
+<div class="temp">
+  <div class="temp-content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

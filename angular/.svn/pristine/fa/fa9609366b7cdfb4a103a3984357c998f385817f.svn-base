@@ -1,0 +1,54 @@
+import { Component, OnInit } from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Messages} from "../../../../model/msg";
+import {ActivatedRoute} from '@angular/router';
+import {atob, getWageState} from "../../../../model/methods";
+
+@Component({
+  selector: 'rev-settle-detail-record',
+  templateUrl: './settle-detail-record.component.html',
+  styleUrls: ['./../../settle.component.scss','./settle-detail-record.component.scss']
+})
+export class SettleDetailRecordComponent implements OnInit {
+
+  public records:any;
+  public aid:string;
+
+  public loading:string;
+
+
+  constructor(private req:RequestService,
+              private warn:WarningService,
+              private activatedRoute:ActivatedRoute) { }
+
+  ngOnInit() {
+      this.activatedRoute.queryParams.subscribe(params =>{
+          if(params && params["aid"]){
+              this.aid = atob(params["aid"]);
+              this.loadRecord(this.aid);
+          }
+      })
+  }
+
+  loadRecord(aid){
+      if(this.aid){
+          this.req.doPost({
+              url:"recordLabourExpenses",
+              data:{id:aid},
+              success:(res =>{
+                  if(res && res.code == 200){
+                      this.records = res.data;
+                  }else{
+                      this.warn.onError(res.msg || Messages.FAIL.DATA);
+                  }
+              })
+          })
+      }
+  }
+
+  getWageState(s){
+      return getWageState(s);
+  }
+
+}

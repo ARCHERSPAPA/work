@@ -1,0 +1,433 @@
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {bounceAnimate} from "../../../../animation/transform.component";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Messages} from "../../../../model/msg";
+import {getOptionName, getOptionTag,atob} from "../../../../model/methods";
+import * as UserValidate from "./../../../../validate/user-validate";
+
+@Component({
+    selector: 'rev-question-edit',
+    templateUrl: './question-edit.component.html',
+    styleUrls: ['./../question.component.scss', './question-edit.component.scss'],
+    animations: [bounceAnimate]
+})
+export class QuestionEditComponent implements OnInit {
+
+    /**
+     * type:1=>选择题,2=>填空题
+     */
+    public type: number;
+    /**
+     * 从一页添加过来
+     */
+    // public title: string;
+
+    public switch: string;
+
+    public questForm: FormGroup;
+    /**
+     * 题库id
+     */
+    public qid: string;
+    /**
+     * 具体题型id
+     */
+    public tid: string;
+    //问题名称
+    public questName: string;
+
+    //问题类型(1:单选，2：多选)
+    public radioValue: string = '1';
+    //问题选择
+    public checkboxOptions: Array<any>;
+
+
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private fb: FormBuilder,
+                private req: RequestService,
+                private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        // this.title = "题库名称";
+        this.switch = "bottom";
+        this.type = parseInt(this.activatedRoute.snapshot.params["type"]);
+        console.log(123)
+        this.activatedRoute.queryParams.subscribe(params => {
+              console.log(params)
+            if (params && params["qid"]) {
+                this.qid = atob(params["qid"]);
+                // console.log(this.qid)
+            }
+            if (params && params["tid"]) {
+                this.tid = params["tid"];
+                this.loadOptions(this.tid);
+            }
+            // if (params && params["title"]) {
+            //     this.title = params["title"];
+            // }
+        })
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["qid"]) {
+                this.qid = atob(params["qid"]);
+            }
+        })
+
+        this.questForm = this.fb.group({
+            questName: [this.questName, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(100),
+                UserValidate.ValidateInputTrim
+            ]]
+        });
+
+        if (!this.tid) {
+            if (this.type % 2 == 1) {
+                this.checkboxOptions = this.createDefaultOption(3);
+            } else if (this.type % 2 == 0) {
+                this.checkboxOptions = this.createDefaultOption(1);
+            }
+            this.getOptionControl();
+        }
+
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.switch = "down";
+        }, 1000);
+    }
+
+    ngDoCheck() {
+        console.log(this.qid)
+    }
+    /**
+     * 添加新的验证服务
+     */
+    getOptionControl() {
+        this.checkboxOptions.forEach((option, index) => {
+            this.questForm.addControl('option' + index, this.fb.control(option.content,
+                [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(30),
+                    UserValidate.ValidateInputTrim
+                ])
+            );
+        })
+    }
+
+    getName() {
+        let s = this.tid ? '编辑' : '添加';
+        switch (this.type % 2) {
+            case 1:
+                return s + "选择题";
+            case 0:
+                return s + "填空题";
+            default:
+                return "";
+        }
+    }
+
+    exist() {
+        this.switch = "up";
+        setTimeout(() => {
+            if(this.type < 3){
+                this.router.navigate(["./../../detail"], {queryParams: {qid: this.qid}, relativeTo: this.activatedRoute});
+            }else{
+                this.router.navigate(["./../../../exam/detail"],{queryParams:{eid:this.qid},relativeTo: this.activatedRoute});
+            }
+        }, 500)
+    }
+
+    /**
+     * 本地添加选项
+     * @param type
+     */
+    addOptions(type) {
+        console.log("type====="+type);
+        if (this.checkboxOptions.length >= 5 && (type === 1 || type === 3)) {
+            this.warn.onWarn("添加选项最多5个");
+            return;
+        }
+        if (this.checkboxOptions.length >= 3 && (type === 2 || type === 4)) {
+            this.warn.onWarn("添加答案最多3个");
+            return;
+        }
+        this.checkboxOptions.push({
+            content: '',
+            checked: false
+        });
+        let i = this.checkboxOptions.length - 1;
+        this.questForm.addControl('option' + i, this.fb.control(
+            this.checkboxOptions[i].content, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30),
+                UserValidate.ValidateInputTrim
+            ])
+        );
+    }
+
+    /**
+     * 本地删除选项
+     * @param i
+     */
+    removeOptions(i) {
+        this.checkboxOptions.splice(i, 1);
+        this.questForm.removeControl("option" + i);
+    }
+
+    check(option) {
+        option.checked = !option.checked;
+    }
+
+    submit() {
+        if (this.qid) {
+            let params = {
+                id: this.qid,
+                title: this.questName.trim()
+            };
+            if (this.tid) {
+                params["questionId"] = this.tid;
+            }
+            if(!this.justRadioByOptions() && this.type % 2 == 1){
+                this.warn.onWarn(Messages.SELECT_RADIO_EMPTY);
+                return;
+            }
+            if (this.type === 1) {
+                params["answerType"] = this.radioValue;
+                params["options"] = this.getAnswers(this.checkboxOptions);
+                this.req.doPost({
+                    url: "choiceQuest",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.router.navigate(["./../../detail"], {
+                                queryParams: {qid: this.qid},
+                                relativeTo: this.activatedRoute
+                            });
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+
+            }
+            else if (this.type === 2) {
+                params["answers"] = this.getOptions(this.checkboxOptions);
+                this.req.doPost({
+                    url: "clozeQuest",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.router.navigate(["./../../detail"], {
+                                queryParams: {qid: this.qid},
+                                relativeTo: this.activatedRoute
+                            });
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+            else if (this.type === 3) {
+                params["answerType"] = this.radioValue;
+                params["options"] = this.getAnswers(this.checkboxOptions);
+                this.req.doPost({
+                    url: "choiceExam",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.router.navigate(["./../../../exam/detail"], {
+                                queryParams: {eid: this.qid},
+                                relativeTo: this.activatedRoute
+                            });
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+            else if (this.type === 4) {
+                params["answers"] = this.getOptions(this.checkboxOptions);
+                this.req.doPost({
+                    url: "clozeExam",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.router.navigate(["./../../../exam/detail"], {
+                                queryParams: {eid: this.qid},
+                                relativeTo: this.activatedRoute
+                            });
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+        } else {
+            this.warn.onWarn(Messages.PARAM_EMPTY);
+        }
+
+
+    }
+
+    getOptionTag(type) {
+        return getOptionTag(type);
+    }
+
+    getOptionName(index) {
+        return getOptionName(index);
+    }
+
+    /**
+     * 获取选择的选项内容
+     * @param options
+     * @returns {any[]}
+     */
+    getAnswers(options) {
+        let answers = [];
+        if (options && options.length > 0) {
+            options.forEach(option => {
+                answers.push({
+                    answer: option.content.trim(),
+                    right: option.checked
+                });
+            })
+        }
+        return answers;
+    }
+
+    /**
+     * 获取填空选项内容
+     * @param options
+     * @returns {any[]}
+     */
+    getOptions(options) {
+        let answers = [];
+        if (options && options.length > 0) {
+            options.forEach(option => {
+                answers.push(option.content);
+            })
+        }
+        return answers;
+    }
+
+    /**
+     * 设置默认选项
+     * @param num
+     * @returns {any[]}
+     */
+    createDefaultOption(num) {
+        let arr = [];
+        for (let i = 0; i < num; i++) {
+            arr.push({
+                content: '',
+                checked: i == 0?true:false
+            });
+        }
+        return arr;
+    }
+
+
+    loadOptions(id) {
+        // console.log(this.getOptionUrl(this.type))
+        if (id) {
+            this.req.doPost({
+                url: this.getOptionUrl(this.type),
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                     
+                        let data = res.data;
+                        this.questName = data.title ? data.title : "";
+                        this.radioValue = data.rightType ? String(data.rightType) : "1";
+                        if (this.type % 2 === 1) {
+                            this.checkboxOptions = this.setOptions(data.options);
+                        }else{
+                            this.checkboxOptions = this.setAnswers(data.answers);
+                        }
+                        this.getOptionControl();
+                    }else{
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    getOptionUrl(type) {
+        switch (type) {
+            case 1:
+            case 2:
+                return "detailInfoQuest";
+            case 3:
+            case 4:
+                return "detailInfoExam";
+            default:
+                break;
+
+        }
+    }
+
+    setOptions(options) {
+        let arr = [];
+        if (options && options.length > 0) {
+            options.forEach(option => {
+                arr.push({
+                    content: option.answer,
+                    checked: option.right
+                })
+            })
+        }
+        return arr;
+    }
+
+    setAnswers(answers) {
+        let arr = [];
+        if (answers && answers.length > 0) {
+            answers.forEach(answer => {
+                arr.push({
+                    content: answer,
+                    checked: false
+                });
+            })
+        }
+        return arr;
+    }
+
+    /**
+     * 根据选择类型，判定是否单选或者多选
+     */
+    justRadioByOptions(){
+        let radioCount = 0;
+        if(this.checkboxOptions && this.checkboxOptions.length > 0){
+            this.checkboxOptions.forEach(option =>{
+                if(option.checked){
+                    radioCount ++;
+                }
+            });
+        }
+        if(this.radioValue === '1'){
+            if(radioCount === 1) return true;
+            else  return false;
+        }else if(this.radioValue === '2'){
+            if(radioCount >= 2) return true;
+            else return false;
+        }
+
+    }
+
+
+}

@@ -1,0 +1,34 @@
+/**
+ * 重置当前颜色组
+ * @param {string} colours
+ * @returns {Array<string>}
+ */
+export function renderColors(colours: string): Array<string> {
+    let array = [];
+    if (colours && colours.length > 0) {
+        if (colours.indexOf("/") > -1) {
+            array = colours.split("/")
+        } else {
+            array.push(colours);
+        }
+    }
+    return array;
+}
+
+/**
+ * 查找到相应的颜色后，重置颜色组数据
+ * @param {string} color 当前选中的颜色
+ * @param {string} colours 当前颜色组数据
+ * @ returns {Array<string>} 返回整理好的数组颜色
+ */
+export function findColorReset(color:string,colours:string):string{
+    let array = renderColors(colours);
+    if(array && array.length > 0){
+        let index = array.findIndex(a => a === color);
+        if(index !== -1){
+            array.splice(index,1);
+            array.unshift(color);
+        }
+    }
+    return array.join("/");
+}

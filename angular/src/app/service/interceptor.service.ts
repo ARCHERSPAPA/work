@@ -1,0 +1,121 @@
+import { Injectable } from '@angular/core';
+import {HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpResponse, HttpHeaderResponse, HttpErrorResponse} from '@angular/common/http';
+import {Observable,throwError} from "rxjs";
+// import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+import { mergeMap,catchError } from 'rxjs/operators';
+// import {Observable,mergeMap, catchError,ErrorObservable} from 'rxjs';
+import { Default } from "../model/constant";
+import {Router, ActivatedRoute} from '@angular/router';
+
+const configFilterUrls = ["//upload.qiniup.com/","/clouds/uptoken/typeId"]
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class InterceptorService  implements HttpInterceptor{
+
+    constructor(private router:Router,
+                private activatedRoute:ActivatedRoute){}
+
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        // throw new Error("Method not implemented.");
+        let auth = req.clone({
+            url:(req.url+"?v="+Default.VERSION)
+        });
+
+        if(filterUrl(req.url,configFilterUrls)){
+            return next.handle(auth).pipe(mergeMap((event: any) => {
+                // console.log(event);
+                if (event instanceof HttpResponse && event.status != 200) {
+                    // console.log(event.statusText);
+                    return throwError(event.statusText);
+                }
+                else if(event instanceof HttpErrorResponse && event.status !== 200){
+                    // console.log("error");
+                    return throwError(event.statusText);
+                }else if(event instanceof HttpHeaderResponse && event.status !== 200){
+                    // console.log("header");
+                    return throwError(event.statusText);
+                }
+                return Observable.create(observer => observer.next(event));
+            }))
+        }else{
+            return next.handle(auth).pipe(mergeMap((event: any) => {
+
+                    if (event instanceof HttpResponse && event.status != 200) {
+                        this.router.navigate(["/error"],{
+                            queryParams:{
+                                keyword:event.statusText
+                            },
+                            relativeTo: this.activatedRoute,
+                            skipLocationChange: true}
+                        );
+                        return throwError(event.statusText);
+                    }
+
+                    if(event instanceof HttpResponse && event.status == 200){
+
+                        if(event.url.indexOf("checkLogin") >= 0 && !event.body.data["isLogin"]){
+                            this.router.navigate(["/"]);
+                        }
+                        if(event.body.code == 108){
+                            this.router.navigate(["/error"],{
+                                queryParams:{
+                                    keyword:event.body.msg
+                                },
+                                relativeTo: this.activatedRoute,
+                                skipLocationChange: true}
+                            );
+                            return throwError(event.body.msg);
+                        }else if(event.body.code == 614){
+                            this.router.navigate(["/error"],{
+                                queryParams:{
+                                    keyword:event.body.msg
+                                },
+                                relativeTo: this.activatedRoute,
+                                skipLocationChange: true}
+                            );
+                            return throwError(event.body.msg);
+                        }
+                    }
+                    return Observable.create(observer => observer.next(event)); //请求成功返回响应
+                }),
+                catchError((error:any,caught:Observable<any>) => {   //请求失败处理
+                    if(error && error.statusText){
+                        this.router.navigate(["/error"],{
+                            queryParams:{
+                                keyword: this.getErrorMag(error.statusText)
+                            },
+                            relativeTo: this.activatedRoute,
+                            skipLocationChange: true}
+                        );
+                    }
+                    return throwError(error.statusText);
+                }))
+        }
+    }
+
+    getErrorMag(msg){
+            switch(msg){
+                case "Unknown Error":
+                    return "当前网络繁忙，请稍后再试";
+                case "Timeout Error":
+                    return "访问已超时，请稍后重试";
+                default:
+                    return "当前未登录或者登录已过期";
+            }
+    }
+
+}
+
+
+export function filterUrl(url,filters){
+    if(filters && filters.length > 0){
+        for(let f of filters){
+            if(f.indexOf(url) > -1) return true;
+        }
+    }
+    return false;
+}
+

@@ -1,0 +1,42 @@
+import { Injectable } from '@angular/core';
+import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router} from '@angular/router';
+import {Observable} from 'rxjs';
+import {UserService} from "./user.service";
+import {WarningService} from "./warning.service";
+import {Messages} from "../model/msg";
+
+@Injectable({
+  providedIn: 'root'
+})
+export class GuardService implements CanActivate {
+
+    constructor(private userInfo:UserService,
+                private warn:WarningService,
+                private router:Router) { }
+    canActivate(route: ActivatedRouteSnapshot,
+                state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+        //需要加载用户的公司是否已经审核通过在check login上面
+        if(this.userInfo.getCompanyState() >= 0 && this.userInfo.getCompanyState() < 2){
+            this.warn.onWarn(Messages.NOT_VALID);
+            this.router.navigate(["/rev/schedule/stay"]);
+        }
+        return !!this.userInfo.getCompanyId() && (this.userInfo.getCompanyState() === 2 || this.userInfo.getCompanyState() === 9);
+    }
+
+    saftyGuard(){
+        return !!this.userInfo.getCompanyId() && (this.userInfo.getCompanyState() === 2 || this.userInfo.getCompanyState() === 9);
+    }
+
+}
+
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DefendService implements CanActivate {
+    constructor(private userInfo:UserService){}
+    canActivate(route: ActivatedRouteSnapshot,
+                state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+        return !!this.userInfo.getCompanyId();
+    }
+}

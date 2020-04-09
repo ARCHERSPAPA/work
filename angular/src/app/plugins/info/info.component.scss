@@ -1,0 +1,167 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.info {
+  .info-header {
+    padding: 16px 24px;
+    border-radius: 4px 4px 0 0;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.65);
+  }
+  .info-title {
+    font-size: 16px;
+    line-height: 36px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .info-data {
+    width: 100%;
+    @include compatibility(box-sizing, border-box);
+  }
+  .info-user {
+    display: flex;
+  }
+
+  .info-content {
+    .list-group-rev {
+      width: 70%;
+      thead {
+        height: 350px;
+      }
+    }
+    .list-quick {
+      height: 350px;
+      overflow: auto;
+      flex: 1;
+      margin: 14px 0 0 18px;
+      &-title {
+        margin-bottom: 8px;
+      }
+    }
+
+    
+    tr th,
+    tr td {
+      font-size: 14px;
+      max-width: 30px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      a {
+        padding-right: 4px;
+        color: #007bff;
+      }
+    }
+   
+    .info-show {
+      width: 100%;
+      .info-simple,
+      .info-multi {
+        text-align: left;
+        font-size: 0;
+        li {
+          border: 1px solid #dedede;
+          margin: 1px 0;
+          p {
+            font-size: 12px;
+            margin: 0;
+            padding: 2px 5px;
+          }
+          span {
+            display: inline-block;
+            vertical-align: top;
+            font-size: 12px;
+            border-right: 1px solid #dedede;
+            width: 20%;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            @include ellipsis;
+            &:last-child {
+              border-right: 0;
+            }
+            &.w10 {
+              width: 10%;
+            }
+            &.w30 {
+              width: 30%;
+            }
+            &.w90 {
+              width: 90%;
+            }
+            .text {
+              width: 60%;
+              height: 100%;
+              border: 0;
+              display: inline-block;
+              text-indent: 10px;
+              outline: none;
+              font-size: 12px;
+            }
+            .fix {
+              width: 40%;
+              height: 100%;
+              display: inline-block;
+              vertical-align: top;
+            }
+            .del {
+              color: #f92650;
+            }
+          }
+        }
+      }
+    }
+    .info-btns {
+      width: 100%;
+      font-size: 0;
+      text-align: right;
+      margin-top: 24px;
+      .btn {
+        display: inline-block;
+        vertical-align: top;
+        font-size: 14px;
+        margin: 10px 20px;
+        padding: 3px 20px;
+        outline: none;
+        border: 1px solid #dedede;
+        cursor: pointer;
+        color: #fff;
+        &.btn-default {
+          @include hover(#b4b4b4);
+        }
+        &.btn-primary {
+          @include hover(#0a8ddf);
+        }
+      }
+    }
+  }
+  .info-msg {
+    color: #f92650;
+    font-size: 12px;
+    text-align: center;
+  }
+  .info-user {
+    .list-group-rev {
+      .list-items {
+        width: 70%;
+        float: left;
+      }
+      .list-quick {
+        width: 28%;
+        margin: 0 1%;
+        float: right;
+      }
+    }
+  }
+}
+.btns {
+  margin: 24px -16px 1px -16px;
+  text-align: right;
+  border-top: 1px solid #dedede;
+  padding-top: 10px;
+  button{
+    margin-right: 24px;
+  }
+  button:first-child {
+    margin-right: 8px;
+  }
+}

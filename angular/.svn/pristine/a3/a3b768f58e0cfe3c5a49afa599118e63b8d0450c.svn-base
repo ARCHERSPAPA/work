@@ -1,0 +1,251 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.post-list {
+  tr th,
+  tr td {
+    a {
+      padding-right: 4px;
+      color: #1890ff;
+    }
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  tr th,
+  tr td:not(.w10) {
+    max-width: 60px;
+  }
+
+  tr td {
+    font-size: 14px;
+  }
+
+  .list-head {
+    &:after {
+      content: "";
+      clear: both;
+      zoom: 1;
+      visibility: hidden;
+      display: block;
+    }
+    .search-bar {
+      margin-bottom: 24px;
+      width: 300px;
+      height: 30px;
+      float: right;
+      font-size: 0;
+      text-align: right;
+      .text {
+        display: inline-block;
+        vertical-align: top;
+        width: 200px;
+        height: 30px;
+        outline: none;
+        font-size: 12px;
+        border: 1px solid #dedede;
+        margin-right: 2%;
+        text-indent: 10px;
+        @include border;
+      }
+      .btn {
+        display: inline-block;
+        vertical-align: top;
+        width: 20%;
+        line-height: 18px;
+        outline: none;
+        border: 0;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        &.btn-primary {
+          @include hover(#0a8ddf);
+        }
+      }
+    }
+  }
+  .list-items {
+    margin-top: 20px;
+    &:after {
+      @include clear;
+    }
+    .item-content {
+      margin: 1rem 0;
+      ul {
+        margin-top: -1px;
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+    .item-head,
+    .item-body {
+      width: 100%;
+      height: 30px;
+      line-height: 30px;
+      display: block;
+      text-align: center;
+      border: 1px solid #dedede;
+      margin: 0;
+      li {
+        display: inline-block;
+        vertical-align: top;
+        width: 40%;
+        font-size: 12px;
+        word-break: break-all;
+        border-right: 1px solid #dedede;
+        @include ellipsis;
+        @include compatibility(box-sizing, border-box);
+      }
+      &.item-head {
+        background: #f2f2f2;
+        li {
+          font-weight: 600;
+          &:last-child {
+            width: 20%;
+            border: 0;
+          }
+        }
+      }
+      &.item-body {
+        li:last-child {
+          width: 20%;
+          border-right: 0;
+          font-size: 0;
+          a {
+            display: inline-block;
+            vertical-align: top;
+            font-size: 12px;
+            color: #1890ff;
+            margin-right: 5px;
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.meal_modal {
+  .post_inp {
+    margin-bottom: 0;
+    position: relative;
+    .count {
+      position: absolute;
+      bottom: -20px;
+      right: 10px;
+    }
+  }
+  
+  .label {
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+  .declaration {
+    vertical-align: top;
+    margin-right: 10px;
+  }
+  .btns {
+    margin: 24px -24px -11px -24px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+      margin-right: 24px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }
+  .text {
+    width: 50%;
+  }
+}
+
+.post-role {
+  h3 {
+    font-weight: 500;
+    font-size: 13px;
+    span {
+      display: inline-block;
+      vertical-align: bottom;
+      font-size: 15px;
+    }
+  }
+  .btns {
+    width: 100%;
+    font-size: 0;
+    text-align: center;
+    .btn {
+      display: inline-block;
+      vertical-align: top;
+      font-size: 14px;
+      margin: 10px 20px;
+      padding: 3px 20px;
+      outline: none;
+      border: 1px solid #dedede;
+      cursor: pointer;
+      color: #fff;
+      &.btn-default {
+        @include hover(#b4b4b4);
+      }
+      &.btn-primary {
+        @include hover(#0a8ddf);
+        &.disabled {
+          background: rgb(222, 222, 222);
+          color: #f2f2f2;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+/***role scss***/
+.post-role {
+  .post-head {
+    font-family: "PingFang SC";
+    font-weight: 400;
+    line-height: 46px;
+    font-size: 38px;
+    color: rgba(0, 0, 0, 0.85);
+  }
+  .post-desc {
+    font-size: 14px;
+    font-family: "PingFang SC";
+    font-weight: 400;
+    line-height: 22px;
+    color: rgba(0, 0, 0, 0.65);
+  }
+  .post-sub {
+    font-size: 16px;
+    font-family: "PingFang SC";
+    font-weight: bold;
+    line-height: 24px;
+    color: rgba(0, 0, 0, 0.85);
+  }
+}
+.post-role-tree {
+  margin-top: 24px;
+  padding-bottom: 20px;
+}
+.tree-dl {
+  @include compatibility(user-select, none);
+  .tree-dd {
+    margin: 5px 20px;
+  }
+  .tree-li {
+    margin: 5px 20px;
+    .tree-item {
+      display: inline-block;
+      margin: 5px 10px 5px 0;
+    }
+  }
+}
+.del {
+  color: #007bff !important;
+  &:hover {
+    color: #0056b3 !important;
+    text-decoration: underline !important;
+  }
+}

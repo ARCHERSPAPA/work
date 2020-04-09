@@ -1,0 +1,37 @@
+<div class="ant-modal-content">
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+    <div class="ant-modal-header">
+        <div class="ant-modal-title">{{name}}</div>
+    </div>
+    <div class="ant-modal-body clearfix" style="width:100%;height:340px;overflow:hidden;">
+        <p class="error" *ngIf="msg" style="text-align: center;"><span>{{msg}}</span></p>
+        <div class="rev-img-cropper">
+            <img-cropper #cropper [image]="data" [settings]="cropperSettings" (onCrop)="cropped($event)"></img-cropper>
+        </div>
+        <!--<div class="rev-img-cnt">-->
+            <!--<div class="rev-img-btn">-->
+            <!--<button type="button" class="ant-btn ant-btn-primary">选择图片</button>-->
+            <!--<input type="file" (change)="fileChangeListener($event)" accept="image/jpeg,image/png,image/jpg"/>-->
+            <!--</div>-->
+            <!--<div class="rev-img-show" *ngIf="data.image">-->
+                <!--<img [src]="data.image"/>-->
+            <!--</div>-->
+            <!--<dl *ngIf="data.image">-->
+            <!--<dt>当前图片简介</dt>-->
+            <!--<dd>图片宽度:{{cropperWidth}}</dd>-->
+            <!--<dd>图片高度:{{cropperHeight}}</dd>-->
+            <!--</dl>-->
+        <!--</div>-->
+    </div>
+    <div class="ant-modal-footer">
+        <div class="rev-btn">
+            <button type="button" class="ant-btn ant-btn-primary">选择图片</button>
+            <input type="file" (change)="fileChangeListener($event)" accept="image/jpeg,image/png,image/jpg"/>
+        </div>
+        <div class="rev-btn">
+            <button type="button" class="ant-btn ant-btn-primary" [disabled]="isClick" (click)="onClickImage()">确定</button></div>
+    </div>
+    <canvas id="canvas"></canvas>
+</div>

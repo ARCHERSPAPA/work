@@ -1,0 +1,149 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.info{
+    height: 100%;
+    background: #f5f5f5;
+    .info-head {
+        width: 100%;
+        background: #4c5a5e;
+        .head-wrapper {
+            width: 1200px;
+            height: 80px;
+            margin: 0 auto;
+            .logo {
+                float: left;
+                width: 400px;
+                height: 80px;
+                background: url("./../../rev/head/sub.png") no-repeat left center;
+            }
+        }
+    }
+    .info-content{
+        width: 1200px;
+        margin: 0 auto;
+        h3{
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            padding: 48px 0;
+            background: #fff;
+        }
+    }
+}
+.user-info{
+    width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+    min-height: calc(80vh - 80px);
+    background: transparent;
+    .head{
+        width: 100%;
+        background: transparent;
+    }
+    .content{
+        background: #fff;
+        .form{
+            width: 864px;
+            padding-bottom: 72px;
+            margin: 0 auto;
+            li{
+                width: 100%;
+                font-size: 0;
+                &.title{
+                    font-size: 14px;
+                    height: 40px;
+                    line-height: 40px;
+                    text-align: center;
+                    margin-bottom: 50px;
+                }
+                &.btns{
+                    margin:20px 0  40px 0;
+                    display: block;
+                    text-align: center;
+                    .btn {
+                        padding: 3px 20px;
+                        letter-spacing: 2px;
+                        font-size: 14px;
+                        margin-right: 50px;
+                        outline: none;
+                        border: 0;
+                        cursor: pointer;
+                        color: #fff;
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                        &.btn-primary {
+                            @include hover(#0a8ddf);
+                        }
+                        &.btn-default {
+                            @include hover(#999)
+                        }
+                        &.disabled{
+                            cursor: not-allowed;
+                            color: #666;
+                            @include  hover(#dedede);
+                        }
+                    }
+                }
+                .label,.inp{
+                    display: inline-block;
+                    vertical-align: top;
+                    font-size: 13px;
+                    line-height: 26px;
+                }
+                .label{
+                    width: 30%;
+                    padding-right: 3%;
+                    text-align: right;
+                }
+                .inp{
+                    width: 50%;
+                    .text{
+                        display: inline-block;
+                        width: 100%;
+                        border: 1px solid #dedede;
+                        text-indent: 10px;
+                        outline: none;
+                        font-size: 14px;
+                        margin-bottom: 10px;
+                        @include border;
+                        &.code{
+                            width: 48%;
+                        }
+                    }
+                    .send{
+                        width: 50%;
+                        display: inline-block;
+                        color: #fff;
+                        text-indent: 10px;
+                        line-height: 30px;
+                        cursor: pointer;
+                        outline: none;
+                        border: 0;
+                        @include  hover(#0a8ddf);
+                        &.code{
+                            width: 50%;
+                            margin-left: 2%;
+                        }
+                        &.disabled{
+                            cursor: not-allowed;
+                            color: #666;
+                            @include  hover(#dedede);
+                        }
+                    }
+                    p{
+                        width: 100%;
+                        font-size: 12px;
+                        color: #bbb;
+                        line-height: 20px;
+                    }
+                }
+            }
+        }
+        .ant-form-item{
+            margin: 0;
+        }
+    }
+}

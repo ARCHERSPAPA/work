@@ -1,0 +1,70 @@
+<div class="detail-assess">
+    <div *ngIf="assessments && assessments.length > 0">
+        <div *ngFor="let assess of assessments">
+            <div class="assess-list">
+                <ul>
+                    <li class="assess-item" *ngIf="assess.evaTime">
+                        <p class="item-head">
+                            <span class="item-name">客户</span>
+                            <span class="item-date" *ngIf="assess.evaTime">{{assess.evaTime|date:'yyyy-MM-dd HH:mm'}}</span>
+                        </p>
+                        <p class="item-content">项目评价：<span>{{getEvaluateLevel(assess.evaLevel)}}</span></p>
+                        <p class="item-content" *ngIf="assess.content">{{assess.content}}</p>
+                        <p class="item-imgs" *ngIf="assess.imgs && assess.imgs.length > 0">
+                            <span class="item-img" *ngFor="let img of assess.imgs"
+                                  (click)="openModal(img.imgUrl)" [hidden]="img.imgType === 1"><img [src]="img.imgUrl"/></span>
+                        </p>
+                    </li>
+                    <li class="assess-item" *ngIf="assess.replyStatus === 1">
+                        <p class="item-head">
+                            <span class="item-name">公司回复</span>
+                            <span class="item-date" *ngIf="assess.replyTime">{{assess.replyTime|date:'yyyy-MM-dd HH:mm'}}</span>
+                        </p>
+                        <p class="item-content" *ngIf="assess.sellerReply">{{assess.sellerReply}}</p>
+                    </li>
+                    <li class="assess-item" *ngIf="assess.addEvaTime">
+                        <p class="item-head">
+                            <span class="item-name">客户</span>
+                            <span class="item-date" *ngIf="assess.evaTime">{{assess.addEvaTime|date:'yyyy-MM-dd HH:mm'}}</span>
+                        </p>
+                        <p class="item-content">追加评价</p>
+                        <p class="item-content" *ngIf="assess.addContent">{{assess.addContent}}</p>
+                        <p class="item-imgs" *ngIf="assess.imgs && assess.imgs.length > 0">
+                            <span class="item-img" *ngFor="let img of assess.imgs"
+                                  (click)="openModal(img.imgUrl)" [hidden]="img.imgType === 0"><img [src]="img.imgUrl"/></span>
+                        </p>
+                    </li>
+                </ul>
+            </div>
+            <div class="assess-reply" *ngIf="assess.replyStatus === 0">
+                <label>回复</label>
+                <div class="assess-inp">
+                    <textarea class="assess-inp" nz-input [(ngModel)]="reply" maxlength="100"
+                              placeholder="请输入回复信息（输入在10~100字符之间）"></textarea>
+                    <span class="assess-count" *ngIf="reply && reply.length > 0"><span class="ant-btn-danger">{{reply.length}}</span>/100</span>
+                    <span class="btns"><button nz-button [nzType]="'primary'" type="button" style="margin-top: 24px;"
+                                               [ngClass]="{'disabled':!reply || (reply && reply.length < 10)}"
+                                               [disabled]="!reply || (reply && reply.length.length < 10)"
+                                               (click)="submitReply(assess.id)">提交</button></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!assessments || (assessments && assessments.length == 0)">
+        <p>暂无数据信息显示</p>
+    </div>
+    <!--<div class="page" *ngIf="assessments && assessments.length > 0">-->
+        <!--<ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>-->
+        <!--<nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"-->
+                       <!--(nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>-->
+    <!--</div>-->
+</div>
+
+<!--放大图片-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>
+

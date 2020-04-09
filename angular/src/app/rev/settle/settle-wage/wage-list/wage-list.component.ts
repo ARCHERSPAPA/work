@@ -1,0 +1,347 @@
+import {Component, OnInit} from '@angular/core';
+import {sideAnimate} from "../../../../animation/transform.component";
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Default} from "../../../../model/constant";
+import {Messages} from "../../../../model/msg";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import * as UserValidate from "../../../../validate/user-validate";
+import {btoa, getWageState, getWageType} from "../../../../model/methods";
+
+@Component({
+    selector: 'rev-settle-wage-list',
+    templateUrl: './wage-list.component.html',
+    styleUrls: ['../../../detail/list.scss', '../../../detail/detail.scss', './../../settle.component.scss', './wage-list.component.scss'],
+    animations: [
+        sideAnimate
+    ]
+})
+export class SettleWageListComponent implements OnInit {
+
+    public title: string;
+    public switch: string;
+    public radioSwitch = [{
+        key: 1,
+        text: '待结算'
+    }, {
+        key: 0,
+        text: '结算记录'
+    }];
+    public costVisible: boolean = false;
+
+    //分页
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    public costState: number = 1;
+
+    public wageList: any;
+    public allChecked = false;
+    /**
+     *@single:单个 all:全部
+     *
+     **/
+    public settleType: string = "single";
+    /*查询*/
+    public searchType:string;
+    public settleIds: Array<any> = [];
+    public costAccount: string = "";
+
+    public costForm: FormGroup;
+
+    constructor(private request: RequestService,
+                private warn: WarningService,
+                private fb: FormBuilder) {
+    }
+
+    ngOnInit() {
+
+        this.title = "工费结算";
+        this.switch = "left";
+        this.allChecked = this.updateChecked();
+
+        this.costForm = this.fb.group({
+            costAccount: ['', [
+                Validators.maxLength(300),
+                // UserValidate.ValidateAccount
+            ]]
+        })
+
+        this.changeData();
+    }
+
+    handleSwitch(status: number) {
+        this.costState = status;
+        // console.log( this.costState)
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    changeData(type=false) {
+        let pageNo
+        if (type) {
+            pageNo = 1
+        } else {
+            pageNo = this.pageNo
+        }
+        let that = this;
+        this.allChecked = false;
+        that.request.doPost({
+            url: "listLabourExpensesSettle",
+            data: {
+                pageNo: pageNo,
+                pageSize: that.pageSize,
+                type: that.costState,
+                searchName:this.searchType
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.wageList = res.data.pageSet;
+                    this.total = res.data.total;
+                    // this.text = '总计\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0￥'+that.getWageTotal(res.data.total);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    selectCost(state) {
+        this.costState = state;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.pageSize = Default.PAGE.PAGE_SIZE;
+        this.changeData();
+    }
+
+    getWageState(s) {
+        return getWageState(s);
+    }
+
+    getWageType(t) {
+        return getWageType(t);
+    }
+
+    getWageTotal(total) {
+        if (!isNaN(total) && total > 0) {
+            return total.toFixed(2);
+        }
+        return 0;
+    }
+
+    updateAllChecked() {
+        if (this.allChecked) {
+            if (this.wageList && this.wageList.length > 0) {
+                this.wageList = this.wageList.map(item => {
+                    return {
+                        ...item,
+                        checked: true
+                    };
+                });
+            }
+        } else {
+            if (this.wageList && this.wageList.length > 0) {
+                this.wageList = this.wageList.map(item => {
+                    return {
+                        ...item,
+                        checked: false
+                    };
+                });
+            }
+
+        }
+    }
+
+    updateSingleChecked() {
+        if (this.wageList && this.wageList.length > 0) {
+            if (this.wageList.every(item => item.checked === false)) {
+                this.allChecked = false;
+            } else if (this.wageList.every(item => item.checked === true)) {
+                this.allChecked = true;
+            } else {
+                this.allChecked = false;
+            }
+        }
+
+    }
+
+    updateChecked() {
+        if (this.wageList && this.wageList.length > 0) {
+            this.wageList.map(item => {
+                if (!item.checked) return false;
+            })
+            return true;
+        }
+
+    }
+
+    showCostModal(...args) {
+        this.costVisible = true;
+        this.settleType = args[0];
+        if (args && args[1]) {
+            this.settleIds = [args[1]];
+        }
+        if (this.settleType === "all") {
+            this.settleIds = this.getIds();
+        } else if (this.settleType === "single") {
+            this.removeIds();
+        }
+    }
+
+    costCancel() {
+        this.costVisible = false;
+        this.costAccount = null;
+    }
+
+    costOk() {
+        if (this.settleIds && this.settleIds.length > 0 && this.costForm.valid) {
+            let bankName = this.costForm.value.costAccount;
+            this.request.doPost({
+                url: "submitLabourExpensesSettle",
+                data: {
+                    ids: this.settleIds,
+                    bankName: bankName
+                },
+                success: (res => {
+                    this.costCancel();
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.pageNo = Default.PAGE.PAGE_NO;
+                        this.changeData();
+                        this.allChecked = false;
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        } else {
+            this.warn.onError(Messages.EMPTY);
+        }
+    }
+
+    //导出选中的行数据
+    export(event) {
+        let str = "<tr><td>申请人</td><td>部门</td><td>工种</td><td>金额</td><td>工长</td><td>楼盘</td><td>项目总额</td><td>申请时间</td><td>类型</td><td>部门审核人</td></tr>";
+        for (let i = 0; i < this.wageList.length; i++) {
+            if (this.wageList[i].checked) {
+                str += "<tr>";
+                str += "<td>" + this.wageList[i].workerName + "</td>";
+                str += "<td>" + this.wageList[i].departmentNames + "</td>";
+                str += "<td>" + this.wageList[i].workerType + "</td>";
+                str += "<td>" + this.wageList[i].price + "</td>";
+                str += "<td>" + this.wageList[i].memberName + "</td>";
+                str += "<td>" + this.wageList[i].customerHouseAddress + "</td>";
+                str += "<td>" + this.wageList[i].finalPrice + "</td>";
+                str += "<td>" + this.format(this.wageList[i].submitTime, 'yyyy-MM-dd hh:mm') + "</td>";
+                str += "<td>" + this.getWageType(this.wageList[i].type) + "</td>";
+                str += "<td>" + this.wageList[i].departmentAuditName + "</td>";
+                str += "</tr>";
+            }
+        }
+        ;
+        let workSheet = "工费审核数据";
+        // let uri = "data:application/vnd.ms-excel;base64,";
+        let uri = "data:application/octet-stream;utf-8,";
+        //   let template = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+        // xmlns:x="urn:schemas-microsoft-com:office:excel"
+        // xmlns="http://www.w3.org/TR/REC-html40">
+        // <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+        //   <x:Name>${workSheet}</x:Name>
+        //   <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+        //   </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        //   </head><body><table class="excelTable">${str}</table></body></html>`;
+
+        /**
+         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+
+         */
+
+        let template = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+      <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+      <head>
+      <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+       <x:Name>${workSheet}</x:Name>
+       <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+       </x:ExcelWorksheets></x:ExcelWorkbook></xml>
+      <![endif]-->
+       </head>
+       <body>
+       <table class="excelTable">${str}</table>
+       </body>
+       </html>`;
+
+        let blob = new Blob([template], {type: "application/vnd.ms-excel"});
+        let link = document.createElement('a');
+        link.download = workSheet + ".xls";
+        link.style.display = 'visibility:hidden';
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // base64(s) {
+    //     return window.btoa(unescape(encodeURIComponent(s)));
+    // }
+
+    format(date, fmt) {
+        let that = new Date(date);
+        var o = {
+            "M+": that.getMonth() + 1,                 //月份
+            "d+": that.getDate(),                    //日
+            "h+": that.getHours(),                   //小时
+            "m+": that.getMinutes(),                 //分
+            "s+": that.getSeconds()
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (that.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+
+    getIds() {
+        let ids = [];
+        if (this.wageList && this.wageList.length > 0) {
+            this.wageList.map(item => {
+                if (item.checked) ids.push(item.id);
+            })
+        }
+        ;
+        return ids;
+    }
+
+    removeIds() {
+        if (this.wageList && this.wageList.length > 0) {
+            this.allChecked = false;
+            this.wageList = this.wageList.map(item => {
+                return {
+                    ...item,
+                    checked: false
+                };
+            });
+        }
+    }
+
+    showBtnByData() {
+        if (this.wageList && this.wageList.length > 0) {
+            for (let wage of this.wageList) {
+                if (wage.checked) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * url加密
+     * @param {string} id
+     * @returns {any}
+     */
+    btoa(id:string){
+        return btoa(id);
+    }
+
+
+}

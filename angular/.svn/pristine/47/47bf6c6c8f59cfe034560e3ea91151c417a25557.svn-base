@@ -1,0 +1,51 @@
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import {DepartService} from "../../../service/depart.service";
+
+@Component({
+  selector: 'rev-info-depart-tree',
+  templateUrl: './info-depart-tree.component.html',
+  styleUrls: ['./info-depart-tree.component.scss']
+})
+export class InfoDepartTreeComponent implements OnInit {
+  @Input() departTree:any;
+  @Input() departDefault:any;
+  @Output() selectDepartHandler:EventEmitter<any> = new EventEmitter<any>();
+
+  public selectId:number;
+  public showDepart;
+  public lock=true;
+  constructor(private depart:DepartService) {
+
+  }
+
+  ngOnInit() {
+      // setTimeout(()=>{
+      //     this.departTree = this.depart-tree.getDepartList();
+      // },1000);
+      // this.showDepart = this.depart.getSelectDepartByName()
+      if(this.departDefault && this.departTree){
+        this.showDepart=this.departDefault['departmentId'];
+      }
+    
+  }
+  
+  nzClick($event){
+        this.depart.setSelectDepartByName($event);
+
+  }
+
+  ngDoCheck(){
+    if(this.departDefault && this.departTree && this.lock){
+      this.showDepart=this.departDefault['departmentId'];
+      this.nzClick(this.showDepart);
+      this.lock=false;
+    }
+
+  }
+
+  // ngOnDestroy(){
+  //     console.log("destroy==="+this.selectId);
+  //     this.selectId = null;
+  // }
+
+}

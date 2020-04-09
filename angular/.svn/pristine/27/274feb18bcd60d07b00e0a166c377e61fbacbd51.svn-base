@@ -1,0 +1,587 @@
+import {Component, OnInit} from '@angular/core';
+import {UserService} from "../../../../service/user.service";
+import * as UserValidate from "../../../../validate/user-validate";
+import {RequestService} from "../../../../service/request.service";
+import {Messages} from "../../../../model/msg";
+import {WarningService} from "../../../../service/warning.service";
+import {FormGroup, FormBuilder, Validators, FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {Default} from "../../../../model/constant";
+import {atob} from "../../../../model/methods";
+@Component({
+    selector: 'rev-temp-whole-edit',
+    templateUrl: './temp-whole-edit.component.html',
+    styleUrls: ['./../../template.component.scss', './temp-whole-edit.component.scss']
+})
+export class TempWholeEditComponent implements OnInit {
+
+    public wholeForm: FormGroup;
+
+    public sid: string;
+    public companyId: number;
+    //主要内容修改(参数)
+    public isVisible: boolean = false;
+    public packageName: string;
+    public remark: string;
+
+    public pkg: any;
+    //说明
+    public info: string;
+
+    //数据列表
+    public dataSource: Array<any> = [];
+
+    //价格数据
+    public priceSource: Array<any> = [];
+    public total:number = 0;
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public loading: boolean = false;
+
+    //修改版本信息
+    public isVersionVisible: boolean = false;
+    public versionList: Array<any> = [];
+    public typeForm: FormGroup;
+    public selectType: any;
+
+    //大项的添加或者修改
+    public isBranchVisible: boolean = false;
+    public branchForm: FormGroup;
+    public branchName: string;
+    public branchTitle: string;
+    public branchItem: any;
+
+    //一口价添加或者修改
+    public priceForm: FormGroup;
+    public isPriceVisible: boolean = false;
+    public priceTitle: string = "新建整装价格范围";
+    public price: number;
+    public areaStart: number;
+    public areaEnd: number;
+    public hxArray: Array<any> = [];
+    public priceItem: any;
+
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private fb: FormBuilder,
+                private warn: WarningService,
+                private user: UserService) {
+    }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["sid"]) {
+                this.sid = atob(params["sid"]);
+                this.loadData(this.sid);
+            }
+        });
+
+        //套餐参数设置
+        this.wholeForm = this.fb.group({
+            packageName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]],
+            remark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+
+        //版本修改或者增加
+        this.typeForm = this.fb.group({
+            selectType: ['', [
+                Validators.required
+            ]]
+        });
+
+        //添加或者修改大项名称
+        this.branchForm = this.fb.group({
+            branchName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+
+        //添加或者修改一口价
+        this.priceForm = this.fb.group({
+            price: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice,
+            ]
+            ],
+            areaStart: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            areaEnd: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+        });
+    }
+
+
+    /**
+     * 加载头部基础数据
+     * @param sid
+     */
+    loadData(sid) {
+        let that = this;
+        if (sid) {
+            that.req.doPost({
+                url: "packageInfo",
+                data: {id: sid},
+                success: (res => {
+                    if (res && res.code === 200) {
+                        // res.data.pkg.roomType = JSON.parse(res.data.pkg.roomType);
+                        that.pkg = res.data.pkg;
+                        if (res.data && res.data.pkg && res.data.pkg.offerExplain) {
+                            that.info = res.data.pkg.offerExplain;
+                        }
+                        if (res.data && res.data.pkgInfoVo && res.data.pkgInfoVo.length > 0) {
+                            that.dataSource = res.data.pkgInfoVo;
+                            that.dataSource.forEach(data => {
+                                data["expand"] = true;
+                            })
+                        } else {
+                            that.dataSource = [];
+                        }
+                        that.setTitleParams(res.data.pkg);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    /**
+     * 加载价格范围数据
+     * @param sid
+     */
+    loadPriceData(sid) {
+        if (sid) {
+            this.loading = true;
+            this.req.doPost({
+                url: "priceList",
+                data: {mouldPkgId: this.sid},
+                success: (res => {
+                    this.loading = false;
+                    if (res && res.code === 200) {
+                        this.priceSource = res.data;
+                        this.total = res.data.length;
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    showModal(data) {
+        this.isVisible = true;
+        this.setTitleParams(data);
+    }
+
+    setTitleParams(data) {
+        this.packageName = data.packageName;
+        this.remark = data.remark;
+    }
+
+    // getHxArray(roomList) {
+    //     if (roomList && roomList.length > 0) {
+    //         for (let i = 0; i < roomList.length; i++) {
+    //             let control = {i, room: `room${i}`, bath: `bath${i}`};
+    //             let index = this.hxArray.push(control);
+    //             this.wholeForm.addControl(this.hxArray[index - 1].room, new FormControl(roomList[i].room, [
+    //                 Validators.required,
+    //                 Validators.max(99)
+    //             ]));
+    //             this.wholeForm.addControl(this.hxArray[index - 1].bath, new FormControl(roomList[i].toilet, [
+    //                 Validators.required,
+    //                 Validators.max(99)
+    //             ]));
+    //         }
+    //     } else {
+    //         this.addHx();
+    //     }
+    // }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.wholeForm.reset();
+    }
+
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        if (that.wholeForm.valid && that.sid) {
+            let params = that.wholeForm.value;
+            params["companyId"] = that.user.getCompanyId();
+            params["id"] = that.sid;
+            params["packageType"] = 4;
+            that.req.doPost({
+                url: "packageUpd",
+                data: params,
+                success: (res => {
+                    that.handleCancel();
+                    if (res && res.code == 200) {
+                        that.loadData(that.sid);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    /**
+     * 新增户型单元
+     */
+    addHx() {
+        let id = (this.hxArray.length > 0) ? this.hxArray[this.hxArray.length - 1].id + 1 : 0;
+        let control = {id, room: `room${id}`, bath: `bath${id}`};
+        let index = this.hxArray.push(control);
+        this.priceForm.addControl(this.hxArray[index - 1].room, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+        this.priceForm.addControl(this.hxArray[index - 1].bath, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+    }
+
+    /**
+     * 删除户型
+     * @param {number} index
+     */
+    delHx(control: any, index: number) {
+        if (this.hxArray.length > 0) {
+            this.priceForm.removeControl(control.room);
+            this.priceForm.removeControl(control.bath);
+            this.hxArray.splice(index, 1);
+        }
+    }
+
+    /**
+     * 获取当前数组对象信息
+     * @param values
+     * @returns {any[]}
+     */
+    getHxByParams(values) {
+        let arr = [];
+        if (values) {
+            this.hxArray.forEach(item => {
+                arr.push(values[item.room] + '室' + values[item.bath] + '卫');
+            })
+        }
+        return arr;
+    }
+
+    //拉取版本信息
+    loadVersionData(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "mouldNameList",
+                data: {
+                    versionType: 4
+                },
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            })
+        })
+    }
+
+    showVersionModal() {
+        this.isVersionVisible = true;
+        if (this.versionList && this.versionList.length == 0) {
+            this.loadVersionData().then(res => {
+                this.versionList = res;
+                this.initSelectType(this.versionList);
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            });
+        } else {
+            this.initSelectType(this.versionList);
+        }
+    }
+
+    initSelectType(list) {
+        if (list && list.length > 0 &&
+            this.pkg && this.pkg.id > 0) {
+            let type = list.filter(item => item.id === this.pkg.versionId);
+            if (type && type.length > 0) {
+                this.selectType = type[0];
+            }
+        }
+    }
+
+    handleVersionCancel() {
+        this.isVersionVisible = false;
+        this.typeForm.reset();
+    }
+
+    handleVersionOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        if (that.typeForm.valid) {
+            let params = {
+                id: that.sid,
+                versionName: that.typeForm.value.selectType.versionName,
+                versionId: that.typeForm.value.selectType.id
+            };
+            that.req.doPost({
+                url: "packageUpd",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.handleVersionCancel();
+                        that.loadData(that.sid);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    /**
+     * 添加或者修改大项（type=>1:添加，2：修改）
+     * @param {number} type
+     */
+    showBranchModal(type: number = 1, ...args) {
+        this.isBranchVisible = true;
+        this.branchTitle = (type === 1) ? "添加大项" : "修改大项";
+        if (args && args.length > 0) {
+            this.branchItem = args[0];
+            this.branchName = this.branchItem.projectName;
+        } else {
+            this.branchItem = null;
+        }
+
+    }
+
+    handleBranchOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        if (that.branchForm.valid) {
+            let params = {};
+            if (that.branchItem && that.branchItem.id) {
+                params = {
+                    id: that.branchItem.id,
+                    projectName: that.branchForm.value.branchName
+                }
+            } else {
+                params = {
+                    projectName: that.branchForm.value.branchName,
+                    versionType: 4,
+                    companyId: that.user.getCompanyId(),
+                    packageId: that.sid
+                };
+            }
+            that.req.doPost({
+                url: (that.branchItem && that.branchItem.id > 0) ? "packageInfoItemUpdate" : "packageInfoParentAdd",
+                data: params,
+                success: (res => {
+                    that.handleBranchCancel();
+                    if (res && res.code == 200) {
+                        that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.loadData(that.sid);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+
+        }
+    }
+
+    handleBranchCancel() {
+        this.isBranchVisible = false;
+        this.branchForm.reset();
+    }
+
+    //删除小项
+    delBranchItem(id: number) {
+        if (id) {
+            this.req.doPost({
+                url: "packageInfoRemove",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadData(this.sid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    //保存说明
+    handleSaveExplain() {
+        if (this.sid) {
+            this.req.doPost({
+                url: "offerExplainUpd",
+                data: {mouldPkgId: this.sid, offerExplain: this.info.trim()},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    selectChange(e: any) {
+        if (e.index === 1) {
+            if (this.priceSource && this.priceSource.length == 0) {
+                this.loadPriceData(this.sid);
+            }
+        }
+    }
+
+    /**
+     * 操作
+     * @param type
+     * @param id
+     * @param args args[0]当前下标,args[1]上移为true,下移为false
+     */
+    handleOperate(type, id, ...args) {
+        let params = {id: id};
+        if (args && args.length > 0) {
+            if(args[1]){
+                params["toId"] = this.priceSource[(this.pageNo-1)*this.pageSize+args[0]-1].id
+            }else{
+                params["toId"] = this.priceSource[(this.pageNo-1)*this.pageSize+args[0]+1].id
+            }
+        }
+        if (id) {
+            this.loading = true;
+            this.req.doPost({
+                url: this.getUrlByType(type),
+                data: params,
+                success: (res => {
+                    this.loading = false;
+                    if (res && res.code == 200) {
+                        this.loadPriceData(this.sid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    getUrlByType(type) {
+        switch (type) {
+            //价格置顶
+            case "stick":
+                return "priceSortUdp";
+            case "delete":
+                return "priceDelete";
+            case "sort":
+                return "priceSortUdp";
+        }
+    }
+
+    showPriceModal(...args) {
+        this.isPriceVisible = true;
+        this.priceForm.reset();
+        if (args && args.length > 0) {
+            this.priceItem = args[0];
+            this.priceTitle = "编辑整装价格范围";
+            this.price = this.priceItem.price;
+            this.areaStart = this.priceItem.houseArea_start;
+            this.areaEnd = this.priceItem.houseArea_end;
+            this.getHxArray(this.priceItem.roomTypeList);
+        } else {
+            this.addHx();
+            this.priceTitle = "新建整装价格范围";
+        }
+    }
+
+    getHxArray(roomList) {
+        if (roomList && roomList.length > 0) {
+            for (let i = 0; i < roomList.length; i++) {
+                let control = {i, room: `room${i}`, bath: `bath${i}`};
+                let index = this.hxArray.push(control);
+                this.priceForm.addControl(this.hxArray[index - 1].room, new FormControl(roomList[i].room, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+                this.priceForm.addControl(this.hxArray[index - 1].bath, new FormControl(roomList[i].toilet, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+            }
+        } else {
+            this.addHx();
+        }
+    }
+
+    handlePriceCancel() {
+        this.isPriceVisible = false;
+        this.delHx(this.hxArray[0], 0);
+        this.hxArray = [];
+        this.price = null;
+        this.areaStart = null;
+        this.areaEnd = null;
+        this.priceItem = null;
+    }
+
+    handlePriceOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        if (that.priceForm.valid && that.sid) {
+            if (Number(that.areaStart) < Number(that.areaEnd)) {
+                let params = {
+                    price: that.price,
+                    houseArea_start: that.areaStart,
+                    houseArea_end: that.areaEnd,
+                    roomType: that.getHxByParams(that.priceForm.value),
+                    mouldPkgId: that.sid
+                };
+                if(this.priceItem && this.priceItem.id){
+                    params["id"] = this.priceItem.id;
+                }
+
+                that.req.doPost({
+                    url: "packagePriceUpd",
+                    data: params,
+                    success: (res => {
+                        that.handlePriceCancel();
+                        if (res && res.code == 200) {
+                            that.loadPriceData(that.sid);
+                        } else {
+                            that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            } else {
+                that.warn.onMsgWarn(Messages.AREAS);
+            }
+        }
+    }
+
+
+}
