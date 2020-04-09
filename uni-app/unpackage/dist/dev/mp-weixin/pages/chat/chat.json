@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "消息详情",
+  "usingComponents": {
+    "chat-item": "/components/chat-item/chat-item",
+    "chat-input": "/components/chat-input/chat-input"
+  }
+}

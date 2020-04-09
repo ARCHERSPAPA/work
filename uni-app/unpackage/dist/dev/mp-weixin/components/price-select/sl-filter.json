@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "popup-layer": "/components/price-select/popup-layer",
+    "sl-filter-view": "/components/price-select/filter-view"
+  }
+}

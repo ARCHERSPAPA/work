@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "工地参观",
+  "onReachBottomDistance": 50,
+  "usingComponents": {
+    "uni-search-bar": "/components/uni-search-bar/uni-search-bar",
+    "mkb-dropdown": "/components/mkb-dropdown/mkb-dropdown",
+    "mkb-site": "/components/mkb-site/mkb-site",
+    "mkb-empty": "/components/mkb-empty/mkb-empty"
+  }
+}

@@ -1,0 +1,1 @@
+<block wx:if="{{type===0}}"><view class="{{['mkb-state1',stateClassName]}}"><text>{{stateName}}</text></view></block><block wx:else><block wx:if="{{type===1}}"><view class="{{['mkb-state2',stateClassName]}}"><text>{{stateStatus}}</text></view></block></block>

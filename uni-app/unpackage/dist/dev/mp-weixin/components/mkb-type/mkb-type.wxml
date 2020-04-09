@@ -1,0 +1,1 @@
+<view class="mkb-type"><image class="mkb-type-img" src="{{src}}"></image><text class="mkb-type-text">{{text}}</text></view>

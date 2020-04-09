@@ -1,0 +1,1 @@
+<view><input class="mkb-search-bar" style="{{(styleSearch)}}" placeholder="搜索" maxlength="{{maxLength}}" readonly="{{readonly}}" data-event-opts="{{[['comfirm',[['comfirm',['$event']]]],['blur',[['confirm',['$event']]]],['input',[['__set_model',['','inpVal','$event',[]]]]]]}}" value="{{inpVal}}" bindcomfirm="__e" bindblur="__e" bindinput="__e"/></view>

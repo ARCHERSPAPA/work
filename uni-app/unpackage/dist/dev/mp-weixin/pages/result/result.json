@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "一键报价",
+  "usingComponents": {
+    "price-result": "/components/price-result/price-result",
+    "design-result": "/components/design-result/design-result"
+  }
+}

@@ -1,0 +1,17 @@
+@charset "utf-8";
+%defaultBgCss{
+	background:rgba(77,77,77,0.03);
+}
+@mixin eclipse {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+@mixin fontStyle {
+	font-weight:400;
+}
+@mixin flex {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

@@ -1,0 +1,1 @@
+<view class="mkb-layout"><price-layout vue-id="1" layoutList="{{layoutList}}" data-event-opts="{{[['^layout',[['getLayout']]]]}}" bind:layout="__e" bind:__l="__l"></price-layout><button data-event-opts="{{[['tap',[['next',['$0'],['queryId']]]]]}}" class="mkb-layout-btn" catchtap="__e">{{title}}</button></view>

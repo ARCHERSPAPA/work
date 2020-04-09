@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "搜索",
+  "onReachBottomDistance": 50,
+  "usingComponents": {
+    "uni-search-bar": "/components/uni-search-bar/uni-search-bar",
+    "sl-filter": "/components/sl-filter/sl-filter",
+    "mkb-search-item": "/components/mkb-search-item/mkb-search-item",
+    "mkb-empty": "/components/mkb-empty/mkb-empty",
+    "ms-dropdown-menu": "/components/ms-dropdown/dropdown-menu",
+    "ms-dropdown-item": "/components/ms-dropdown/dropdown-item",
+    "search-select": "/components/search-select/sl-filter"
+  }
+}

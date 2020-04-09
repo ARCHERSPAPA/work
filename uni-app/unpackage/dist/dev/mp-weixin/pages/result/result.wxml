@@ -1,0 +1,1 @@
+<view><block wx:if="{{queryId==1}}"><price-result vue-id="1" bind:__l="__l"></price-result></block><block wx:if="{{queryId==2}}"><design-result vue-id="2" bind:__l="__l"></design-result></block></view>

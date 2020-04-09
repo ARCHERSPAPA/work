@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "一键报价",
+  "usingComponents": {
+    "price-area": "/components/price-area/price-area",
+    "design-area": "/components/design-area/design-area"
+  }
+}

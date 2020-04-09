@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "一键报价",
+  "usingComponents": {
+    "price-manner": "/components/price-manner/price-manner",
+    "design-manner": "/components/design-manner/design-manner"
+  }
+}

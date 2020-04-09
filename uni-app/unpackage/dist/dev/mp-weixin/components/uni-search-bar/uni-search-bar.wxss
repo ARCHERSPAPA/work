@@ -1,0 +1,101 @@
+
+.uni-searchbar.data-v-dc6dc408 {
+	
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: flex;
+	
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: normal;
+	-webkit-flex-direction: row;
+	        flex-direction: row;
+	position: relative;
+	/* padding: 16rpx; */
+	background-color: #ffffff;
+	height: 100%;
+	width: 100%;
+}
+.uni-searchbar__box.data-v-dc6dc408 {
+	
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: flex;
+	box-sizing: border-box;
+	
+	overflow: hidden;
+	position: relative;
+	-webkit-box-flex: 1;
+	-webkit-flex: 1;
+	        flex: 1;
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	        justify-content: center;
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: normal;
+	-webkit-flex-direction: row;
+	        flex-direction: row;
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	        align-items: center;
+	/* height: 36px; */
+	padding: 9.05rpx 14.49rpx 9.05rpx 0;
+	border-width: 0.9rpx;
+	border-style: solid;
+	border-color: #e5e5e5;
+}
+.uni-searchbar__box-icon-search.data-v-dc6dc408 {
+	
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: flex;
+	
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: normal;
+	-webkit-flex-direction: row;
+	        flex-direction: row;
+	width: 57.97rpx;
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	        justify-content: center;
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	        align-items: center;
+	color: #808080;
+}
+.uni-searchbar__box-search-input.data-v-dc6dc408 {
+	-webkit-box-flex: 1;
+	-webkit-flex: 1;
+	        flex: 1;
+	font-size: 25.36rpx;
+	color: #808080;
+	font-family:'PingFang SC';
+	color:rgba(0,0,0,0.40);
+}
+.uni-searchbar__box-icon-clear.data-v-dc6dc408 {
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	        align-items: center;
+	line-height: 43.47rpx;
+	padding-left: 9.05rpx;
+}
+.uni-searchbar__text-placeholder.data-v-dc6dc408 {
+	font-size: 25.36rpx;
+	color: #808080;
+	font-family:'PingFang SC';
+	color:rgba(0,0,0,0.40);
+}
+.uni-searchbar__cancel.data-v-dc6dc408 {
+	padding-left: 18.11rpx;
+	line-height: 57.97rpx;
+	font-size: 25.36rpx;
+}
+.icon-mkb-clear.data-v-dc6dc408{
+	width: 28.98rpx;
+	height: 28.98rpx;
+	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAE50lEQVR4Xu2cS4tdRRCAq67D3fhajEZcBIyL+QXjOKea+FaMoIIKim58JugqbhSStYJudKUYH8lGUVDBCEZ8a+g+4zi/YBZGcCE+ZuFEN8PklHS8V+Llnu7qx7lzlL5wuAO3qrrqO3X6WWcQysdJAAsfN4ECyJMhBVABlNaJlAzqYwYZY25k5hsGg8EuANjFzJfZ79FlXf7FXoj4s/1umsb+/QURfZ6WD+HaM8mgtbW1y7e2tq5HxJuZ+S4AuCjc1bMam4j4PjN/OhwOv1xcXPwp0o5YrVNAxphbAeAJALgNAM4TeyUTPAMAHwHAS0T0sUwlXKoTQMaYaxHxcWa+N9ylcA1EfIeZXyair8O1ZzgP0lpfZTMGER/M7ajEHjMfsxmllPpOIi+RyZZBxpiDAPCCpNEZyDxJRC/maCcLIGPMKwCwP4dDGW0cIaIDqfaSAWmtv0HEvamOdKHPzCeVUtek2E4CpLX+FREvSXGga11m/k0pdWlsO9GAjDGnAOCK2IZnrPcDEe2JaTMKUF3XR5l5R0aqmCCtDiIeq6rqoVD9YEBa66cQ8bnQhvogz8xPK6WeD/ElCJAx5mEAeD2kgR7KPkJEb0j9EgOyk0BEXJUa7rMcMy9JJ5MhgI7u1Aw5N2w741ZKifojESC7tgKAr2IdXVhYgPX19Vj1qXoZbF4nWbuJANV1/XbswtMGMj8/DxsbG9kg5bBpF7hVVd3nu2teQKMtixM+Q9N+Hwcy/i0HpMw29/m2SiSAjgPA7aGAJgPJAakDmx8S0R2u2JyAVldXd29vb9sZc9BmV1sgKZC6sAkAZ+bm5vYsLS392AbJCWhlZWV/0zR2pR78yRlQTluTgQwGgwPLy8tHogDVdf0uM98dTGekkCOwHDacjxDie1VV3RMFyBizCQAXxgKyeikBpugG+HyaiFoPEVofsZTRa9K5mEBjdAKgTIq2jmatgLTWzyDioYRG/6UaEnCIbA7/mPlZpdThabZaAdV1/SozP5rDgbENSeBW1k4s2z455lKTthHxtaqqHgsF9AEzO+cIMfB8kFw2u4Bj20PE41VV3RkEyBizAgBXx0Dw6cRA6grOyNdviWg5FND3ABC1TekDJBndzrXRMRzb1CkiujIU0B8AcL4k2FgZSSbNAI51/08iuqAAar+TUYDKI2Y78DaopZP+m4xrHlSGeQ+gMlF0ASpLDc8jZusIAeCz2CH8XD3fcD5tKI/RSfD1prb6R+eGmTHm94R6wrP+pgSaohsAa5OILm6TdwJKPYPPEWAOGy5YvjN7XwbdDwBvBtyNf0RzBpbT1pRYHiCit6IyaFS+aze0/7eb9sPhcLernLgc+6Qc+9i0S9l6zXzIN7XTT1zMph8cWq/K0bOnFy7FC4JhSmtdyl9cnEoBlSCLelZNL/B4qkhQFb53mJ9soqdV9VJYwdX3wYCsJ32urm8jFVt1HwVoBKn3VfZjWCnV9tGARpPI/0K1fXSVvXPLVfpQp674pe3EyPlW6hKbSRk0bqCP1fcxVfXTgGUBNHrc+lSFH1RN79wvkqSZVKa8kikkVV7qlYMqr4VLWNly4qZp9jHzLfZKqHs8jYif2GswGJxwle9K/JLIZOukJY2NZewmHDPvDfzXFCd9VfEhPkhldwSQ1Lk+yBVAnrtQABVAaQ9qyaCSQWkZ9BdhXe1nncoJ6AAAAABJRU5ErkJggg==) no-repeat center center #C6C6C6;
+	background-size: contain;
+	border-radius: 28.98rpx;		
+	margin-left: 14.49rpx;
+	margin-right: 14.49rpx;
+}
+
