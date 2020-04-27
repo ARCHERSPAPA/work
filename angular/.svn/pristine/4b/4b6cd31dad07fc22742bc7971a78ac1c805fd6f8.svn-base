@@ -1,0 +1,650 @@
+import { Component, Input, OnInit } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { DepartService } from "../../service/depart.service";
+import { RequestService } from "../../service/request.service";
+import { WarningService } from "../../service/warning.service";
+import { Messages } from "../../model/msg";
+import { QuoteService } from "../../service/quote.service";
+import {
+    showChiefs,
+    showDesigner,
+    showLeaders, showPersonal, showReusers,
+    showSupervisors,
+    showpriceUser
+} from "../../model/methods";
+import { Default } from "../../model/constant";
+
+
+@Component({
+    selector: 'rev-info',
+    templateUrl: './info.component.html',
+    styleUrls: ['./info.component.scss'],
+    providers: [QuoteService]
+})
+export class InfoComponent implements OnInit {
+    /**
+     * 1: 部门，2：设计师们，3：工长，4：监理，5：总监，6:复用人员，7：有权限查看人员
+     * 9：客户，10：新建客户(报价列表新建)，11:新建客户(项目列表中新建)  12(案例详情中客户)
+     * 13(增减项选择审核人员)
+     * 201:添加或者修改设计师(项目列表)
+     * 301:添加或者修改工长(项目列表)
+     * 401:添加或者修改监理(项目列表)
+     * 501:添加或者修改总监(项目列表)
+     */
+    @Input() type: number;
+    //报价id
+    @Input() id: string;
+
+    @Input() userId: string;
+
+    //所有设计师
+    @Input() designers: any;
+
+    // //所有职权人员
+    // @Input() members: any;
+    /**
+     * 单个的职能人员
+     */
+    @Input() member: any;
+    /**
+ * 增减项中传入的相关信息（价格等）
+ */
+    @Input() price: any;
+
+    /**
+     * 修改单个职能人员时传入（复用人员和添加查看人员）
+     */
+    @Input() qmid: string;
+
+    @Input() user: any;
+
+    @Input() department: any;
+
+    public title: string;
+    public departList: any;
+
+    //部门
+    public showDepart: any;
+    //设计师们
+    public showDesigners: Array<any> = [];
+    //工程总监
+    public showLeader: any;
+    //工长
+    public showChief: any;
+    //监理
+    public showSupervisor: any;
+    //复用人员
+    public showReuser: any;
+    public reuserRole: string;
+    //查看人员到PP
+    public showViewUser: any;
+
+    public showPriceUser: any;
+
+    public quoteBase: any;
+    //提示语信息
+    public msg: string;
+
+
+    constructor(public modal: NgbActiveModal,
+        private depart: DepartService,
+        private request: RequestService,
+        private warn: WarningService,
+        private quote: QuoteService) {
+        // this.depart-tree.loadDepart(0,2);
+    }
+
+    ngOnInit() {
+        let member                                 //初始化判断是否为空的情况
+        if (this.member) { member = [this.member] } else {
+            member = []
+        }
+        if (this.type === 1) {
+            this.depart.loadDepart(0, 12);
+            this.title = this.department.departmentId ? "修改部门" : "添加部门";
+        }
+        else if (this.showDesigner(this.type)) {
+            this.title = this.designers ? "修改设计师" : "添加设计师";
+            if (this.designers && this.designers.length > 0) {
+                this.showDesigners = this.designers.map(des => {
+                    delete des.id;
+                    des["id"] = des.memberId;
+                    delete des["memberId"];
+                    return des;
+                });
+            }
+        }
+        else if (this.showChiefs(this.type)) {
+            // this.quote.setSelectQuoteMembers(this.member);
+            // this.showChief = this.quote.divideMemberByType(Default.STAFF.CLASS_3);
+            this.showChief = member;
+            this.title = this.showChief ? "修改工长" : "添加工长";
+        }
+        else if (this.showSupervisors(this.type)) {
+            // this.quote.setSelectQuoteMembers(this.member);
+            // this.showSupervisor = this.quote.divideMemberByType(Default.STAFF.CLASS_4);
+            this.showSupervisor = member;
+            this.title = this.showSupervisor ? "修改监理" : "添加监理";
+        }
+        else if (this.showLeaders(this.type)) {
+            // this.quote.setSelectQuoteMembers(this.members);
+            // this.showLeader = this.quote.divideMemberByType(Default.STAFF.CLASS_5);
+            this.showLeader = member;
+            this.title = this.showLeader ? "修改工程总监" : "添加工程总监";
+        } else if (this.showReusers(this.type) && this.member) {
+            this.showReuser = member;
+            this.reuserRole = this.member.customName;
+            this.title = this.showReuser ? "修改" + this.reuserRole : "添加" + this.reuserRole;
+        } else if (this.type === 7) {
+            this.showViewUser = member;
+            this.title = this.showViewUser ? "修改查看人员" : "添加查看人员";
+        }
+        else if (this.type === 9) {
+            this.title = "修改客户";
+            this.quoteBase = this.user;
+        }
+        else if (this.type === 10) {
+            this.title = "创建客户";
+            this.quoteBase = this.user;
+        }
+        else if (this.type === 11) {
+            this.title = "创建客户";
+            this.quoteBase = this.user;
+        }
+        else if (this.type === 12) {
+            this.title = "基础信息";
+            this.quoteBase = this.user;
+        }
+        else if (this.type === 13) {
+            this.title = "选择审核员";
+            member[0]['memberName'] = member[0]['name'];
+            member[0]['type'] = 13;
+            member[0]['departmentName'] = member[0]['positionName'];
+            this.showPriceUser = member;
+            // console.log(this.showPriceUser)
+            this.quoteBase = this.user;
+        }
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.departList = this.renderList(this.depart.getDepartList(12));
+        }, 500)
+    }
+
+    renderList(items) {
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                item['key'] = item['id'];
+                item['title'] = item['name'];
+                item['expanded'] = false;
+                if (item['children']) {
+                    item['children'] = this.renderList(item['children'])
+                }
+            })
+        }
+        return items
+    }
+    ngDoCheck() {
+        if (this.type === 1) {
+            if (this.depart.getSelectDepartByName()) {
+                this.showDepart = this.depart.getSelectDepartByName();
+            }
+        }
+    }
+
+    selectUser(user) {
+        let userinfo
+        if (!user) {
+            userinfo = [];
+        } else {
+            userinfo = [user];
+        }
+        if (this.showLeaders(this.type)) {
+            this.showLeader = userinfo;
+        } else if (this.showSupervisors(this.type)) {
+            this.showSupervisor = userinfo;
+        } else if (this.showChiefs(this.type)) {
+            this.showChief = userinfo;
+        } else if (this.showReusers(this.type)) {
+            this.showReuser = userinfo;
+        } else if (this.type === 7) {
+            this.showViewUser = userinfo;
+        } else if (this.type === 13) {
+            this.showPriceUser = userinfo;
+        }
+
+
+    }
+
+    delDepart() {
+        this.depart.removeSelectDepartByName();
+        this.showDepart = [];
+    }
+
+    submit(e, id) {
+        let that = this;
+        if (that.type === 1) {
+            if (that.showDepart) {
+                let params = {
+                    id: that.id,
+                    departmentId: that.showDepart
+                };
+                that.request.doPost({
+                    url: "saveDepartQuote",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            that.modal.close(that.showDepart);
+                        } else {
+                            that.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            } else {
+                that.warn.onWarn(Messages.SELECT_NOT_EMPTY);
+            }
+        }
+        else if (showDesigner(this.type)) {
+            if (!that.justiceRadio()) {
+                that.warn.onMsgWarn(Messages.ERROR.RADIO);
+            } else {
+                if (that.componentDesigners().length > 0) {
+                    let params = {
+                        id: that.id,
+                        designerVos: that.componentDesigners()
+                    }
+                    that.request.doPost({
+                        url: (that.type === 2 ? "saveDesignerQuote" : (that.type === 201 ? "buildProjectDesigner" : "")),
+                        data: params,
+                        success: (res => {
+                            if (res && res.code == 200) {
+                                that.modal.close(that.componentDesigners());
+                                // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                                that.exist(null);
+                            } else {
+                                this.modal.dismiss();
+                                that.warn.onError(res.msg || Messages.FAIL.DATA);
+                            }
+                        })
+                    })
+                } else {
+                    that.warn.onWarn(Messages.SELECT_NOT_EMPTY);
+                }
+            }
+        }
+        else if (that.showChiefs(this.type)) {
+            if (that.showChief) {
+                that.personalByAddOrFix(that.id, ...that.showChief);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        }
+        else if (that.showSupervisors(this.type)) {
+            if (that.showSupervisor) {
+                that.personalByAddOrFix(that.id, ...that.showSupervisor);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        }
+        else if (that.showLeaders(this.type)) {
+            if (that.showLeader) {
+                that.personalByAddOrFix(that.id, ...that.showLeader);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        } else if (that.showReusers(this.type)) {
+            if (that.showReuser) {
+                that.personalByAddOrFix(that.id, ...that.showReuser);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        } else if (that.type === 7) {
+            if (that.showViewUser) {
+                that.personalByAddOrFix(that.id, ...that.showViewUser);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        }
+        else if (that.type === 13) {
+            if (that.showPriceUser) {
+                console.log(that.showPriceUser)
+                that.personalByAddOrFix(that.id, ...that.showPriceUser, that.price);
+            } else {
+                that.showMsg(Messages.SELECT_NOT_EMPTY)
+            }
+        }
+        else if (that.type === 9) {
+            let params = e;
+            params["id"] = that.user.customerId;
+            params["quoteId"] = that.id;
+            that.request.doPost({
+                url: "saveCustomerQuote",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.modal.close(res.data);
+                    } else {
+                        that.modal.dismiss();
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+        else if (that.type === 10) {
+            let params = e;
+            params["quoteId"] = that.id;
+            that.request.doPost({
+                url: "buildCustomer",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.modal.close(res.data);
+                    } else {
+                        that.modal.dismiss();
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+        else if (that.type === 12) {
+            let params = e;
+            that.request.doPost({
+                url: "smallProgramEdit",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.modal.close(res.data);
+                    } else {
+                        that.modal.dismiss();
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+        else if (that.type === 11) {
+            let params = e;
+            params["quoteId"] = that.id;
+            that.request.doPost({
+                url: "buildProjectByCustomer",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.modal.close(res.data);
+                    } else {
+                        that.modal.dismiss();
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+
+    }
+
+    exist(e) {
+        if (this.type === 1) {
+            this.depart.removeSelectDepartByName();
+        }
+        this.modal.dismiss()
+    }
+
+    componentDesigners() {
+        let data = [];
+        if (this.showDesigners && this.showDesigners.length > 0) {
+            for (let designer of this.showDesigners) {
+                data.push({
+                    id: designer.id,
+                    name: designer.name,
+                    phone: designer.phone,
+                    percentage: designer.percentage
+                })
+            }
+        }
+        return data;
+    }
+
+    modifyRatio(designer) {
+        designer["modify"] = true;
+
+    }
+
+    personalByAddOrFix(...args) {
+        console.log(args)
+        let that = this;
+        let params
+        //增减项中的审核人员添加
+        if (args[1]["type"] === 13) {
+            params = {
+                pauseId: args[2]["id"],
+                amount: args[2]["applyActualPrice"],
+                remark: args[2]["remark"],
+                empId: args[1]["id"],
+                positionName: args[1]["positionName"],
+                name: args[1]["name"],
+            };
+        } else {
+            params = {
+                id: args[0],
+                userId: args[1]["memberId"],
+                type: this.switchPersonType(args[1]["type"])
+            };
+        }
+
+        if (that.getPersonUrl(that.type)) {
+
+            if (that.showSupervisors(that.type) || that.showChiefs(that.type)) {
+                params["departmentId"] = args[1]["departmentId"];
+            }
+            if (that.type === 6) {
+                params["customName"] = this.reuserRole;
+            } else if (that.type === 7) {
+                params["customName"] = args[1]["positionName"];
+            }
+
+            if (that.type === 6 || that.type === 7) {
+                if (that.qmid) {
+                    params["qmid"] = that.qmid;
+                }
+            }
+        }
+
+        that.request.doPost({
+            url: that.getPersonUrl(that.type),
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.modal.close(args[1]);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+
+
+    }
+
+    showMsg(msg: string) {
+        this.msg = msg;
+        setTimeout(() => {
+            this.msg = null;
+        }, 2000);
+    }
+
+    /**
+     * 根据状态来判定可否修改客户信息
+     * @returns {boolean}
+     */
+    showCustomer() {
+        switch (this.type) {
+            case 9:
+                return true;
+            case 10:
+                return true;
+            case 12:
+                return true;
+            case 11:
+                return true;
+        }
+        return false;
+    }
+
+    showDesigner(type) {
+        return showDesigner(type)
+    }
+
+    showChiefs(type) {
+        return showChiefs(type)
+    }
+
+    showSupervisors(type) {
+        return showSupervisors(type)
+    }
+
+    showLeaders(type) {
+        return showLeaders(type)
+    }
+
+    showReusers(type) {
+        return showReusers(type);
+    }
+
+    showStrategy(type) {
+        return showPersonal(type);
+    }
+    showpriceUser(type) {
+        return showpriceUser(type)
+    }
+
+    getPersonUrl(type) {
+        switch (type) {
+            case 3:
+            case 4:
+            case 5:
+                return "addPersonal";
+            case 6:
+            case 7:
+                return "addCustom";
+            case 13:
+                return "savePause"; //增减项的减项审核人员
+            case 301:
+            case 401:
+            case 501:
+                return "buildProjectPersonal";
+
+            default:
+                return null;
+
+        }
+    }
+
+    switchPersonType(type) {
+        if (type === 301) {
+            return 3;
+        } else if (type === 401) {
+            return 4;
+        } else if (type === 501) {
+            return 5;
+        }
+        return type;
+    }
+
+    removeAllDesigners(type) {
+        switch (type) {
+            case 2:
+                return true;
+            case 201:
+                return true;
+            case 3:
+                return true;
+            case 301:
+                return true;
+            case 4:
+                return true;
+            case 401:
+                return true;
+            case 5:
+                return true;
+            case 501:
+                return true;
+            case 6:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    ngOnDestroy() {
+        this.depart.removeSelectDepartByName();
+    }
+
+    /**
+     * 回调选中设计师
+     * @param des
+     */
+    selectDesigner(des) {
+        if (!this.quote.existQuoteDesigner(des, this.showDesigners) && des.checked) {
+            this.showDesigners.push({
+                name: des.name,
+                id: des.id,
+                departmentName: des.departmentName,
+                phone: des.phone,
+                percentage: 0
+            });
+        } else {
+            this.removeDesigner(des, this.showDesigners);
+        }
+        this.calcPercentage(this.showDesigners);
+    }
+
+    /**
+     * 默认给选中设计师赋值
+     */
+    calcPercentage(designers: Array<any>) {
+        let total = 0;
+        if (designers && designers.length > 0) {
+            for (let designer of designers) {
+                designer["percentage"] = Math.floor(100 / (designers.length));
+                total += parseFloat(designer["percentage"]);
+            }
+            if (total !== 100) {
+                designers[0]["percentage"] = (designers[0]["percentage"] + (100 - total));
+            }
+
+        }
+    }
+
+    /**
+     * 删除设计师（逻辑删除）
+     * @param des
+     */
+    removeDesigner(des, designers: Array<any>) {
+        // let designers = this.showDesigners;
+        if (designers && designers.length > 0) {
+            if (this.quote.existQuoteDesigner(des, designers)) {
+                for (let i = 0; i < designers.length; i++) {
+                    if (designers[i].id == des.id) {
+                        designers.splice(i, 1);
+                        this.calcPercentage(designers);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 判断比例尺度
+     * @returns {boolean}
+     */
+    justiceRadio() {
+        let designers = this.showDesigners;
+        let total = 0;
+        for (let i of designers) {
+            total += parseFloat(i["percentage"]);
+        }
+        if (total < 100 || total > 100) return false;
+        return true;
+    }
+
+}

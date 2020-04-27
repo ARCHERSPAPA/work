@@ -1,0 +1,184 @@
+<div class="detail-head">
+    <div nz-row>
+        <div nz-col nzSpan="24" class="head-name">
+            <div nz-col nzSpan="22">
+                <span *ngIf="baseQuote && baseQuote.customerProvinceName">{{baseQuote.customerProvinceName}}</span>
+                <span *ngIf="baseQuote && baseQuote.customerCityName">{{baseQuote.customerCityName}}</span>
+                <span *ngIf="baseQuote && baseQuote.customerAreaName">{{baseQuote.customerAreaName}}</span>
+                <span *ngIf="baseQuote && baseQuote.customerHouseAddress">{{baseQuote.customerHouseAddress}}</span>
+                <span *ngIf="baseQuote && baseQuote.customerRoomNumber">{{baseQuote.customerRoomNumber}}</span>
+            </div>
+            <div nz-col nzSpan="2" class="head-fix text-right">
+                <a href="javascript:void(0)" *ngIf="controlHeadInfo() && baseQuote.customerPhone"
+                   (click)="modifyInfo(9,baseQuote)">修改</a>
+                <a href="javascript:void(0)" *ngIf="controlHeadInfo()  && !baseQuote.customerPhone"
+                   (click)="buildCustomer(10,baseQuote)">添加</a>
+                <a href="javascript:void(0)" *ngIf="controlBuildUser()"
+                   (click)="createCustomer(11,baseQuote)">{{baseQuote && baseQuote.customerPhone?'修改':'添加'}}</a>
+            </div>
+        </div>
+        <div nz-col nzSpan="24" nzFlex class="head-line mt-16">
+            <div nz-col nzSpan="8" class="head-pad">客户：<span>{{(baseQuote && baseQuote.customerName)?baseQuote.customerName:'--'}}</span><span
+                    *ngIf="baseQuote && baseQuote.customerPhone"
+                    class="head-pad-gray">（{{baseQuote.customerPhone}}）</span></div>
+            <div nz-col nzSpan="8" class="head-pad">面积：<span>{{(baseQuote && baseQuote.customerHouseArea)?baseQuote.customerHouseArea+'m²':'--'}}</span>
+            </div>
+            <div nz-col nzSpan="8" class="head-pad">户型：<span>{{(baseQuote && baseQuote.customerHouseType)?baseQuote.customerHouseType:'--'}}</span>
+            </div>
+        </div>
+        <!-----v2.0.7新增内容 start--->
+        <div nz-col nzSpan="24" nzFlex class="head-line mt-16" *ngIf="state === 4">
+            <div nz-col nzSpan="8" class="head-pad">总价：<span>{{(baseQuote && baseQuote.finalPrice)?(baseQuote.finalPrice|number:'1.2'):'--'}}</span>
+            </div>
+            <div nz-col nzSpan="8" class="head-pad">来源：<span>{{(baseQuote && baseQuote.customerSourceInfo)?baseQuote.customerSourceInfo:'--'}}</span>
+            </div>
+            <div nz-col nzSpan="8" class="head-pad">签单时间：<span>{{(baseQuote && baseQuote.billTime)?(baseQuote.billTime|date:'yyyy-MM-dd'):'--'}}</span>
+            </div>
+        </div>
+        <div nz-col nzSpan="24" nzFlex class="head-line mt-16" *ngIf="state === 4">
+            <div nz-col nzSpan="8" class="head-pad">合同开工时间：<span>{{(agreement && agreement.engineeringStartTime)?(agreement.engineeringStartTime|date:'yyyy-MM-dd'):(agreement && agreement.engineeringStartTimeRemark?agreement.engineeringStartTimeRemark:'--')}}</span>
+            </div>
+            <div nz-col nzSpan="8" class="head-pad">合同竣工时间：<span>{{getFinishTime()?(getFinishTime()|date:'yyyy-MM-dd'):'--'}}</span>
+            </div>
+        </div>
+        <!----end v2.0.7新增内容块--->
+
+        <div nz-col nzSpan="24" *ngIf="baseQuote && baseQuote.customerRemark">
+            <p class="mt-16">备注：{{baseQuote.customerRemark}}</p>
+        </div>
+    </div>
+    <div nz-row class="head-line mt-16">
+        <div nz-col nzSpan="8"><span class="head-pad-gray">报价编号：{{baseQuote && baseQuote.quoteNo?baseQuote.quoteNo:'--'}}</span>
+        </div>
+        <div nz-col nzSpan="8"><span class="head-pad-gray">创建时间：{{baseQuote && baseQuote.createTime?(baseQuote.createTime|date:'yyyy-MM-dd HH:mm'):'--'}}</span>
+        </div>
+    </div>
+
+    <div nz-row class="head-line mt-48">
+        <div nz-col nzSpan="24"><span class="head-pad-gray">部门及项目人员</span></div>
+        <div class="head-fix"><a href="javascript:void(0)" *ngIf="controlBuildViewUsers()"
+                                                   (click)="infoModal(7,null)">添加APP查看人员</a></div>
+    </div>
+    <!---部门--->
+    <div nz-row class="head-line mt-16" *ngIf="state !== 4">
+        <div nz-col nzSpan="24" class="head-pad">所属部门：<span>{{(baseQuote && baseQuote.quoteDepartmentName)?baseQuote.quoteDepartmentName:''}}</span>
+        </div>
+        <div class="head-fix">
+            <a href="javascript:void(0)" (click)="modifyInfo(1,baseQuote)"
+               *ngIf="baseQuote.quoteNo && controlHeadInfo()">{{baseQuote &&
+                baseQuote.quoteDepartmentName?'修改':'添加'}}</a>
+        </div>
+    </div>
+    <!---职能人员--->
+    <div nz-row class="head-line" *ngIf="showRoleByState()">
+        <div nz-col nzSpan="8" class="head-pad mt-16">
+            <span>工程总监：</span>
+            <span *ngIf="leader && leader.memberName">{{subText(leader.memberName,10)}}</span>
+            <span class="head-pad-gray" *ngIf="leader && leader.phone">（{{leader.phone}}）</span>
+            <span class="head-fix mr-10">
+                <a href="javascript:void(0)" *ngIf="showRoleEditByState()"
+                   (click)="modifyInfo(5,leader)">{{!leader?'添加':'修改'}}</a>
+                <a href="javascript:void(0)" *ngIf="controlBuildInfo()"
+                   (click)="modifyInfo(501,leader)">{{!leader?'添加':'修改'}}</a>
+            </span>
+        </div>
+        <div nz-col nzSpan="8" class="head-pad mt-16">
+            <span>监理：</span>
+            <span *ngIf="supervisor && supervisor.memberName">{{subText(supervisor.memberName,10)}}</span>
+            <span class="head-pad-gray" *ngIf="supervisor && supervisor.phone">（{{supervisor.phone}}）</span>
+            <span class="head-fix mr-10">
+                <a href="javascript:void(0)" *ngIf="showRoleEditByState()"
+                   (click)="modifyInfo(4,supervisor)">{{!supervisor?'添加':'修改'}}</a>
+                <a href="javascript:void(0)" *ngIf="controlBuildInfo()"
+                   (click)="modifyInfo(401,supervisor)">{{!supervisor?'添加':'修改'}}</a>
+            </span>
+        </div>
+        <div nz-col nzSpan="8" class="head-pad mt-16">
+            <span>工长：</span>
+            <span *ngIf="chief && chief.memberName">{{subText(chief.memberName,10)}}</span>
+            <span class="head-pad-gray" *ngIf="chief && chief.phone">（{{chief.phone}}）</span>
+            <span class="head-fix">
+                <a href="javascript:void(0)" *ngIf="showRoleEditByState()"
+                   (click)="modifyInfo(3,chief)">{{!chief?'添加':'修改'}}</a>
+                <a href="javascript:void(0)" *ngIf="controlBuildInfo()"
+                   (click)="modifyInfo(301,chief)">{{!chief?'添加':'修改'}}</a>
+            </span>
+        </div>
+        <div></div>
+    </div>
+
+    <!---复用人员--->
+    <div nz-row class="head-line" *ngIf="showRoleByState() && reusers && reusers.length > 0">
+        <div nz-col nzSpan="8" class="head-pad mt-16" *ngFor="let user of reusers;let i = index">
+            <span>{{user && user.customName?subText(user.customName,10):'--'}}：</span>
+            <span>{{user && user.memberName?subText(user.memberName,10):''}}</span>
+            <span *ngIf="user && user.phone" class="head-pad-gray">（{{user.phone}}）</span>
+            <span class="head-fix" [ngClass]="{'mr-10':(i+1) % 3 != 0}"
+                  *ngIf="showRoleEditByState() || controlBuildInfo()">
+                <a href="javascript:void(0)" class="fix-del" (click)="delUser(user)">删除</a>
+                <a href="javascript:void(0)" (click)="modifyInfo(6,user)">修改</a>
+            </span>
+        </div>
+    </div>
+
+    <!---查看人员--->
+    <div nz-row class="head-line" *ngIf="showRoleByState() && viewUsers && viewUsers.length > 0">
+        <div nz-col nzSpan="8" class="head-pad mt-16" *ngFor="let view of viewUsers;let i = index">
+            <span>{{view && view.customName?subText(view.customName,10):'--'}}：</span>
+            <span>{{view && view.memberName?subText(view.memberName,10):''}}</span>
+            <span *ngIf="view && view.phone" class="head-pad-gray">（{{view.phone}}）</span>
+            <span class="head-fix" [ngClass]="{'mr-10':(i+1) % 3 != 0}"
+                  *ngIf="showRoleEditByState() || controlBuildInfo()">
+                <a href="javascript:void(0)" class="fix-del" (click)="delUser(view)">删除</a>
+                <a href="javascript:void(0)" (click)="modifyInfo(7,view)">修改</a>
+            </span>
+        </div>
+    </div>
+
+    <!---设备与指定人员--->
+    <div nz-row class="head-line" *ngIf="deviceQuote">
+        <div nz-col nzSpan="8" class="head-pad mt-16">
+            <span>绑定设备：</span>
+            <span>{{deviceQuote.deviceNo?deviceQuote.deviceNo:'--'}}</span>
+            <span class="head-fix">
+                <a href="javascript:void(0)" (click)="unbind(deviceQuote.deviceNo)">解绑</a>
+            </span>
+        </div>
+    </div>
+
+    <!---设计师--->
+    <div nz-row class="head-line">
+        <div nz-col nzSpan="24" class="head-pad mt-16">
+            <span>设计师：</span>
+            <span *ngFor="let designer of designQuote" class="mr-40">
+                <span>{{designer && designer.name?subText(designer.name,10):(designer && designer.memberName?subText(designer.memberName,10):'')}}</span>
+                <span *ngIf="designer && designer.phone" class="head-pad-gray">（{{designer.phone}}）</span>
+                <span class="head-pad-gray ml-8" *ngIf="designer.percentage" nz-tooltip [nzTitle]="designer.percentage+'%'"
+                      nzTrigger="click"><i nz-icon type="info-circle" theme="outline"></i></span>
+            </span>
+            <span class="head-fix" *ngIf="state !== 2">
+                <a href="javascript:void(0)" (click)="modifyInfo(2,designQuote)"
+                   *ngIf="controlHeadDesign()">修改</a>
+                <a href="javascript:void(0)" (click)="modifyInfo(201,designQuote)"
+                   *ngIf="controlBuildEmptyDesign()">添加</a>
+                <a href="javascript:void(0)" (click)="modifyInfo(201,designQuote)"
+                   *ngIf="controlBuildDesign()">修改</a>
+            </span>
+        </div>
+    </div>
+    <div nz-row class="head-line" *ngIf="state === 7">
+        <div nz-col nzSpan="24" class="head-pad mt-16">
+            <span>保修人员：</span>
+            <span class="mr-40" *ngIf="responsibility">
+                <span>{{responsibility && responsibility.name?subText(responsibility.name,10):(responsibility && responsibility.name?subText(responsibility.name,10):'')}}</span>
+                <span *ngIf="responsibility && responsibility.phone"
+                      class="head-pad-gray">（{{responsibility.phone}}）</span>
+            </span>
+            <span class="head-fix" *ngIf="responsibility.status < 2">
+                <a href="javascript:void(0)" *ngIf="baseQuote.quoteNo" (click)="sendDispatcher()">指派</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+

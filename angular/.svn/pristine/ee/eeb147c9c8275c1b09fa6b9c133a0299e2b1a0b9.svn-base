@@ -1,0 +1,119 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { atob, getCaseName } from "../../../../model/methods";
+import { SettleService } from "../../../../service/settle.service";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { InfoComponent } from "../../../../plugins/info/info.component";
+
+@Component({
+  selector: 'rev-case-tabs-head',
+  templateUrl: './case-tabs-head.component.html',
+  styleUrls: ['./case-tabs-head.component.scss']
+})
+export class CaseTabsHeadComponent implements OnInit {
+
+
+  public case: any = [];
+  public aid: string;
+  public cid: string;
+  public loading: string;
+  public quoteNo: string;
+  //判断是新增还是详情2.2.3
+  public newcase: boolean = false;
+  constructor(private activatedRoute: ActivatedRoute,
+    private warn: WarningService,
+    private modal: NgbModal,
+    private settle: SettleService) {
+  }
+
+  ngOnInit() {
+
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && !params["newcase"]) {
+        // console.log(this.cid)
+        this.quoteNo = atob(params["quoteNo"]);
+        this.cid = atob(params["aid"]);
+        this.loadSettleHead(this.quoteNo, 1);
+      }
+      else {
+        this.newcase = params["newcase"];
+        if (params && params["aid"]) {
+          this.cid = atob(params["aid"]);
+          this.quoteNo = atob(params["quoteNo"]);
+          this.loadSettleHead(this.quoteNo, 0);
+        }
+        // console.log(this.newcase)
+
+
+      }
+    });
+
+  }
+
+  //   ngDoCheck(){
+  //       if(this.settle.getCaseData()){
+  //         this.case=this.settle.getCaseData();
+  //       }
+  //   }
+
+  loadSettleHead(quoteNo, type) {
+    console.log(this.newcase)
+    if (this.newcase) {
+      console.log(1)
+      this.settle.newLoadCaseHead(quoteNo, type).then(res => {
+          console.log(res)
+          this.case = res;
+          this.settle.setCaseData(this.case);
+        }).catch(err => {
+          this.warn.onError(err);
+        })
+    } else {
+      this.settle.loadCaseHead(quoteNo)
+        .then(res => {
+          this.case = res;
+          this.settle.setCaseData(this.case);
+        }).catch(err => {
+          this.warn.onError(err);
+        })
+    }
+  }
+
+  showModal() {
+    let that = this;
+    this.case['newcase'] = this.newcase;
+    let info = that.modal.open(InfoComponent, {
+      centered: true,
+      keyboard: true,
+      backdrop: "static"
+    });
+    info.componentInstance.type = 12;
+    info.componentInstance.id = that.aid;
+    info.componentInstance.user = this.case;
+    info.result.then((res) => {
+      console.log(res)
+      if(this.newcase){
+        this.settle.newLoadCaseHead(res, 0).then(res => {
+          this.case = res;
+          this.settle.setCaseData(this.case);
+        }).catch(err => {
+          this.warn.onError(err);
+        })
+      }else{
+        this.settle.loadCaseHead(this.quoteNo).then(res => {
+          this.case = res;
+          this.settle.setCaseData(this.case);
+        }).catch(err => {
+          this.warn.onError(err);
+        })
+      }
+    },
+      (rea) => {
+      })
+  }
+
+  getcaseName(state) {
+    return getCaseName(state);
+  }
+}

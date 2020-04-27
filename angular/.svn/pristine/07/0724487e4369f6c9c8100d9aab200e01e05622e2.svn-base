@@ -1,0 +1,126 @@
+<div class="worker-add">
+  <ul>
+    <form [formGroup]="workerForm">
+        <img *ngIf="headImg" [src]="headImg" class="worker_headImg" (click)="openModal()" class="avatar"/>
+        <rev-uploader-new [content]='content' class="avatar" (click)="openModal()" *ngIf="!headImg" title="修改"></rev-uploader-new>
+      <li> <label class="label" style="font-weight:bold">基础资料</label></li>
+      <li>
+          <div class="tick-code">
+              <input nz-input type="text" class="text" placeholder="请输入提取码" [ngModelOptions]="{standalone: true}"
+                [(ngModel)]="pickCode" maxlength="20" />
+              <button nz-button type="button" nzType="primary" [disabled]="!pickCode" (click)="handlePick()">提取</button>
+            </div>
+      </li>
+      <li>
+        <label class="label"><span>*</span> 姓名</label>
+
+        <div class="inp" style="text-align: left;position: relative">
+          <input style="width:100%;margin-right: 5%" type="text" class="com_input" placeholder="请输入工人姓名" autocomplete="off" [(ngModel)]="name"
+                 formControlName="name" name="name" maxlength="32" [readonly]="is_disabled"/>
+
+          <!-- <input style="width: 47.5%" type="text" class="com_input" placeholder="请输入提取码" [ngModelOptions]="{standalone: true}" [(ngModel)]="pickCode"/>
+          <span style="display:inline-block;position: absolute;right: 10px;line-height: 32px;color: #0a8ddf;cursor: pointer" (click)="handlePick()" >提取</span> -->
+
+          <div [hidden]="workerForm.get('name').valid || workerForm.get('name').pristine" class="error">
+            <span [hidden]="!workerForm.hasError('required',['name'])">工人姓名为必填选项</span>
+            <span [hidden]="!workerForm.hasError('text',['name'])">输入格式错误,只能输入中文或者英文</span>
+            <span [hidden]="!workerForm.hasError('minlength',['name'])">至少输入2个字符</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <label class="label"><span>*</span> 身份证号码</label>
+        <div class="inp">
+          <input type="text" class="com_input" placeholder="请输入身份证号" autocomplete="off" [(ngModel)]="idCard"
+                 formControlName="idCard" name="idCard" maxlength="32" [readonly]="is_disabled"/>
+          <div [hidden]="workerForm.get('idCard').valid || workerForm.get('idCard').pristine" class="error">
+            <span [hidden]="!workerForm.hasError('required',['idCard'])">身份证号为必填选项</span>
+            <span [hidden]="!workerForm.hasError('idCard',['idCard'])">身份证号格式输入错误</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <label class="label"><span>*</span> 籍贯</label>
+        <div class="inp">
+          <input type="text" class="com_input" placeholder="请输入籍贯" autocomplete="off" [(ngModel)]="nativePlace"
+                 formControlName="nativePlace" name="nativePlace" maxlength="30" [readonly]="is_disabled"/>
+          <div [hidden]="workerForm.get('nativePlace').valid || workerForm.get('nativePlace').pristine" class="error">
+            <span [hidden]="!workerForm.hasError('required',['nativePlace'])">籍贯为必填选项</span>
+          </div>
+        </div>
+      </li>
+      <li style="margin-bottom:48px">
+        <label class="label"><span>*</span> 性别</label>
+        <div class="inp">
+            <nz-select style="width: 348px;" [(ngModel)]='sex' nzPlaceHolder='男' formControlName="sex"
+            name="sex" >
+     <nz-option nzValue="1" nzLabel="男"></nz-option>
+     <nz-option nzValue="0" nzLabel="女"></nz-option>
+ </nz-select>
+          <!-- <select class="com_input" [ngModelOptions]="{standalone: true}" autocomplete="off" name="sex" [(ngModel)]="sex" [disabled]="is_disabled">
+            <option value="1" [selected]="sex === '1'">男</option>
+            <option value="0" [selected]="sex === '0'">女</option>
+          </select> -->
+        </div>
+      </li>
+
+
+      <li> <label class="label" style="font-weight:bold">创建账号</label></li>
+      <li>
+        <label class="label"><span>*</span> 手机号码</label>
+        <div class="inp">
+          <input type="text" class="com_input" placeholder="请输入手机号码" autocomplete="off" [(ngModel)]="phone"
+                 formControlName="phone" name="phone" maxlength="16"/>
+          <div [hidden]="workerForm.get('phone').valid || workerForm.get('phone').pristine" class="error">
+            <span [hidden]="!workerForm.hasError('required',['phone'])">手机号码为必填选项</span>
+            <span [hidden]="!workerForm.hasError('phone',['phone'])">手机号码格式输入错误</span>
+          </div>
+        </div>
+      </li>
+      <li>
+
+        <label class="label"><span>*</span> 部门</label>
+        <div class="inp">
+          <nz-tree-select
+            class="text_sta"
+            formControlName="depart"
+            [nzPlaceHolder]="departInfo"
+            [nzDropdownMatchSelectWidth]="true"
+            [nzDropdownStyle]="{ 'max-height': '300px' }"
+            [nzNodes]="nodes"
+            [(ngModel)]="depart"
+            [nzDefaultExpandAll]="true"
+            [nzAllowClear]="false"
+            [nzMultiple]="true"
+            [nzCheckable]="true"
+          >
+
+          </nz-tree-select>
+        </div>
+      </li>
+      <li>
+        <label class="label"><span>*</span> 工种</label>
+        <div class="inp">
+          <input type="text" class="com_input" placeholder="请输入工种" autocomplete="off" [(ngModel)]="workerType" formControlName="workerType" name="workerType" maxlength="10"/>
+          <div [hidden]="workerForm.get('workerType').valid || workerForm.get('workerType').pristine" class="error">
+            <span [hidden]="!workerForm.hasError('required',['workerType'])">工种为必填选项</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <label class="label">备注</label>
+        <div class="inp">
+          <textarea class="com_input"  rows="6" placeholder="请输入需要的备注信息" [ngModelOptions]="{standalone: true}" autocomplete="off" maxlength="120" name="remarks"  [(ngModel)]="remarks"></textarea>
+          <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+        </div>
+      </li>
+      <li>
+        <div class="btns">
+          <button nz-button [nzType]="'default'" type="button" (click)="exist()">关闭</button>
+          <button nz-button nzType="primary" type="submit"  (click)="submit()" *ngIf="!isEdit" style="margin-left:167px"  [disabled]="!workerForm.valid">提交</button>
+          <button nz-button nzType="primary" type="submit"   (click)="modify()" *ngIf="isEdit"  style="margin-left:167px" >修改</button>
+        </div>
+      </li>
+    </form>
+  </ul>
+</div>

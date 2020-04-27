@@ -1,0 +1,113 @@
+<div class="article" style="padding: 0">
+    <div class="head">
+        <rev-title [title]="title" [show]="true" [buttons]="buttons" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="content">
+        <div class="detail-list">
+            <div class="list-head">
+                <div class="search-bar">
+                    <form method="post" [formGroup]="searchForm">
+                        <!-- <select [(ngModel)]="type" class="choice" [ngModelOptions]="{standalone: true}"
+                                (ngModelChange)="changeData(true)">
+                            <option value="">全部</option>
+                            <option value="4">待开工</option>
+                            <option value="5">待确认开工</option>
+                            <option value="11">待派单</option>
+                            <option value="6">施工中</option>
+                            <option value="7">待验收</option>
+                            <option value="8">已竣工</option>
+                        </select> -->
+                        <nz-select style="width: 160px;display: inline-block" [(ngModel)]='type' nzAllowClear='false'
+                        (ngModelChange)="changeData(true)"
+                                   nzPlaceHolder="全部" class="serchs" [ngModelOptions]="{standalone: true}">
+                            <nz-option nzValue="" nzLabel="全部"></nz-option>
+                            <nz-option nzValue="4" nzLabel="待开工"></nz-option>
+                            <nz-option nzValue="5" nzLabel="待监理确认"></nz-option>
+                            <nz-option nzValue="15" nzLabel="待客户确认"></nz-option>
+                            <nz-option nzValue="11" nzLabel="待派单"></nz-option>
+                            <nz-option nzValue="6" nzLabel="施工中"></nz-option>
+                            <nz-option nzValue="7" nzLabel="待验收"></nz-option>
+                            <nz-option nzValue="8" nzLabel="已竣工"></nz-option>
+                        </nz-select>
+                        <!--<select [(ngModel)]="type" class="choice" [ngModelOptions]="{standalone: true}"-->
+                        <!--(ngModelChange)="changeType()" style="width: 25%;">-->
+                        <!--<option value="1">按客户姓名查询</option>-->
+                        <!--<option value="2">按手机号码查询</option>-->
+                        <!--</select>-->
+                        <div class="inp">
+                            <!--<input type="text" class="text" [hidden]="type == 2" placeholder="请输入客户姓名"-->
+                            <!--formControlName="name" name="name" autocomplete="off" maxlength="32"-->
+                            <!--[(ngModel)]="name"/>-->
+                            <!--<input type="text" class="text" [hidden]="type == 1" placeholder="请输入手机号码"-->
+                            <!--formControlName="phone" name="phone" autocomplete="off" maxlength="16"-->
+                            <!--[(ngModel)]="phone"/>-->
+                            <input nz-input type="text" class="text" placeholder="请输入客户/手机号/地址/工长/设计师/监理" autocomplete="off"
+                                   maxlength="32" formControlName="info" name="info" [(ngModel)]="info"  style="width:70%;"/>
+                            <button nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid"
+                                    (click)="changeData(true)">查询
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="list-group-rev">
+                <nz-table #nzTable [nzData]="articleList" [nzBordered]="true" [nzFrontPagination]="false"
+                          [nzShowPagination]="true" nzSize="middle" class="tables" [(nzPageIndex)]='pageNo'
+                          [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)="changeData()">
+                    <thead>
+                    <tr>
+                        <th>客户姓名</th>
+                        <th>手机号</th>
+                        <th>地址</th>
+                        <th>类型</th>  
+                        <th>实际开工日期</th>
+                        <th>项目状态</th>
+                        <th>成本状态</th>
+                        <th>签单日期</th>
+                        <th>设计师</th>
+                        <th>工长</th>
+                        <th>监理</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let item of nzTable.data">
+                        <td [title]="item.customerName?item.customerName:''">
+                            <nz-badge [nzDot]="item.agendaCount > 0">{{item.customerName?item.customerName:'--'}}</nz-badge>
+                        </td>
+                        <td [title]="item.customerPhone?item.customerPhone:''">
+                            {{item.customerPhone?item.customerPhone:'--'}}
+                        </td>
+                        <td [title]="item.customerHouseAddress?item.customerHouseAddress:''">
+                            {{item.customerHouseAddress?item.customerHouseAddress:'--'}}
+                        </td>
+                        <td>{{getTypeName(item.type)}}</td>
+                        <td>{{item.startTime?(item.startTime|date:'y-MM-dd'):'--'}}</td>
+                        <td>{{getStateName(item.state)}}</td>
+                        <td>{{getCostState(item.costState)}}</td>
+                        <td>{{item.billTime?(item.billTime|date:'y-MM-dd'):'--'}}</td>
+                        <td [title]="item.designerName?item.designerName:''">
+                            {{item.designerName?item.designerName:'--'}}
+                        </td>
+                        <td [title]="item.foremanName?item.foremanName:''">
+                            {{item.foremanName?item.foremanName:'--'}}
+                        </td>
+                        <td [title]="item.supervisorName?item.supervisorName:''">
+                            {{item.supervisorName?item.supervisorName:'--'}}
+                        </td>
+                        <td class="note" [nzTitle]="item.remark?item.remark:'暂无备注信息'"
+                            nzPlacement="topCenter" nz-tooltip>{{item.remark?item.remark:'--'}}
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" [routerLink]="['./../detail/dispatch',4]"
+                               [queryParams]="{cid:btoa(item.id)}">详情</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+        </div>
+    </div>
+</div>
+

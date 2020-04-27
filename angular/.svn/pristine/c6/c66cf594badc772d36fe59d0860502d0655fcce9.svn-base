@@ -1,0 +1,193 @@
+@charset "utf-8";
+html,
+body,
+address,
+dl,
+dt,
+dd ol,
+p,
+pre,
+ul,
+li,
+img,
+input {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Chinese Quote", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+}
+html {
+  height: 100%;
+}
+
+.error {
+  font-size: 0;
+  white-space: nowrap;
+  span {
+    font-size: 12px ;
+    color: #eb0000;
+    line-height: 20px;
+    vertical-align: top;
+    display: inline-block;
+  }
+}
+
+.split-line {
+  width: calc(100% + 48px);
+  height: 8px;
+  background: #f0f2f5;
+  opacity: 1;
+  margin: 0px -24px 0px -24px;
+}
+.com_input {
+  outline: none;
+  font-variant: tabular-nums;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 4px 11px;
+  list-style: none;
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.65);
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  transition: 0.3s;
+  &:focus {
+    border-color: #1890ff;
+  }
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 650px;
+  }
+}
+
+@media (min-width: 576px) {
+  .modal-dialog.modal-lg {
+    max-width: 560px;
+  }
+}
+
+@media (min-width: 960px) {
+  .modal-dialog.modal-lg {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .modal-dialog.modal-lg {
+    max-width: 1200px;
+  }
+}
+
+.anticon {
+  vertical-align: middle;
+}
+
+.bt_1_dedede {
+  border-top: 1px solid #dedede;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ant-form-item-label label::after {
+  content: " ";
+}
+
+.amap-logo,
+.amap-copyright {
+  display: none !important;
+}
+
+//日历组件时的调试控制
+.ant-fullcalendar-fullscreen .ant-fullcalendar-date,
+.ant-fullcalendar-fullscreen .ant-fullcalendar-month {
+  height: auto;
+}
+
+@for $i from 1 through 9 {
+  .ml-#{$i*10} {
+    margin-left: $i * 10px;
+  }
+  .mt-#{$i*10} {
+    margin-top: $i * 10px;
+  }
+  .mr-#{$i*10} {
+    margin-right: $i * 10px;
+  }
+  .mb-#{$i*10} {
+    margin-bottom: $i * 10px;
+  }
+}
+
+@for $i from 1 through 9 {
+  .pl-#{$i*10} {
+    padding-left: $i * 10px;
+  }
+  .pt-#{$i*10} {
+    padding-top: $i * 10px;
+  }
+  .pr-#{$i*10} {
+    padding-right: $i * 10px;
+  }
+  .pb-#{$i*10} {
+    padding-bottom: $i * 10px;
+  }
+}
+
+@for $i from 1 through 9 {
+  .ml-#{$i*8} {
+    margin-left: $i * 8px;
+  }
+  .mt-#{$i*8} {
+    margin-top: $i * 8px;
+  }
+  .mr-#{$i*8} {
+    margin-right: $i * 8px;
+  }
+  .mb-#{$i*8} {
+    margin-bottom: $i * 8px;
+  }
+}
+
+@for $i from 1 through 9 {
+  .pl-#{$i*8} {
+    padding-left: $i * 8px;
+  }
+  .pt-#{$i*8} {
+    padding-top: $i * 8px;
+  }
+  .pr-#{$i*8} {
+    padding-right: $i * 8px;
+  }
+  .pb-#{$i*8} {
+    padding-bottom: $i * 8px;
+  }
+}
+
+colgroup {
+  display: none !important;
+}
+.ant-table-small {
+  border: none;
+}
+.ant-layout.ant-layout-has-sider > .ant-layout,
+.ant-layout.ant-layout-has-sider > .ant-layout-content {
+  overflow-x: auto;
+}

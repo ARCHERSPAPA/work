@@ -1,0 +1,251 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.staff-list {
+  .list-head {
+    &:after {
+      content: "";
+      clear: both;
+      zoom: 1;
+      visibility: hidden;
+      display: block;
+    }
+    .search-bar {
+      width: 300px;
+      height: 30px;
+      float: right;
+      font-size: 0;
+      text-align: right;
+      input {
+        width: 70%;
+      }
+      button {
+        width: 20%;
+        margin-left: 2%;
+      }
+    }
+  }
+  .list-group-rev {
+    width: 100%;
+    margin-top: 20px;
+    overflow: hidden;
+    .list-items {
+      width: 88%;
+      float: left;
+      .w1 {
+        width: 2em;
+      }
+      .w2 {
+        width: 5em;
+      }
+      .w3 {
+        width: 6em;
+      }
+      .w16{
+        width: 200px;
+      }
+      tr th,
+      tr td {
+        a {
+          padding-right: 4px;
+          color: #1890ff;
+        }
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      tr th,
+      tr td:not(.w10) {
+        max-width: 60px;
+      }
+
+      tr td {
+        font-size: 14px;
+      }
+    }
+    .list-quick {
+      width: 10%;
+      float: right;
+      &-title {
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        background: #f2f2f2;
+        border: 1px solid #dedede;
+        padding: 4px;
+        margin-bottom: 10px;
+      }
+    }
+  }
+}
+.add-title {
+  width: 100%;
+  height: 36px;
+  line-height: 36px;
+  font-size: 16px;
+  font-weight: 500;
+
+  // border-bottom: 1px solid #dedede;
+}
+.chk-sex {
+  padding: 4px 11px;
+  display: block;
+  width: 100%;
+  border: 1px solid #dedede;
+  text-indent: 10px;
+  outline: none;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.tick-code {
+  .text {
+    display: inline-block;
+    margin-left: 83px;
+    width: 60.5%;
+    line-height: 26px;
+    border: none;
+    outline: none;
+    margin-right: 4px;
+  }
+}
+.border-bottom {
+  border: 0.5px solid rgba(232, 232, 232, 1);
+  width: 69% !important;
+  margin-left: 97px;
+}
+
+.staff-add {
+  position: relative;
+  .btn {
+    margin-left: 132px;
+    padding-top: 10px;
+    button {
+      margin-right: 24px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }
+  .avatar {
+    position: absolute;
+    top: 0%;
+    left: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 160px;
+  }
+
+  display: inline-block;
+  width: 600px;
+  // margin: 30px ;
+  // border: 1px solid #dedede;
+
+  ul {
+    li {
+      width: 100%;
+      font-size: 0;
+      .label,
+      .inp {
+        display: inline-block;
+        vertical-align: top;
+        font-size: 14px;
+        line-height: 31px;
+      }
+      .label {
+        width: 152px;
+        text-align: right;
+        > .icon {
+          color: #f92650;
+          display: inline-block;
+          vertical-align: text-top;
+          margin-right: 5px;
+        }
+      }
+
+      .inp {
+        width: 58%;
+        margin-left: 2%;
+        position: relative;
+
+        .inp-over {
+          width: 100%;
+          height: 30px;
+          position: absolute;
+          left: 0;
+          top: 0;
+          background: transparent;
+          z-index: 10;
+        }
+        .text {
+          display: block;
+
+          width: 100%;
+          border: 1px solid #dedede;
+          padding: 0 9px;
+          text-indent: 10px;
+          outline: none;
+          font-size: 14px;
+          margin-bottom: 10px;
+          @include border;
+          &.textarea {
+            height: 120px;
+            resize: none;
+            padding-top: 5px;
+          }
+        }
+        .count {
+          position: absolute;
+          right: 6px;
+          top: 94px;
+          span {
+            color: #ff6000;
+          }
+        }
+        .tick-code,
+        .tick-name {
+          width: 100%;
+          display: inline-block;
+          position: relative;
+        }
+        .tick-name {
+          margin-right: 2%;
+        }
+        .tick-code {
+          display: inline-block;
+          width: 100%;
+          > button {
+            outline: none;
+            border: 0;
+            background: transparent;
+            color: #0a8ddf;
+            position: absolute;
+            right: 5px;
+            top: 2px;
+            &:disabled {
+              color: #9d9d9d;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+
+      .btns {
+        margin: 24px -24px -11px -24px;
+        text-align: right;
+        border-top: 1px solid #dedede;
+        padding-top: 10px;
+        button {
+          margin-right: 24px;
+        }
+        button:first-child {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+.sub-btn {
+  font-size: 14px;
+  margin: 10px 24px;
+  padding: 6.5px 32px;
+  height: 38px;
+}

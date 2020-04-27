@@ -1,0 +1,217 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../../service/request.service";
+import { ActivatedRoute } from '@angular/router';
+import { WarningService } from "../../../../service/warning.service";
+import { atob } from "../../../../model/methods";
+import { Messages } from "../../../../model/msg";
+import { SettleService } from "../../../../service/settle.service";
+@Component({
+  selector: 'rev-case-tabs-materials',
+  templateUrl: './case-tabs-materials.component.html',
+  styleUrls: ['./case-tabs-materials.component.scss']
+})
+export class CaseTabsMaterialsComponent implements OnInit {
+  public materialsList = [];
+  public quoteNo: string;
+  public pveList = [];
+  public index: number = 0;
+  public newcase
+  public cid;
+  constructor(
+    private req: RequestService,
+    private warn: WarningService,
+    private route: ActivatedRoute,
+    private settle: SettleService
+  ) { }
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params && !params["newcase"]) {
+        this.quoteNo = atob(params["quoteNo"]);
+        this.cid = atob(params["aid"]);
+        console.log(this.cid)
+     
+      }
+      else {
+        this.newcase = params["newcase"];
+        // setTimeout(() => {
+        //   if(this.quoteNo){
+        //     this.settle.newLoadCaseHead(this.quoteNo,0).then(res => {
+
+        //     })
+        //   }
+        // }, 400);
+      }
+      this.changeData();
+    })
+  }
+  ngDoCheck() {
+    if (this.settle.getCaseData() && this.newcase) {
+      this.cid = this.settle.getCaseData().id;
+      return
+    }
+    // if (this.settle.getCaseData() && !this.newcase) {
+    //   this.quoteNo = this.settle.getCaseData().quoteNo;
+    // }
+  }
+  //添加
+  addRow() {
+    if (this.cid) {
+      this.index++;
+      this.materialsList.push({ name: '', brand: '', edit: true, key: this.index });
+    } else {
+      this.warn.onError('请先保存完工照,基础信息或者其他图片');
+    }
+
+  }
+  //删除
+  delList(i, key, id) {
+    let url;
+    if (!this.newcase) {
+      url = 'smallDeleteBrand'
+    } else {
+      url = 'newSmallDeleteBrand'
+    }
+    this.req.doPost({
+      url: url,
+      data: {
+        id: id,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          // this.settle.newLoadCaseHead(res.data,0).then(res => {
+          //   this.settle.setCaseData(res);
+          // });
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+    this.materialsList.splice(i, 1);
+    // this.materialsList.find(item => item.key === key).name = this.pveList[0]['name'];
+  }
+  //编辑
+  startEdit(key) {
+    this.materialsList.find(item => item.key === key).edit = true;
+    //暂存
+    this.pveList.splice(0, 1, {
+      name: this.materialsList.find(item => item.key === key).name,
+      brand: this.materialsList.find(item => item.key === key).brand,
+      key: this.materialsList.find(item => item.key === key).key
+    });
+  }
+  //取消
+  cancelEdit(i, key, name, id) {
+    this.materialsList[i].edit = false;
+    this.materialsList[i].name = '';
+    this.materialsList[i].brand = '';
+    this.materialsList.find(item => item.key === key && item.key === this.pveList[0]['key']).name = this.pveList[0]['name'];
+    this.materialsList.find(item => item.key === key && item.key === this.pveList[0]['key']).brand = this.pveList[0]['brand'];
+    this.finishEdit(name, key, id);
+  }
+  //编辑
+  // checkSave(name, key) {
+  //   if (type === 0) {
+  //     this.finishEdit(name, key)
+  //   } else {
+  //     this.saveEdit(key)
+  //   }
+  // }
+
+  // saveEdit(key) {
+  //   let url;
+  //   if (!this.newcase) {
+  //     url = 'smallEditBrand'
+  //   } else {
+  //     url = 'newSmallEditBrand'
+  //   }
+  //   this.req.doPost({
+  //     url: url,
+  //     data: {
+  //       quoteId: this.cid,
+  //       name: this.materialsList.find(item => item.key === key).name,
+  //       brand: this.materialsList.find(item => item.key === key).brand,
+  //     },
+  //     success: res => {
+  //       if (res && res.code == 200) {
+  //         this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+  //         // this.settle.newLoadCaseHead(res.data,0).then(res => {
+  //         //   this.settle.setCaseData(res);
+  //         // });
+  //       } else {
+  //         this.warn.onError(res.msg || Messages.FAIL.DATA);
+  //       }
+  //     }
+  //   })
+  // }
+  //保存
+  finishEdit(name, key, id) {
+    console.log(this.cid)
+    let url;
+    let params = {};
+    this.materialsList.find(item => item.key === key).name = name;
+    this.materialsList.find(item => item.key === key).edit = false;
+    if (!this.newcase) {
+      console.log(this.cid)
+      if (!id) {
+        url = 'smallAddBrand';
+
+        params['quoteId'] = this.cid;
+      } else {
+        url = 'smallEditBrand';
+        params['id'] = id;
+      }
+    } else {
+      if (!id) {
+        url = 'newSmallAddBrand';
+        params['quoteId'] = this.cid;
+      } else {
+        url = 'newSmallEditBrand';
+        params['id'] = id;
+      }
+    }
+    params['name'] = this.materialsList.find(item => item.key === key).name;
+    params['brand'] = this.materialsList.find(item => item.key === key).brand;
+    this.req.doPost({
+      url: url,
+      data: params,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          // this.changeData();
+          // this.settle.newLoadCaseHead(res.data,0).then(res => {
+          //   this.settle.setCaseData(res);
+          // });
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  changeData() {
+    let url;
+    if (this.newcase) {
+      url = "newSmallProgramMaterls"
+    } else {
+      url = "smallProgramMaterls"
+    }
+    this.req.doPost({
+      url: url,
+      data: {
+        quoteId: this.cid,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.materialsList = res.data;
+          this.materialsList.filter((v,i)=>{
+            v['key']=i;
+          })
+        } else {
+          // this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+} 

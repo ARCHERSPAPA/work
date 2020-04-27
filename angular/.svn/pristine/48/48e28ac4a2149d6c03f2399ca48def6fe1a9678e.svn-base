@@ -1,0 +1,142 @@
+import { Component, OnInit, Input } from '@angular/core';
+import { Default } from "../../model/constant";
+import { RequestService } from "../../service/request.service";
+import { WarningService } from "../../service/warning.service";
+import { Messages } from "../../model/msg";
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+@Component({
+    selector: 'rev-relevant',
+    templateUrl: './relevant.component.html',
+    styleUrls: ['./../info/info.component.scss', './../info/info-designers/info-designers.component.scss']
+})
+export class RelevantComponent implements OnInit {
+
+    @Input() type: number;
+    @Input() user: any;
+
+    /***查询***/
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public departmentId: string;
+
+
+    public staffList: Array<any>;
+
+    public departList: any;
+
+    public title: string;
+
+    public departType:number;
+
+    /**
+     * 当前选择后的人
+     */
+    public design: Array<any>=[];
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        public activeModal: NgbActiveModal) {
+    }
+
+    ngOnInit() {
+        this.title = "选择" + this.getTitle(this.type);
+        this.departType = this.getDepartType(this.type);
+        if (this.user) {
+            this.design= [this.user];
+        }
+    }
+
+    selectDepartmentId(e) {
+        this.departmentId = e;
+        this.changeData(true);
+    }
+
+
+    changeData(...args) {
+        let that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        that.request.doPost({
+            url: "listEmployeeByPermit",
+            data: {
+                pageNo: that.pageNo,
+                pageSize: that.pageSize,
+                departmentId: that.departmentId,
+                state: 0
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.staffList = res.data.pageSet;
+                    that.staffList.filter(item=>{
+                        item['checked']=false;
+                        if(this.design[0] && this.design[0].id==item.id){
+                            item['checked']=this.design[0]['checked']
+                        }
+                    })
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    selectRelevant(design:any){
+        this.staffList.forEach(item=>{
+            if(item.id==design.id){
+                this.design=[design];
+            }else{
+                item["checked"] = false;
+                return item;
+            } 
+        })
+        if(this.staffList.every(i=>{
+            return i["checked"]==false
+        })){
+            this.design=[];
+        }
+    }
+
+
+    relevantOk() {
+        this.activeModal.close(JSON.stringify(this.design[0]));
+    }
+
+    getTitle(type) {
+        switch (type) {
+            case 1:
+                return "负责人";
+            case 2:
+                return "设计师";
+            case 3:
+                return "复用人员";
+            case 4:
+                return "成本员";
+            case 5:
+                return "交接人员";
+            default:
+                return "负责人";
+        }
+    }
+
+    /**
+     * 调用部门数据
+     * @param type
+     * @returns {number}
+     */
+    getDepartType(type){
+        switch(type){
+            case 1: return 11;
+            case 2: return 12;
+            case 3: return 11;
+            case 4: return 11;
+            case 5: return 11;
+            default: return 11;
+        }
+    }
+
+}

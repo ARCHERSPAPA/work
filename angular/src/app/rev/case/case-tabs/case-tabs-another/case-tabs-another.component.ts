@@ -21,15 +21,17 @@ export class CaseTabsAnotherComponent implements OnInit {
   public effectPicture: string;
   public realisticPicture: string;
   //判断是不是已经发布
-  public isDown:number;
+  // public isDown: number;
   public anotherForm: FormGroup;
-  public quoteNo: any;
-  public cid:string;
+  public quoteNo: any;//项目编号
+  public cid: string; //项目主键
+  public newcase: boolean = false;
   constructor(
     private modalService: NgbModal,
+    private router: Router,
     private req: RequestService,
-    private settle: SettleService,
     private warn: WarningService,
+    private settle: SettleService,
     private fb: FormBuilder,
     private _lightbox: Lightbox,
     private route: ActivatedRoute,
@@ -39,9 +41,31 @@ export class CaseTabsAnotherComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      if (params && params["quoteNo"]) {
+      if (params && !params["newcase"]) {
         this.quoteNo = atob(params["quoteNo"]);
-        this.cid= atob(params["aid"]);
+        this.cid = atob(params["aid"]);
+        //top案例中的初始化
+        this.loadCaseInfo();
+      }
+      else {
+        this.newcase = params["newcase"];
+        //其他案例中的详情初始化
+        if (params && params["quoteNo"]) {
+          this.quoteNo = atob(params["quoteNo"]);
+        }
+        setTimeout(() => {
+          if (this.quoteNo) {
+            this.settle.newLoadCaseHead(this.quoteNo, 0).then(res => {
+              this.effectPicture = res['vrResultImg'];
+              this.realisticPicture = res['vrLiveImg'];
+              if (res['newStyleImg']) {
+                this.imgList = res['newStyleImg'];
+              } else {
+                this.imgList = [];
+              }
+            })
+          }
+        }, 400);
       }
     })
     this.anotherForm = this.fb.group({
@@ -52,12 +76,16 @@ export class CaseTabsAnotherComponent implements OnInit {
         Validators.required,
       ]],
     })
-    this.loadCaseInfo();
   }
-//获取Setter的状态
-  ngDoCheck(){
-    if(this.settle.getCaseData()){
-      this.isDown=this.settle.getCaseData().isDown;
+  //获取Setter的状态
+  ngDoCheck() {
+    //top案例和其他案例不一样
+    if (this.settle.getCaseData() && this.newcase) {
+      this.quoteNo = this.settle.getCaseData().quoteId;
+    } else {
+      if (this.settle.getCaseData() && this.settle.getCaseData().quoteNo) {
+        this.quoteNo = this.settle.getCaseData().quoteNo;
+      }
     }
   }
 
@@ -71,12 +99,13 @@ export class CaseTabsAnotherComponent implements OnInit {
       });
       modalRef.componentInstance.name = "新增图片";
       modalRef.componentInstance.open = true;
-      modalRef.componentInstance.total=6;
-      modalRef.componentInstance.size=2;
-      modalRef.componentInstance.cid=this.cid;
+      modalRef.componentInstance.total = 6;
+      modalRef.componentInstance.size = 2;
+      modalRef.componentInstance.cid = this.cid;
       modalRef.componentInstance.split = this.split;
       // modalRef.componentInstance.cid = this.id ? this.id : Math.ceil(Math.random() * 100);
       modalRef.result.then((result) => {
+
         result.forEach(item => {
           if (this.imgList.length && this.imgList.length > 4) {
             this.warn.onWarn(Messages.ERROR.CASE_IMG_MAX);
@@ -88,7 +117,7 @@ export class CaseTabsAnotherComponent implements OnInit {
     }
   }
 
-//打开图片放大
+  //打开图片放大
   openModal(index) {
     let _albums = []
     this.imgList.forEach((i) => {
@@ -116,25 +145,60 @@ export class CaseTabsAnotherComponent implements OnInit {
       })
     });
   }
-  
-//提交
-  submit() {
-    //已发布不能编辑操作
-    if(this.isDown!=0){
-      this.warn.onWarn(Messages.ERROR.EDIT_ERROR);
-      return;
-    }
+
+  //判断是新建时的保存还是详情的保存
+  checkImg() {
     let img = [];
     if (this.imgList && this.imgList.length > 0) {
       this.imgList.forEach(item => {
         img.push(item);
       })
     }
+    if (this.newcase) {
+      this.newCaseSave(img);
+    } else {
+      this.submit(img)
+    }
+  }
+//新建案例的保存
+  newCaseSave(img) {
+    this.req.doPost({
+      url: "newSmallProgramSave",
+      data: {
+        quoteId: this.quoteNo,
+        isSave: 2,
+        styleImg: img,
+        vrResultImg: this.effectPicture ? this.effectPicture : '',
+        vrLiveImg: this.realisticPicture ? this.realisticPicture : ''
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          if (!this.quoteNo) {
+            this.router.navigate(["/rev/case/detail/another"], { queryParams: { newcase: true, quoteNo: btoa(res.data) } });
+          }
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.settle.newLoadCaseHead(res.data, 0).then(res => {
+            this.settle.setCaseData(res);
+          });
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  //提交
+  submit(img) {
+    //已发布不能编辑操作
+    // if(this.isDown!=0){
+    //   this.warn.onWarn(Messages.ERROR.EDIT_ERROR);
+    //   return;
+    // }
     this.req.doPost({
       url: "smallProgramSave",
       data: {
         quoteNo: this.quoteNo,
-        isSave:2,
+        isSave: 2,
         styleImg: img,
         vrResultImg: this.effectPicture ? this.effectPicture : '',
         vrLiveImg: this.realisticPicture ? this.realisticPicture : ''
@@ -151,6 +215,6 @@ export class CaseTabsAnotherComponent implements OnInit {
 
   styleImg(img) {
     return setStyleBg(img, 160, 160);
-}
+  }
 
 }

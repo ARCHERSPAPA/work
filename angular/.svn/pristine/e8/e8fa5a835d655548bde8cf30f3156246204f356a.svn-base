@@ -1,0 +1,77 @@
+<div nz-row class="case-head" >
+    <div class="case-title">
+        <span>
+            <span  *ngIf="case && case.customerHouseAddress">
+                {{case.customerHouseAddress}}
+            </span>
+            <span *ngIf="case && case.customerRoomNumber">
+                ({{case.customerRoomNumber?case.customerRoomNumber:''}})
+            </span>
+        </span>
+        <div class="edit">
+            <!-- <a (click)="showModal()" href="javascript:void(0)" *ngIf="case.isDown==0">
+                编辑
+            </a> -->
+            <a (click)="showModal()" href="javascript:void(0)">
+                编辑
+            </a>
+        </div>
+    </div>
+
+    <div class="case-head-left" nz-col>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span nz-col nzSpan="8">客户：{{case.customerName?case.customerName:'--'}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span class="state">装修类型：{{case.decorateType?case.decorateType:'--'}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span class="state">设计师：{{case.designerName?case.designerName:'--'}}<span *ngIf="case && case.designerPhone"
+                    class="display Grey">({{case.designerPhone}})</span></span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16 ">
+            <span class="state Grey">项目ID：{{case.quoteNo?case.quoteNo:'--'}}</span>
+        </p>
+    </div>
+
+    <div class="case-head-left" nz-col>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>面积：{{case && case.customerHouseArea? case.customerHouseArea:'--'}} <span
+                    class="display">m<sup>2</sup></span></span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>装修风格：{{case && case.style? case.style:'--'}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>工长：{{case && case.foremanName? case.foremanName:'--'}}
+                <span class="display Grey" *ngIf="case && case.foremanPhone">({{case.foremanPhone}})</span></span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16 ">
+            <span class="Grey">状态：{{getcaseName(case.state)}}<span class="Grey display"
+                    *ngIf="case && case.completionTime">({{case.completionTime|date:'yyyy-MM-dd'}})</span></span>
+        </p>
+
+    </div>
+    <div class="case-head-left" nz-col>
+        <p nz-col nzSpan="24" class="mt-16" style="margin-bottom: 34px;">
+            <span>户型：{{case && case.customerHouseType? case.customerHouseType:'--'}}</span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>监理：{{case && case.supervisorName? case.supervisorName:'--'}}
+                <span class="display Grey" *ngIf="case && case.supervisorPhone">({{case.supervisorPhone}})</span>
+            </span>
+        </p>
+    </div>
+    <div class="case-head-right" nz-col>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span class="ft-20">
+                {{(case.finalPrice?case.finalPrice:0)|number:'1.2'}}
+            </span>
+        </p>
+        <p nz-col nzSpan="24" class="mt-16">
+            <span>
+                合同金额
+            </span>
+        </p>
+    </div>
+</div>

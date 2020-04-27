@@ -1,0 +1,1391 @@
+<div class="detail-add">
+    <ul *ngIf="type === 9">
+        <form [formGroup]="clientForm">
+            <nz-form-item class="detail-add-title layout">
+                <nz-form-label [nzSpan]="5">部门及负责人</nz-form-label>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>所属部门</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectDepart()"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择所属部门" formControlName="departmentName"
+                        name="departmentName" [(ngModel)]="departmentName" readonly />
+                     
+                    <input nz-input type="hidden" formControlName="departmentId" name="departmentId"
+                        autocomplete="off" [(ngModel)]="departmentId" />
+                        <nz-form-explain *ngIf="clientForm.get('departmentId').dirty && clientForm.get('departmentId').errors">
+                            <ng-container *ngIf="clientForm.get('departmentId').hasError('required')">
+                                必选所属部门
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">负责人</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectRelevant(1)"></div>
+                    <input nz-input type="hidden" formControlName="personLiableId" name="personLiableId"
+                    [(ngModel)]="personLiableId" />
+                <input nz-input type="text" class="text" placeholder="请选择负责人" formControlName="personLiableName"
+                    name="personLiableName" [(ngModel)]="personLiableName" readonly="readonly" />
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户来源</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-select  [(ngModel)]="sourceId" (ngModelChange)="selectSource()"
+                                formControlName="sourceId" name="sourceId"
+                                nzAllowClear nzPlaceHolder="请选择客户来源渠道">
+                        <nz-option  *ngFor="let source of sourceList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
+                      </nz-select>
+                      <input nz-input type="hidden" formControlName="sourceInfo" name="sourceInfo"
+                      [(ngModel)]="sourceInfo" />
+                        <nz-form-explain *ngIf="clientForm.get('sourceId').dirty && clientForm.get('sourceId').errors">
+                            <ng-container *ngIf="clientForm.get('sourceId').hasError('required')">
+                                必选客户来源
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="detail-add-title layout" style="margin-top: 24px;">
+                <nz-form-label [nzSpan]="5">客户资料</nz-form-label>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户姓名</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户姓名" formControlName="customerName"
+                    name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" />
+                        <nz-form-explain *ngIf="clientForm.get('customerName').dirty && clientForm.get('customerName').errors">
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('text')">
+                                &nbsp;&nbsp;只能输入英文或者中文
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入50位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>客户姓名</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户姓名" formControlName="customerName"
+                        name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" />
+                    <div [hidden]="clientForm.get('customerName').valid || clientForm.get('customerName').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['customerName'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('text',['customerName'])">&nbsp;&nbsp;只能输入英文或者中文</span>
+                        <span [hidden]="!clientForm.hasError('minlength',['customerName'])">&nbsp;&nbsp;至少输入2位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['customerName'])">&nbsp;&nbsp;至多输入50位字符</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户手机号</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                    name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone"
+                    [ngClass]="{'disabled':controlPhoneByState()}" [readonly]="controlPhoneByState()" />
+                        <nz-form-explain *ngIf="clientForm.get('customerPhone').dirty && clientForm.get('customerPhone').errors">
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>客户手机号</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                        name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone"
+                        [ngClass]="{'disabled':controlPhoneByState()}" [readonly]="controlPhoneByState()" />
+                    <div [hidden]="clientForm.get('customerPhone').valid || clientForm.get('customerPhone').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['customerPhone'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('phone',['customerPhone'])">输入手机号码格式不正确</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>装修地址</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="10">
+                        <input nz-input type="text" class="text hemi" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" />
+                    </span>
+                    <span nz-col [nzSpan]="2"[nzOffset]="2" class="typename">房号</span>
+                    <span nz-col [nzSpan]="10" style="float:right">
+                        <input nz-input type="text" class="text hemi" placeholder="具体房号" formControlName="roomNumber"
+                            name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" />
+                    </span >
+                        <nz-form-explain *ngIf="clientForm.get('address').dirty && clientForm.get('address').errors">
+                            <ng-container *ngIf="clientForm.get('address').hasError('required')">
+                                必填地址信息
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('account')">
+                                输入地址格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入30位字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('roomNumber').dirty && clientForm.get('roomNumber').errors">
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>装修地址</label>
+                <div class="inp hemi"> -->
+                    <!--start 2019年07月25是取消选择市区--->
+                    <!--<select class="text semi" formControlName="cityId" name="cityId" [(ngModel)]="cityId"-->
+                    <!--(change)="selectArea(cityId)">-->
+                    <!--<option value="">&#45;&#45;请选择城市名称&#45;&#45;</option>-->
+                    <!--<option [value]="area.id" *ngFor="let area of areas">{{area.name}}</option>-->
+                    <!--</select>-->
+                    <!--<input type="hidden" formControlName="cityName" name="cityName" [(ngModel)]="cityName"/>-->
+                    <!--<select class="text semi" formControlName="areaId" name="areaId" [(ngModel)]="areaId"-->
+                    <!--(change)="selectDistrict()">-->
+                    <!--<option value="">&#45;&#45;请选择城区名称&#45;&#45;</option>-->
+                    <!--<option [value]="d.id" *ngFor="let d of districts">{{d.name}}</option>-->
+                    <!--</select>-->
+                    <!--<input type="hidden" formControlName="areaName" name="areaName" [(ngModel)]="areaName"/>-->
+                    <!--<input type="text" class="text semi" placeholder="楼盘名称" formControlName="address"-->
+                    <!--name="address" autocomplete="off" maxlength="32" [(ngModel)]="address"/>-->
+                    <!--<input type="text" class="text semi semi-last" placeholder="具体房号" formControlName="roomNumber"-->
+                    <!--name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber"/>-->
+                    <!--<div [hidden]="clientForm.get('cityId').valid || clientForm.get('cityId').pristine" class="error">-->
+                    <!--<span [hidden]="!clientForm.hasError('required',['cityId'])">必选城市</span>-->
+                    <!--</div>-->
+                    <!--<div [hidden]="clientForm.get('areaId').valid || clientForm.get('areaId').pristine" class="error">-->
+                    <!--<span [hidden]="!clientForm.hasError('required',['areaId'])">必选地区</span>-->
+                    <!--</div>-->
+                    <!-- <span class="label w50">
+                        <input nz-input type="text" class="text hemi" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" />
+                    </span>
+                    <span class="label w50">
+                        <input nz-input type="text" class="text hemi" placeholder="具体房号" formControlName="roomNumber"
+                            name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" />
+                    </span>
+                    <div [hidden]="clientForm.get('address').valid || clientForm.get('address').pristine" class="error">
+                        <span [hidden]="!clientForm.hasError('required',['address'])">必填地址信息</span>
+                        <span [hidden]="!clientForm.hasError('account',['address'])">输入地址格式不正确</span>
+                        <span [hidden]="!clientForm.hasError('minlength',['address'])">&nbsp;&nbsp;至少输入1位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['address'])">&nbsp;&nbsp;至多输入30位字符</span>
+                    </div>
+                    <div [hidden]="clientForm.get('roomNumber').valid || clientForm.get('roomNumber').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('minlength',['roomNumber'])">&nbsp;&nbsp;至少输入1位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['roomNumber'])">&nbsp;&nbsp;至多输入10位字符</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">地址定位</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div class="inp-text" (click)="openModal('address',gpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="gpsAddress" name="gpsAddress" [(ngModel)]="gpsAddress" />
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">地址定位</label>
+                <div class="inp">
+                    <div class="inp-text" (click)="openModal('address',gpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="gpsAddress" name="gpsAddress" [(ngModel)]="gpsAddress" />
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">房屋户型</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="12">
+                        <nz-input-number  placeholder="请输入房间数" style="width:100%"
+                        formControlName="roomType" name="roomType"  autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                        <!-- <input nz-input type="text" class="text hemi" placeholder="请输入房间数"
+                        formControlName="roomType" name="roomType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 263px;">室</span>
+                <span nz-col [nzSpan]="12" >
+                    <nz-input-number  placeholder="请输入卫生间数" style="width:100%"
+                        formControlName="toiletType" name="toiletType"  autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                    <!-- <input nz-input type="text" class="text  hemi" placeholder="请输入卫生间数"
+                        formControlName="toiletType" name="toiletType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 24px;">卫</span>
+                        <nz-form-explain *ngIf="clientForm.get('roomType').dirty && clientForm.get('roomType').errors">
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('min')">
+                                输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('max')">
+                               输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('toiletType').dirty && clientForm.get('toiletType').errors">
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('min')">
+                                &nbsp;&nbsp;输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('max')">
+                                &nbsp;&nbsp;输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">房屋户型</label> -->
+                <!---version III pass away start--->
+                <!--<div class="inp model">-->
+                <!--<span class="label">卧室<input type="text" class="text model" placeholder="卧室" formControlName="roomType"-->
+                <!--name="roomType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="roomType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">客厅<input type="text" class="text model" placeholder="客厅"-->
+                <!--formControlName="parlourType"-->
+                <!--name="parlourType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="parlourType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">餐厅<input type="text" class="text model" placeholder="餐厅"-->
+                <!--formControlName="restaurant"-->
+                <!--name="restaurant" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="restaurant"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">卫生间<input type="text" class="text  model" placeholder="卫生间"-->
+                <!--formControlName="toiletType"-->
+                <!--name="toiletType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="toiletType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">厨房<input type="text" class="text model" placeholder="厨房"-->
+                <!--formControlName="kitchenType"-->
+                <!--name="kitchenType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="kitchenType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">阳台<input type="text" class="text model" placeholder="阳台"-->
+                <!--formControlName="balcony"-->
+                <!--name="balcony" maxlength="1" autocomplete="off" [(ngModel)]="balcony"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<div [hidden]="clientForm.get('roomType').valid || clientForm.get('roomType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['roomType'])">输入卧室数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('parlourType').valid || clientForm.get('parlourType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['parlourType'])">输入客厅数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('toiletType').valid || clientForm.get('toiletType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['toiletType'])">输入卫生间数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('kitchenType').valid || clientForm.get('kitchenType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['kitchenType'])">输入厨房数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('balcony').valid || clientForm.get('balcony').pristine" class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['balcony'])">输入阳台数量不正确</span>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!---version III pass away end--->
+
+                <!---version IV start--->
+                <!-- <div class="inp hemi">
+                    <span class="label w50"><input nz-input type="text" class="text hemi" placeholder="请输入房间数"
+                            formControlName="roomType" name="roomType" maxlength="3" autocomplete="off"
+                            [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                            [readonly]="controlHouseTypeByState()" />室</span>
+                    <span class="label w50"><input nz-input type="text" class="text  hemi" placeholder="请输入卫生间数"
+                            formControlName="toiletType" name="toiletType" maxlength="3" autocomplete="off"
+                            [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                            [readonly]="controlHouseTypeByState()" />卫</span>
+                    <div [hidden]="clientForm.get('roomType').valid || clientForm.get('roomType').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('numberMin',['roomType'])">输入房间数量不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['roomType'])">输入房间数量至少为0</span>
+                        <span [hidden]="!clientForm.hasError('max',['roomType'])">输入房间数量至多为100</span>
+                    </div>
+                    <div [hidden]="clientForm.get('toiletType').valid || clientForm.get('toiletType').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('numberMin',['toiletType'])">输入卫生间数量不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['toiletType'])">&nbsp;&nbsp;输入卫生间至少为0</span>
+                        <span [hidden]="!clientForm.hasError('max',['toiletType'])">&nbsp;&nbsp;输入卫生间数量至多为100</span>
+                    </div>
+                </div> -->
+                <!---version IV end--->
+
+            <!-- </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>房屋面积</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number  placeholder="请输入客户的房屋面积" style="width:100%"
+                    formControlName="houseArea" name="houseArea"  autocomplete="off"
+                    [(ngModel)]="houseArea" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                   [nzMin]="1" [nzMax]="99999" [nzStep]="1"></nz-input-number>
+                   <span class="position-name" style="right: 24px;">
+                       m<sup>2</sup>
+                   </span>
+                    <!-- <input nz-input type="text" class="text" placeholder="请输入客户的房屋面积" formControlName="houseArea"
+                    name="houseArea" autocomplete="off" maxlength="6" [(ngModel)]="houseArea"
+                    [ngClass]="{'disabled':controlHouseTypeByState()}" [readonly]="controlHouseTypeByState()" /> -->
+                    <nz-form-explain *ngIf="clientForm.get('houseArea').dirty && clientForm.get('houseArea').errors">
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('decimal')">
+                            &nbsp;&nbsp;输入房屋面积不正确
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('min')">
+                            &nbsp;&nbsp;至少输入比1大
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('max')">
+                            &nbsp;&nbsp;至多输入为99999
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>房屋面积</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户的房屋面积" formControlName="houseArea"
+                        name="houseArea" autocomplete="off" maxlength="6" [(ngModel)]="houseArea"
+                        [ngClass]="{'disabled':controlHouseTypeByState()}" [readonly]="controlHouseTypeByState()" />
+                    <div [hidden]="clientForm.get('houseArea').valid || clientForm.get('houseArea').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['houseArea'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('decimal',['houseArea'])">&nbsp;&nbsp;输入房屋面积不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['engineeringArea'])">&nbsp;&nbsp;至少输入比1大</span>
+                        <span [hidden]="!clientForm.hasError('max',['engineeringArea'])">&nbsp;&nbsp;至多输入为99999</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" style='vertical-align: top;line-height: 19px;'>备注</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                    name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                <nz-form-explain *ngIf="clientForm.get('remarks').dirty && clientForm.get('remarks').errors">
+                    <ng-container *ngIf="clientForm.get('remarks').hasError('maxlength')">
+                        至多输入120位字符
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">备注</label>
+                <div class="inp">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                        name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                    <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                    <div [hidden]="clientForm.get('remarks').valid || clientForm.get('remarks').pristine" class="error">
+                        <span [hidden]="!clientForm.hasError('maxlength',['remarks'])">至多输入120位字符</span>
+                    </div>
+                </div>
+            </li> -->
+
+            <li>
+                <div class="btns">
+                    <button nz-button nzType="default" (click)="exist($event)">关闭</button>
+                    <button nz-button nzType="primary" [disabled]="!clientForm.valid"
+                        (click)="submit($event)">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+    </ul>
+
+    <ul *ngIf="type === 10">
+        <form [formGroup]="clientForm">
+            <nz-form-item class="detail-add-title layout">
+                <nz-form-label [nzSpan]="5">部门及负责人</nz-form-label>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>所属部门</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectDepart()"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择所属部门" formControlName="departmentName"
+                        name="departmentName" [(ngModel)]="departmentName" readonly />
+                    <input nz-input type="hidden" formControlName="departmentId" name="departmentId"
+                        autocomplete="off" [(ngModel)]="departmentId" />
+                        <nz-form-explain *ngIf="clientForm.get('departmentId').dirty && clientForm.get('departmentId').errors">
+                            <ng-container *ngIf="clientForm.get('departmentId').hasError('required')">
+                                必选所属部门
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">负责人</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectRelevant(1)"></div>
+                    <input nz-input type="hidden" formControlName="personLiableId" name="personLiableId"
+                    [(ngModel)]="personLiableId" />
+                <input nz-input type="text" class="text" placeholder="请选择负责人" formControlName="personLiableName"
+                    name="personLiableName" [(ngModel)]="personLiableName" readonly="readonly" />
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户来源</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-select  [(ngModel)]="sourceId" (ngModelChange)="selectSource()"
+                                formControlName="sourceId"name="sourceId"
+                                nzAllowClear nzPlaceHolder="--请选择客户来源渠道--">
+                        <nz-option  *ngFor="let source of sourceList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
+                      </nz-select>
+                      <input nz-input type="hidden" formControlName="sourceInfo" name="sourceInfo"
+                      [(ngModel)]="sourceInfo" />
+                        <nz-form-explain *ngIf="clientForm.get('sourceId').dirty && clientForm.get('sourceId').errors">
+                            <ng-container *ngIf="clientForm.get('sourceId').hasError('required')">
+                                必选客户来源
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="detail-add-title layout" style="margin-top: 24px;">
+                <nz-form-label [nzSpan]="5">客户资料</nz-form-label>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户姓名</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户姓名" formControlName="customerName"
+                    name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" />
+                        <nz-form-explain *ngIf="clientForm.get('customerName').dirty && clientForm.get('customerName').errors">
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('text')">
+                                &nbsp;&nbsp;只能输入英文或者中文
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入50位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户手机号</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                    name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone"
+                    [ngClass]="{'disabled':controlPhoneByState()}" [readonly]="controlPhoneByState()" />
+                        <nz-form-explain *ngIf="clientForm.get('customerPhone').dirty && clientForm.get('customerPhone').errors">
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>装修地址</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="10">
+                        <input nz-input type="text" class="text hemi" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" />
+                    </span>
+                    <span nz-col [nzSpan]="2"[nzOffset]="2" class="typename">房号</span>
+                    <span nz-col [nzSpan]="10" style="float:right">
+                        <input nz-input type="text" class="text hemi" placeholder="具体房号" formControlName="roomNumber"
+                            name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" />
+                    </span >
+                        <nz-form-explain *ngIf="clientForm.get('address').dirty && clientForm.get('address').errors">
+                            <ng-container *ngIf="clientForm.get('address').hasError('required')">
+                                必填地址信息
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('account')">
+                                输入地址格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入30位字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('roomNumber').dirty && clientForm.get('roomNumber').errors">
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">地址定位</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div class="inp-text" (click)="openModal('address',gpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="gpsAddress" name="gpsAddress" [(ngModel)]="gpsAddress" />
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">房屋户型</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="12">
+                        <nz-input-number  placeholder="请输入房间数" style="width:100%"
+                        formControlName="roomType" name="roomType"  autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                    </span><span class="typename position-name" style="right: 263px;">室</span>
+                <span nz-col [nzSpan]="12" >
+                    <nz-input-number  placeholder="请输入卫生间数" style="width:100%"
+                        formControlName="toiletType" name="toiletType"  autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                    </span><span class="typename position-name" style="right: 24px;">卫</span>
+                        <nz-form-explain *ngIf="clientForm.get('roomType').dirty && clientForm.get('roomType').errors">
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('min')">
+                                输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('max')">
+                               输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('toiletType').dirty && clientForm.get('toiletType').errors">
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('min')">
+                                &nbsp;&nbsp;输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('max')">
+                                &nbsp;&nbsp;输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>房屋面积</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number  placeholder="请输入客户的房屋面积" style="width:100%"
+                    formControlName="houseArea" name="houseArea"  autocomplete="off"
+                    [(ngModel)]="houseArea" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                   [nzMin]="1" [nzMax]="99999" [nzStep]="1"></nz-input-number>
+                   <span class="position-name" style="right: 24px;">
+                       m<sup>2</sup>
+                   </span>
+                    <nz-form-explain *ngIf="clientForm.get('houseArea').dirty && clientForm.get('houseArea').errors">
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('decimal')">
+                            &nbsp;&nbsp;输入房屋面积不正确
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('min')">
+                            &nbsp;&nbsp;至少输入比1大
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('max')">
+                            &nbsp;&nbsp;至多输入为99999
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" style='vertical-align: top;line-height: 19px;'>备注</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                    name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                <nz-form-explain *ngIf="clientForm.get('remarks').dirty && clientForm.get('remarks').errors">
+                    <ng-container *ngIf="clientForm.get('remarks').hasError('maxlength')">
+                        至多输入120位字符
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <li>
+                <div class="btns">
+                    <button nz-button nzType="default" (click)="exist($event)">关闭</button>
+                    <button nz-button nzType="primary" [disabled]="!clientForm.valid"
+                        (click)="submit($event)">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+    </ul>
+
+    <ul *ngIf="type === 11">
+        <form [formGroup]="clientForm">
+            <nz-form-item class="detail-add-title layout">
+                <nz-form-label [nzSpan]="5">部门及负责人</nz-form-label>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">所属部门</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectDepart()"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择所属部门" formControlName="departmentName"
+                        name="departmentName" [(ngModel)]="departmentName" readonly />
+                    <input nz-input type="hidden" formControlName="departmentId" name="departmentId"
+                        autocomplete="off" [(ngModel)]="departmentId" />
+                        <nz-form-explain *ngIf="clientForm.get('departmentId').dirty && clientForm.get('departmentId').errors">
+                            <ng-container *ngIf="clientForm.get('departmentId').hasError('required')">
+                                必选所属部门
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li class="detail-add-title">
+                部门及负责人
+            </li>
+            <li>
+                <label class="label"><span class="icon">*</span>所属部门</label>
+                <div class="inp">
+                    <div class="inp-text" (click)="selectDepart()"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择所属部门" formControlName="departmentName"
+                        name="departmentName" [(ngModel)]="departmentName" />
+                    <input type="hidden" formControlName="departmentId" name="departmentId" autocomplete="off"
+                        [(ngModel)]="departmentId" />
+                    <div [hidden]="clientForm.get('departmentId').valid || clientForm.get('departmentId').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['departmentId'])">必选所属部门</span>
+                    </div>
+                </div>
+            </li> -->
+
+            <!----version IV add start--->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">负责人</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div nz-col [nzSpan]="20"class="inp-text" (click)="selectRelevant(1)"></div>
+                    <input nz-input type="hidden" formControlName="personLiableId" name="personLiableId"
+                    [(ngModel)]="personLiableId" />
+                <input nz-input type="text" class="text" placeholder="请选择负责人" formControlName="personLiableName"
+                    name="personLiableName" [(ngModel)]="personLiableName" readonly="readonly" />
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">负责人</label>
+                <div class="inp">
+                    <div class="inp-text" (click)="selectRelevant(1)"></div>
+                    <input nz-input type="hidden" formControlName="personLiableId" name="personLiableId"
+                        [(ngModel)]="personLiableId" />
+                    <input nz-input type="text" class="text" placeholder="请选择负责人" formControlName="personLiableName"
+                        name="personLiableName" [(ngModel)]="personLiableName" readonly="readonly" />
+                </div>
+            </li> -->
+            <!--<li>-->
+            <!--<label class="label">设计师</label>-->
+            <!--<div class="inp">-->
+            <!--<div class="inp-text" (click)="selectRelevant(2)"></div>-->
+            <!--<input type="hidden" formControlName="designerId" name="designerId" [(ngModel)]="designerId" />-->
+            <!--<input type="text" class="text" placeholder="请选择设计师" formControlName="designerName"-->
+            <!--name="designerName" [(ngModel)]="designerName" readonly="readonly"/>-->
+            <!--</div>-->
+            <!--</li>-->
+            <!----version IV add end---->
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户来源</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-select  [(ngModel)]="sourceId" (ngModelChange)="selectSource()"formControlName="sourceId"name="sourceId" nzAllowClear nzPlaceHolder="--请选择客户来源渠道--">
+                        <nz-option  *ngFor="let source of sourceList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
+                      </nz-select>
+                      <input nz-input type="hidden" formControlName="sourceInfo" name="sourceInfo"
+                      [(ngModel)]="sourceInfo" />
+                        <nz-form-explain *ngIf="clientForm.get('sourceId').dirty && clientForm.get('sourceId').errors">
+                            <ng-container *ngIf="clientForm.get('sourceId').hasError('required')">
+                                必选客户来源
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>客户来源</label>
+                <div class="inp">
+                 
+                    <select class="text" formControlName="sourceId" name="sourceId" [(ngModel)]="sourceId"
+                        (change)="selectSource()">
+                        <option value="">--请选择客户来源渠道--</option>
+                        <option *ngFor="let source of sourceList" [value]="source.id">{{source.name}}</option>
+                    </select>
+                    <input nz-input type="hidden" formControlName="sourceInfo" name="sourceInfo"
+                        [(ngModel)]="sourceInfo" />
+                    <div [hidden]="clientForm.get('sourceId').valid || clientForm.get('sourceId').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['sourceId'])">必选客户来源</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="detail-add-title layout" style="margin-top: 24px;">
+                <nz-form-label [nzSpan]="5">客户资料</nz-form-label>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户姓名</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户姓名" formControlName="customerName"
+                    name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" />
+                        <nz-form-explain *ngIf="clientForm.get('customerName').dirty && clientForm.get('customerName').errors">
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('text')">
+                                &nbsp;&nbsp;只能输入英文或者中文
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入50位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>客户姓名</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户姓名" formControlName="customerName"
+                        name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" />
+                    <div [hidden]="clientForm.get('customerName').valid || clientForm.get('customerName').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['customerName'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('text',['customerName'])">&nbsp;&nbsp;只能输入英文或者中文</span>
+                        <span [hidden]="!clientForm.hasError('minlength',['customerName'])">&nbsp;&nbsp;至少输入2位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['customerName'])">&nbsp;&nbsp;至多输入50位字符</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>客户手机号</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                    name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone"
+                    [ngClass]="{'disabled':controlPhoneByState()}" [readonly]="controlPhoneByState()" />
+                        <nz-form-explain *ngIf="clientForm.get('customerPhone').dirty && clientForm.get('customerPhone').errors">
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>客户手机号</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                        name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone"
+                        [ngClass]="{'disabled':controlPhoneByState()}" [readonly]="controlPhoneByState()" />
+                    <div [hidden]="clientForm.get('customerPhone').valid || clientForm.get('customerPhone').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['customerPhone'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('phone',['customerPhone'])">输入手机号码格式不正确</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>装修地址</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="10">
+                        <input nz-input type="text" class="text hemi" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" />
+                    </span>
+                    <span nz-col [nzSpan]="2"[nzOffset]="2" class="typename">房号</span>
+                    <span nz-col [nzSpan]="10" style="float:right">
+                        <input nz-input type="text" class="text hemi" placeholder="具体房号" formControlName="roomNumber"
+                            name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" />
+                    </span >
+                        <nz-form-explain *ngIf="clientForm.get('address').dirty && clientForm.get('address').errors">
+                            <ng-container *ngIf="clientForm.get('address').hasError('required')">
+                                必填地址信息
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('account')">
+                                输入地址格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入30位字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('roomNumber').dirty && clientForm.get('roomNumber').errors">
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>装修地址</label>
+                <div class="inp hemi"> -->
+                    <!--start 2019年07月25是取消选择市区--->
+                    <!--<select class="text semi" formControlName="cityId" name="cityId" [(ngModel)]="cityId"-->
+                    <!--(change)="selectArea(cityId)">-->
+                    <!--<option value="">&#45;&#45;请选择城市名称&#45;&#45;</option>-->
+                    <!--<option [value]="area.id" *ngFor="let area of areas">{{area.name}}</option>-->
+                    <!--</select>-->
+                    <!--<input type="hidden" formControlName="cityName" name="cityName" [(ngModel)]="cityName"/>-->
+                    <!--<select class="text semi" formControlName="areaId" name="areaId" [(ngModel)]="areaId"-->
+                    <!--(change)="selectDistrict()">-->
+                    <!--<option value="">&#45;&#45;请选择城区名称&#45;&#45;</option>-->
+                    <!--<option [value]="d.id" *ngFor="let d of districts">{{d.name}}</option>-->
+                    <!--</select>-->
+                    <!--<input type="hidden" formControlName="areaName" name="areaName" [(ngModel)]="areaName"/>-->
+                    <!--<input type="text" class="text semi" placeholder="楼盘名称" formControlName="address"-->
+                    <!--name="address" autocomplete="off" maxlength="32" [(ngModel)]="address"/>-->
+                    <!--<input type="text" class="text semi semi-last" placeholder="具体房号" formControlName="roomNumber"-->
+                    <!--name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber"/>-->
+                    <!--<div [hidden]="clientForm.get('cityId').valid || clientForm.get('cityId').pristine" class="error">-->
+                    <!--<span [hidden]="!clientForm.hasError('required',['cityId'])">必选城市</span>-->
+                    <!--</div>-->
+                    <!--<div [hidden]="clientForm.get('areaId').valid || clientForm.get('areaId').pristine" class="error">-->
+                    <!--<span [hidden]="!clientForm.hasError('required',['areaId'])">必选地区</span>-->
+                    <!--</div>-->
+                    <!-- <span class="label w50">
+                        <input nz-input type="text" class="text hemi" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" />
+                    </span>
+                    <span class="label w50">
+                        <input nz-input type="text" class="text hemi" placeholder="具体房号" formControlName="roomNumber"
+                            name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" />
+                    </span>
+                    <div [hidden]="clientForm.get('address').valid || clientForm.get('address').pristine" class="error">
+                        <span [hidden]="!clientForm.hasError('required',['address'])">必填地址信息</span>
+                        <span [hidden]="!clientForm.hasError('account',['address'])">输入地址格式不正确</span>
+                        <span [hidden]="!clientForm.hasError('minlength',['address'])">&nbsp;&nbsp;至少输入1位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['address'])">&nbsp;&nbsp;至多输入30位字符</span>
+                    </div>
+                    <div [hidden]="clientForm.get('roomNumber').valid || clientForm.get('roomNumber').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('minlength',['roomNumber'])">&nbsp;&nbsp;至少输入1位字符</span>
+                        <span [hidden]="!clientForm.hasError('maxlength',['roomNumber'])">&nbsp;&nbsp;至多输入10位字符</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">地址定位</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div class="inp-text" (click)="openModal('address',gpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="gpsAddress" name="gpsAddress" [(ngModel)]="gpsAddress" />
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">地址定位</label>
+                <div class="inp">
+                    <div class="inp-text" (click)="openModal('address',gpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="gpsAddress" name="gpsAddress" [(ngModel)]="gpsAddress" />
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">房屋户型</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="12">
+                        <nz-input-number  placeholder="请输入房间数" style="width:100%"
+                        formControlName="roomType" name="roomType"  autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                        <!-- <input nz-input type="text" class="text hemi" placeholder="请输入房间数"
+                        formControlName="roomType" name="roomType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 263px;">室</span>
+                <span nz-col [nzSpan]="12" >
+                    <nz-input-number  placeholder="请输入卫生间数" style="width:100%"
+                        formControlName="toiletType" name="toiletType"  autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1"></nz-input-number>
+                    <!-- <input nz-input type="text" class="text  hemi" placeholder="请输入卫生间数"
+                        formControlName="toiletType" name="toiletType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 24px;">卫</span>
+                        <nz-form-explain *ngIf="clientForm.get('roomType').dirty && clientForm.get('roomType').errors">
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('min')">
+                                输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('max')">
+                               输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('toiletType').dirty && clientForm.get('toiletType').errors">
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('min')">
+                                &nbsp;&nbsp;输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('max')">
+                                &nbsp;&nbsp;输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">房屋户型</label> -->
+                <!---version III pass away start--->
+                <!--<div class="inp model">-->
+                <!--<span class="label">卧室<input type="text" class="text model" placeholder="卧室" formControlName="roomType"-->
+                <!--name="roomType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="roomType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">客厅<input type="text" class="text model" placeholder="客厅"-->
+                <!--formControlName="parlourType"-->
+                <!--name="parlourType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="parlourType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">餐厅<input type="text" class="text model" placeholder="餐厅"-->
+                <!--formControlName="restaurant"-->
+                <!--name="restaurant" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="restaurant"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">卫生间<input type="text" class="text  model" placeholder="卫生间"-->
+                <!--formControlName="toiletType"-->
+                <!--name="toiletType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="toiletType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">厨房<input type="text" class="text model" placeholder="厨房"-->
+                <!--formControlName="kitchenType"-->
+                <!--name="kitchenType" maxlength="1" autocomplete="off"-->
+                <!--[(ngModel)]="kitchenType"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<span class="label">阳台<input type="text" class="text model" placeholder="阳台"-->
+                <!--formControlName="balcony"-->
+                <!--name="balcony" maxlength="1" autocomplete="off" [(ngModel)]="balcony"-->
+                <!--[ngClass]="{'disabled':controlHouseTypeByState()}"-->
+                <!--[readonly]="controlHouseTypeByState()"/></span>-->
+                <!--<div [hidden]="clientForm.get('roomType').valid || clientForm.get('roomType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['roomType'])">输入卧室数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('parlourType').valid || clientForm.get('parlourType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['parlourType'])">输入客厅数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('toiletType').valid || clientForm.get('toiletType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['toiletType'])">输入卫生间数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('kitchenType').valid || clientForm.get('kitchenType').pristine"-->
+                <!--class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['kitchenType'])">输入厨房数量不正确</span>-->
+                <!--</div>-->
+                <!--<div [hidden]="clientForm.get('balcony').valid || clientForm.get('balcony').pristine" class="error">-->
+                <!--<span [hidden]="!clientForm.hasError('numberMin',['balcony'])">输入阳台数量不正确</span>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!---version III pass away end--->
+
+                <!---version IV start--->
+                <!-- <div class="inp hemi">
+                    <span class="label w50"><input nz-input type="text" class="text hemi" placeholder="请输入房间数"
+                            formControlName="roomType" name="roomType" maxlength="3" autocomplete="off"
+                            [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                            [readonly]="controlHouseTypeByState()" />室</span>
+                    <span class="label w50"><input nz-input type="text" class="text  hemi" placeholder="请输入卫生间数"
+                            formControlName="toiletType" name="toiletType" maxlength="3" autocomplete="off"
+                            [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                            [readonly]="controlHouseTypeByState()" />卫</span>
+                    <div [hidden]="clientForm.get('roomType').valid || clientForm.get('roomType').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('numberMin',['roomType'])">输入房间数量不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['roomType'])">输入房间数量至少为0</span>
+                        <span [hidden]="!clientForm.hasError('max',['roomType'])">输入房间数量至多为100</span>
+                    </div>
+                    <div [hidden]="clientForm.get('toiletType').valid || clientForm.get('toiletType').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('numberMin',['toiletType'])">输入卫生间数量不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['toiletType'])">&nbsp;&nbsp;输入卫生间至少为0</span>
+                        <span [hidden]="!clientForm.hasError('max',['toiletType'])">&nbsp;&nbsp;输入卫生间数量至多为100</span>
+                    </div>
+                </div> -->
+                <!---version IV end--->
+
+            <!-- </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" nzRequired>房屋面积</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number  placeholder="请输入客户的房屋面积" style="width:100%"
+                    formControlName="houseArea" name="houseArea"  autocomplete="off"
+                    [(ngModel)]="houseArea" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                   [nzMin]="1" [nzMax]="99999" [nzStep]="1"></nz-input-number>
+                   <span class="position-name" style="right: 24px;">
+                       m<sup>2</sup>
+                   </span>
+                    <!-- <input nz-input type="text" class="text" placeholder="请输入客户的房屋面积" formControlName="houseArea"
+                    name="houseArea" autocomplete="off" maxlength="6" [(ngModel)]="houseArea"
+                    [ngClass]="{'disabled':controlHouseTypeByState()}" [readonly]="controlHouseTypeByState()" /> -->
+                    <nz-form-explain *ngIf="clientForm.get('houseArea').dirty && clientForm.get('houseArea').errors">
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('decimal')">
+                            &nbsp;&nbsp;输入房屋面积不正确
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('min')">
+                            &nbsp;&nbsp;至少输入比1大
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('max')">
+                            &nbsp;&nbsp;至多输入为99999
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label"><span class="icon">*</span>房屋面积</label>
+                <div class="inp">
+                    <input nz-input type="text" class="text" placeholder="请输入客户的房屋面积" formControlName="houseArea"
+                        name="houseArea" autocomplete="off" maxlength="6" [(ngModel)]="houseArea"
+                        [ngClass]="{'disabled':controlHouseTypeByState()}" [readonly]="controlHouseTypeByState()" />
+                    <div [hidden]="clientForm.get('houseArea').valid || clientForm.get('houseArea').pristine"
+                        class="error">
+                        <span [hidden]="!clientForm.hasError('required',['houseArea'])">必填选项</span>
+                        <span [hidden]="!clientForm.hasError('decimal',['houseArea'])">&nbsp;&nbsp;输入房屋面积不正确</span>
+                        <span [hidden]="!clientForm.hasError('min',['engineeringArea'])">&nbsp;&nbsp;至少输入比1大</span>
+                        <span [hidden]="!clientForm.hasError('max',['engineeringArea'])">&nbsp;&nbsp;至多输入为99999</span>
+                    </div>
+                </div>
+            </li> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" style='vertical-align: top;line-height: 19px;'>备注</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                    name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                <nz-form-explain *ngIf="clientForm.get('remarks').dirty && clientForm.get('remarks').errors">
+                    <ng-container *ngIf="clientForm.get('remarks').hasError('maxlength')">
+                        至多输入120位字符
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <li>
+                <label class="label">备注</label>
+                <div class="inp">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                        name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                    <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                    <div [hidden]="clientForm.get('remarks').valid || clientForm.get('remarks').pristine" class="error">
+                        <span [hidden]="!clientForm.hasError('maxlength',['remarks'])">至多输入120位字符</span>
+                    </div>
+                </div>
+            </li> -->
+
+            <li>
+                <div class="btns">
+                    <button nz-button nzType="default" (click)="exist($event)">关闭</button>
+                    <button nz-button nzType="primary" [disabled]="!clientForm.valid"
+                        (click)="submit($event)">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+    </ul>
+
+    <ul *ngIf="type === 12">
+        <form [formGroup]="clientForm">
+            <nz-form-item class="layout" *ngIf="!newcase">
+                <nz-form-label [nzSpan]="5" >客户姓名</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" [ngStyle]="{'cursor':!newcase ? 'not-allowed' : 'auto' }"class="text " placeholder="请输入客户姓名" formControlName="customerName"
+                    name="customerName" autocomplete="off" maxlength="50" [(ngModel)]="customerName" [readonly]="!newcase"/>
+                        <nz-form-explain *ngIf="clientForm.get('customerName').dirty && clientForm.get('customerName').errors">
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('text')">
+                                &nbsp;&nbsp;只能输入英文或者中文
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入2位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerName').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入50位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+     
+            <nz-form-item class="layout" *ngIf="!newcase">
+                <nz-form-label [nzSpan]="5" >客户手机号</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text " [ngStyle]="{'cursor':!newcase ? 'not-allowed' : 'auto' }" placeholder="请输入客户手机号码" formControlName="customerPhone"
+                    name="customerPhone" autocomplete="off" maxlength="16" [(ngModel)]="customerPhone" [readonly]="!newcase"
+                      />
+                        <nz-form-explain *ngIf="clientForm.get('customerPhone').dirty && clientForm.get('customerPhone').errors">
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('customerPhone').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="layout" *ngIf="newcase">
+                <nz-form-label [nzSpan]="5" >设计师手机号</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <input nz-input type="text" class="text " placeholder="请输入设计师手机号码" formControlName="desginPhone"
+                    name="desginPhone" autocomplete="off" maxlength="16" [(ngModel)]="desginPhone" 
+                     />
+                        <nz-form-explain *ngIf="clientForm.get('desginPhone').dirty && clientForm.get('desginPhone').errors">
+                            <ng-container *ngIf="clientForm.get('desginPhone').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('desginPhone').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="layout" *ngIf="newcase">
+                <nz-form-label [nzSpan]="5" >合同金额</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number  placeholder="请输入合同金额" style="width:100%"
+                        formControlName="contractPrice" name="contractPrice"  autocomplete="off"
+                        [(ngModel)]="contractPrice" 
+                       [nzMin]="1"  [nzStep]=".1" [nzDisabled]="!newcase"></nz-input-number>
+                        <nz-form-explain *ngIf="clientForm.get('contractPrice').dirty && clientForm.get('contractPrice').errors">
+                            <ng-container *ngIf="clientForm.get('contractPrice').hasError('required')">
+                                必填选项
+                            </ng-container>
+                            <!-- <ng-container *ngIf="clientForm.get('contractPrice').hasError('phone')">
+                                输入手机号码格式不正确
+                            </ng-container> -->
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" >装修地址</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="10">
+                        <input nz-input type="text" class="text hemi " [ngStyle]="{'cursor':!newcase ? 'not-allowed' : 'auto' }" placeholder="楼盘名称" formControlName="address"
+                            name="address" autocomplete="off" maxlength="32" [(ngModel)]="address" [readonly]="!newcase"/>
+                    </span>
+                    <span nz-col [nzSpan]="2"[nzOffset]="2" class="typename ">房号</span>
+                    <span nz-col [nzSpan]="10" style="float:right">
+                        <input nz-input type="text" class="text hemi " [ngStyle]="{'cursor':!newcase ? 'not-allowed' : 'auto' }" placeholder="具体房号" formControlName="roomNumber"
+                         name="roomNumber" maxlength="10" autocomplete="off" [(ngModel)]="roomNumber" [readonly]="!newcase"/>
+                    </span >
+                        <nz-form-explain *ngIf="clientForm.get('address').dirty && clientForm.get('address').errors">
+                            <ng-container *ngIf="clientForm.get('address').hasError('required')">
+                                必填地址信息
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('account')">
+                                输入地址格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('address').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入30位字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('roomNumber').dirty && clientForm.get('roomNumber').errors">
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('minlength')">
+                                &nbsp;&nbsp;至少输入1位字符
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomNumber').hasError('maxlength')">
+                                &nbsp;&nbsp;至多输入10位字符
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">地址定位</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <div class="inp-text" (click)="openModal('address',customerGpsAddress)"></div>
+                    <input nz-input type="text" class="text" placeholder="请选择地址" readonly="readonly"
+                        formControlName="customerGpsAddress" name="customerGpsAddress" [(ngModel)]="customerGpsAddress" />
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5">房屋户型</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <span nz-col [nzSpan]="12">
+                        <nz-input-number  placeholder="请输入房间数" style="width:100%"
+                        formControlName="roomType" name="roomType"  autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1" [nzDisabled]="!newcase"></nz-input-number>
+                        <!-- <input nz-input type="text" class="text hemi" placeholder="请输入房间数"
+                        formControlName="roomType" name="roomType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="roomType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 263px;">室</span>
+                <span nz-col [nzSpan]="12" >
+                    <nz-input-number  placeholder="请输入卫生间数" style="width:100%"
+                        formControlName="toiletType" name="toiletType"  autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                       [nzMin]="0" [nzMax]="100" [nzStep]="1" [nzDisabled]="!newcase"></nz-input-number>
+                    <!-- <input nz-input type="text" class="text  hemi" placeholder="请输入卫生间数"
+                        formControlName="toiletType" name="toiletType" maxlength="3" autocomplete="off"
+                        [(ngModel)]="toiletType" [ngClass]="{'disabled':controlHouseTypeByState()}"
+                        [readonly]="controlHouseTypeByState()" /> -->
+                    </span><span class="typename position-name" style="right: 24px;">卫</span>
+                        <nz-form-explain *ngIf="clientForm.get('roomType').dirty && clientForm.get('roomType').errors">
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('min')">
+                                输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('roomType').hasError('max')">
+                               输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                        <nz-form-explain *ngIf="clientForm.get('toiletType').dirty && clientForm.get('toiletType').errors">
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('numberMin')">
+                                输入房间数量不正确
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('min')">
+                                &nbsp;&nbsp;输入房间数量至少为0
+                            </ng-container>
+                            <ng-container *ngIf="clientForm.get('toiletType').hasError('max')">
+                                &nbsp;&nbsp;输入卫生间数量至多为100
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+      
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" >房屋面积</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number  placeholder="请输入客户的房屋面积" style="width:100%"
+                    formControlName="houseArea" name="houseArea"  autocomplete="off" class="disabled"
+                    [(ngModel)]="houseArea" 
+                   [nzMin]="1" [nzMax]="99999" [nzStep]="1" [nzDisabled]="!newcase"></nz-input-number>
+                   <span class="position-name" style="right: 24px;">
+                       m<sup>2</sup>
+                   </span>
+                    <!-- <input nz-input type="text" class="text" placeholder="请输入客户的房屋面积" formControlName="houseArea"
+                    name="houseArea" autocomplete="off" maxlength="6" [(ngModel)]="houseArea"
+                    [ngClass]="{'disabled':controlHouseTypeByState()}" [readonly]="controlHouseTypeByState()" /> -->
+                    <nz-form-explain *ngIf="clientForm.get('houseArea').dirty && clientForm.get('houseArea').errors">
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('decimal')">
+                            &nbsp;&nbsp;输入房屋面积不正确
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('min')">
+                            &nbsp;&nbsp;至少输入比1大
+                        </ng-container>
+                        <ng-container *ngIf="clientForm.get('houseArea').hasError('max')">
+                            &nbsp;&nbsp;至多输入为99999
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <!-- <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" style='vertical-align: top;line-height: 19px;'>备注</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <textarea nz-input class="text textarea" placeholder="请输入备注信息" formControlName="remarks"
+                    name="remarks" autocomplete="off" [(ngModel)]="remarks" maxlength="132"></textarea>
+                <span class="count" *ngIf="remarks && remarks.length > 0"><span>{{remarks.length}}</span>/120</span>
+                <nz-form-explain *ngIf="clientForm.get('remarks').dirty && clientForm.get('remarks').errors">
+                    <ng-container *ngIf="clientForm.get('remarks').hasError('maxlength')">
+                        至多输入120位字符
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item> -->
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" >装修类型</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-select  nzShowSearch  nzPlaceHolder="选择装修类型" [(ngModel)]="decorateType" formControlName="decorateType">
+                        <nz-option *ngFor="let type of selectedType"  [nzLabel]="type.decorateStyle" [nzValue]="type.decorateStyle"></nz-option>
+                      </nz-select>
+                        <nz-form-explain *ngIf="clientForm.get('decorateType').dirty && clientForm.get('decorateType').errors">
+                            <ng-container *ngIf="clientForm.get('decorateType').hasError('required')">
+                                必填选项
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="5" >装修风格</nz-form-label>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-select  nzShowSearch  nzPlaceHolder="选择装修风格" [(ngModel)]="style" formControlName="style">
+                        <nz-option *ngFor="let style of decorateStyle" [nzLabel]="style.decorateStyle" [nzValue]="style.decorateStyle"></nz-option>
+                      </nz-select>
+                        <nz-form-explain *ngIf="clientForm.get('style').dirty && clientForm.get('style').errors">
+                            <ng-container *ngIf="clientForm.get('style').hasError('required')">
+                                必填选项
+                            </ng-container>
+                        </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <li>
+                <div class="btns">
+                    <button nz-button nzType="default" (click)="exist($event)">关闭</button>
+                    <button nz-button nzType="primary" [disabled]="!clientForm.valid"
+                        (click)="submit($event)">修改
+                    </button>
+                </div>
+            </li>
+        </form>
+    </ul>
+</div>

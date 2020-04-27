@@ -1,0 +1,40 @@
+<div class="ant-modal-content">
+    <!-- <div class="ant-modal-header">
+        <div class="ant-modal-title">选择部门</div>
+    </div>
+    <div class="ant-modal-body">
+        <dl class="depart-select">
+            <dt>已选择部门：</dt>
+            <dd *ngIf="showList && showList.length > 0">
+                <a *ngFor="let item of showList">{{item.name}}<span (click)="removeDepart(item)">&times;</span></a>
+            </dd>
+            <dd *ngIf="!showList || (showList && showList.length == 0)"><a>暂无选中部门信息</a></dd>
+        </dl>
+        <div class="depart-content">
+            <div class="depart-list">
+                <rev-sector-tree [sectorTree]="departList" [rank]="0" [type]="type" [url]="url"></rev-sector-tree>
+            </div>
+        </div>
+    </div> -->
+    <div class="ant-modal-header">
+        <div class="ant-modal-title">选择部门</div>
+    </div>
+    <nz-tree-select
+    style="width: 600px;"
+    [nzNodes]="departList"
+    nzShowSearch
+    nzPlaceHolder="选择部门"
+    [nzMultiple]="type === 'checkbox'?true:false"
+    [(ngModel)]="showList"
+    [nzDefaultExpandAll]=true
+    [nzDropdownStyle]="{'height':'300px','overflow-y':'scroll'}"
+    (ngModelChange)=" select($event)"
+    [nzCheckable]="true"
+  >
+  </nz-tree-select>
+    <div class="ant-modal-footer">
+        <button nz-button nzType="default" (click)="cancel()">取消</button>
+        <button nz-button nzType="primary" (click)="ok()">确定</button>
+    </div>
+</div>
+

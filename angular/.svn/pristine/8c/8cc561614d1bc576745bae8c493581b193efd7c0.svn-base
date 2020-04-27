@@ -1,0 +1,52 @@
+<div class="list-group-rev">
+    <button nz-button (click)="addRow()" nzType="primary" style="margin-bottom: 24px;">添加</button>
+  <nz-table #nzTable [nzData]="materialsList" [nzBordered]="true" [nzFrontPagination]="false"
+            [nzShowPagination]="false" nzSize="middle" class="tables" 
+          >
+      <thead>
+      <tr>
+          <th>材料</th>
+          <th>品牌</th>
+          <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of nzTable.data;let i=index">
+          
+          <td [title]="item.name?item.name:''">
+            <ng-container *ngIf="!item.edit">
+                {{item.name?item.name:'--'}}
+                <!-- <i nz-icon type="edit" class="editable-cell-icon" (click)="startEdit(i)"></i> -->
+              </ng-container>
+              <ng-container *ngIf="item.edit">
+                <input type="text" nz-input [(ngModel)]="item.name"placeholder="请输入材料名称"  maxlength=30>
+                <!-- <i nz-icon type="check" theme="outline"></i> -->
+                <!-- <i nz-icon type="check" class="editable-check"(click)="finishEdit(item.name,item.key)"></i> -->
+              </ng-container>
+              <!-- <nz-badge >{{item.name?item.name:'--'}}</nz-badge> -->
+          </td>
+          <td [title]="item.brand?item.brand:''">
+            <ng-container *ngIf="!item.edit">
+                {{item.brand?item.brand:'--'}}
+                <!-- <i nz-icon type="edit" class="editable-cell-icon" (click)="startEdit(i)"></i> -->
+              </ng-container>
+              <ng-container *ngIf="item.edit">
+                <input type="text" nz-input [(ngModel)]="item.brand" placeholder="请输入品牌名称" maxlength=30>
+                <!-- <i nz-icon type="check" theme="outline"></i> -->
+                <!-- <i nz-icon type="check" class="editable-check"(click)="finishEdit(item.name,item.key)"></i> -->
+              </ng-container>
+              <!-- {{item.brand?item.brand:'--'}} -->
+          </td>
+          <td >
+            <a (click)="startEdit(item.key)" *ngIf="!item.edit">编辑</a>
+            <a (click)="delList(i,item.key)" >删除</a>
+            <a (click)="finishEdit(item.name,item.key)" *ngIf="item.edit">保存</a>
+            <nz-popconfirm [nzTitle]="'确认退出编辑?'" (nzOnConfirm)="cancelEdit(i,item.key)" *ngIf="item.edit">
+                <a nz-popconfirm>取消编辑</a>
+              </nz-popconfirm>
+        </td>
+
+      </tr>
+      </tbody>
+  </nz-table>
+</div>
