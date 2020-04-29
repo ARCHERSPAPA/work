@@ -1,9 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "uni-swiper-dot": "/components/uni-swiper-dot/uni-swiper-dot",
-    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
-    "mkb-empty": "/components/mkb-empty/mkb-empty",
-    "price-select": "/components/price-select/sl-filter"
-  }
-}

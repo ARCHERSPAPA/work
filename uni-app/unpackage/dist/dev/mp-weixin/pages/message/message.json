@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "在线装修",
-  "usingComponents": {
-    "mkb-empty": "/components/mkb-empty/mkb-empty",
-    "message-item": "/pages/message/message-item/message-item"
-  }
-}

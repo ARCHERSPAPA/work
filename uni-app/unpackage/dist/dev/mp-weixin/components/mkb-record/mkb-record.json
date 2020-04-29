@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
-    "mkb-state": "/components/mkb-state/mkb-state"
-  }
-}

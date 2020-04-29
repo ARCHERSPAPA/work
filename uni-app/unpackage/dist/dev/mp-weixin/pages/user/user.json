@@ -1,9 +1,0 @@
-{
-  "navigationBarTitleText": "在线装修",
-  "navigationBarBackgroundColor": "#F4711B",
-  "navigationBarTextStyle": "white",
-  "usingComponents": {
-    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
-    "mkb-user-item": "/components/mkb-user-item/mkb-user-item"
-  }
-}

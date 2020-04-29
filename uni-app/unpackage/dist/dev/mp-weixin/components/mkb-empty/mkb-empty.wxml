@@ -1,1 +1,0 @@
-<view class="mkb-empty"><view class="mkb-empty-img"></view><block wx:if="{{text}}"><view class="mkb-empty-text"><text>{{text}}</text></view></block></view>

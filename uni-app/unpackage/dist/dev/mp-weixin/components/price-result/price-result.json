@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
-    "price-select": "/components/price-select/sl-filter"
-  }
-}

@@ -1,0 +1,37 @@
+@font-face {font-family: "iconfont";
+  src: url('./static/fonts/iconfont.eot?t=1584518493968'); /* IE9 */
+  src: url('./static/fonts/iconfont.eot?t=1584518493968#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAUoAAsAAAAACcgAAATbAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDKAqGXIVNATYCJAMYCw4ABCAFhG0HWBtjCBEVpA2RfVW8EwKfwP8Iq3VxxxisNbQNC8xmXRciqJat53bvsiIYQ52RyKjIEhzot/cSsjA4hExGIBzlsxH3/39n3jdvkubMrKFZOZsCWFCFkkJeKGj9BzD7zfkDNipqktCiR4WF5Hql9KW5bf8HAMXw7gEDCziyEU9l1/5XIlGkgQRtVw0x7I97VTMmBmw++xaXObZ+ygUwHKAAjbFtdmCAW5CKeoexm8iDPEwAHT020GZYTApwkMCoAOJiAa8AOAkDsoIWOGp2wcIMPUITp7gixqHiwfv9+IdJHFBgJWDiXkloMQQ8p5/L40laCneKAeFwNijLQAJGIIM4LXTsAw4SI4yyHCSr6t4kBL7kpVL4oqlgsf/yQCBgJBaIClAMPHErWYIvGiME+JJBKMCXLEICX3J6+XiFvEEpaqoBeQI1OtWJQBxtBczz6CXranpsBR0ZVXN/klw03LW8KtzFJbPiJRiTxLSJySw7rV7oc0ksJJ2EInL3N1jzJBIl33UTlTZybFL83xAKD3ViGmpPF13lGy5rZw0M808tx/SNOiE/pA9J9vTs3a3apZGSIqsod0s8WTsl4TRQz/s0yL79pvJ7BdqINirMlQH6LJHHb5KWs3nMhVJf7sUGfyahU+2GWPCyYzvU0+pVUoQPKBJx92nztJ4ytdRuqn6XikrnLlajVtI9Yq6+dyTr2yQWazEb10/rwNAMDdtFobJ7BQgt+RR1vQ8qpDsfoffL+mj4kptEkgN1qZ+GyjRD0zdzOTmziynUX+IuL3yTP38v2LXGpkBq7N3kxYZHofCr9sKFda8MU5xzzJxDck3nQ46la1gieyw61sy0J6SHcH1ujJvawC3fEtyPuSMTmJ/rE0j/7AgMvrEwKRi8V9G4FEsdCgxf5nnzjXY0yB2RlnrLzlbQp/rH4nlUoPYHbtj8g4ZyAYpcBwB7EREsYJGuCaVMqcI6BGihAB4vwct5N+o/MDcKC8YLCm8wYDzw+UxISDg3XEmZW8INCT17emb5Fd6yJetXhfS4WnG9dyidz8z0Dlml0923fOnTzSmQf1k/I2PCcKK29ryiTEzU1pLNZRTHFBSfLbR8rrnhQ23tGMyfiGi9cuViyKVTrNVYkRAQisbWrPDwggXkKDFK65VScRerUqUaJWsHKRZsKotY3NK6GEEuzSEWGysaC0Ql0yp3nZQRMCl84oTNAK5KbxiBWYrHsAMAacIA5innY0NPJhpMZf3D/Q2cb1Lfmifv861DZ4DPnu85QmCeCuiebBCgsfD3Ejasy7YYGKtsouMhAqiEA34jNtDBMJgBeFY8HUq13riUwKEaQWEeXUg4TLCZaAMlmgtUOPyhYy18eU/ZSsBQboENVRwgCg4DQc5lwBRMYEniE2BR8w7YFMJASUXKG9Ic/WxvK+gphuD/gQ04J2TWnl9+QuNST+Jij35DKW0YxoNROn3EHGWIKeXHTFQJSDiDA3ccpilDIRxjoINItdgMh1T0pEHAWaVnK+gphsD/AzbgnGhz7WV+/oTGpZ5UoFqcN5TStg/GBkYNsEdF3gh1Kd3Lj5lQJXEYCWfgwNswhQkGRXG/GAMdiDrEio2h0IiaKgbTq7K73AIdcEGVwRGoaOil8yN2gZebdmip9B+VdQjzn031iJzXSJBcpQIA') format('woff2'),
+  url('./static/fonts/iconfont.woff?t=1584518493968') format('woff'),
+  url('./static/fonts/iconfont.ttf?t=1584518493968') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
+  url('./static/fonts/iconfont.svg?t=1584518493968#iconfont') format('svg'); /* iOS 4.1- */
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.iconshoucang:before {
+  content: "\e60b";
+}
+
+.icondianzan:before {
+  content: "\e60c";
+}
+
+.iconfenxiang:before {
+  content: "\e60d";
+}
+
+.icondianhua:before {
+  content: "\e60e";
+}
+
+.iconkefu:before {
+  content: "\e60f";
+}
+

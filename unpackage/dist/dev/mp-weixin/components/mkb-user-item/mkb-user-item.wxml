@@ -1,0 +1,1 @@
+<view class="user-record"><image class="user-record-icon" src="{{item.src}}" lazy-load="{{true}}"></image><text data-event-opts="{{[['tap',[['lister',['$0','$1'],['item.url','item.index']]]]]}}" class="user-record-text" bindtap="__e">{{item.text}}</text></view>

@@ -1,0 +1,214 @@
+@charset "UTF-8";
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* 自定义-文字颜色 */
+.font-color-activity {
+  color: #FA322D;
+}
+.uni-spacing-col-lg {
+  font-size: 24rpx;
+}
+/* 自定义-背景颜色 */
+/* 自定义-列表文字大小 */
+/**
+ * 头部搜索
+ */
+.mkb-index {
+  margin: 0 28.98rpx;
+}
+.mkb-index .search-bar {
+    width: 100%;
+    height: 57.97rpx;
+    margin-bottom: 28.98rpx;
+    position: relative;
+}
+.mkb-index .search-bar-mask, .mkb-index .search-bar-inp {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 9;
+}
+.mkb-index .search-bar-mask {
+      z-index: 10;
+      opacity: 0;
+}
+/**
+ * 广告banner
+ */
+.carousel-swiper {
+  width: 100%;
+  height: 260.86rpx;
+  border-radius: 14.49rpx;
+}
+.carousel-swiper-item {
+    width: 100%;
+    height: 100%;
+    border-radius: 14.49rpx;
+}
+.mkb-quick {
+  margin-top: 25.36rpx;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  width: 100%;
+}
+.mkb-quick .mkb-quick-box {
+    display: inline-block;
+}
+.mkb-quick .mkb-quick-box.box-item {
+      margin-left: 28.98rpx;
+      width: calc(100% - 272.60rpx);
+}
+.mkb-quick .mkb-quick-box-online {
+      width: 253.62rpx;
+      height: 253.62rpx;
+      font-size: 32.6rpx;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+      border-radius: 9.05px;
+      position: relative;
+}
+.mkb-quick .mkb-quick-box-online .text-box {
+        background: -webkit-linear-gradient(top, rgba(255, 145, 0, 0.8) 0%, #ff6f00 100%);
+        background: linear-gradient(180deg, rgba(255, 145, 0, 0.8) 0%, #ff6f00 100%);
+}
+.mkb-quick .mkb-quick-box-online .text-box .text-icon {
+          display: block;
+          margin: 68.84rpx auto 18.11rpx;
+}
+.mkb-quick .mkb-quick-box-fast {
+      width: 100%;
+      font-size: 32.6rpx;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+      border-radius: 9.05px;
+      height: 115.94rpx;
+      position: relative;
+      line-height: 115.94rpx;
+}
+.mkb-quick .mkb-quick-box-fast .text-box {
+        background: -webkit-linear-gradient(top, rgba(104, 140, 255, 0.8) 0%, #1633f1 100%);
+        background: linear-gradient(180deg, rgba(104, 140, 255, 0.8) 0%, #1633f1 100%);
+}
+.mkb-quick .mkb-quick-box-intel {
+      width: 100%;
+      margin-top: 28.98rpx;
+      font-size: 32.6rpx;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+      border-radius: 9.05px;
+      height: 115.94rpx;
+      line-height: 115.94rpx;
+      position: relative;
+}
+.mkb-quick .mkb-quick-box-intel .text-box {
+        background: -webkit-linear-gradient(top, rgba(38, 196, 255, 0.8) 0%, #0076de 100%);
+        background: linear-gradient(180deg, rgba(38, 196, 255, 0.8) 0%, #0076de 100%);
+}
+.mkb-quick .mkb-quick-box .bg,
+    .mkb-quick .mkb-quick-box .text-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 9.05px;
+}
+.mkb-quick .mkb-quick-box .bg .text-icon,
+      .mkb-quick .mkb-quick-box .text-box .text-icon {
+        font-weight: 400;
+        padding-right: 14.49rpx;
+}
+.mkb-quick .mkb-quick-box .bg .text,
+      .mkb-quick .mkb-quick-box .text-box .text {
+        text-align: center;
+        margin-top: -3.62rpx;
+}
+.mkb-quick .mkb-quick-box .bg {
+      z-index: 9;
+}
+.mkb-quick .mkb-quick-box .text-box {
+      z-index: 10;
+}
+.mkb-types {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+          flex-direction: row;
+  -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+  width: 100%;
+}
+.mkb-tj-box-head {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+  margin: 43.47rpx 0;
+}
+.mkb-tj-box-name {
+  font-size: 32.6rpx;
+  font-weight: bold;
+  line-height: 45.28rpx;
+  color: rgba(0, 0, 0, 0.9);
+}
+.mkb-tj-box-list {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+          align-items: flex-start;
+  -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+          flex-direction: row;
+}
+.mkb-tj-box-item {
+  margin-bottom: 28.98rpx;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+}
+

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "在线装修",
+  "usingComponents": {
+    "message-item": "/pages/message/message-item/message-item"
+  }
+}

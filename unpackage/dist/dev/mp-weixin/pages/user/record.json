@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "浏览记录",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50,
+  "usingComponents": {
+    "mkb-state": "/components/mkb-state/mkb-state",
+    "mkb-empty": "/components/mkb-empty/mkb-empty"
+  }
+}

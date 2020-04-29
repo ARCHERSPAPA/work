@@ -1,0 +1,1 @@
+<view><block wx:if="{{loginStatus===0}}"><view>需要去登录</view></block><block wx:else><view><message-item hidden="{{!(messageList.length!==0)}}" vue-id="1" messageList="{{messageList}}" data-event-opts="{{[['^longpress',[['getConversationList']]]]}}" bind:longpress="__e" bind:__l="__l"></message-item></view></block></view>
