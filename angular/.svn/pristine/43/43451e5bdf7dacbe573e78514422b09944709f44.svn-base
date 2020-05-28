@@ -1,0 +1,296 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { Default, appTypes } from "../../../../model/constant";
+import { Messages } from "../../../../model/msg";
+import { DepartService } from "../../../../service/depart.service";
+import { Router, ActivatedRoute } from '@angular/router';
+import { UserService } from "../../../../service/user.service";
+import { transformQuickDepartType, btoa } from "../../../../model/methods";
+
+
+
+
+@Component({
+    selector: 'rev-staff-list',
+    templateUrl: './staff-list.component.html',
+    styleUrls: ['./../staff.component.scss']
+})
+export class StaffListComponent implements OnInit {
+
+    /***查询***/
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public searchInfo: string = "";
+    public departmentId: string;
+    public departType: number;
+    public isVisible: Boolean = false;
+    public appType = 1;
+    public permissionList;
+    public id: Array<any>=[];
+    //标题文字
+    public showTitle: string;
+    //取消按钮的文字
+    public CancelText: string;
+    //离职状态
+    public quitState: number;
+    public state: number;
+    //离职状态126需要去交接项目
+    public isAllDisplayDataChecked: boolean;
+
+    public indeterminate = false;
+    // public APPids:Array<any>;
+
+
+    public staffList: any;
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+        private user: UserService) { }
+
+    ngOnInit() {
+        this.permissionList = appTypes;
+        this.departType = transformQuickDepartType(this.user.getQuickQueryDepartType());
+    }
+
+    selectDepart(e: any) {
+        this.departmentId = e;
+        this.searchInfo = "";
+        this.changeData();
+    }
+
+    appPermission(data) {
+        this.isVisible = true;
+        if(data===1){
+            this.appType=1;
+            this.staffList.forEach(v => {
+                if(v['checked']){
+                    this.id.push(v['id'])
+                }
+            });
+        }else{
+            this.id.push(data.id);
+            this.appType = data.appJurisdiction;
+        }
+     
+       
+    }
+    refreshStatus(item, i) {
+        const allChecked = this.staffList.filter(value => value.state!=1).every(value => value.checked === true);
+        const allUnChecked = this.staffList.filter(value => value.state!=1).every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+        // this.staffList.forEach(v => {
+        //       if(item['id']==v['id']){
+        //           v['checked']=
+        //       }
+        // });
+    }
+    showButton() {
+        if(this.staffList && this.staffList.length>0){
+            return this.staffList.every(v => {
+               return v['checked'] == false;
+            })
+        }
+        
+    }
+    checkAll(event) {
+        if (event) {
+            this.staffList.filter((item, i) => {
+                if (item['state'] === 0) {
+                    item['checked'] = true;
+                }
+
+                //   this.quoteIds.splice(i + ((this.currentPage - 1) * 20), 1, item.id);
+            })
+        } else {
+            this.staffList.filter(item => {
+                item['checked'] = false;
+            })
+            // this.quoteIds.splice(20 * (this.currentPage - 1), 20, '')
+            // for (let i = 0; i < 19; i++) {
+            //   this.quoteIds.push('')
+            // }
+        }
+         let id=[]
+   
+        console.log(id);
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.id.length=0;
+    }
+
+    handleAPPType(e) {
+        this.appType = e;
+    }
+
+    submit() {
+        // let id=[]
+        // this.staffList.forEach(v => {
+        //     if(v['checked']){
+        //         id.push(v['id'])
+        //     }
+        // });
+        // console.log(id);
+        // return
+        this.request.doPost({
+            url: "appEmp",
+            data: {
+                id: this.id[0],
+                appJurisdiction: this.appType
+            }, success: res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.isAllDisplayDataChecked = false;
+                    this.isVisible = false;
+                    this.changeData();
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        })
+    }
+
+    changeData(...args) {
+        let that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+        };
+
+        if (this.searchInfo) {
+            params["searchInfo"] = this.searchInfo;
+        } else {
+            params["departmentId"] = this.departmentId;
+        }
+        this.request.doPost({
+            url: "listEmployee",
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.staffList = res.data.pageSet;
+                    this.isAllDisplayDataChecked=false;
+                    this.indeterminate=false;
+                    this.id=[];
+                    that.staffList.filter(v => {
+                        v['checked'] = false;
+                    })
+                    that.total = res.data.total;
+                    // that.router.navigate(['./'],{queryParams:{page:that.pageNo,search:encodeURI(that.searchInfo),did:that.departmentId},relativeTo:that.activatedRoute});
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+    //3种情况展示离职交互state=0，1，2；
+    checkStaff(id) {
+        // return new Promise((resolve, reject) => {
+        this.request.doPost({
+            url: "checkEmp",
+            data: {
+                id: id
+            },
+            success: res => {
+                if (res && res.code === 200) {
+                    this.quitState = res.data;
+                    if (this.quitState === 0) {
+                        this.showTitle = '确认离职该员工吗！';
+                        this.CancelText = '取消';
+                    } else if (this.quitState === 2) {
+                        this.showTitle = '该员工负责有已结束的项目！';
+                        this.CancelText = '离职';
+                    } else if (this.quitState === 1) {
+                        this.showTitle = '该员工负责有进行中的项目！！';
+                        this.CancelText = '关闭';
+                    }
+                } else {
+                    this.showTitle = '网络异常！！';
+                    this.CancelText = '关闭';
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+
+            }
+        })
+        // })
+    }
+
+    //交接项目时的跳转。2.2.3版本修改之前的126时跳转
+    //确认触发函数
+    quitPage(id) {
+        //当直接离职时二次确认判断
+        if (this.quitState === 0 && this.quitState != null) {
+            // console.log(id)
+            this.quitStaff(id);
+        } else {
+            this.router.navigate(["../associate"], { queryParams: { id: btoa(id) }, relativeTo: this.activatedRoute });
+        }
+    }
+    //取消触发函数
+    checkQuit(id) {
+        // console.log( this.quitState)
+        if (this.quitState === 2) {
+            this.quitStaff(id);
+        } else if (this.quitState == 0) {
+            this.quitState = null;
+            // console.log( this.quitState)
+        }
+    }
+
+    quitStaff(id) {
+        let that = this;
+        if (id && this.quitState != null) {
+            // console.log(this.quitState,id)
+            that.request.doPost({
+                url: "quitEmp",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.state = res.code;
+                        this.changeData();
+                        this.quitState = null;
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    }
+                    //  else if (res && res.code == 126) {
+                    //     this.router.navigate(["../associate"], { queryParams: { id: btoa(id) }, relativeTo: this.activatedRoute });
+                    // } 
+                    else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    delStaff(id) {
+        let that = this;
+        if (id) {
+            that.request.doPost({
+                url: "delEmp",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.changeData();
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    btoa(id: string) {
+        return btoa(id)
+    }
+
+}

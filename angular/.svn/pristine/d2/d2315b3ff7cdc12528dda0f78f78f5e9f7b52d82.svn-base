@@ -1,0 +1,31 @@
+import { Component, OnInit } from '@angular/core';
+import { Lightbox, LightboxConfig } from 'ngx-lightbox';
+@Component({
+  selector: 'rev-cost-detail-disclose',
+  templateUrl: './cost-detail-disclose.component.html',
+  styleUrls: ['./cost-detail-disclose.component.scss']
+})
+export class CostDetailDiscloseComponent implements OnInit {
+  public _albums = [];
+public imgList=[{src:'http://img5.imgtn.bdimg.com/it/u=3302407625,2204157742&fm=26&gp=0.jpg'},{src:'http://img5.imgtn.bdimg.com/it/u=3302407625,2204157742&fm=26&gp=0.jpg'},{src:'http://img5.imgtn.bdimg.com/it/u=3302407625,2204157742&fm=26&gp=0.jpg'}]
+  constructor(
+    private _lightbox: Lightbox
+  ) { }
+
+  ngOnInit() {
+  }
+  styleLicense(src){
+    // return {'background-image':'url('+((src.indexOf('?') > -1)?src:src+'?imageView/2/h/180')+')'};
+    return {'background-image':'url('+src+')'};
+}
+
+openModal(src:Array<any>, index) {
+  this._albums = []
+  // this.isVisible = true;
+  // this.src = src;
+  src.forEach((i) => {
+      this._albums.push({ src: i.src })
+  })
+  this._lightbox.open(this._albums, index);
+}
+}

@@ -1,0 +1,47 @@
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+declare var jigsaw: any;
+@Component({
+  selector: 'rev-slider',
+  templateUrl: './slider.component.html',
+  styleUrls: ['./slider.component.scss']
+})
+export class SliderComponent implements OnInit {
+  @Output() handleSwitch = new EventEmitter<any>();
+  public lock:boolean=true;
+  public inits = function () {
+    let that = this;
+    jigsaw.init({
+      el: document.getElementById('captcha'),
+      onSuccess: function () { that.handleSwitch.emit('success')},
+      onFail: function () { that.handleSwitch.emit('fail') },
+      onRefresh: function () {  }
+    })
+    // let that = this;
+    // // console.log($('div:hidden').find('#captcha').get(0));
+    // // console.log($('div').find('#captcha').get(0));
+    // var eles = document.querySelector('#captcha')
+    // SlidingVerificationCode.init(eles, function () {
+    //   that.handleSwitch.emit('success')
+    //   console.log("成功了")
+
+    // }, function () {
+    //   that.handleSwitch.emit('fail')
+    //   console.log("失败了")
+    // })
+  }
+
+  constructor() { }
+
+  ngOnInit() {
+    setTimeout(() => {
+      this.inits();
+    }, 500);
+  }
+
+  // ngDoCheck() {
+  //   if(window.SlidingVerificationCode && this.lock){
+  //     this.inits();
+  //     this.lock=false;
+  //   }
+  // }
+}

@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-cost-detail-disclose',
+  templateUrl: './cost-detail-disclose.component.html',
+  styleUrls: ['./cost-detail-disclose.component.scss']
+})
+export class CostDetailDiscloseComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

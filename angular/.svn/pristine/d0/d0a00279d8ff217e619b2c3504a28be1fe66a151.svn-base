@@ -1,0 +1,43 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="person-content">
+        <div class="examine">
+            <div class="examine_person">
+                <div class="personTitle">默认审批人</div>
+                <div *ngFor="let item of personList;let i = index" class="personItem">
+                    <div class="personItem_explain">
+                        {{i === 0?'一审批人':i===1?'二审批人':i===2?'三审批人':''}}
+                    </div>
+                    <div class="personItem_head"><img [src]="item.img" alt="">
+                        <i (click)="handleClose(i)" nz-icon type="close"></i>
+                        <div class="personItem_head_dots" *ngIf="!(personList.length === i+1)"  >
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="personItem_name">{{item.name}}</div>
+                    <div class="personItem_job">{{item.job}}</div>
+                </div>
+                <div (click)="handleAdd()"  class="personItem personItem_add" *ngIf="personList.length < 3"><img src="https://qiniu.madrock.com.cn/qr/gzh.jpg" alt=""></div>
+            </div>
+            <div class="examine_permission">
+                <div class="permissionTitle">修改权限</div>
+                <div class="permissionWrap">
+                    <nz-radio-group [(ngModel)]="radioValue">
+                        <label nz-radio [ngStyle]="style" nzValue="A">允许修改审批人</label>
+                        <label nz-radio [ngStyle]="style" nzValue="B">不允许修改审批人</label>
+                    </nz-radio-group>
+                </div>
+            </div>
+            <div class="examine_operation">
+                <button nz-button [nzType]="'default'">返回</button>
+                <button nz-button [nzType]="'primary'">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

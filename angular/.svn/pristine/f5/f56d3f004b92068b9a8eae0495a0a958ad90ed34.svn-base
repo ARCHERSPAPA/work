@@ -1,0 +1,349 @@
+import { Component, OnInit, Input, Pipe, PipeTransform } from '@angular/core';
+import {trigger, state, style, transition, animate} from '@angular/animations';
+import {Router, ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import * as UserValidate from "../../../../validate/user-validate";
+import {Messages} from "../../../../model/msg";
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+
+
+import {UploaderComponent} from "../../../../plugins/uploader/uploader.component";
+import { NzFormatEmitEvent, NzTreeNode } from 'ng-zorro-antd';
+import {CookieService} from "ngx-cookie-service";
+import {User} from "../../../../model/user";
+import {atob} from "../../../../model/methods";
+
+@Component({
+  selector: 'rev-staff-add',
+  templateUrl: './worker-add.component.html',
+  styleUrls: ['./../worker.component.scss'],
+})
+export class WorkerAddComponent implements OnInit {
+  public title:string;
+  public workerForm:FormGroup;
+  public isEdit:boolean = false;
+  public id:string;
+  public content:string='上传照片';
+
+  public userId:string;
+
+  public headImg:string;
+  public name:string;
+  public phone:string;
+  public idCard:string;
+  // 籍贯
+  public nativePlace:string;
+  // 性别
+  public sex:string = '1';
+  // 部门
+  public depart: string[];
+  public superiorDepartmentId:string;
+  public nodes = [];
+  // 职位
+  public workerType:string;
+  // 备注
+  public remarks:string;
+
+  public departInfo:string;
+
+  public pickCode:number;
+
+  // 是否可编辑
+  public is_disabled = false;
+
+  constructor(
+    private cookieService:CookieService,
+    private router:Router,
+    private activatedRoute:ActivatedRoute,
+    private request:RequestService,
+    private warn:WarningService,
+    private fb:FormBuilder,
+    private modalService: NgbModal
+  ) {}
+
+
+
+  ngOnInit() {
+    this.title = "新增工人";
+    this.loadDepartment();
+    this.departInfo = '请选择部门';
+    this.workerForm = this.fb.group({
+      name:[this.name,[
+        Validators.required,
+        Validators.minLength(2),
+        UserValidate.ValidateText
+      ]],
+      phone:[this.phone,[
+        Validators.required,
+        UserValidate.ValidatePhone
+      ]],
+      idCard:[this.idCard,[
+        Validators.required,
+        UserValidate.ValidateIdCard
+      ]],
+      nativePlace:[this.nativePlace,[
+        Validators.required
+      ]],
+      workerType:[this.workerType,[
+        Validators.required
+      ]],
+      depart:[this.depart,[
+        Validators.required
+      ]],
+      sex:[this.depart,[
+        Validators.required
+      ]],
+    });
+  }
+
+  // 根据id拉取工人信息
+  loadStaff(id){
+    let self = this;
+    if(id){
+      this.request.doPost({
+        url:"loadWorker",
+        data:{id:id},
+        success:(res =>{
+          if(res && res.code == 200){
+            self.depart = [];
+            self.workerType = '';
+            let data = res.data,arr:any = [];
+            self.headImg = data.headImg;
+            self.name = data.name;
+            self.sex = String(data.sex);
+            self.phone = data.phone;
+            self.idCard = data.idCard;
+            self.nativePlace = data.nativePlace;
+            self.workerType = data.workerType;
+            self.remarks = data.remarks;
+
+            for(let i=0;i<data.deps.length;i++){
+              arr.push(data.deps[i].id)
+            }
+            self.depart = arr;
+
+            if(data.wokerSupplier){
+              self.is_disabled = true;
+            }
+          }
+        })
+      })
+    }
+  }
+  // 提交
+  submit(){
+    let self = this;
+    if(this.workerForm.valid){
+      let values = this.workerForm.value;
+      this.request.doPost({
+        url:"addWorker",
+        data:{
+          name:values.name,
+          phone:values.phone,
+          workerType:values.workerType,
+          remarks:this.remarks,
+          idCard:values.idCard,
+          headImg:this.headImg?this.headImg: (new User()).headImg,
+          sex:this.sex,
+          nativePlace:values.nativePlace,
+          departmentIds:values.depart,
+          externalSigns:this.userId
+        },
+        success:(res =>{
+          if(res && res.code == 200){
+            self.cookieService.set('depart',values.depart)
+            self.cookieService.set('workerType',values.workerType)
+            self.router.navigate(["../list"],{relativeTo:self.activatedRoute});
+          }else{
+            self.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    }else{
+      this.warn.onError('输入有误' || Messages.FAIL.DATA);
+    }
+  }
+  // 修改
+  modify(){
+    let self = this;
+
+    if(this.workerForm.valid){
+      let values = this.workerForm.value;
+      this.request.doPost({
+        url:"upWorker",
+        data:{
+          id:this.id,
+          name:values.name,
+          phone:values.phone,
+          idCard:values.idCard,
+          nativePlace:values.nativePlace,
+          workerType:values.workerType,
+
+          remarks:this.remarks,
+          headImg:this.headImg?this.headImg:(new User()).headImg,
+          sex:this.sex,
+          departmentIds:values.depart,
+        },
+        success:(res =>{
+          if(res && res.code == 200){
+            self.cookieService.set('depart',values.depart)
+            self.cookieService.set('workerType',values.workerType)
+            // console.log(self.cookieService.get('depart-tree'))
+            self.router.navigate(["../list"],{relativeTo:self.activatedRoute});
+          }else{
+            self.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      })
+    }else{
+      this.warn.onError('输入有误' || Messages.FAIL.DATA);
+    }
+  }
+  // 返回列表页面
+  exist(){
+    this.router.navigate(["../list"],{relativeTo:this.activatedRoute});
+  }
+
+  // 拉取部门信息
+  loadDepartment(){
+    let self = this;
+    self.request.doPost({
+      // url:"listDepartAddEmp",
+      url:"ListDepartmentTree",
+      data:{},
+      success:(res =>{
+       
+        if(res && res.code == 200){
+          self.nodes = res.data;
+          self.onChange(self.nodes);
+
+          self.id = atob(self.activatedRoute.snapshot.queryParams["id"]);
+
+          if(!isNaN(Number(self.id))){
+            self.title = "编辑工人";
+            self.isEdit = true;
+            self.loadStaff(self.id);
+          }else{
+            if(self.cookieService.get("workerType")){
+              self.workerType = self.cookieService.get("workerType");
+            }
+            if(self.cookieService.get("depart")){
+              let arrCopy:any = self.cookieService.get("depart").split(',');
+              self.depart = JSON.parse('[' + String(arrCopy) + ']')
+            }
+          }
+
+
+          // self.activatedRoute.queryParams.subscribe(params =>{
+          //     if(params && params.id){
+          //         self.title = "编辑工人";
+          //         self.isEdit = true;
+          //         self.id = params.id;
+          //         self.loadStaff(params.id);
+          //     }else{
+          //         if(self.cookieService.get("workerType")){
+          //             self.workerType = self.cookieService.get("workerType");
+          //         }
+          //         if(self.cookieService.get("depart-tree")){
+          //             let arrCopy:any = self.cookieService.get("depart-tree").split(',');
+          //             self.depart-tree = JSON.parse('[' + String(arrCopy) + ']')
+          //         }
+          //     }
+          // });
+
+        }else{
+          self.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    })
+  }
+  onChange(info){
+    for(let i=0;i<info.length;i++){
+      info[i]['title'] = info[i].name;
+      info[i]['value'] =info[i].id;
+      info[i]['key'] = info[i].id;
+
+      if(info[i].children && info[i].children.length>0){
+        this.onChange(info[i].children);
+      }else{
+        info[i]['isLeaf'] = true;
+      }
+    }
+  }
+
+  // 根据id拉取部门信息
+  // onExpandChange(e: NzFormatEmitEvent): void {
+  //     if (e.node.getChildren().length === 0 && e.node.isExpanded) {
+  //         this.request.doPost({
+  //             url:"listDepartAddEmp",
+  //             data:{
+  //                 superiorDepartmentId:e.node.key
+  //             },
+  //             success:(res =>{
+  //                 if(res && res.code == 200){
+  //
+  //                     for(let i=0;i< res.data.length;i++){
+  //                         res.data[i]['title'] =  res.data[i].name;
+  //                         res.data[i]['value'] =  res.data[i].id;
+  //                         res.data[i]['key'] =  res.data[i].id;
+  //                         res.data[i]['isLeaf'] = !res.data[i].ownSubset
+  //                     }
+  //                     e.node.addChildren(res.data)
+  //                 }else{
+  //                     this.warn.onError(res.msg || Messages.FAIL.DATA);
+  //                 }
+  //             })
+  //         });
+  //     }
+  // }
+
+  // 头像裁剪
+  openModal(){
+    const modalRef = this.modalService.open(UploaderComponent,{
+      centered:true,
+      keyboard:false
+    });
+    modalRef.componentInstance.name = "修改头像信息";
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.result.then((result) => {
+      if(result && result.image){
+        this.headImg = result.image;
+      }else{
+        this.warn.onError(Messages.ERROR.IMG_LARGE);
+      }
+
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+  // 提取工人资料
+  handlePick(){
+    const self = this;
+    if(this.pickCode){
+      this.request.doPost({
+        url:"queryUserByCode",
+        data:{
+          code:this.pickCode
+        },
+        success:(res =>{
+          if(res && res.code == 200){
+            self.userId = res.data.userId;
+            self.name = res.data.userName;
+            self.sex = res.data.sex;
+            self.idCard = res.data.idcard;
+            self.nativePlace = res.data.natives;
+            self.headImg = res.data.faceimg;
+            self.is_disabled = true;
+          }else{
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        })
+      });
+    }else{
+      this.warn.onError('请输入提取码' || Messages.FAIL.DATA);
+    }
+  }
+}

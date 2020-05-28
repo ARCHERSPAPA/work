@@ -1,0 +1,280 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.rev {
+    width: 100%;
+    overflow: hidden;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+  'Segoe UI Emoji', 'Segoe UI Symbol';
+    .head {
+        width: 100%;
+        h1 {
+            background: url("./logo.png") no-repeat left center transparent;
+            width: 1200px;
+            height: 50px;
+            margin: 0 auto;
+        }
+    }
+    .content {
+        height: 560px;
+        min-width: 1200px;
+        background: url("./bg.png") no-repeat;
+        background-size: 100% 100%;
+        padding-top: 100px;
+        position: relative;
+        /**
+            v1.3.4前版本form样式表
+         */
+        .form {
+            width: 340px;
+            height: 320px;
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            margin-top: -160px;
+            background: rgb(255, 255, 255);
+            border: 1px solid #dedede;
+            @include compatibility(border-radius, 3px);
+            li {
+                font-size: 0;
+                height: 55px;
+                overflow: hidden;
+                &.tip {
+                    font-size: 12px;
+                    height: 20px;
+                    line-height: 20px;
+                    margin-bottom: 0;
+                }
+                &.title {
+                    display: inline-block;
+                    vertical-align: top;
+                    width: 100%;
+                    font-size: 20px;
+                    height: 32px;
+                    line-height: 32px;
+                    font-weight: 700;
+                    text-align: center;
+                    margin: 10px auto;
+                }
+                &.forget {
+                    height: 20px;
+                    line-height: 20px;
+                    .text{
+                        display: block;
+                        text-align: right;
+                        color: #0a8ddf;
+                        font-size: 12px;
+                        cursor: pointer;
+                    }
+                }
+                label {
+                    display: inline-block;
+                    vertical-align: top;
+                    font-size: 14px;
+                    height: 32px;
+                    line-height: 32px;
+                    outline: none;
+                    text-indent: 5px;
+                    &.label {
+                        width: 70px;
+                        text-align: right;
+                        padding-right: 10px;
+                    }
+                }
+                .inp {
+                    display: inline-block;
+                    width: 230px;
+                    input {
+                        display: inline-block;
+                        vertical-align: top;
+                        font-size: 14px;
+                        height: 32px;
+                        line-height: 32px;
+                        outline: none;
+                        text-indent: 5px;
+                        &.text {
+                            width: 100%;
+                            border: 1px solid #dedede;
+                            box-sizing: border-box;
+                        }
+                        &.code {
+                            width: 120px;
+                            letter-spacing: 5px;
+                            cursor: pointer;
+                            background: transparent;
+                            font-size: 14px;
+                            letter-spacing: 0;
+                            cursor: text;
+                        }
+                    }
+                    .code {
+                        display: inline-block;
+                        vertical-align: top;
+                        width: 110px;
+                        height: 32px;
+                        line-height: 32px;
+                        letter-spacing: 5px;
+                        padding-left: 10px;
+                        background: rgba(10, 120, 110, 0.15);
+                        font-size: 14px;
+                        cursor: pointer;
+                    }
+                }
+
+                button {
+                    width: 230px;
+                    height: 30px;
+                    line-height: 30px;
+                    background: rgba(0, 120, 12, 0.7);
+                    color: #fff;
+                    outline: none;
+                    border: 0;
+                    display: inline-block;
+                    cursor: pointer;
+                    font-size: 14px;
+                    &.disabled {
+                        background: rgb(222, 222, 222);
+                        color: #f2f2f2;
+                        cursor: not-allowed;
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+
+.block {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .sliderContainer {
+    position: relative;
+    text-align: center;
+    width: 310px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 15px;
+    background: #f7f9fa;
+    color: #45494c;
+    border: 1px solid #e4e7eb;
+  }
+
+  .sliderContainer_active .slider {
+    height: 38px;
+    top: -1px;
+    border: 1px solid #1991FA;
+  }
+
+  .sliderContainer_active .sliderMask {
+    height: 38px;
+    border-width: 1px;
+  }
+
+  .sliderContainer_success .slider {
+    height: 38px;
+    top: -1px;
+    border: 1px solid #52CCBA;
+    background-color: #52CCBA !important;
+  }
+
+  .sliderContainer_success .sliderMask {
+    height: 38px;
+    border: 1px solid #52CCBA;
+    background-color: #D2F4EF;
+  }
+
+  .sliderContainer_success .sliderIcon {
+    background-position: 0 0 !important;
+  }
+
+  .sliderContainer_fail .slider {
+    height: 38px;
+    top: -1px;
+    border: 1px solid #f57a7a;
+    background-color: #f57a7a !important;
+  }
+
+  .sliderContainer_fail .sliderMask {
+    height: 38px;
+    border: 1px solid #f57a7a;
+    background-color: #fce1e1;
+  }
+
+  .sliderContainer_fail .sliderIcon {
+    background-position: 0 -83px !important;
+  }
+
+  .sliderContainer_active .sliderText,
+  .sliderContainer_success .sliderText,
+  .sliderContainer_fail .sliderText {
+    display: none;
+  }
+
+  .sliderMask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 40px;
+    border: 0 solid #1991FA;
+    background: #D1E9FE;
+  }
+
+  .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background .2s linear;
+  }
+
+  .slider:hover {
+    background: #1991FA;
+  }
+
+  .slider:hover .sliderIcon {
+    background-position: 0 -13px;
+  }
+
+  .sliderIcon {
+    position: absolute;
+    top: 15px;
+    left: 13px;
+    width: 14px;
+    height: 10px;
+    background: url(https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=2582288082,3298009836&fm=74&app=80&f=JPEG&size=f121,90?sec=1880279984&t=8c49419fc255bb68253c1fe1528f734d) 0 -26px;
+    background-size: 34px 471px;
+  }
+
+  .refreshIcon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    background: url(http://cstaticdun.126.net//2.6.3/images/icon_light.f13cff3.png) 0 -437px;
+    background-size: 34px 471px;
+  }
+
+  .fatherBox {
+    display: none;
+    position: absolute;
+    top: -160px;
+  }
+
+  .captcha:hover .fatherBox {
+    display: block;
+  }
+
+  .myCanvas {
+    background-color: #fff;
+  }
+

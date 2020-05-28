@@ -1,0 +1,252 @@
+<div class="cost">
+  <div class="cost-content">
+    <div nz-row class="cost-detail">
+      <div nz-col nzSpan="24" class="cost-form pb-24">
+        <form nz-form [formGroup]="costForm">
+          <!--<div nz-row class="cost-title mb-20">承包合同内容</div>-->
+          <div nz-row nzType="flex">
+            <div nz-col nzSpan="8">
+              <!---人工费用--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="laborCost">人工费</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="laborCost" name="laborCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="laborCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入人工费"
+                                     (ngModelChange)="changeData()"></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('laborCost').dirty && costForm.get('laborCost').errors">
+                      <ng-container *ngIf="costForm.get('laborCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('laborCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <!---木工费用---->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="carpentryCost">木工</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="carpentryCost" name="carpentryCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="carpentryCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入木工费" ></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('carpentryCost').dirty && costForm.get('carpentryCost').errors">
+                      <ng-container *ngIf="costForm.get('carpentryCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('carpentryCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <!---泥工费用--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="masonCost">泥工</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="masonCost" name="masonCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="masonCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入泥工费" ></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('masonCost').dirty && costForm.get('masonCost').errors">
+                      <ng-container *ngIf="costForm.get('masonCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('masonCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <!---漆工费用--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="paintCost">漆工</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="paintCost" name="paintCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="paintCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入漆工费" ></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('paintCost').dirty && costForm.get('paintCost').errors">
+                      <ng-container *ngIf="costForm.get('paintCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('paintCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <!---水电工费用--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="electricianCost">水电工</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="electricianCost" name="electricianCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="electricianCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入水电工费" ></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('electricianCost').dirty && costForm.get('electricianCost').errors">
+                      <ng-container *ngIf="costForm.get('electricianCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('electricianCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+            <div nz-col nzSpan="8">
+              <!---材料费用--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="materialCost">材料费</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="materialCost" name="materialCost"
+                                     style="width:100%;"
+                                     [(ngModel)]="materialCost" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入材料费"
+                                     (ngModelChange)="changeData()"></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('materialCost').dirty && costForm.get('materialCost').errors">
+                      <ng-container *ngIf="costForm.get('materialCost').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('materialCost').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <!---chart--->
+              <div nz-col nzSpan="24">
+                <div nz-col nzSpan="16" class="cost-chart-data">
+                  <dl>
+                    <dt [nzTitle]="finalPrice?finalPrice:0" nzPlacement="topCenter"
+                        nz-tooltip>{{(finalPrice?finalPrice:0)|number:'1.2'}}</dt>
+                    <dd>工程总额</dd>
+                  </dl>
+                  <v-chart [forceFit]="true" height="300" [data]="data">
+                    <v-tooltip [showTitle]="false" [show]="true" [itemTpl]="itemTpl"></v-tooltip>
+                    <v-pie position="percent" [color]="color" [select]="false" [tooltip]="tooltip"></v-pie>
+                    <v-coord type="theta" [radius]="1" [innerRadius]="0.9"></v-coord>
+                  </v-chart>
+                </div>
+                <div nz-col nzSpan="8">
+                  <div nz-col nzSpan="24">
+                    <dl class="cost-side">
+                      <dt [nzTitle]="finalCost?finalCost:0" nzPlacement="topCenter"
+                          nz-tooltip class="pl-20">
+                        <span class="bg-cost"></span>{{(finalCost?finalCost:0)|number:'1.2'}}
+                      </dt>
+                      <dd class="pl-20">工程成本费</dd>
+                    </dl>
+                  </div>
+                  <div nz-col nzSpan="24">
+                    <dl class="cost-side">
+                      <dt [nzTitle]="profit?profit:0" nzPlacement="topCenter"
+                          nz-tooltip class="pl-20">
+                        <span class="bg-profit"></span>{{(profit?profit:0)|number:'1.2'}}
+                      </dt>
+                      <dd class="pl-20">毛利</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div nz-col nzSpan="8">
+              <!---工程合同总额--->
+              <div nz-col nzSpan="24">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="3" nzFor="finalPrice">工程合同金额</nz-form-label>
+                  <nz-form-control [nzSpan]="16" [nzOffset]="1">
+                    <nz-input-number formControlName="finalPrice" name="finalPrice"
+                                     style="width:100%;"
+                                     [(ngModel)]="finalPrice" autocomplete="off" maxlength="50"
+                                     [nzDisabled]="!showSendByState()" nzStep="1"
+                                     nzPlaceHolder="请输入工程合同金额"
+                                     (ngModelChange)="changeData()"></nz-input-number>
+                    <nz-form-explain
+                            *ngIf="costForm.get('finalPrice').dirty && costForm.get('finalPrice').errors">
+                      <ng-container *ngIf="costForm.get('finalPrice').hasError('required')">
+                        必填项目
+                      </ng-container>
+                      <ng-container *ngIf="costForm.get('finalPrice').hasError('price')">
+                        输入格式不正确
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div nz-col nzSpan="24">
+                <div nz-col nzSpan="11" nzOffset="1">
+                  <dl class="cost-side">
+                    <dt [title]="laborPercentage">{{laborPercentage?laborPercentage:0}}</dt>
+                    <dd>人工费占合同比例</dd>
+                  </dl>
+                </div>
+
+                <div nz-col nzSpan="11" nzOffset="1">
+                  <dl class="cost-side">
+                    <dt [title]="materialPercentage">{{materialPercentage?materialPercentage:0}}</dt>
+                    <dd>材料费占合同比例</dd>
+                  </dl>
+                </div>
+
+                <div nz-col nzSpan="11" nzOffset="1">
+                  <dl class="cost-side">
+                    <dt [title]="profitPercentage">{{profitPercentage?profitPercentage:0}}</dt>
+                    <dd>毛利率</dd>
+                  </dl>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div nz-row>
+            <div nz-col nzSpan="16" nzOffset="8" class="text-right">
+              <button nz-button nzType="default" *ngIf="showViewByState()"
+                      (click)="viewCost()" class="ml-10">预览成本表
+              </button>
+              <button nz-button nzType="default" (click)="importCost()"
+                      *ngIf="showImportByState()" class="ml-10">导入成本表
+              </button>
+              <button nz-button nzType="primary" [disabled]="!costForm.valid"
+                      (click)="sendCost($event)" class="ml-10"
+                      *ngIf="showSendByState()">提交至工长
+              </button>
+              <button nz-button nzType="primary" [disabled]="!costForm.valid"
+                      (click)="saveCost($event)" class="ml-10"
+                      *ngIf="showSaveByState()">保存
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

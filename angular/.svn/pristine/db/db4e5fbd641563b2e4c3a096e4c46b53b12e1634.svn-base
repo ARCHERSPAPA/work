@@ -1,0 +1,118 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Default} from "../../../../model/constant";
+import {Messages} from "../../../../model/msg";
+import {Router, ActivatedRoute} from '@angular/router';
+import {btoa, transformQuickDepartType} from "../../../../model/methods";
+import {UserService} from "../../../../service/user.service";
+
+@Component({
+    selector: 'rev-staff-list',
+    templateUrl: './worker-list.component.html',
+    styleUrls: ['./../../personnel.component.scss', './../worker.component.scss']
+})
+export class WorkerListComponent implements OnInit {
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    public searchInfo: string = "";
+    public workerList: any;
+    public departmentId: any;
+
+    //查询部门显示数据
+    public departType:number;
+
+    constructor(private request: RequestService,
+                private warn: WarningService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private user:UserService) {}
+
+    ngOnInit() {
+        this.departType = transformQuickDepartType(this.user.getQuickQueryDepartType());
+    }
+
+    selectDepart(e: any) {
+        this.departmentId = e;
+        this.searchInfo = "";
+        this.changeData();
+    }
+
+    changeData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.pageSize = Default.PAGE.PAGE_SIZE;
+        let self = this;
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+        };
+        if (this.searchInfo) {
+            params["searchInfo"] = this.searchInfo;
+        } else {
+            params["departmentId"] = this.departmentId;
+        }
+        this.request.doPost({
+            url: "workerList",
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    self.workerList = res.data.pageSet;
+                    self.total = res.data.total;
+                } else {
+                    self.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    // 列表操作
+    quitWorker(id) {
+        let self = this;
+        if (id) {
+            this.request.doPost({
+                url: "quitWorker",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        self.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        self.changeData();
+                    } else {
+                        self.warn.onError(res.msg || Messages.SUCCESS.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    delWorker(id) {
+        let self = this;
+        if (id) {
+            this.request.doPost({
+                url: "delWorker",
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        self.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        self.changeData();
+                    } else {
+                        self.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    editWorker(id) {
+        if (id) {
+            this.router.navigate(["./../add"], {
+                queryParams: {id: btoa(id)},
+                relativeTo: this.activatedRoute
+            });
+        }
+    }
+}

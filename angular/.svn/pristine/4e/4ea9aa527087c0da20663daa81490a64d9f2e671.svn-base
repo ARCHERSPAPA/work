@@ -1,0 +1,47 @@
+<div class="cost-disclose" *ngIf='discloseList && discloseList.submitter '>
+  <div class="cost-disclose-title">
+    <div>
+      <span *ngIf='discloseList && discloseList.submitter'>
+      {{discloseList.submitter}}
+      </span>
+      <span class="cost-disclose-title-job">
+        (工长)
+      </span>
+    </div>
+    <span class="cost-disclose-title-time">
+     {{discloseList.createTime|date:'yyyy-MM-dd hh:ss'}}(已交低{{getDiscloseTime(discloseList.createTime)}}天)
+    </span>
+  </div>
+  <p>
+   {{discloseList.content}}
+  </p>
+  <div class="cost-disclose-imgs"*ngIf='discloseList && discloseList.images' >
+    <div *ngFor="let img of discloseList.images" [ngStyle]="styleLicense(img.imageAddress)"(click)="openModal(discloseList.images)">
+    </div>
+  </div>
+</div>
+<div *ngIf='discloseList && !discloseList.submitter '>
+  <p>暂无交底信息显示</p>
+</div>
+<!-- <div class="cost-disclose">
+  <div class="cost-disclose-title">
+    <div>
+      <span>
+        李明
+      </span>
+      <span class="cost-disclose-title-job">
+        (工长)
+      </span>
+    </div>
+    <span class="cost-disclose-title-time">
+      2020-1-2
+    </span>
+  </div>
+  <p>
+    葛饰北斋是以「名所绘（风景绘）」著名的，而风景绘则又是借鉴了欧洲绘画的，比方透视与明暗结构。却没想到借鉴了欧洲艺术原理的葛饰北斋后来的作品又反过来大力影响了欧洲画坛，比如梵高、德加、高更、马奈这几位世界级欧洲艺术大咖都分别临摹过葛饰北斋的作品。葛饰北斋是以「名所绘（风景绘）」著名的，而风景绘则又是借鉴了欧洲绘画的，比方透视与明暗结构。
+  </p>
+  <div class="cost-disclose-imgs">
+    <div *ngFor="let img of imgList;let i=index" [ngStyle]="styleLicense(img.src)" (click)="openModal(imgList,i)">
+    </div>
+  </div>
+</div> -->

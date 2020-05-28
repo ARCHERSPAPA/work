@@ -1,0 +1,186 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../../service/request.service";
+import { ActivatedRoute } from '@angular/router';
+import { WarningService } from "../../../../service/warning.service";
+import { atob } from "../../../../model/methods";
+import { Messages } from "../../../../model/msg";
+import { SettleService } from "../../../../service/settle.service";
+@Component({
+  selector: 'rev-case-tabs-materials',
+  templateUrl: './case-tabs-materials.component.html',
+  styleUrls: ['./case-tabs-materials.component.scss']
+})
+export class CaseTabsMaterialsComponent implements OnInit {
+  public materialsList = [];
+  public quoteNo: string;//项目编号
+  //暂存列表，用于还原取消编辑前的数据
+  public pveList = [];
+  //材料列表的index，本地的编辑删除
+  public index: number = 0;
+  public newcase
+  public cid;//主键ID
+  public editTitle: string;//取消的Titel
+  constructor(
+    private req: RequestService,
+    private warn: WarningService,
+    private route: ActivatedRoute,
+    private settle: SettleService
+  ) { }
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params && !params["newcase"]) {
+        this.quoteNo = atob(params["quoteNo"]);
+        this.cid = atob(params["aid"]);
+      }
+      else {
+        this.newcase = params["newcase"];
+      } setTimeout(() => {
+        this.changeData();
+      }, 400);
+    })
+  }
+
+  ngDoCheck() {
+    if (this.settle.getCaseData() && this.newcase && this.settle.getCaseData().id) {
+      this.cid = this.settle.getCaseData().id;
+      this.quoteNo = this.settle.getCaseData().quoteId;
+    }
+  }
+  //添加
+  addRow() {
+    this.editTitle = "确认取消添加"
+    if (this.cid) {
+      this.index++;
+      this.materialsList.unshift({ name: '', brand: '', edit: true, key: this.index });
+    } else {
+      this.warn.onError('请先保存完工照,基础信息或者其他图片');
+    }
+
+  }
+  //删除
+  delList(i, id) {
+    let url;
+    if (!this.newcase) {
+      url = 'smallDeleteBrand'
+    } else {
+      url = 'newSmallDeleteBrand'
+    }
+    this.req.doPost({
+      url: url,
+      data: {
+        id: id,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+    this.materialsList.splice(i, 1);
+  }
+  //编辑
+  startEdit(i,key) {
+    this.editTitle = "确认取消编辑"
+    this.materialsList.find(item => item.key === key).edit = true;
+    this.pveList.splice(i, 1, {
+      name: this.materialsList.find(item => item.key === key).name,
+      brand: this.materialsList.find(item => item.key === key).brand,
+      key: this.materialsList.find(item => item.key === key).key
+    });
+  }
+      //暂存
+  onlySave(key){
+
+  }
+  //取消
+  cancelEdit(i, key, brand, name, id) {
+console.log( this.pveList, this.pveList[i])
+    this.materialsList[i].edit = false;
+    //是否真实数据
+    if (id) {
+      this.materialsList[i].name = '';
+      this.materialsList[i].brand = '';
+      this.materialsList.find(item => item.key === key && item.key === this.pveList[i]['key']).name = this.pveList[i]['name'];
+      this.materialsList.find(item => item.key === key && item.key === this.pveList[i]['key']).brand = this.pveList[i]['brand'];
+    } else {
+      this.materialsList.splice(i, 1);
+    }
+  }
+  
+  //保存
+  finishEdit(name, brand, key, id) {
+    if (!name) {
+      this.warn.onWarn('材料不能为空');
+      return
+    }
+    if (!brand) {
+      this.warn.onWarn('品牌不能为空');
+      return
+    }
+    let url;
+    let params = {};
+    this.materialsList.find(item => item.key === key).edit = false;
+    if (!this.newcase) {
+      if (!id) {
+        //top案例
+        url = 'smallAddBrand';
+        params['quoteId'] = this.cid;
+      } else {
+         //top案例编辑
+        url = 'smallEditBrand';
+        params['id'] = id;
+      }
+    } else {
+      if (!id) {
+          //其他案例
+        url = 'newSmallAddBrand';
+        params['quoteId'] = this.quoteNo;
+      } else {
+          //其他案例编辑
+        url = 'newSmallEditBrand';
+        params['id'] = id;
+      }
+    }
+    params['name'] = this.materialsList.find(item => item.key === key).name;
+    params['brand'] = this.materialsList.find(item => item.key === key).brand;
+    this.req.doPost({
+      url: url,
+      data: params,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.materialsList.find(item => item.key === key).id = res.data;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  changeData() {
+    let url;
+    if (this.newcase) {
+      url = "newSmallProgramMaterls"
+    } else {
+      url = "smallProgramMaterls"
+    }
+    this.req.doPost({
+      url: url,
+      data: {
+        quoteId: this.newcase ? this.quoteNo : this.cid,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.materialsList = res.data;
+          this.index = this.materialsList.length;
+          this.materialsList.filter((v, i) => {
+            v['key'] = i;
+          })
+        } else {
+        }
+      }
+    })
+  }
+} 

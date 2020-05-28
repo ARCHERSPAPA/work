@@ -1,0 +1,60 @@
+import {Component, OnInit, AfterViewInit} from '@angular/core'
+import {Router, ActivatedRoute} from '@angular/router'
+import {sideAnimate} from '../../../animation/transform.component'
+
+@Component({
+    selector: 'rev-staff',
+    templateUrl: './worker.component.html',
+    styleUrls: ['./../personnel.component.scss', './worker.component.scss'],
+    animations: [
+        sideAnimate
+    ]
+})
+export class WorkerComponent implements OnInit {
+    public title: string
+    public atags: Array<any>
+
+    public showBtn = false
+
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute) {
+    }
+
+    ngOnInit() {
+        this.atags = [
+            {
+                name: '新建工人',
+                link: '/rev/personnel/worker/add'
+            }
+        ]
+    }
+
+    // handleName(name: string) {
+    //   switch (name){
+    //     case "新建工人":
+    //       // window.open(window.location.href.replace(/list/g,'add'),'_blank');
+    //       this.router.navigate(["./add"],{relativeTo: this.activatedRoute})
+    //       break;
+    //     default:
+    //       console.log("默认")
+    //   }
+    // }
+
+    ngDoCheck() {
+        this.title = this.getTitle()
+        const url = this.activatedRoute.snapshot['_routerState'].url.toString()
+        this.showBtn = url.indexOf('list') >= 0
+    }
+
+    getTitle() {
+        const url = this.router.url.match(/personnel\/worker\/[a-z]+/g)
+        const id = this.activatedRoute.queryParams['value']['id']
+        if (url && url.length > 0 && url[0].includes('add')) {
+            if (!id) { return '新建工人' }
+            return '编辑工人'
+        } else {
+            return '工人管理'
+        }
+    }
+
+}

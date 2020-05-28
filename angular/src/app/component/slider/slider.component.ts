@@ -1,0 +1,43 @@
+import { Component, OnInit, Output, Input, EventEmitter } from '@angular/core';
+declare var jigsaw: any;
+@Component({
+  selector: 'rev-slider',
+  templateUrl: './slider.component.html',
+  styleUrls: ['./slider.component.scss']
+})
+export class SliderComponent implements OnInit {
+  @Output() handleSwitch = new EventEmitter<any>();
+  @Input() img: false;
+  public lock = true;
+
+  public inits = function () {
+    if (this.lock) {
+      let that = this;
+      jigsaw.init({
+        //初始化
+        el: document.getElementById('captcha'), //选取dom
+        width: 320, //宽
+        height: 240,
+        imgList: that.img, //验证的图片
+        onSuccess: function () { that.handleSwitch.emit('success'); },
+        onFail: function () { that.handleSwitch.emit('fail'); },
+        onRefresh: function () { that.handleSwitch.emit('Refresh') },
+      });
+      this.lock = false;
+    }
+  };
+
+  constructor() { }
+  ngDoCheck() {
+    if (this.lock) {
+      this.inits();
+      this.lock = false;
+    }
+  }
+  ngOnInit() {
+    setTimeout(() => {
+      this.inits();
+    }, 200);
+  }
+
+}

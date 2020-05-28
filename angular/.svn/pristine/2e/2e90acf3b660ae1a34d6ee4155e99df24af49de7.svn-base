@@ -1,0 +1,120 @@
+import {Component, OnInit} from '@angular/core'
+import {sideAnimate} from '../../../animation/transform.component'
+import {Router, ActivatedRoute} from '@angular/router'
+import {FormGroup, FormBuilder, Validators} from '@angular/forms'
+import {RequestService} from '../../../service/request.service'
+import {WarningService} from '../../../service/warning.service'
+import {Messages} from '../../../model/msg'
+import * as UserValidate from '../../../validate/user-validate'
+import {DepartService} from '../../../service/depart.service'
+import { resolve } from 'url'
+
+@Component({
+    selector: 'rev-depart',
+    templateUrl: './depart.component.html',
+    styleUrls: ['./../personnel.component.scss', './depart.component.scss'],
+    animations: [
+        sideAnimate
+    ]
+})
+export class DepartComponent implements OnInit {
+
+    public title: string
+    public buttons: Array<any>
+
+    // 模块相关
+    public isVisible = false
+    public switch: string
+    public pid: string
+
+    public departForm: FormGroup
+    public name: string
+    public remarks: string
+
+    public departList: any
+
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private warn: WarningService,
+                private request: RequestService,
+                private fb: FormBuilder,
+                private depart: DepartService
+    ) {
+    }
+
+    ngOnInit() {
+        this.departForm = this.fb.group({
+            name: [this.name, [
+                Validators.required,
+                Validators.minLength(2),
+                Validators.maxLength(10),
+                UserValidate.ValidateAccount
+            ]],
+            remarks: [this.remarks, [
+                Validators.maxLength(120)
+            ]]
+        })
+        this.title = '部门设置'
+        this.buttons = [{
+            color: 'btn-primary',
+            name: '新建部门'
+        }]
+
+        this.depart.loadDepart(0, 1)
+    }
+
+    ngAfterViewChecked() {
+
+        setTimeout(() => {
+            this.departList = this.depart.getDepartList(1)
+        }, 500)
+    }
+
+    handleCancel() {
+        this.isVisible = false
+        this.departForm.reset()
+    }
+
+    handleName(name: string) {
+        this.isVisible = true
+        // switch (name){
+        //   case "新建部门":
+        //     this.router.navigate(["./add"],{relativeTo: this.activatedRoute});
+        //     break;
+        //   default:
+        //     console.log("默认")
+        // }
+    }
+
+    // ngDoCheck() {
+    //     let url = this.activatedRoute.snapshot["_routerState"].url.toString();
+    //     this.showBtn = url.indexOf("list") >= 0;
+    // }
+
+    submit(e: any) {
+        e.stopPropagation()
+        e.preventDefault()
+        const that = this
+        if (that.departForm.valid) {
+            const params = that.departForm.value
+            if (that.pid) {
+                params['superiorDepartmentId'] = that.pid
+            }
+            that.request.doPost({
+                url: 'addDepart',
+                data: params,
+                success: (res => {
+                    this.handleCancel()
+                    if (res && res.code == 200) {
+                        // that.router.navigate(["./../depart/list"], {relativeTo: that.activatedRoute});
+                        this.depart.loadDepart(0, 1)
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA)
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA)
+                    }
+                })
+            })
+        }
+    }
+
+}

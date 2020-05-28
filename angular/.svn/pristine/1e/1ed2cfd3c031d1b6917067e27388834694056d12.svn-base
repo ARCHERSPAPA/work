@@ -1,0 +1,86 @@
+<div class="rev">
+    <div style="height:770px;">
+        <div class="head">
+            <h1></h1>
+        </div>
+        <div class="content">
+            <!-- <img src="./bg.png" alt="" style="width: 600px ;"> -->
+            <div class="bg-img">
+
+            </div>
+            <div class="form">
+                <form [formGroup]="loginForm" style="height: 520px;" >
+                    <ul>
+                        <li class="title">登录</li>
+                        <li class="tip" style="margin-top: 16px;"><span></span></li>
+                        <li class="sliderContainer_active_input ">
+                            <label class="label">帐号</label>
+                            <div class="inp">
+                                <input nz-input type="text" nzSize='large' formControlName="account" name="account" placeholder="请输入帐号"
+                                       autocomplete="off" maxlength="20"/>
+                                <div [hidden]="loginForm.get('account').valid || loginForm.get('account').pristine"
+                                     class="error">
+                                    <span [hidden]="!loginForm.hasError('number',['account'])">输入格式错误</span>
+                                    <span
+                                        [hidden]="!loginForm.hasError('minlength',['account'])">&nbsp;&nbsp;至少输入6位字符</span>
+                                    <span
+                                        [hidden]="!loginForm.hasError('maxlength',['account'])">&nbsp;&nbsp;至多输入20位字符</span>
+                                </div>
+                            </div>
+    
+                        </li>
+                        <li  class="sliderContainer_active_input "  style="margin-top:61px" >
+                            <label class="label ">密码</label>
+                            <div class="inp">
+                                <input  type="password" nz-input nzSize='large' formControlName="password" name="password" 
+                                       placeholder="请输入密码" (keypress)="($event.which === 13)?login():0"
+                                       autocomplete="off" maxlength="32"/>
+                                <div [hidden]="loginForm.get('password').valid || loginForm.get('password').pristine"
+                                     class="error">
+                                    <!--<span [hidden]="!loginForm.hasError('pwd',['password'])">输入包含数字和字母</span>-->
+                                    <span
+                                        [hidden]="!loginForm.hasError('minlength',['password'])">&nbsp;&nbsp;密码至少输入6位字符</span>
+                                    <span
+                                        [hidden]="!loginForm.hasError('maxlength',['password'])">&nbsp;&nbsp;密码至多输入32位字符</span>
+                                </div>
+                            </div>
+    
+                        </li>
+    
+                        <li style="    margin-top: 122px;">
+                            <label class="label">验证</label>
+                            <rev-slider  style="position: absolute;font-size: 16px;top: -50px;" (handleSwitch)='checkVerify($event)'></rev-slider>
+                            <!-- <div class="inp">
+                                <input type="text" class="text code" formControlName="code" name="code" placeholder="请输入验证码"
+                                       autocomplete="off" maxlength="6"/>
+                                <span class="code" (click)="changeCode()" style="letter-spacing: 10px;">{{randCode}}</span>
+                                <div [hidden]="loginForm.get('code').valid || loginForm.get('code').pristine" class="error">
+                                    <span [hidden]="!loginForm.hasError('code',['code'])">只能输入数字或字母</span>
+                                    <span [hidden]="!loginForm.hasError('minlength',['code'])">&nbsp;&nbsp;至少输入4位字符</span>
+                                    <span [hidden]="!loginForm.hasError('maxlength',['code'])">&nbsp;&nbsp;至多输入6位字符</span>
+                                </div>
+                            </div> -->
+                        </li>
+                        <li>
+                            <label class="label"></label>
+                            <button type="button" nz-button nzType="primary" (click)="login()" [disabled]="!loginForm.valid || !passState">
+                                登录
+                            </button>
+                        </li>
+                        <li class="forget">
+                            <label class="label">&nbsp;</label>
+                            <div class="inp" style="margin-top: 8px;text-align: right;">
+                                <a class="text" style="font-size: 16px;display: inline-block;" (click)="forget()">找回密码?</a>
+                                <!--<a [routerLink]="'/user/company'" class="text" href="javascript:void(0)">忘记密码</a>-->
+                            </div>
+    
+                        </li>
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+   
+    <rev-copy-right [bg]="'#fff'"></rev-copy-right>
+</div>
+

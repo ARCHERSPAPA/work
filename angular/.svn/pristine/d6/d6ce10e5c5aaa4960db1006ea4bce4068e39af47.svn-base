@@ -1,0 +1,30 @@
+<div class="list-group-rev">
+  <nz-table #nzTable [nzData]="receivablesList" [nzBordered]="true" [nzFrontPagination]="false"
+            [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" nzSize="middle"
+            (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]='true' class="tables">
+    <thead>
+    <tr width='100%'>
+      <th>收款期数</th>
+      <th >收款比例（%）</th>
+      <th>金额 </th>
+      <th >实收</th>
+      <th>备注</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of nzTable.data">
+      <td [title]="item.customerName?item.customerName:''">
+        <nz-badge [nzDot]="item.agendaCount > 0">{{item.customerName?item.customerName:'--'}}</nz-badge>
+      </td>
+      <td [title]="item.customerPhone?item.customerPhone:''">
+        {{item.customerPhone?item.customerPhone:'--'}}
+      </td>
+      <td [title]="item.customerHouseAddress?item.customerHouseAddress:''">
+        {{item.customerHouseAddress?item.customerHouseAddress:'--'}}
+      </td>
+      <td nz-td></td>
+      <td nz-td></td>
+    </tr>
+    </tbody>
+  </nz-table>
+</div>

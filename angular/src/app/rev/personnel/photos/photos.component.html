@@ -1,0 +1,105 @@
+<div class="personnel">
+    <div class="personnel-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+
+    <div nz-row class="mt-16">
+        <div nz-col nzSpan="14">
+            <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        </div>
+        <div nz-col nzSpan="10" class="text-right">
+            <button nz-button [nzType]="'primary'" type="button" (click)="addPhoto()">新建</button>
+        </div>
+    </div>
+    <div nz-row class="mt-16">
+        <div nz-col nzSpan="24">
+            <nz-table #nzTable [nzData]="photoSettings" [nzBordered]="true" [nzFrontPagination]="false"
+                      [nzShowPagination]="false" nzSize="middle">
+                <thead nz-thead>
+                <tr>
+                    <th>图纸类型</th>
+                    <th>付款前是否可查阅</th>
+                    <th>数量要求</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody nz-tbody style="font-size: 12px">
+                <tr nz-tbody-tr *ngFor="let photo of nzTable.data">
+                    <td nz-td [title]="photo.name">{{photo.imgType?photo.imgType:'--'}}</td>
+                    <td nz-td>{{photo.designStage === 0?'是':'否'}}</td>
+                    <td nz-td>{{photo.imgCount?photo.imgCount:(photo.imgCount === 0?0:'--')}}</td>
+                    <td nz-td><a href="javascript:void(0)" (click)="editPhoto(photo)">
+                        编辑
+                    </a>
+                        <a href="javascript:void(0)" class="del" nz-popconfirm [nzTitle]="'确定删除该类型吗?'"
+                           nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="delPhoto(photo.id)">
+                            删除
+                        </a></td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+
+</div>
+
+
+<!---图片设置弹出框--->
+<nz-modal [(nzVisible)]="photoVisible"
+          [nzTitle]="photoTitle"
+          [nzFooter]="modalFooter"
+          (nzOnCancel)="photoCancel()"
+>
+    <div class="modify">
+        <form nz-form [formGroup]="photoForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="8" nzRequired>图纸类型</nz-form-label>
+                <nz-form-control [nzSpan]="16">
+                    <input nz-input type="text" class="text" formControlName="photoName"
+                           name="photoName" [(ngModel)]="photoName" maxLength="30" autocomplete="off"
+                           onkeyup="this.value = this.value.replace(/\s/g,'')"/>
+                    <nz-form-explain *ngIf="photoForm.get('photoName').dirty && photoForm.get('photoName').errors">
+                        <ng-container *ngIf="photoForm.get('photoName').hasError('required')">
+                            必填选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="8" nzRequired>首付款前是否可查阅</nz-form-label>
+                <nz-form-control [nzSpan]="16">
+                    <nz-radio-group [(ngModel)]="photoView" nzName="radiogroup" formControlName="photoView"
+                                    name="photoView">
+                        <label nz-radio [nzValue]="0" style="margin-right:120px;">是</label>
+                        <label nz-radio [nzValue]="1">否</label>
+                    </nz-radio-group>
+
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="8">数量要求</nz-form-label>
+                <nz-form-control [nzSpan]="16">
+                    <input nz-input type="text" class="text" formControlName="photoNum"
+                           name="photoNum" [(ngModel)]="photoNum" maxLength="30" autocomplete="off"
+                           onkeyup="this.value = this.value.replace(/\s/g,'')"/>
+                    <nz-form-explain *ngIf="photoForm.get('photoNum').dirty && photoForm.get('photoNum').errors">
+                        <ng-container *ngIf="photoForm.get('photoNum').hasError('number')">
+                            数量格式不正确
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+
+        </form>
+    </div>
+</nz-modal>
+<!--自定义页脚-->
+<ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="photoCancel()">取消</button>
+    <button nz-button nzType="primary" (click)="photoOk()"
+            [disabled]="!photoForm.valid">确认
+    </button>
+</ng-template>

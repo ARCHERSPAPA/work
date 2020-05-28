@@ -1,0 +1,59 @@
+<div class="detail-graph">
+    <!--项目图纸-->
+    <dl>
+        <dt>
+            <span class="title">{{graphName}}</span>
+            <span *ngIf="graphInfo && graphInfo.submitedDrawingTime" class="ml-8">上传时间：{{graphInfo.submitedDrawingTime|date:'yy-MM-dd HH:mm'}}</span>
+            <span *ngIf="graphInfo && graphInfo.customConfirmDrawingTime" class="ml-8">确认时间：{{graphInfo.customConfirmDrawingTime|date:'yy-MM-dd HH:mm'}}</span>
+        </dt>
+        <dd class="graph-list">
+            <ul>
+                <li *ngFor="let graph of graphList;let i = index">
+                    <span class="img" [ngStyle]="styleBg(graph)" (click)="openModal($event,graph)">
+                        <a class="del" *ngIf="showBtnByState()" (click)="delDraw($event,i)">
+                            <i nz-icon type="delete"></i>
+                        </a>
+                        <div class="graph-audit">
+                            <a class="audit-pass" href="javascript:void(0)">已审</a>
+                            <a class="audit-not"  href="javascript:void(0)">未审</a>
+                        </div>
+                    </span>
+
+                    <div class="graph-select-box">
+                        <!--<nz-select  class="graph-select-opt">-->
+                            <!--<nz-option [nzValue]="gt.key" [nzLabel]="gt.value" [title]="gt.value"-->
+                                       <!--*ngFor="let gt of graphTypes"></nz-option>-->
+                        <!--</nz-select>-->
+                        <!--<button nzTitle="prompt text" nzPlacement="right" nz-button nz-tooltip>Right</button>-->
+                        <div class="graph-select-opt" nzTitle="电脑上已经没有基础信息了"
+                             nzPlacement="top" nz-tooltip>电脑上已经没有基础信息了</div>
+                        <div class="graph-select-eye">
+                            <i nz-icon type="eye" theme="fill"></i>
+                        </div>
+                    </div>
+                    <!---nz-popconfirm nzTitle="确定删除照片?" (nzOnConfirm)="delDraw($event,i)" nzOkText="确定" nzCancelText="取消" --->
+
+                </li>
+                <li *ngIf="showBtnByState()">
+                    <rev-uploader-new [content]="'上传图片'" class="uploader" (click)='addDrawList()'></rev-uploader-new>
+                </li>
+            </ul>
+        </dd>
+    </dl>
+    <!--按钮控制-->
+
+    <div nz-row class="text-right">
+        <button nz-button nzType="primary"  *ngIf="showBtnByState()" class="mr-16">完成审核并锁定/解除审核</button>
+        <!--<button nz-button nzType="primary" (click)="doGraph($event)" *ngIf="showBtnByState()">保存</button>-->
+        <button nz-button nzType="primary" (click)="doGraph($event)" *ngIf="showBtnByState()">提交可查阅</button>
+    </div>
+</div>
+
+
+<!--图片放大-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" nzWidth="1000"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>

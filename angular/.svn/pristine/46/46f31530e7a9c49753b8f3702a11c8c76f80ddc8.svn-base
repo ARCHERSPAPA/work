@@ -1,0 +1,4 @@
+<div class="form-group row">
+  <div id="captcha" style="position: relative" class="captcha"></div>
+  <div id="msg"></div>
+</div>

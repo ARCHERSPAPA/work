@@ -1,0 +1,203 @@
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Default } from "../../../model/constant";
+import { Messages } from "../../../model/msg";
+import { DepartService } from "../../../service/depart.service";
+import { QuoteService } from "../../../service/quote.service";
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+
+
+@Component({
+    selector: 'rev-info-strategy',
+    templateUrl: './info-strategy.component.html',
+    styleUrls: ['./../info-strategy.component.scss']
+})
+export class InfoStrategyComponent implements OnInit {
+
+    /**
+     * 辨别类型职能人员
+     */
+    @Input() type: number;
+    @Input() member ;
+
+    @Output() selectUserLister: EventEmitter<any> = new EventEmitter<any>();
+
+    /***查询***/
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public departmentId: string;
+
+
+
+    public staffList: any;
+
+    /**
+     * 查询相关
+     * @type {string}
+     */
+    public searchForm: FormGroup;
+    public searchInfo: string = "";
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        private depart: DepartService,
+        private quote: QuoteService,
+        private fb: FormBuilder) {
+    }
+
+    ngOnInit() {
+        this.searchForm = this.fb.group({
+            searchInfo: [this.searchInfo, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(32)
+            ]]
+        });
+    }
+
+    // ngAfterViewInit() {
+    //     // this.findDepartFirstId();
+    // }
+    ngDoCheck() {
+        // let lock=true;
+        // console.log(this.searchInfo)
+        if(this.member && this.member['del']&&this.staffList){
+            //删除
+            this.staffList.forEach(item => {
+                if (item.id == this.member.id) {
+                    item["checked"] = false;
+                }
+            })
+        }else if(this.member &&this.staffList){
+            //回显
+            this.staffList.forEach(item => {
+                if (item.id == this.member.id) {
+                    item["checked"] = true;
+                }
+            })
+        }
+    }
+    changeDepart(e: any) {
+        this.departmentId = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+    // findDepartFirstId() {
+    //     let that = this;
+    //     if (!that.departmentId) {
+    //         setTimeout(() => {
+    //             that.departmentId = that.depart-tree.getDepartFirstId(3);
+    //             that.depart-tree.setQuickDepartId(that.departmentId);
+    //             if (that.departmentId) {
+    //                 that.changeData();
+    //             }
+    //         }, 300);
+    //     } else {
+    //         that.findDepartFirstId();
+    //     }
+    // }
+
+
+    // searchData(){
+    //     if(this.searchForm.valid){
+    //         this.searchInfo = this.searchForm.value.searchInfo;
+    //         this.changeData(true);
+    //     }
+    // }
+
+    changeData(...args) {
+        let that = this;
+        if (args && args.length > 0) {
+            that.pageNo = args[0] ? Default.PAGE.PAGE_NO : that.pageNo;
+        }
+        let params = {
+            pageNo: that.pageNo,
+            pageSize: that.pageSize,
+            departmentId: that.departmentId,
+            state: 0
+        };
+
+        if (this.searchInfo) {
+            params["searchInfo"] = this.searchInfo;
+            that.depart.setQuickDepartId(null);
+            delete params["departmentId"];
+        }
+
+        that.request.doPost({
+            url: "listEmployeeByPermit",
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.staffList = res.data.pageSet;
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    ngAfterViewChecked() {
+        if (this.departmentId && this.depart.getQuickDepartId()) {
+            if (this.departmentId != this.depart.getQuickDepartId()) {
+                this.departmentId = this.depart.getQuickDepartId();
+                this.searchInfo = "";
+                this.changeData(true);
+            }
+        }
+
+    }
+
+    // removeRelevant(member: any) {
+    //     this.staffList.forEach(item => {
+    //         if (item.id == member.id) {
+    //             this.selectUserLister.emit();
+    //             item["checked"] = false;
+    //         } else {
+    //             return
+    //         }
+    //     })
+    // }
+
+    selectMember(member: any) {
+        member["type"] = this.type;
+        member["memberName"] = member.name;
+        member["memberId"] = member.id;
+        member["departmentId"] = this.departmentId;
+        // this.selectUserLister.emit(member);
+        this.staffList.forEach(item => {
+            if (item.id == member.id) {
+                this.selectUserLister.emit(member);
+                // item["checked"] = true;
+            } else {
+                item["checked"] = false;
+                return item;
+            }
+        })
+        if (this.staffList.every(i => {
+            return i["checked"] == false
+        })) {
+
+            this.selectUserLister.emit();
+        }
+    }
+
+    selectDepartmentId(e: any) {
+        this.departmentId = e;
+        this.changeData();
+    }
+
+    // getDepartType(type){
+    //     switch(type){
+    //         case 13: return 11;
+    //     }
+    // }
+
+
+    ngOnDestroy() {
+        this.departmentId = null;
+        this.staffList = null;
+    }
+}

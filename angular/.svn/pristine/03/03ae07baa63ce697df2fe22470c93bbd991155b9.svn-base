@@ -1,0 +1,798 @@
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { SectorComponent } from "../../sector/sector.component";
+import { Messages } from "../../../model/msg";
+import { ModalComponent } from "../../modal/modal.component";
+import * as UserValidate from "../../../validate/user-validate";
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { House } from "../../../model/house";
+import { controlHouseTypeByState, controlPhoneByState, houseType } from "../../../model/methods";
+import { RelevantComponent } from "../../relevant/relevant.component";
+import { UserService } from "../../../service/user.service";
+import { DepartService } from "../../../service/depart.service";
+
+@Component({
+    selector: 'rev-info-user',
+    templateUrl: './info-user.component.html',
+    styleUrls: ['./info-user.component.scss']
+})
+export class InfoUserComponent implements OnInit {
+
+    @Input() id: string;
+    @Input() user: any;
+    /**
+     * 区别对待验证规则
+     * 9(一般客户)
+     * 10(报价列表中客户)
+     * 11(项目列表中客户)
+     * * 12(案例详情中客户)
+     */
+    @Input() type: number;
+
+    @Output() cancelHandler: EventEmitter<any> = new EventEmitter<any>();
+    @Output() submitHandler: EventEmitter<any> = new EventEmitter<any>();
+
+
+    public sourceList: Array<any>;
+    //初始化部门数据信息
+    public doDepartUrl: number = 2;
+
+    public areas: Array<any> = [];
+    public districts: Array<any> = [];
+
+    public clientForm: FormGroup;
+
+    //参数
+    public sourceId: any;
+    public sourceInfo: string;
+
+    public personLiableId: number;
+    public personLiableName: string;
+    public designerId: number;
+    public designerName: string;
+
+    public customerPhone: string;
+    /**
+     * 2019年07月25日取消市区选择
+     * @type {string}
+     */
+    // public cityId: string = "";
+    // public cityName: string;
+    // public areaId: string = "";
+    // public areaName: string;
+    /**
+     * 楼盘名称
+     */
+    public address: string;
+
+    // 小程序案例中的字段2.2.0
+
+    public decorateType: string;
+    public style: string;
+
+    /**
+     * 定位地址
+     */
+    public gpsAddress: string;
+    public point: any;
+    public adcode: string;
+
+    public roomNumber: string;
+    public roomType: string;
+    // public parlourType:number;
+    // public restaurant:number;
+    public toiletType: string;
+    // public kitchenType:number;
+    // public balcony:number;
+    public houseArea: number;
+    public departmentId: string;
+    public departmentName: string;
+    public customerName: string;
+    public remarks: string;
+    public phone:number;
+    public roomFormatter=value => `${value} ${value?'室':''}`;
+    public toiletFormatter=value => `${value} ${value?'卫':''}`;
+    public areaFormatter=value => `${value} ${value?'m²':''}`;
+    public isBuild: boolean = false;
+    //小程序案例2.2.3
+    public quoteNo: string;
+    public decorateStyle = [];
+    public selectedType = [];
+    public NewdecorateStyle = [];
+    public NewselectedType = [];
+    public customerGpsAddress: string;
+    public newcase:boolean;
+    public customerHouseAddress;
+    public finalPrice;
+    public customerHouseArea;
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        private loginUser: UserService,
+        private fb: FormBuilder,
+        private modalService: NgbModal,
+        private depart: DepartService) {
+    }
+
+    ngOnInit() {
+        // this.isBuild = !Boolean(this.user && this.user.customerId);
+        // console.log(this.getBuild());
+        this.isBuild = !this.getBuild();
+        if (this.isBuild) {
+            this.depart.loadDepart(0, this.doDepartUrl);
+        }
+        /**
+         * 2019年07月25日取消显示市区选择功能
+         */
+        // this.selectArea();
+
+        this.loadSource();
+        // console.log(this.user);
+        // this.loadDetail(this.id);
+        // if(this.isBuild){
+        this.setDataByUser(this.user);
+        // }
+
+        // console.log(this.user);
+
+        if (this.type === 10) {
+            this.clientForm = this.fb.group({
+                personLiableId: [this.personLiableId, []],
+                personLiableName: [this.personLiableName, []],
+                sourceId: [this.sourceId, [
+                    Validators.required
+                ]],
+                sourceInfo: [this.sourceInfo, [
+                    Validators.required
+                ]],
+                address: [this.address, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(30),
+                    UserValidate.ValidateAccount
+                ]],
+                roomNumber: [this.roomNumber, [
+                    Validators.minLength(1),
+                    Validators.maxLength(10)
+                ]],
+                gpsAddress: [this.gpsAddress, []],
+                roomType: [this.roomType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                toiletType: [this.toiletType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                houseArea: [this.houseArea, [
+                    Validators.required,
+                    Validators.min(1),
+                    Validators.max(999999),
+                    UserValidate.ValidateNumDecimal
+                ]],
+                departmentId: [this.departmentId, [
+                    Validators.required
+                ]],
+                departmentName: [this.departmentName, [
+                    Validators.required
+                ]],
+                customerPhone: [this.customerPhone, [
+                    Validators.required,
+                    UserValidate.ValidatePhone
+                ]],
+                customerName: [this.customerName, [
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(50),
+                    UserValidate.ValidateText
+                ]],
+                remarks: [this.remarks, [
+                    Validators.maxLength(120),
+                ]]
+            });
+        }
+        else if (this.type === 9) {
+            this.clientForm = this.fb.group({
+                sourceId: [this.sourceId, [
+                    Validators.required
+                ]],
+                sourceInfo: [this.sourceInfo, [
+                    Validators.required
+                ]],
+                personLiableId: [this.personLiableId, []],
+                personLiableName: [this.personLiableName, []],
+
+                customerPhone: [this.customerPhone, [
+                    Validators.required,
+                    UserValidate.ValidatePhone
+                ]],
+
+                address: [this.address, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(100),
+                    UserValidate.ValidateAccount
+                ]],
+                roomNumber: [this.roomNumber, [
+                    Validators.minLength(1),
+                    Validators.maxLength(10)
+                ]],
+                gpsAddress: [this.gpsAddress, []],
+                roomType: [this.roomType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+
+                toiletType: [this.toiletType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+
+                houseArea: [this.houseArea, [
+                    Validators.required,
+                    Validators.min(1),
+                    Validators.max(999999),
+                    UserValidate.ValidateNumDecimal
+                ]],
+                departmentId: [this.departmentId, [
+                    Validators.required
+                ]],
+                departmentName: [this.departmentName, [
+                    Validators.required
+                ]],
+                customerName: [this.customerName, [
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(50),
+                    UserValidate.ValidateText
+                ]],
+                remarks: [this.remarks, [
+                    Validators.maxLength(120),
+                ]]
+
+
+            });
+        }
+        else if (this.type === 11) {
+            this.clientForm = this.fb.group({
+                personLiableId: [this.personLiableId, []],
+                personLiableName: [this.personLiableName, []],
+
+                sourceId: [this.sourceId, []],
+                sourceInfo: [this.sourceInfo, []],
+
+                address: [this.address, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(30),
+                    UserValidate.ValidateAccount
+                ]],
+                roomNumber: [this.roomNumber, [
+                    Validators.minLength(1),
+                    Validators.maxLength(10)
+                ]],
+                gpsAddress: [this.gpsAddress, [
+                ]],
+                roomType: [this.roomType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                toiletType: [this.toiletType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                houseArea: [this.houseArea, [
+                    Validators.required,
+                    Validators.min(1),
+                    Validators.max(999999),
+                    UserValidate.ValidateNumDecimal
+                ]],
+                departmentId: [this.departmentId, []],
+                departmentName: [this.departmentName, []],
+                customerPhone: [this.customerPhone, [
+                    Validators.required,
+                    UserValidate.ValidatePhone
+                ]],
+                customerName: [this.customerName, [
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(50),
+                    UserValidate.ValidateText
+                ]],
+                remarks: [this.remarks, [
+                    Validators.maxLength(120),
+                ]]
+            })
+
+
+        } else if (this.type === 12 && !this.newcase) {
+            this.getStyle();
+            this.clientForm = this.fb.group({
+                address: [this.address, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(30),
+                    UserValidate.ValidateAccount
+                ]],
+                roomNumber: [this.roomNumber, [
+                    Validators.minLength(1),
+                    Validators.maxLength(10)
+                ]],
+
+
+                customerGpsAddress: [this.customerGpsAddress, [
+                ]],
+
+                roomType: [this.roomType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                toiletType: [this.toiletType, [
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateMinNum
+                ]],
+                houseArea: [this.houseArea, [
+                    Validators.min(1),
+                    Validators.max(999),
+                    UserValidate.ValidateNumDecimal
+                ]],
+                customerPhone: [this.customerPhone, [
+
+                ]],
+                customerName: [this.customerName, [
+
+                ]],
+                decorateType: [this.decorateType, [
+
+                ]],
+                style: [this.style, [
+
+                ]]
+            })
+        }else if (this.type === 12 && this.newcase) {
+            this.getStyle();
+            this.clientForm = this.fb.group({
+                address: [this.address, [
+
+                ]],
+                // roomNumber: [this.roomNumber, [
+                //     Validators.required,
+                // ]],
+                customerHouseAddress: [this.customerHouseAddress, [
+                    // Validators.required,   Validators.required,
+                    Validators.required,
+                ]],
+               phone: [this.phone, [
+                Validators.required,
+                    UserValidate.ValidatePhone
+                ]],
+                finalPrice: [this.finalPrice, [
+                    Validators.required,
+                    UserValidate.ValidatePrice
+                ]],
+                customerGpsAddress: [this.customerGpsAddress, [
+                ]],
+
+                roomType: [this.roomType, [
+                    Validators.required,
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateNumToInt
+                ]],
+                toiletType: [this.toiletType, [
+                    Validators.required,
+                    Validators.maxLength(3),
+                    Validators.min(0),
+                    Validators.max(100),
+                    UserValidate.ValidateNumToInt
+                ]],
+                customerHouseArea: [this.customerHouseArea, [
+                    Validators.required,
+                    Validators.min(1),
+                    Validators.max(999),
+                    Validators.maxLength(16),
+                    UserValidate.ValidateNumToInt
+                ]],
+                decorateType: [this.decorateType, [
+                    Validators.required,
+                ]],
+                style: [this.style, [
+                    Validators.required,
+                ]]
+            })
+        }
+
+    }
+    //小程序案例中获取类型
+    getStyle() {
+        this.request.doPost({
+            url: "smallProgramStyle",
+            success: res => {
+                res.data.forEach(item => {
+                    if (item.type == 1) {
+                        this.selectedType.push(item);
+                    } else if(item.type == 2) {
+                        this.decorateStyle.push(item);
+                    }
+                })
+            }
+        })
+    }
+
+    ngDoCheck() {
+        if (this.depart.getDepartList(this.doDepartUrl) && !this.departmentId) {
+            let doDepartList = this.depart.getDepartList(this.doDepartUrl);
+            if (doDepartList && doDepartList.length > 0) {
+                if (doDepartList.length === 1 && !doDepartList[0]["ownSubset"]) {
+                    this.departmentId = doDepartList[0].id;
+                    this.departmentName = doDepartList[0].name;
+                }
+            }
+        }
+    }
+
+    setDataByUser(user) {
+        // if(this.sourceId){
+        this.sourceId = user && user.customerSourceId ? user.customerSourceId : "";
+        if (this.sourceId) {
+            this.sourceInfo = user && user.customerSourceInfo ? user.customerSourceInfo : "";
+        }
+        // }
+        this.customerName = user && user.customerName ? user.customerName : "";
+        this.customerPhone = user && user.customerPhone ? user.customerPhone : "";
+
+        // this.designerName = user.customerDesignerName;
+        // this.designerId = user.customerDesignerId;
+
+        this.personLiableName = user && user.customerPersonLiableName ? user.customerPersonLiableName : "";
+        this.personLiableId = user && user.customerPersonLiableId ? user.customerPersonLiableId : "";
+
+        /**
+         * 2019年07月25日取消市区的选择
+         * @type {string}
+         */
+        // this.cityId = user && user.customerCityId ? user.customerCityId : "";
+        // if (this.cityId) {
+        //     this.selectArea(this.cityId);
+        // }
+        // this.cityName =  user && user.customerCityName? user.customerCityName:"";
+        // this.areaId = user && user.customerAreaId ? user.customerAreaId : "";
+        // this.areaName = user && user.customerAreaName?user.customerAreaName:"";
+
+        this.address = user && user.customerHouseAddress ? user.customerHouseAddress : "";
+        this.gpsAddress='';
+        if (user.customerGpsAddress) {
+            this.gpsAddress = user.customerGpsAddress?user.customerGpsAddress:'';
+            this.customerGpsAddress = user.customerGpsAddress;
+            this.point = {
+                lat: user.latitude,
+                lng: user.longitude
+            };
+            this.adcode = user.adcode;
+        }
+
+        this.roomType = this.getRoomByParam(user, "room");
+        // this.parlourType = this.getRoomByParam(user,"parlour");
+        // this.restaurant = this.getRoomByParam(user,"restaurant");
+        this.toiletType = this.getRoomByParam(user, "toilet");
+        this.roomType = this.getRoomByParam(user, "room");
+        // this.roomType = user && (user.roomType+'') ? user.roomType : '';
+        // this.parlourType = this.getRoomByParam(user,"parlour");
+        // this.restaurant = this.getRoomByParam(user,"restaurant");
+        // this.toiletType = user && (user.toiletType+'') ? user.toiletType : '';
+        // this.kitchenType = this.getRoomByParam(user,"kitchen");
+        // this.balcony = this.getRoomByParam(user,"balcony");
+
+        this.newcase=user && user.newcase ? user.newcase : '';
+        this.roomNumber = user && user.customerRoomNumber ? user.customerRoomNumber : "";
+
+        this.houseArea = user && user.customerHouseArea ? user.customerHouseArea : "";
+
+        this.departmentId = user && user.customerDepartmentId ? user.customerDepartmentId : "";
+        this.departmentName = user && user.customerDepartmentName ? user.customerDepartmentName : "";
+        // this.departmentId = "1";
+        // this.departmentName = "更新数据部";
+        this.remarks = user && user.customerRemark ? user.customerRemark : "";
+        if(!this.newcase){
+            this.quoteNo = user && user.quoteNo ? user.quoteNo : "";
+        }else{
+            this.quoteNo = user && user.quoteId ? user.quoteId : "";
+        }
+
+
+        this.decorateType = user && user.decorateType ? user.decorateType : "";
+        this.style = user && user.style ? user.style : "";
+
+
+        this. customerHouseAddress=user && user.customerHouseAddress ? user.customerHouseAddress : '';
+        this.phone=user && user.phone ? user.phone : '';
+        this.finalPrice=user && user.finalPrice ? user.finalPrice : '';
+
+        // console.log(this.quoteNo,'+++++++++++++',user.)
+        this.customerHouseArea=user && user.customerHouseArea ? user.customerHouseArea : '';
+    }
+
+    submit(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        if (that.clientForm.valid) {
+            let params = that.clientForm.value;
+            params['newcase']=this.newcase;
+            if (that.quoteNo && this.newcase) {
+                params["quoteId"] = this.quoteNo;
+                params["customerAreaId"] = that.adcode;
+            }else{
+                params["quoteNo"] = this.quoteNo;
+                params["customerAreaId"] = that.adcode;
+            }
+            params = houseType(params);
+            if (params["gpsAddress"] || params["customerGpsAddress"] ) {
+                params["longitude"] = that.point["lng"] + "";
+                params["latitude"] = that.point["lat"] + "";
+                params["adcode"] = that.adcode;
+            }
+            if(this.type !=12){
+                that.clientForm.reset();
+            }
+            console.log(params)
+            that.submitHandler.emit(params);
+        }
+    }
+    //去掉2边空格
+    trims(e) {
+        return e?(e + '').trim():null;
+    }
+
+    /**
+     *加载用户来源信息
+     */
+    loadSource() {
+        let that = this;
+        that.request.doPost({
+            url: "querySource",
+            data: {},
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.sourceList = res.data;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    selectDepart() {
+        const modalRef = this.modalService.open(SectorComponent, {
+            centered: true,
+            keyboard: false
+        });
+        modalRef.componentInstance.type = "radio";
+        modalRef.componentInstance.url = 12;
+        modalRef.componentInstance.id = this.departmentId;
+        modalRef.componentInstance.isCheckable = false;
+        modalRef.result.then(res => {
+            if (res && res.length === 1) {
+                this.departmentId = res[0].id;
+                this.departmentName = res[0].name;
+            } else {
+                this.warn.onWarn(Messages.SELECT_NOT_EMPTY);
+            }
+        }, reason => {
+            console.log(reason);
+        });
+    }
+
+    openModal(type, val) {
+        let that = this;
+        const modalRef = this.modalService.open(ModalComponent, {
+            centered: true,
+            keyboard: true
+        });
+        modalRef.componentInstance.type = type;
+        modalRef.componentInstance.value = val;
+        modalRef.componentInstance.name = "选择";
+        if (type === "address") {
+            modalRef.componentInstance.point = that.point;
+        }
+        modalRef.result.then((result) => {
+            let res = JSON.parse(result);
+            console.log(res)
+            if (type === "address") {
+                that.customerGpsAddress = res.address;
+                that.gpsAddress = res.address;
+                if (Array.isArray(res.point)) {
+                    that.point = { lat: res.point[1], lng: res.point[0] };
+                } else {
+                    that.point = res.point;
+                }
+                that.adcode = res.adcode;
+            }
+        }, (reason) => {
+            console.log(reason);
+        });
+    }
+
+    /**
+     * 2019年07月25日取消市区选择
+     */
+    // selectArea(...arg) {
+    //     let that = this, params = {level: 2};
+    //     that.districts = [];
+    //     if (arg[0]) {
+    //         params["level"] = 3;
+    //         params["parentId"] = arg[0];
+    //         that.getAreaName();
+    //     }
+    //     this.areaId = "";
+    //     that.request.doPost({
+    //         url: "loadArea",
+    //         data: params,
+    //         success: (res => {
+    //             if (res && res.code == 200) {
+    //                 // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+    //                 if (params["level"] == 2) {
+    //                     that.areas = res.data;
+    //                 } else if (params["level"] == 3) {
+    //                     that.districts = res.data;
+    //                 }
+    //             } else {
+    //                 that.warn.onError(res.msg || Messages.FAIL.DATA);
+    //             }
+    //         })
+    //     })
+    // }
+    // getAreaName() {
+    //     let that = this;
+    //     if (that.areas && that.areas.length > 0) {
+    //         for (let area of that.areas) {
+    //             if (area.id == that.cityId) {
+    //                 that.cityName = area.name;
+    //             }
+    //         }
+    //     }
+    // }
+    // selectDistrict() {
+    //     let that = this;
+    //     if (that.districts && that.districts.length > 0) {
+    //         for (let d of that.districts) {
+    //             if (d.id == that.areaId) {
+    //                 that.areaName = d.name;
+    //             }
+    //         }
+    //     }
+    // }
+
+    selectSource() {
+        let that = this;
+        if (that.sourceList && that.sourceList.length > 0) {
+            for (let source of that.sourceList) {
+                if (source.id == that.sourceId) {
+                    that.sourceInfo = source.name;
+                }
+            }
+        }
+    }
+
+    exist(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.clientForm.reset();
+        this.cancelHandler.emit('close');
+    }
+
+    //求取单一的室数据
+    // getRoomByParam(user,type){
+    //      let num = null;
+    //      if(user && user.customerHouseType){
+    //         let house = user.customerHouseType;
+    //         if(house.indexOf(this.getParam(type)) > 0){
+    //             num = house.charAt(house.indexOf(this.getParam(type))-1);
+    //         }
+    //      }
+    //      console.log(num);
+    //      return num;
+    // }
+
+    getRoomByParam(user, type) {
+        let num = "";
+        if (user && user.customerHouseType) {
+            let house = user.customerHouseType.match(/\d+[\u4E00-\uFA29]/g);
+            for (let h of house) {
+                if (h.indexOf(this.getParam(type)) > 0) {
+                    num = h.substring(0, h.indexOf(this.getParam(type)));
+                }
+            }
+
+        }
+        return num;
+    }
+
+    getParam(type) {
+        if (type) {
+            switch (type) {
+                case "room":
+                    return House.ROOM;
+                case "parlour":
+                    return House.PARLOUR;
+                case "restaurant":
+                    return House.RESTAURANT;
+                case "toilet":
+                    return House.TOILET;
+                case "kitchen":
+                    return House.KITCHEN;
+                case "balcony":
+                    return House.BALCONY;
+                default:
+                    return "";
+            }
+        }
+
+    }
+
+    controlHouseTypeByState() {
+        return this.user && controlHouseTypeByState(this.user.state) && !this.isBuild;
+    }
+
+    controlPhoneByState() {
+        return this.user && controlPhoneByState(this.user.state) && !this.isBuild;
+    }
+
+    //负责人和设计师
+    selectRelevant(type: number) {
+        const modalRef = this.modalService.open(RelevantComponent, {
+            centered: true,
+            keyboard: false
+        });
+        modalRef.componentInstance.type = type;
+        modalRef.result.then(res => {
+            res = JSON.parse(res);
+            if (type === 1) {
+                this.personLiableName = res.name;
+                this.personLiableId = res.sysUserId;
+            } else if (type === 2) {
+                this.designerName = res.name;
+                this.designerId = res.sysUserId;
+            }
+        }, reason => {
+            console.log(reason);
+        });
+    }
+
+    /**
+     * 是否为可创建
+     * @returns {boolean}
+     */
+    getBuild() {
+        switch (this.type) {
+            case 10:
+                return true;
+            case 11:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+}

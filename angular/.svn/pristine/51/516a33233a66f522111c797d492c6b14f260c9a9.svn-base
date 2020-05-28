@@ -1,0 +1,28 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-slider',
+  templateUrl: './slider.component.html',
+  styleUrls: ['./slider.component.scss']
+})
+export class SliderComponent implements OnInit {
+  public inits = function () {
+    let that = this;
+    // console.log($('div:hidden').find('#captcha').get(0));
+    // console.log($('div').find('#captcha').get(0));
+    var eles=document.querySelector('#captcha')
+    console.log(eles)
+    window.SlidingVerificationCode.init(eles, function () {
+      document.getElementById('msg').innerHTML = '初始化成功！'
+    }, function () {
+      document.getElementById('msg').innerHTML = '初始化失败！'
+    })
+  }
+  constructor() { }
+
+  ngOnInit() {
+    this.inits();
+  }
+
+
+}

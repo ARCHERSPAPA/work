@@ -1,0 +1,48 @@
+<div class="cost">
+  <div class="cost-content">
+    <div nz-row class="cost-detail">
+      <div nz-col nzSpan="24" class="mt-24">
+        <div nz-row>
+          <div nz-col nzSpan="16" class="cost-title">工作批注</div>
+          <div nz-col nzSpan="8" class="cost-fix"><a href="javascript:void(0)"
+                                                     class="cost-fix" (click)="publish()">发布并通知</a></div>
+        </div>
+        <div nz-row *ngIf="notices && notices.length > 0" class="cost-publish">
+          <dl *ngFor="let notice of notices" [hidden]="notice.state">
+            <dt nz-row>
+                            <span nz-col nzSpan="16" class="cost-name">{{notice.realName}}<span class="cost-gray"
+                                                                                                *ngIf="notice.positionName">（{{notice.positionName}}）</span></span>
+              <span nz-col nzSpan="8" class="cost-gray text-right">{{notice.createTime?(notice.createTime|date:'yyyy-MM-dd HH:mm'):''}}</span>
+            </dt>
+            <dd *ngIf="notice.content" class="cost-content">{{notice.content}}</dd>
+            <dd *ngIf="transImgUrls(notice.imgUrls)  && transImgUrls(notice.imgUrls).length > 0"
+                class="cost-img">
+              <div (click)="showLargeImg(url)" *ngFor="let url of transImgUrls(notice.imgUrls)"
+                   [ngStyle]="showNoticeImgBg(url)"></div>
+            </dd>
+            <dd *ngIf="justBuildBySelf(notice.createUserId)">
+                            <span nz-col nzSpan="22" class="mt-16">
+                                <span *ngIf="notice.person && notice.person.length > 0"
+                                      [title]="getNoticeInfo(notice.person)"
+                                      class="cost-content">通知：{{getNoticeInfo(notice.person)}}</span>
+                            </span>
+              <span nz-col nzSpan="2" class="text-right mt-16"><a href="javascript:void(0)"
+                                                                  class="cost-fix" (click)="delNotice(notice.id)">删除</a></span>
+            </dd>
+
+          </dl>
+        </div>
+        <div nz-row *ngIf="notices && notices.length == 0" class="cost-publish">
+          <dl><dd class="cost-content">暂无批注信息</dd></dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nz-modal [(nzVisible)]="visibleImg" nzTitle="图片展示" (nzOnCancel)="handleCancel()"
+          [nzFooter]="null" nzWidth="1000px">
+  <div class="large-img" *ngIf="largeImg">
+    <img [src]="largeImg"/>
+  </div>
+</nz-modal>
