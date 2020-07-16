@@ -1,0 +1,176 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+
+import {HttpHeaders, HttpParams, HttpClient} from '@angular/common/http';
+import {ApiService} from '../../../../service/api.service';
+import {RequestService} from '../../../../service/request.service';
+import { NzNotificationService } from 'ng-zorro-antd';
+import {Default} from '../../../../model/constant';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {FormGroup, FormBuilder} from '@angular/forms';
+import {compiledTplId} from '../../../../model/methods';
+import {  btoa } from '../../../../model/methods';
+@Component({
+    selector: 'rev-master-list',
+    templateUrl: './master-list.component.html',
+    styleUrls: ['./master-list.component.scss']
+})
+export class MasterListComponent implements OnInit {
+
+    public title: string;
+    public buttons: Array<any>;
+
+    public dataSource: Array<any> = [];
+    public loading = false;
+    public pageNo = Default.PAGE.PAGE_NO;
+    public pageSize = Default.PAGE.PAGE_SIZE;
+    public total = Default.PAGE.PAGE_TOTAL;
+
+    //查询条件
+    public searchInfo: string;
+    public materForm: FormGroup;
+
+    public httpOptions = {
+        withCredentials: true
+    };
+
+    @ViewChild('uploadFile') uploadFile: any;
+    constructor(
+        private httpClient: HttpClient,
+        private apiService: ApiService,
+        private service: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder
+    ) { }
+
+    ngOnInit() {
+        this.title = '主材管理';
+        this.buttons = [
+            {
+                name: '下载模板',
+                link: Default.TEMP_URL.MASTER
+            },
+            {
+                name: '批量导入'
+            }];
+
+        this.loadData();
+        this.materForm = this.fb.group({
+            searchInfo: [this.searchInfo, []]
+        });
+    }
+
+    loadData(...args) {
+        this.loading = true;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+            this.total = Default.PAGE.PAGE_TOTAL;
+        }
+        this.service.doPost({
+            url: 'mouldList',
+            data: {
+                pageNo: this.pageNo,
+                pageSize: this.pageSize,
+                versionType: 1, //版本类别
+                name: this.searchInfo
+            },
+            success: (res => {
+                this.loading = false;
+                if (res && res.code === 200) {
+                    this.dataSource = res.data.pageSet;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    // 上传
+    // handleImport(){
+    //     document.getElementById('import').click()
+    // }
+
+    handleFileChange(e) {
+        const that = this;
+        const files = e.target.files;
+        const file = files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('versionType', '1');
+
+        this.httpClient.post(this.apiService.getUrl('upExl'), formData, this.httpOptions)
+            .subscribe(
+                (res: any) => {
+                    if (res.code === 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.loadData();
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                },
+                error => {
+                    that.warn.onWarn('请求失败');
+                }
+            );
+        this.uploadFile.nativeElement.value = '';
+    }
+
+    // 操作
+    handleOperate(str, item) {
+        let that = this, url = 'mouldUpd';
+        const param = {
+            id: item.id
+        };
+        switch (str) {
+            case 'del':
+                url = 'mouldUpd';
+                that.pageNo = 1;
+                param['state'] = 2;
+                break;
+            case 'def':
+                url = 'mouldUpd';
+                param['defaultVsersion'] = 1;
+                break;
+            case 'on':
+                url = 'materRack';
+                param['state'] = 1;
+                break;
+            case 'off':
+                url = 'materRack';
+                param['state'] = 0;
+                break;
+        }
+
+        this.service.doPost({
+            url: url,
+            data: param,
+            success: function (res) {
+                if (res.code === 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.loadData();
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        });
+    }
+
+    //编译id
+    getCompileById(id: number) {
+        return compiledTplId(id);
+    }
+
+    handleName(e: any) {
+        if (e === this.buttons[0].name) {
+            const a = document.createElement('a');
+            a.href = this.buttons[0].link;
+            a.click();
+        } else {
+            document.getElementById('import').click();
+        }
+    }
+    btoa(id: string) {
+        return btoa(id);
+    }
+}

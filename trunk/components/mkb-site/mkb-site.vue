@@ -3,7 +3,7 @@
     <view class="site-box-item">
       <!-- <image :src="site.coverImgs[0]" lazy-load="true" class="site-box-item-img" /> -->
       <view class="site-box-item-img">
-        <mkb-img-cut :img-url="getImgUrl" class="backImg" />
+        <mkb-img-cut :img-url="getImgUrl+'?imageView2/2/w/216/h/216'" class="backImg" />
       </view>
     </view>
     <view class="site-box-item item-border">
@@ -11,7 +11,8 @@
         <text class="site-box-item-name">{{ site.customerHouseAddress?site.customerHouseAddress:'' }}</text>
         <!-- <mkb-stage :stage="site.stage" class="site-box-item-stage"></mkb-stage> -->
         <text v-if="site.stageName" class="site-box-item-stage">{{ site.stageName }}</text>
-        <text class="site-box-item-price">{{ (site.finalPrice?site.finalPrice:0) | digit(4) | number(1,true) }}</text>
+        <text class="site-box-item-price" v-if="site && site.finalPrice >= 1000">{{ (site.finalPrice?site.finalPrice:0) | digit(4) | number(1,true) }}万</text>
+		<text class="site-box-item-price" v-if="site && site.finalPrice > 0 && site.finalPrice < 1000">{{site.finalPrice| number(1,true) }}</text>
       </view>
       <view class="site-box-item-col">
         <!-- <text class="site-box-item-info">{{site.room}}室{{site.toilet}}卫 / {{site.measure}}m²</text> -->
@@ -120,8 +121,8 @@ export default {
 					font-size: 21.73rpx;
 					font-weight: 400;
 					text-align: center;
-					color: rgba(255,136,0,1);;
-					background:rgba(255,243,229,1);
+					color: $col_098684;
+					background:$col_DDF3F3;
 					border-radius:7.24rpx;
 					float: left;
 					position: relative;
@@ -139,12 +140,9 @@ export default {
 					padding-left: 18.11rpx;
 					font-size:28.98rpx;
 					font-weight:400;
-					color:rgba(255, 136, 0, 1);
+					color:$col_098684;
 					&:before {
 						content: "¥";
-					}
-					&:after {
-						content: "万";
 					}
 				}
 

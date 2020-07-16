@@ -1,0 +1,132 @@
+<div class="finance">
+    <div class="head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+
+    <div class="content mt-16">
+      <nz-table #nzTable [nzData]="tempList" [nzBordered]="true" [nzFrontPagination]="false"  nzSize="middle"
+        [nzShowPagination]='false'>
+        <thead nz-thead>
+          <tr>
+            <th>名称</th>
+            <th nz-th><span>期数</span></th>
+            <th nz-th><span>编辑人</span></th>
+            <th nz-th><span>编辑时间</span></th>
+            <th nz-th><span>操作</span></th>
+          </tr>
+        </thead>
+        <tbody nz-tbody>
+          <tr *ngFor="let data of nzTable.data;let i = index">
+            <td  title="{{data.name?data.name:'--'}}">{{data.name?data.name:'--'}}</td>
+            <td  >{{getNumber(data.details)}}</td>
+            <td nz-td title="{{data.operator?data.operator:'--'}}">{{data.operator?data.operator:'--'}}</td>
+            <td >{{data.createTime|date:'yyyy-MM-dd'}}</td>
+            <td nz-td >
+              <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该模板吗?"   (nzOnConfirm)="delTemp(data.id)"nzOkText="删除"
+              >删除</a>
+           <a href="javascript:void(0)" (click)="defaultTemp(data.id,data.defaultUse)" *ngIf="data.defaultUse!=1" >默认</a>
+           <a href="javascript:void(0)" [routerLink]="['./../detail',6]" 
+           [queryParams]="">详情</a>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+</div>
+
+
+<nz-modal [(nzVisible)]="tempVisible" [nzTitle]="tempTitle"
+          nzOkText="确定" nzWidth="800" nzCancelText="取消">
+    <div class="modify">
+        <form nz-form [formGroup]="tempForm">
+            <div nz-row nzSpan="24">
+                <div nz-col nzSpan="6">模板名称</div>
+                <div nz-col nzSpan="18">
+                    <nz-form-item>
+                        <nz-form-control>
+                            <input nz-input placeholder="请输入模板名称" formControlName="tempName" autocomplete="off"
+                                   maxlength="20"/>
+                            <nz-form-explain
+                                    *ngIf="tempForm.get('tempName').dirty && tempForm.get('tempName').errors">
+                                <ng-container *ngIf="tempForm.get('tempName').hasError('required')">
+                                    必填选项
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            <div nz-row nzSpan="24">
+                <div nz-col nzSpan="6">收款期数</div>
+                <div nz-col nzSpan="8" class="ml-10">付款时间</div>
+                <div nz-col nzSpan="4" class="ml-10">占比</div>
+                <div nz-col nzSpan="6" class="ml-10">备注</div>
+            </div>
+            <div nz-row nzSpan="24" *ngFor="let pay of payList;let i = index">
+                <!--<div nz-col nzSpan="6">{{getPayType(pay.type)}}</div>-->
+                <!--<div nz-col nzSpan="8" class="ml-10">-->
+                <!--<nz-form-item>-->
+                <!--<nz-form-control>-->
+                <!--<input nz-input placeholder="请输入付款时间信息" [formControlName]="'payTime'+i" autocomplete="off"-->
+                <!--[(ngModel)]="pay.payTime" maxlength="50" />-->
+                <!--<nz-form-explain-->
+                <!--*ngIf="tempForm.get('payTime'+i).dirty && tempForm.get('payTime'+i).errors">-->
+                <!--<ng-container *ngIf="tempForm.get('payTime'+i).hasError('maxlength')">-->
+                <!--至多输入50个字符-->
+                <!--</ng-container>-->
+                <!--</nz-form-explain>-->
+                <!--</nz-form-control>-->
+                <!--</nz-form-item>-->
+                <!--</div>-->
+                <!--<div nz-col nzSpan="4" class="ml-10" *ngIf="i > 0">-->
+                <!--<nz-form-item>-->
+                <!--<nz-form-control>-->
+                <!--<input nz-input placeholder="请输入占比" [formControlName]="'percentage'+i" autocomplete="off"-->
+                <!--[(ngModel)]="pay.percentage" maxlength="6" (keyup)="payPercentage($event,i)" />-->
+                <!--<nz-form-explain-->
+                <!--*ngIf="tempForm.get('percentage'+i).dirty && tempForm.get('percentage'+i).errors">-->
+                <!--<ng-container *ngIf="tempForm.get('percentage'+i).hasError('required')">-->
+                <!--必填选项-->
+                <!--</ng-container>-->
+                <!--<ng-container *ngIf="tempForm.get('percentage'+i).hasError('min')">-->
+                <!--至少为0-->
+                <!--</ng-container>-->
+                <!--<ng-container *ngIf="tempForm.get('percentage'+i).hasError('max')">-->
+                <!--至多为1-->
+                <!--</ng-container>-->
+                <!--<ng-container *ngIf="tempForm.get('percentage'+i).hasError('decimal')">-->
+                <!--格式错误，最多保留小数点后四位-->
+                <!--</ng-container>-->
+                <!--</nz-form-explain>-->
+                <!--</nz-form-control>-->
+                <!--</nz-form-item>-->
+                <!--</div>-->
+                <!--<div nz-col nzSpan="4" class="ml-10" *ngIf="i == 0">-->
+                <!--<nz-form-item>-->
+                <!--<nz-form-control>-->
+                <!--<input nz-input placeholder="请输入占比" autocomplete="off" [value]="pay.percentage"-->
+                <!--disabled="true" />-->
+                <!--</nz-form-control>-->
+                <!--</nz-form-item>-->
+                <!--</div>-->
+                <!--<div nz-col nzSpan="6" class="ml-10">-->
+                <!--<nz-form-item>-->
+                <!--<nz-form-control>-->
+                <!--<input nz-input placeholder="请输入备注信息" [formControlName]="'remark'+i" autocomplete="off"-->
+                <!--[(ngModel)]="pay.remark" maxlength="120" />-->
+                <!--<nz-form-explain-->
+                <!--*ngIf="tempForm.get('remark'+i).dirty && tempForm.get('remark'+i).errors">-->
+                <!--<ng-container *ngIf="tempForm.get('remark'+i).hasError('maxlength')">-->
+                <!--至多输入120个字符-->
+                <!--</ng-container>-->
+                <!--</nz-form-explain>-->
+                <!--</nz-form-control>-->
+                <!--</nz-form-item>-->
+                <!--</div>-->
+            </div>
+
+        </form>
+    </div>
+</nz-modal>
+
+

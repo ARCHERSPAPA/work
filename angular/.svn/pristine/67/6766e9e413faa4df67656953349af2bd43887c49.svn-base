@@ -1,0 +1,28 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-master-temp',
+  templateUrl: './master-temp.component.html',
+  styleUrls: ['./master-temp.component.scss']
+})
+export class MasterTempComponent implements OnInit {
+
+  public departTempList;
+  public title:string;
+  public buttons;
+    constructor() { }
+  
+    ngOnInit() {
+      this.title="主材模板";
+      this.buttons = [{
+        color: 'btn-primary',
+        name: '添加'
+    }];
+    }
+    changeData(){
+  
+    }
+    handleName($event){
+      
+    }
+  }

@@ -1,0 +1,115 @@
+import { Component, OnInit } from '@angular/core';
+import {InfoComponent} from '../../../../plugins/info/info.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {RequestService} from '../../../../service/request.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
+@Component({
+  selector: 'app-examine-add',
+  templateUrl: './examine-add.component.html',
+  styleUrls: ['./examine-add.component.scss']
+})
+export class ExamineAddComponent implements OnInit {
+  public examineId: any;
+  public examineName: string;
+  // public title: string;
+  public personList: Array<any> = [];
+
+  public radioValue = 'A';
+  style = {
+    display   : 'block',
+    height    : '30px',
+    lineHeight: '30px'
+  };
+
+  constructor(
+      private modal: NgbModal,
+      private request: RequestService,
+      private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit(): void {
+    // this.title = '编辑';
+
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params.examineId) {
+        this.examineId = params.examineId;
+        this.loadExamineSelect();
+      }
+      if (params && params.examineName) {
+        this.examineName = '编辑' + params.examineName;
+      }
+    });
+
+
+  }
+
+  handleClose(index) {
+    this.personList.splice(index, 1);
+  }
+
+  handleAddPerson() {
+    const that = this;
+    const info = that.modal.open(InfoComponent, {
+      centered: true,
+      keyboard: true,
+      backdrop: 'static'
+    });
+    info.componentInstance.type = 15;
+    info.result.then((res) => {
+      console.log(res);
+      const {id, name, positionName } = res[0];
+      this.personList.push({
+        employeeId: id,
+        approver: name,
+        position: positionName,
+      });
+      // Id	Long	主键id
+      // employeeId	Long	员工id
+      // approver	Stirng	审批人
+      // position	String	职位
+      // orderAddress	Byte	审批人节点顺序：0-没有；1-第一个；2-第二个；3-第三个
+      // state	Byte	状态：1-运行修改审批人；2-不允许修改审批人
+    }, (err) => {
+    });
+  }
+
+  loadExamineSelect() {
+    const self = this;
+
+    this.request.doPost({
+      url: 'examineSelect',
+      data: {
+        id: this.examineId
+      }, success: res => {
+        self.personList = res.data;
+      }
+    });
+  }
+
+  handleExamineSave() {
+    const self = this;
+
+    console.log(this.radioValue)
+
+    this.request.doPost({
+      url: 'examineSave',
+      data: {
+        id: this.examineId,
+        employeeId: 466,
+        approver: '审核人名字',
+        position: '职位',
+        orderAddress: 1,
+        state: 1
+      }, success: res => {
+
+        if ( res.code && res.code === 200) {
+          this.loadExamineSelect();
+        }
+
+
+      }
+    });
+  }
+
+}

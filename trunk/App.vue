@@ -1,6 +1,8 @@
-
 <script>
-  import { mapState, mapGetters } from 'vuex'
+	import {
+		mapState,
+		mapGetters
+	} from 'vuex'
 	import {
 		imConfig
 	} from './util/config.js'
@@ -9,20 +11,20 @@
 
 		data() {
 			return {
-				
+
 			}
 		},
 		computed: {
 			...mapState({
-			  isSdkReady: state => state.global.isSdkReady,
-			  userInfo: state => state.userInfo,
-			  loginStatus: state => state.loginStatus
+				isSdkReady: state => state.global.isSdkReady,
+				userInfo: state => state.userInfo,
+				loginStatus: state => state.loginStatus
 			})
 		},
 
 		// 应用生命周期仅可在App.vue中监听，在其它页面监听无效。
 		onLaunch: function() {
-      console.log("onlanch初始化")
+			console.log("onlanch初始化")
 
 			let that = this
 			// #ifdef MP-WEIXIN
@@ -41,9 +43,9 @@
 				that.$store.dispatch('setLoginStatus', 0);
 				that.$store.dispatch('logout');
 			}
-      
-      that.$store.commit('restAllUnreadCount')
-      console.log('loading login status.......', this.$store.state.loginStatus)
+
+			that.$store.commit('restAllUnreadCount')
+			console.log('loading login status.......', this.$store.state.loginStatus)
 
 
 			if (wx.canIUse('getUpdateManager')) {
@@ -80,25 +82,26 @@
 			// #endif
 
 		},
-    onShow() {
-      // console.log("onShow初始化")
-      // console.log(this.isSdkReady)
-      
-      
-      if(!this.isSdkReady){
-        if(this.loginStatus === 1){
-          // console.log("登录状态为1")
-          this.imLogin(this.userInfo.userId)
-        }else{
-          this.checkLogin();
-        }
-      }
-      
-    },
-    onHide() {
-      // console.log("onHide")
-    },
-    methods: {
+		onShow() {
+			console.log("onShow初始化嘻嘻")
+			// console.log(this.isSdkReady)
+
+
+			if (!this.isSdkReady) {
+				if (this.loginStatus === 1) {
+					// console.log("登录状态为1")
+					this.imLogin(this.userInfo.userId)
+				} else {
+					this.checkLogin();
+				}
+			}
+			this.getAllHouseType();
+
+		},
+		onHide() {
+			// console.log("onHide")
+		},
+		methods: {
 			/**
 			 * 检查session 是否已经登录
 			 */
@@ -118,7 +121,7 @@
 										let userInfo = {
 											avatarUrl: res.data.avatarUrl,
 											isSubscribe: res.data.isSubscribe,
-                      isService: res.data.isService,
+											isService: res.data.isService,
 											nickName: res.data.nickName,
 											userId: res.data.userId
 										};
@@ -146,25 +149,41 @@
 			// 	}
 
 			// },
-      // im登录
-      imLogin(id){
-        const self = this
-        self.$http.tencentyunUserSig({ id })
-          .then(res => {
-            const { userId, userSig } = res.data
-            const promise = this.$tim.login({ userID: userId, userSig })
-            promise.then(function(imResponse) {
-              console.log(imResponse.data) // 登录成功
-            }).catch(function(imError) {
-              console.warn('login error:', imError) // 登录失败的相关信息
-            })
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      },
-      
-      
+			// 获取全部户型
+			getAllHouseType() {
+				if (!uni.getStorageSync("allHouseType")) {
+					this.$http.getAllHouseType({}).then(res => {
+						this.$store.commit('setAllHouseType', res.data);
+					});
+				}
+			},
+			// im登录
+			imLogin(id) {
+				const self = this
+				self.$http.tencentyunUserSig({
+						id
+					})
+					.then(res => {
+						const {
+							userId,
+							userSig
+						} = res.data
+						const promise = this.$tim.login({
+							userID: userId,
+							userSig
+						})
+						promise.then(function(imResponse) {
+							console.log(imResponse.data) // 登录成功
+						}).catch(function(imError) {
+							console.warn('login error:', imError) // 登录失败的相关信息
+						})
+					})
+					.catch(err => {
+						console.log(err)
+					})
+			},
+
+
 		}
 
 	}

@@ -1,0 +1,29 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="person-content">
+        <nz-table #nzTable [nzData]="examineList" [nzBordered]="true" [nzFrontPagination]="false"
+                  nzSize="middle" [nzShowPagination]='false'
+        >
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of nzTable.data;let i = index">
+                <td [title]="(data.workName === 1?'设计师':'工长') + (data.type === 1?'增项':'减项')">
+                    {{data.workName === 1?'设计师':'工长'}}{{data.type === 1?'增项':'减项'}}
+                </td>
+                <td>
+                    <a href="javascript:void(0)" [routerLink]="['../add']" [queryParams]="{examineId:data.id,examineName:(data.workName === 1?'设计师':'工长') + (data.type === 1?'增项':'减项')}">编辑</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+
+

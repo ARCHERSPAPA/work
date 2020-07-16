@@ -1,0 +1,1 @@
+<block wx:if="{{scrollTop>1000}}"><view data-event-opts="{{[['tap',[['toTopClick',['$event']]]]]}}" class="{{['backTop',(isShowToTop)?'mescroll-fade-in':'']}}" bindtap="__e"><uni-icons vue-id="36e78d02-1" type="fanhuidingbu" color="{{color}}" size="40" bind:__l="__l"></uni-icons></view></block>

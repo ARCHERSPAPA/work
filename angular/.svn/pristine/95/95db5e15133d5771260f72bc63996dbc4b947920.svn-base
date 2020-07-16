@@ -1,0 +1,49 @@
+//下载图片
+import {getUrlName} from "./methods";
+import * as JSZip from "jszip";
+import {saveAs} from "file-saver";
+import axios from 'axios';
+
+export function downloadImages(imgs:Array<string>, name:string = "images"){
+    let zip = new JSZip(), that = this, ps = [];
+    that.isSpinning = true;
+    that.tip = "数据下载中";
+    for (let i = 0; i < imgs.length; i++) {
+        let p = new Promise((resolve, reject) => {
+            axios.get(imgs[i]["url"], {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                }
+            }).then(function (res) {
+                resolve({
+                    data: res.data,
+                    name: imgs[i]["fileName"] ? imgs[i]["fileName"] : getUrlName(imgs[i]["url"])
+                });
+            }).catch(function (error) {
+                console.error(error);
+                reject(error);
+            });
+        });
+        ps.push(p);
+    }
+
+    Promise.all(ps).then(data => {
+        if (data && data.length > 0) {
+            data.forEach((d, i) => {
+                zip.file([i, d.name].join("."), d.data, {binary: true});
+            });
+            zip.generateAsync({
+                type: "blob"
+            }).then((blob) => {
+                saveAs(blob, name);
+                that.isSpinning = false;
+                that.tip = "数据加载中";
+            }, err => {
+                that.isSpinning = false;
+                that.tip = "数据加载中";
+                this.warn.onMsgError(JSON.stringify(err));
+            })
+        }
+    });
+}

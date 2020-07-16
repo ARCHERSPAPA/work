@@ -1,0 +1,46 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="examineName"></rev-title>
+    </div>
+    <div class="person-content">
+        <div class="examine">
+            <div class="examine_person">
+                <div class="personTitle">默认审批人</div>
+                <div *ngIf="personList.length > 0" >
+                    <div *ngFor="let item of personList;let i = index" class="personItem" (click)="handleChange(item,i)">
+                        <div class="personItem_explain">
+                            {{i === 0?'一审批人':i===1?'二审批人':i===2?'三审批人':''}}
+                        </div>
+                        <div class="personItem_head" title="编辑">
+                            <img [src]="item.headImg?item.headImg:'https://qiniu.madrock.com.cn/rev/imgs/435467b6-6b9e-2a36-a51b-bde1d77a31ce.png'" alt="">
+                            <i title="删除" class="examine_icon" (click)="handleClose(i)" nz-icon type="close"></i>
+                            <div class="personItem_head_dots" *ngIf="!(personList.length === i+1)"  >
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="personItem_name">{{item.approver}}</div>
+                        <div class="personItem_job">{{item.position}}</div>
+                    </div>
+                </div>
+                <div (click)="handleAddPerson()" class="personItem personItem_add" *ngIf="personList.length < 3"><img src="assets/images/examine-add.png" alt=""></div>
+            </div>
+            <div class="examine_permission">
+                <div class="permissionTitle">修改权限</div>
+                <div class="permissionWrap">
+                    <nz-radio-group [(ngModel)]="radioValue">
+                        <label nz-radio class="radioBtn" nzValue="1">允许修改审批人</label>
+                        <label nz-radio class="radioBtn"  nzValue="2">不允许修改审批人</label>
+                    </nz-radio-group>
+                </div>
+            </div>
+            <div class="examine_operation">
+                <button title="返回列表页" nz-button [nzType]="'default'" (click)="back($event)">返回</button>
+                <button title="提交" nz-button [nzType]="'primary'" (click)="handleExamineSave()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,8 +1,8 @@
 <template>
   <view id="chat" class="chat">
     <view style="padding-bottom: 99.63rpx;">
-      <view v-for="(item, index) in currentMessageList" :id="'item'+Number(index+1)" class="chatItem m-item">
-        <view style="text-align: center;margin: 10.86rpx 0;font-size: 21.73rpx;" v-if="showTime(index,currentMessageList)"> {{item.time*1000 |format('MM/dd hh:mm')  }}</view>
+      <view v-for="(item, index) in currentMessageList" :id="'item'+Number(index+1)" :key="index" class="chatItem m-item">
+        <view style="text-align: center;margin: 10.86rpx 0;font-size: 25.36rpx;color: #000;opacity: 0.4;" v-if="showTime(index,currentMessageList)"> {{item.time*1000 |format('hh:mm')  }}</view>
         <chatItem :item-info="item" :img-list="currentMessageImgList" />
       </view>
     </view>

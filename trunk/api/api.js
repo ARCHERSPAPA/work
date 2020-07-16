@@ -58,6 +58,11 @@ export default {
     getHotCase(data) {
       return http.post('/diy/large/mini/quote/hotQuote', data)
     },
+	//获取热门案例以外的数据
+	getOtherCase(data){
+		return http.post('/diy/large/mini/quote/getOtherQuote',data)
+	},
+	
     // 获取当前用户的记录信息
     getUserRecord(data) {
       return http.post('/diy/large/mini/quote/quoteRecord', data)
@@ -155,6 +160,10 @@ export default {
     getCategoryByArea(data) {
       return http.post('/diy/large/mini/quote/getCategoryByArea', data)
     },
+	// 全部户型
+	getAllHouseType(data){
+		return http.post('/diy/large/mini/quote/selectAllHouseType', data)
+	},
 
     // im模块
     tencentyunUserSig(data) {
@@ -163,7 +172,56 @@ export default {
     // im模块 根据ID获取用户资料
     tencentyunUserPersonal(data) {
       return http.post('/imini/tencentyun/user/personal', data)
-    }
+    },
+	
+	//活动详情
+	getEventDetail(data){
+		return http.post("/mini/event/support/detail",data)
+	},
+	//分享活动
+	getEventShare(data){
+		return http.post("/mini/event/add/host",data)
+	},
+	//活动中的好友助力
+	getEventFight(data){
+		return http.post("/mini/event/support",data)
+	},
+	//生成活动海报
+	getEventPoster(data){
+		return http.post("/mini/event/getQRCode",data)
+	},
+	
+	//订单模块
+	getOrderList(data){
+		return http.post("/mini/quote/order/baseList",data)
+	},
+	//签单后的pdf文件
+	// getSignContract(data){
+	// 	return http.post("/anxin/sign/view",data)
+	// },
+	//签单时获取手机号码（与报价状态相关）
+	getSignPhone(data){
+		return http.post("/mini/quote/agreement/getPhone",data)
+	},
+	//独立获取手机号码（非状态来获取）
+	getContractPhone(data){
+		return http.post("/mini/quote/agreement/contract/phone",data)
+	},
+	//发送验证码
+	getCaptcha(data){
+		return http.post("/mini/quote/agreement/send/code",data)
+	},
+	//提交验证码
+	submitCaptcha(data){
+		return http.post("/mini/quote/agreement/verify/code",data)
+	},
+		
+	//设置签名信息
+	setSignInfo(data,options){
+		return  http.post("/anxin/mini/person/sign/image",data,options)
+	},
+	
+	
   }
 
 }

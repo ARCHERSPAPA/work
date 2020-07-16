@@ -33,7 +33,7 @@ const router = new MinRouter({
 			}
 		},
 		{
-			'path': 'pages/user/info',
+			'path': 'pagesUser/user-info/user-info',
 			'name': 'info',
 			'style': {
 				'navigationBarTitleText': '个人信息'
@@ -64,13 +64,6 @@ const router = new MinRouter({
 		{
 			'path': 'pages/area/area',
 			'name': 'area',
-			'style': {
-				'navigationBarTitleText': '一键报价'
-			}
-		},
-		{
-			'path': 'pages/layout/layout',
-			'name': 'layout',
 			'style': {
 				'navigationBarTitleText': '一键报价'
 			}
@@ -119,11 +112,35 @@ const router = new MinRouter({
 		},
 		{
 			'path': 'pages/out/out',
-			'name': 'out',
-			'style': {
-				'navigationBarTitleText': 'out'
+			'name': 'out'			
+		},
+		{
+			"path": "pagesActivities/activity/activity",
+			'name': 'activity',
+			"style": {
+				"navigationBarTitleText": "活动"
 			}
-		}
+		},
+		{
+			"path": "pages/orders/orders",
+			'name': 'orders',
+			'type': 'switchTab',
+			"style": {
+				"navigationBarTitleText": "订单"
+			}
+		},
+		{
+			"path": "pagesOrders/order-contract/order-contract",
+			'name': 'orderContract'
+		},
+		{
+			"path": "pagesOrders/order-sign/order-sign",
+			'name': 'orderSign'
+		},
+		{
+			"path": "pagesOrders/order-captcha/order-captcha",
+			'name': 'orderCaptche'
+		},
 	]
 })
 

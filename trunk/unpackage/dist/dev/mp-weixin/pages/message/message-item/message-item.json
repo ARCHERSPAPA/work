@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "mkb-empty": "/components/mkb-empty/mkb-empty"
+  },
+  "component": true
+}

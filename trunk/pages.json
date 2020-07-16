@@ -1,120 +1,185 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		
+
 		{
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "在线装修",
-				"enablePullDownRefresh": true
+				"enablePullDownRefresh": true,
+				"onReachBottomDistance": 50
 			}
 		},
 		{
 			"path": "pages/message/message",
 			"style": {
-				"navigationBarTitleText": "在线装修"
+				"navigationBarTitleText": "消息"
 			}
 		},
 		{
-		  "path" : "pages/chat/chat",
-		  "style" : {
-        "navigationBarTitleText": "消息详情",
-        "enablePullDownRefresh": true
-		  }
+			"path": "pages/chat/chat",
+			"style": {
+				"navigationBarTitleText": "消息详情",
+				"enablePullDownRefresh": true
+			}
 		},
 		{
-		    "path" : "pages/area/area",
-		    "style" : {
+			"path": "pages/area/area",
+			"style": {
 				"navigationBarTitleText": "一键报价"
 			}
 		},
 		{
-		    "path" : "pages/manner/manner",
-		    "style" : {
+			"path": "pages/manner/manner",
+			"style": {
 				"navigationBarTitleText": "一键报价"
 			}
 		},
 		{
-		    "path" : "pages/result/result",
-		    "style" : {
+			"path": "pages/result/result",
+			"style": {
 				"navigationBarTitleText": "一键报价"
 			}
 		},
 		{
-		    "path" : "pages/search/search",
-		    "style" : {
+			"path": "pages/search/search",
+			"style": {
 				"navigationBarTitleText": "搜索",
 				"onReachBottomDistance": 50
 				// "enablePullDownRefresh": true
 			}
 		},
 		{
-		    "path" : "pages/layout/layout",
-		    "style" : {
-				"navigationBarTitleText": "一键报价"
+			"path": "pages/example/example",
+			"style": {
+				"navigationBarTitleText": "案例详情",
+				"enablePullDownRefresh": false
 			}
 		},
 		{
-		  "path" : "pages/example/example",
-		  "style" : {
-			"navigationBarTitleText": "案例详情"
-		  }
-		},
-		{
-		  "path" : "pages/example/example-site",
-		  "style" : {
-			"navigationBarTitleText": "工地实况"
-		  }
+			"path": "pages/example/example-site",
+			"style": {
+				"navigationBarTitleText": "工地实况"
+			}
 		},
 		{
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "在线装修",
-				"navigationBarBackgroundColor": "#F4711B",
 				"navigationBarTextStyle": "white"
 			}
 		},
-		{
-			"path": "pages/user/record",
-			"app-plus": {
-				"titleNView": false //禁用原生导航栏
-			},
-			"style": {
-				"navigationBarTitleText": "浏览记录",
-				"enablePullDownRefresh": true,
-				"onReachBottomDistance": 50
+		// {
+		// 	"path": "pages/user/record",
+		// 	"app-plus": {
+		// 		"titleNView": false //禁用原生导航栏
+		// 	},
+		// 	"style": {
+		// 		"navigationBarTitleText": "浏览记录",
+		// 		"enablePullDownRefresh": true,
+		// 		"onReachBottomDistance": 50
 
-			}
-		},
-        {
-            "path" : "pages/site/site",
-            "style" : {
-				"navigationBarTitleText":"工地参观",
+		// 	}
+		// },
+		{
+			"path": "pages/site/site",
+			"style": {
+				"navigationBarTitleText": "工地参观",
 				// "enablePullDownRefresh": true,
 				"onReachBottomDistance": 50
 			}
-        }
-        ,{
-            "path" : "pages/site-address/site-address",
-            "style" : {
-				"navigationBarTitleText":"工地参观",
+		}, {
+			"path": "pages/site-address/site-address",
+			"style": {
+				"navigationBarTitleText": "工地参观",
 				"onReachBottomDistance": 50
 			}
-        }
+		}, 
+		// {
+		// 	"path": "pages/user/info",
+		// 	"style": {
+		// 		"navigationBarTitleText": "个人资料"
+		// 	}
+		// },
+		{
+			"path": "pages/out/out",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/orders/orders",
+			"style": {
+				"navigationBarTitleText": "订单",
+				"enablePullDownRefresh": true
+			}
+		}
         ,{
-            "path" : "pages/user/info",
+            "path" : "pages/auth/auth",
             "style" : {
-            	"navigationBarTitleText":"个人资料"
-            }
-        }
-        ,{
-            "path" : "pages/out/out",
-            "style" : {}
+				"navigationBarTitleText":"登录在线装修"
+			}
         }
     ],
+	//分包处理
+	"subPackages": [
+	//活动
+	{
+	        "root": "pagesActivities",
+	        "pages": [{
+	            "path": "activity/activity",
+	            "style": { 
+					"navigationBarTitleText": "活动",
+					"enablePullDownRefresh": false
+				}
+	        }]			
+	},
+	//订单
+	{
+		"root": "pagesOrders",
+		"pages": [{
+                    "path" : "order-sign/order-sign",
+                    "style" : {
+						"navigationBarTitleText": "签名"
+					}
+                },
+				{
+					"path":"order-captcha/order-captcha",
+					"style" : {
+						"navigationBarTitleText": "短信验证"
+					}
+				},
+				{
+					"path":"order-contract/order-contract",
+					"style" : {
+						"navigationBarTitleText": "合同"
+					}
+				}
+            ]		
+	},
+	//用户
+	{
+		"root": "pagesUser",
+		"pages": [{
+	                "path" : "user-info/user-info",
+	                "style" : {
+						"navigationBarTitleText": "个人资料"
+					}
+	            },
+				{
+					"path":"user-record/user-record",
+					"style" : {
+						"navigationBarTitleText": "浏览记录",
+						"enablePullDownRefresh": true,
+						"onReachBottomDistance": 50
+					}
+				}
+	        ]		
+	}
+	],
 	"tabBar": {
 		"color": "#4D4D4D",
 		"custom": true,
-		"selectedColor": "#FF8800",
+		"selectedColor": "#098684",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
@@ -130,6 +195,12 @@
 				"text": "消息"
 			},
 			{
+				"pagePath": "pages/orders/orders",
+				"iconPath": "static/tabBar/home.png",
+				"selectedIconPath": "static/tabBar/select-home.png",
+				"text": "订单"
+			},
+			{
 				"pagePath": "pages/user/user",
 				"iconPath": "static/tabBar/me.png",
 				"selectedIconPath": "static/tabBar/select-me.png",
@@ -138,14 +209,13 @@
 		]
 	},
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
+		"navigationBarTextStyle": "#FFF",
 		"navigationBarTitleText": "在线装修",
-		"navigationBarBackgroundColor": "#fff",
-		"backgroundColor": "#fff",
-    "usingComponents": { //这里给所有页面全局引入了如下组件
-      "tab-bar": "/components/tab-bar/tab-bar"
-    }
-		// "navigationStyle": "custom
+		"navigationBarBackgroundColor": "#098684",
+		"backgroundColor": "#098684",
+		//设置屏幕是否横竖屏
+		"pageOrientation":"portrait",
+		"usingComponents": {}
 	},
 	"condition": { //模式配置，仅开发期间生效
 		"current": 0, //当前激活的模式(list 的索引项)
@@ -155,7 +225,7 @@
 			"query": "" //启动参数，在页面的onLoad函数里面得到
 		}]
 	},
-  "networkTimeout": {
-    "request": 41000
-  }
+	"networkTimeout": {
+		"request": 41000
+	}
 }

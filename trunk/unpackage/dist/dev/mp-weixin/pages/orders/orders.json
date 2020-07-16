@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "订单",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "mkb-order": "/components/mkb-order/mkb-order",
+    "mkb-empty": "/components/mkb-empty/mkb-empty",
+    "mkb-back-top": "/components/mkb-back-top/mkb-back-top"
+  }
+}

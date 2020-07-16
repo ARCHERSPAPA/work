@@ -1,0 +1,1 @@
+<view class="mkb-img-box"><block wx:if="{{loading===0}}"><view class="mkb-img"></view></block><block wx:else><block wx:if="{{loading===1}}"><view class="mkb-img" style="{{'background-image:'+('url('+imgUrl+')')+';'}}"></view></block></block></view>

@@ -90,11 +90,14 @@ export default {
 		pageNo: 1,
 		pageSize: 20
 	},
+	defaultThemeColor:"#098684",
 	//默认图片
 	defaultImage: "http://tqiniu.madrock.com.cn/rev/case/TEST/undefined/b4f3875e-d4c4-bc08-1cc8-79d2f0ed16ee.jpg",
 	//默认图上(详情、动态)
 	// defaultImg:"https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/9a82d04b-6b48-b94c-ea64-738626beb666.jpg",
-	defaultImg:"https://qiniu.madrock.com.cn/rev/graph/ONLINE/2501/4e92893a-7d22-fbfa-0326-b34c09d81747.png",
+	// defaultImg:"https://qiniu.madrock.com.cn/rev/graph/ONLINE/2501/4e92893a-7d22-fbfa-0326-b34c09d81747.png",
+	defaultImg:"https://qiniu.madrock.com.cn/rev/project/ONLINE/44/eafbac90-73ca-c682-c4f8-bfd76fa8e291.png",
+	
 	//默认头像图
 	defaultHeadImg:"https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/d9ceca10-9291-86aa-834c-e1b522dd0b22.png",
 	//默认用户登录时的图标
@@ -102,14 +105,22 @@ export default {
 	//空白数据显示图片
 	defaultEmptyImg:"https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/adcfaf11-15e7-b0d9-b257-f7e80a6af536.jpg",
 	//默认首页图片组
-	defaultHomeImgs:["https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/c265b06e-ecaf-4131-d762-3d2bb0afff77.jpg","https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/11ff5804-b76f-44d3-a42e-fc5eb268aa6e.jpg","https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/fdce60b3-343e-98ce-4e43-c321d7195eae.jpg"],
+	// defaultHomeImgs:["https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/c265b06e-ecaf-4131-d762-3d2bb0afff77.jpg","https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/11ff5804-b76f-44d3-a42e-fc5eb268aa6e.jpg","https://qiniu.madrock.com.cn/rev/remark/ONLINE/2504/fdce60b3-343e-98ce-4e43-c321d7195eae.jpg"],
+	defaultHomeImgs:["https://qiniu.madrock.com.cn/rev/project/ONLINE/44/1960a214-13b6-6338-a73d-409929a9129e.jpg","https://qiniu.madrock.com.cn/rev/project/ONLINE/44/bd0febd5-5a5a-36d9-d96c-6c32b2621003.jpg","https://qiniu.madrock.com.cn/rev/project/ONLINE/44/0792ca0e-d7fe-0805-f591-ebf9050da989.jpg"],
 	//默认导出图片时的图片
-	defaultQrcodeHeadImg:"https://qiniu.madrock.com.cn/rev/case/ONLINE/2888/d704f7a9-85fa-e0cf-794f-191c0788c420.jpg",	
+	// defaultQrcodeHeadImg:"https://qiniu.madrock.com.cn/rev/case/ONLINE/2888/d704f7a9-85fa-e0cf-794f-191c0788c420.jpg",	
+	defaultQrcodeHeadImg:"https://qiniu.madrock.com.cn/rev/project/ONLINE/44/c6eae5f8-6c0a-9fba-98f8-13662759072f.jpg",
 	//默认二维码图片
 	defaultQrcodeImg:"https://qiniu.madrock.com.cn/rev/graph/ONLINE/2848/29328fa6-49fd-3e41-84ca-79faf30dbb44.png",
 	//分享到朋友的小图片5：4
 	defaultShareImg:"https://qiniu.madrock.com.cn/rev/graph/ONLINE/3034/82056f31-1da1-91ce-6f55-9ecad2ebcc45.png",
-	
+	//默认分享图片时的背景照
+	defaultShareBg:["https://qiniu.madrock.com.cn/rev/remark/ONLINE/3034/3cf5deb6-9c8d-8178-ce23-11d57ac25d25.png"],
+	//置顶
+	// defaultBackTop:"https://qiniu.madrock.com.cn/rev/graph/ONLINE/198/d95806d0-1241-6305-5ae0-58f90ea2fcc1.png",
+	//授权登录页面图片
+	authImg:"https://qiniu.madrock.com.cn/rev/project/ONLINE/44/98f5bd8a-9c19-0f21-a876-28e9b3df62c3.png",
+		
 	//记录
 	records: [{
 		coverImg: [

@@ -1,0 +1,249 @@
+import {Component, OnInit} from '@angular/core';
+import {InfoComponent} from '../../../../plugins/info/info.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {RequestService} from '../../../../service/request.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Messages} from '../../../../model/msg';
+import {WarningService} from '../../../../service/warning.service';
+
+import {NzModalService} from 'ng-zorro-antd';
+import {ExaminePersonComponent} from '../../../../plugins/examine-person/examine-person.component';
+import {Default, AUDIT_TYPES} from "../../../../model/constant";
+
+
+@Component({
+
+    selector: 'app-examine-add',
+    templateUrl: './examine-add.component.html',
+    styleUrls: ['./examine-add.component.scss']
+})
+export class ExamineAddComponent implements OnInit {
+    public examineId: any;
+    public examineName: string;
+    public personList: Array<any> = []; // 全量更新集合
+    public examinePersonList: Array<any> = [];  // 项目人员
+    public radioValue = '2';  // 默认不允许修改审批人
+
+    //项目人员类型
+    public auditTypes: Array<any> = [];
+    //选择人员类型并设置默认值为固定人员
+    public chooseType:number = 1;
+    //设置人员类型为设计师
+    public chooseProject:number;
+
+    constructor(private modal: NgbModal,
+                private request: RequestService,
+                private activatedRoute: ActivatedRoute,
+                private warn: WarningService,
+                private modalService: NzModalService,
+                private router: Router) {
+    }
+
+    ngOnInit(): void {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params.examineId) {
+                this.examineId = params.examineId;
+                this.loadExamineSelect();
+                this.auditTypes = AUDIT_TYPES;
+            }
+            if (params && params.examineName) {
+                this.examineName = '编辑' + params.examineName;
+            }
+        });
+    }
+
+    handleClose(index) {
+        this.personList.splice(index, 1);
+    }
+
+
+    /**
+     * 添加人员
+     * @param item 人员信息
+     * @param {number} i 当前位置
+     */
+    handleAddPerson(item: any,i:number) {
+        const that = this;
+        const info = that.modal.open(InfoComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: 'static'
+        });
+        info.componentInstance.type = 15;
+        info.componentInstance.memberList = this.personList;
+        if (i != undefined) {
+            //兼容弹出框显示文案v2.2.5
+            item["memberName"] = item["approver"];
+            item["positionName"] = item["position"];
+            info.componentInstance.member = item;
+        }
+        info.result.then((res) => {
+            const {id: employeeId, name, positionName, headImg} = res[0];
+            console.log(i);
+            if (i != undefined) {
+                this.personList.splice(i, 1, {
+                    headImg,
+                    employeeId,
+                    approver: name,
+                    position: positionName,
+                    chooseType: this.chooseType,
+                    chooseProject: this.chooseProject
+                });
+            } else {
+                this.personList.push({
+                    headImg,
+                    employeeId,
+                    approver: name,
+                    position: positionName,
+                    chooseType: this.chooseType,
+                    chooseProject: this.chooseProject
+                });
+            }
+            console.log(this.personList);
+        }, (err) => {
+            console.log(err);
+        });
+    }
+
+    // 项目人员
+    handleAddProjectPerson(item,index) {
+        // const item = this.examinePersonList[i];
+        this.chooseType = 2;
+
+        const modal = this.modalService.create({
+            nzTitle: '选择项目人员',
+            nzContent: ExaminePersonComponent,
+            nzComponentParams: {items: this.auditTypes,index: item && item["chooseProject"]?item["chooseProject"]:1},
+            nzFooter: [{
+                label: '关闭',
+                onClick: (componentInstance) => {
+                    console.log(componentInstance);
+                    modal.destroy();
+                }
+            }, {
+                label: '提交',
+                type:'primary',
+                onClick: (instance) => {
+                    console.log(instance);
+                    this.chooseProject = instance["index"];
+                    this.handleAddPerson(item,index);
+                    modal.destroy();
+                    // if (componentInstance.item === '' || componentInstance.item === null || componentInstance.item === undefined) {
+                    //     this.warn.onSuccess('请选择项目人员');
+                    // } else {
+                    //     modal.destroy(componentInstance.item);
+                    // }
+                }
+            }]
+        });
+        // modal.afterOpen.subscribe(
+        //     (result) => console.log(result)
+        // );
+        // modal.afterClose.subscribe((result) => {
+        //     // todo 3.push进入全量更新array
+        //     console.log(result);
+        //     // this.chooseProject = result.radioValue;
+        //
+        // });
+    }
+
+    // 修改流程人员配置
+    handleChange(item, index) {
+        // todo 2.区分两种情况 固定人员和项目人员
+        let type = !item["chooseType"] || item["chooseType"] === 1;
+        this.chooseType = type?1:2;
+        if(this.chooseType === 2){
+            this.chooseProject = item["chooseProject"];
+        }
+
+        if (type) {
+            this.handleAddPerson(item, index);
+        } else {
+            this.handleAddProjectPerson(item,index);
+        }
+    }
+
+    selectItemType(type:number){
+        this.chooseType = type;
+        if (type === 1) {
+            this.handleAddPerson(null, null);
+        } else {
+            this.handleAddProjectPerson(null,null);
+        }
+    }
+
+    // 拉取审批流程详情
+    loadExamineSelect() {
+        const that = this;
+        this.request.doPost({
+            url: 'examineSelect',
+            data: {
+                id: this.examineId
+            },
+            success: res => {
+                if (res && res.code == 200) {
+                    that.personList = res.data.selectByExample;
+                    if (this.personList && this.personList.length > 0) {
+                        this.personList.filter(person => {
+                            person["headImg"] = person["headImg"] ? person["headImg"] : Default.PERSONNEL.DEFAULT_HEAD_IMG;
+                        })
+                    }
+                }
+
+                if (res.data.state) {
+                    that.radioValue = res.data.state + '';
+                }
+            }
+        });
+    }
+
+    // 拉取项目人员
+    // loadExaminePersonList() {
+    //     // todo 1.拉取固定人员信息
+    //     this.examinePersonList = [{
+    //         name: '刘林1',
+    //         job: '医生1'
+    //     }, {
+    //         name: '刘林2',
+    //         job: '医生2'
+    //     }, {
+    //         name: '刘林3',
+    //         job: '医生3'
+    //     }];
+    // }
+
+    back(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.router.navigate(["./../list"], {relativeTo: this.activatedRoute});
+    }
+
+    // 全量提交
+    handleExamineSave() {
+        const that = this;
+        const redactList = this.personList.map((item, index) => {
+            // let {employeeId, approver, position,chooseType,chooseProject} = item;
+            item["orderAddress"] = index + 1;
+            if(item.chooseType === 1)
+                delete item["chooseProject"];
+            return item;
+            // return {employeeId, approver, position, orderAddress: index + 1,chooseType,chooseProject};
+        });
+        // console.log(redactList);
+        // return;
+        this.request.doPost({
+            url: 'examineSave',
+            data: {
+                id: this.examineId,
+                redactList,
+                state: this.radioValue
+            }, success: res => {
+                if (res.code && res.code === 200) {
+                    that.loadExamineSelect();
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                }
+            }
+        });
+    }
+}
+

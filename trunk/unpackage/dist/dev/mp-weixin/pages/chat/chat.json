@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "消息详情",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "chat-item": "/pages/chat/chat-item/chat-item",
+    "chat-input": "/pages/chat/chat-input/chat-input"
+  }
+}

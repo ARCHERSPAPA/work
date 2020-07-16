@@ -1,0 +1,184 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { RequestService } from '../../../../service/request.service';
+import { Messages } from '../../../../model/msg';
+import { WarningService } from '../../../../service/warning.service';
+@Component({
+  selector: 'rev-master-add',
+  templateUrl: './master-add.component.html',
+  styleUrls: ['./master-add.component.scss', '../../master.component.scss']
+})
+export class MasterAddComponent implements OnInit {
+  public title: string;
+  public buttons;
+  public tempAddList;
+  public addIsVisible: boolean = false;
+  public titleIsVisible;
+  public tempName: string = '主材模板';
+  public materialName: string = '';
+  public tempTitleForm: FormGroup;
+  public tempMateriaForm: FormGroup;
+  public id: string;
+  public preTitle: string = '主材模板';
+
+  constructor(
+    private fb: FormBuilder,
+    private activatedRoute: ActivatedRoute,
+    private req: RequestService,
+    private warn: WarningService,
+  ) { }
+
+  ngOnInit() {
+    this.buttons = [{
+      color: 'btn-primary',
+      name: '添加'
+    }];
+
+    this.tempTitleForm = this.fb.group({
+      tempName: [this.tempName, [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.maxLength(10),
+      ]],
+    });
+    this.tempMateriaForm = this.fb.group({
+      materialName: [this.materialName, [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.maxLength(10),
+      ]],
+    });
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['id']) {
+        this.id = atob(params.id);
+        this.changeData();
+        this.title = '详情';
+      } else {
+        this.title = '新建模板';
+      }
+    });
+  }
+  handleName($event) {
+    this.addIsVisible = true;
+  }
+  changeData(id = '') {
+    if (!id) {
+      id = this.id;
+    }
+    this.req.doPost({
+      url: 'masterTempDetail',
+      data: {
+        id: id
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.tempAddList = res.data.materialData;
+          this.tempName=res.data.mainMaterial.name;
+          this.preTitle=res.data.mainMaterial.name;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+
+    })
+  }
+  delTemp(id) {
+    this.req.doPost({
+      url: 'masterTempMaterialDel',
+      data: {
+        id: id,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS);
+          this.changeData();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  addTemp() {
+    this.req.doPost({
+      url: 'masterTempSave',
+      data: {
+        id: this.id ? this.id : '',
+        name: this.tempName,
+        mainMaterialData: {
+          materialName: this.materialName,
+        }
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS);
+          this.changeData(res.data);
+          this.id=res.data;
+          this.addIsVisible = false;
+          this.materialName='';
+          this.tempMateriaForm.reset();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  /**
+   * @param id 材料的ID
+   *  * @param nearId 材料上下的ID
+   */
+  moveTemp(id, nearId) {
+    let url;
+    let param = {};
+    if (nearId) {
+      url = 'masterTempMove';
+      param['id'] = id;
+      param['toId'] = nearId;
+    } else {
+      url = 'masterTempTop';
+      param['id'] = id;
+      param['mainId'] = this.id;
+    }
+    this.req.doPost({
+      url: url,
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS);
+          this.changeData();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  handleCancel() {
+    this.addIsVisible = false;
+    this.titleIsVisible = false;
+    this.tempName=this.preTitle;
+  }
+  editTemp() {
+    this.req.doPost({
+      url: 'masterTempTitle',
+      data: {
+        id: this.id?this.id:'',
+        name: this.tempName,
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS);
+          this.changeData(res.data);
+          this.id=res.data;
+          this.titleIsVisible = false;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  editTitle() {
+    this.titleIsVisible = true;
+  }
+
+}

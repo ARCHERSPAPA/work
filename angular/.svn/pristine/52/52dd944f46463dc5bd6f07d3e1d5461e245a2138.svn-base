@@ -1,0 +1,160 @@
+import { Component, OnInit } from "@angular/core";
+import * as UserValidate from "../../../../validate/user-validate";
+import { FormGroup, FormBuilder, Validators } from "@angular/forms";
+import {
+    btoa,
+    getAuditStateName, getCostStateName,
+    getStateName,
+    getTypeName
+} from "../../../../model/methods";
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { auditStatus, Default, applyStatus } from "../../../../model/constant";
+import { Messages } from "../../../../model/msg";
+
+@Component({
+    selector: "rev-article-regulation-list",
+    templateUrl: "./article-regulation-list.component.html",
+    styleUrls: [
+        "./../../../client/client-detail/client-detail.component.scss",
+        "./../../article.component.scss",
+        "./article-regulation-list.component.scss"
+    ]
+})
+export class ArticleRegulationListComponent implements OnInit {
+    public radioSwitch = [
+        {
+            key: 0,
+            text: "待处理"
+        },
+        {
+            key: 1,
+            text: "全部"
+        }
+    ];
+    public title: string;
+
+    public type: number;
+
+    public searchForm: FormGroup;
+    public name: string = "";
+    public costState: string = "-1";
+    public optionList: any;
+    public stateList: any;
+    public applyState: string = "-1";
+    public lock=true;
+
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    public regularList: Array<any>;
+
+    constructor(
+        private fb: FormBuilder,
+        private req: RequestService,
+        private warn: WarningService
+    ) {
+    }
+
+    ngOnInit() {
+        this.title = "增减项目";
+        this.optionList = auditStatus;
+        this.stateList = applyStatus;
+        this.type = 0;
+        this.searchForm = this.fb.group({
+            // costState: [this.costState, []],
+            // applyState: [this.costState, []],
+            name: [this.name, [
+                UserValidate.ValidateAccount,
+                Validators.maxLength(120)]
+            ]
+        });
+        this.changeData();
+    }
+
+    // ngAfterViewInit() {
+    //     setTimeout(() => {
+    //
+    //     });
+    // }
+
+    // selectType(type: number) {
+    //     this.type = type;
+    //     this.pageNo = Default.PAGE.PAGE_NO;
+    //     this.name = "";
+    //     this.costState = "-1";
+    //     this.changeData();
+    // }
+
+    getTypeName(type) {
+        return getTypeName(type);
+    }
+
+    getStateName(state) {
+        return getStateName(state);
+    }
+
+    getAuditStateName(state) {
+        return getAuditStateName(state);
+    }
+
+    getCostStateName(state) {
+        return getCostStateName(state);
+    }
+
+
+    handleSwitch(status: number) {
+        this.type = status;
+        this.changeData();
+    }
+/**
+ * 
+ * @param type 1是成本状态，2是搜索类型
+ * @param state 选择的类型
+ */
+    log(type:number,state: string) {
+        if(type===1){
+            this.costState = state;
+        }else if(type===2){
+            this.applyState = state;
+        }
+        this.changeData(true);
+    }
+
+    changeData(...args) {
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        this.req.doPost({
+            url: "listPause",
+            data: {
+                type: this.type,
+                name: this.name,
+                costState: this.costState,
+                page: this.pageNo,
+                pageSize: this.pageSize,
+                processType: this.applyState
+            },
+            success: res => {
+                if (res && res.code == 200) {
+                    this.regularList = res.data.list;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * url加密
+     * @param {string} param
+     * @returns {any}
+     */
+    btoa(param: string) {
+        return btoa(param);
+    }
+}

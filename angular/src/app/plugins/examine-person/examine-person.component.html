@@ -1,0 +1,23 @@
+<!--<div class="container">-->
+<!--<div class="title">项目人员</div>-->
+<!--<div class="wrap" >-->
+<!--<div *ngFor="let item of examinePersonList;let i = index" (click)="handleSelect(item)">-->
+<!--<nz-radio-group [(ngModel)]="radioValue">-->
+<!--<label nz-radio [ngStyle]="style" nzValue="{{i + ''}}">-->
+<!--<span>{{item.name}}</span>-->
+<!--<span>{{item.job}}</span>-->
+<!--</label>-->
+<!--</nz-radio-group>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+
+
+<div nz-row>
+    <div nz-col nzSpan="4" nzOffset="4" style="line-height: 30px">项目人员：</div>
+    <div nz-col nzSpan="4">
+        <nz-radio-group [(ngModel)]="index">
+            <label [nzValue]="item.key" nz-radio *ngFor="let item of items" style="display:block;text-align:left;line-height: 30px">{{item.value}}</label>
+        </nz-radio-group>
+    </div>
+</div>

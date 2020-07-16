@@ -1,0 +1,47 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-master-add',
+  templateUrl: './master-add.component.html',
+  styleUrls: ['./master-add.component.scss','../master.component.scss']
+})
+export class MasterAddComponent implements OnInit {
+  public title: string;
+  public buttons;
+  public tempAddList=[{name:123}];
+  public addIsVisible: boolean = false;
+  public titleIsVisible;
+  public tempName: string = '主材模板';
+  public materialName:string;
+  constructor() { }
+
+  ngOnInit() {
+    this.title = '详情';
+    this.buttons = [{
+      color: 'btn-primary',
+      name: '添加'
+    }];
+  }
+  handleName($event) {
+    this.addIsVisible = true;
+  }
+  changeData() {
+
+  }
+  delTemp() {
+
+  }
+  addTemp() {
+
+  }
+  handleCancel(){
+    this.addIsVisible=false;
+    this.titleIsVisible=false;
+  }
+  editTemp(){
+
+  }
+  editTitle(){
+    this.titleIsVisible=true;
+  }
+}

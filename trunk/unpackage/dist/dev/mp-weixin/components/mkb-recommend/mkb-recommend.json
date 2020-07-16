@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
+    "uni-icons": "/components/uni-icons/uni-icons"
+  }
+}

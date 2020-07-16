@@ -1,10 +1,10 @@
 <template>
 	<view class="content">
 		<view :style="{height: tabHeight + 1 +'px'}">
-			<view :class="topFixed?'select-tab-fixed-top':'select-tab'" :style="{height: tabHeight+'px','background':flag?'rgba(255,136,0,1)':'#FFFFFF'}">
+			<view :class="topFixed?'select-tab-fixed-top':'select-tab'" :style="{height: tabHeight+'px','background':flag?'background:rgba(0,0,0,0.03)':'#FFFFFF'}">
 				<view class="select-tab-item" v-for="(item,index) in titleList" :key="index" @tap="showMenuClick(index)">
-					<text class="select-tab-item-title" :style="{color:flag?'#FFFFFF':'rgba(0,0,0,0.90)'}">{{item.title}}</text>
-					<text class="arrows sl-font" :class="statusList[index].isActive?up:down" :style="{color:flag?'#FFFFFF':'rgba(0,0,0,0.90)'}"></text>
+					<text class="select-tab-item-title" :style="{color:flag?'rgba(0,0,0,0.90);':'rgba(0,0,0,0.90)'}">{{item.title}}</text>
+					<text class="arrows sl-font" :class="statusList[index].isActive?up:down" :style="{color:flag?'rgba(0,0,0,0.90);':'rgba(0,0,0,0.90)'}"></text>
 				</view>
 			</view>
 		</view>
@@ -87,11 +87,6 @@
 				arr.push({
 					'isActive': false
 				});
-				// titleArr.push({
-				// 	'title': this.menuList[i].title,
-				// 	'key': this.menuList[i].key
-				// })
-
 				r[this.menuList[i].key] = this.menuList[i].title;
 
 				if (this.menuList[i].reflexTitle && this.menuList[i].defaultSelectedIndex > -1) {
@@ -122,10 +117,7 @@
 				arr.push({
 					'isActive': false
 				});
-				// titleArr.push({
-				// 	'title': this.menuList[i].title,
-				// 	'key': this.menuList[i].key
-				// });
+				
 				r[this.menuList[i].key] = this.menuList[i].title;
 
 				if (this.menuList[i].reflexTitle && this.menuList[i].defaultSelectedIndex > -1) {
@@ -163,7 +155,7 @@
 		},
 		methods: {
 			// 面积改变户型相应更改
-			getHouseType(e,selectItem){
+			/* getHouseType(e,selectItem){
 				this.menuList[3].detailList = e;
 				this.menuList[3].defaultSelectedIndex = 0;
 				let styleIndex = this.menuList[0].detailList.findIndex(item=>{
@@ -174,7 +166,7 @@
 				})
 				this.menuList[0].defaultSelectedIndex = styleIndex;
 				this.menuList[1].defaultSelectedIndex = decIndex;
-			},
+			}, */
 			getMenuListTemp() {
 				let arr = this.menuList;
 				for (let i = 0; i < arr.length; i++) {
@@ -189,24 +181,6 @@
 					}
 				}
 				return arr;
-			},
-			// 重置所有选项，包括默认选项，并更新result
-			resetAllSelect(callback) {
-				this.$refs.slFilterView.resetAllSelect(function(e){
-					callback(e);
-				});
-			},
-			// 重置选项为设置的默认值，并更新result
-			resetSelectToDefault(callback) {
-				this.$refs.slFilterView.resetSelectToDefault(function(e){
-					callback(e);
-				});
-			},
-			resetMenuList(val) {
-				this.menuList = val;
-				this.$emit('update:menuList', val)
-				this.$forceUpdate();
-				this.$refs.slFilterView.resetMenuList(val)
 			},
 			showMenuClick(index) {
 				this.selectedIndex = index;
@@ -239,31 +213,15 @@
 					let val = obj.result;
 					let titlesObj = obj.titles;
 					// 处理选项映射到菜单title
-					if (this.independence) {
-						if (!this.menuList[this.selectedIndex].isMutiple || this.menuList[this.selectedIndex].isSort) {
-							let tempTitle = '';
-							for (let i = 0; i < this.menuList[this.selectedIndex].detailList.length; i++) {
-								let item = this.menuList[this.selectedIndex].detailList[i];
-								if (item.value == val[this.menuList[this.selectedIndex].key]) {
-									tempTitle = item.title;
-								}
-							}
-							if (this.menuList[this.selectedIndex].reflexTitle) {
-								this.titleList[this.selectedIndex].title = tempTitle;
-							}
+					for (let key in titlesObj) {
+						if (!Array.isArray(titlesObj[key])) {
+							this.tempTitleObj[key] = titlesObj[key];
 						}
-					} else {
-						for (let key in titlesObj) {
-							if (!Array.isArray(titlesObj[key])) {
-								this.tempTitleObj[key] = titlesObj[key];
-							}
-					
-						}
-						for (let key in this.tempTitleObj) {
-							for (let i = 0; i < this.titleList.length; i++) {
-								if (this.titleList[i].key == key) {
-									this.titleList[i].title = this.tempTitleObj[key];
-								}
+					}
+					for (let key in this.tempTitleObj) {
+						for (let i = 0; i < this.titleList.length; i++) {
+							if (this.titleList[i].key == key) {
+								this.titleList[i].title = this.tempTitleObj[key];
 							}
 						}
 					}
@@ -292,7 +250,7 @@
 	@import 'iconfont/iconfont.css';
 	@import "../../mixin/common.scss";
 	.select-tab {
-		background-color: rgba(255,136,0,1);
+		// background-color: rgba(0,0,0,0.03);
 		display: flex;
 		width: 100%;
 		padding-left: 28.98rpx;

@@ -25,7 +25,9 @@ export default {
 		width: 434.78rpx;
 		height: 434.78rpx;
 		text-align: center;
-		background:url('../../static/default/no_data.jpg') no-repeat center top;
+		// background:url('https://qiniu.madrock.com.cn/rev/remark/ONLINE/3778/6ba625b3-4ba1-b979-81ab-ef2be2dc2ae0.jpg') no-repeat center top;
+		// background:url('https://qiniu.madrock.com.cn/rev/project/ONLINE/44/b8e77702-e6b0-2ab0-4f9d-0774d380c83b.png') no-repeat center center;
+		background:url('https://qiniu.madrock.com.cn/rev/project/ONLINE/44/90a91625-1db0-1fe9-f92f-c3c8f439a9f4.png') no-repeat center center;
 		background-size:cover;
 	}
 	&-text{

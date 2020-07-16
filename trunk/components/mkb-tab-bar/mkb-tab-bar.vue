@@ -186,7 +186,7 @@
 								view = res[1];
 							clientViewHeight = view.height;
 							clientViewScrollTop = view.scrollTop;
-							return parseInt(h.top) + clientViewScrollTop - this.barTop - this.barHeight;
+							return parseInt(h && h.top?h.top:0) + clientViewScrollTop - this.barTop - this.barHeight;
 						});
 					}
 				}
@@ -245,6 +245,7 @@
 </script>
 
 <style lang="scss">
+	@import "../../mixin/common.scss";
 	.mkb-bar {
 		position: relative;
 		width: 100%;
@@ -287,7 +288,7 @@
 
 					&.active {
 						font-weight: bold;
-						color: rgba(255, 136, 0, 1);
+						color: $col_098684;
 
 						&::after {
 							content: "";
@@ -297,7 +298,7 @@
 							transform: translateX(-50%);
 							width: 40%;
 							height: 0;
-							border-bottom: 4rpx solid #f5721c;
+							border-bottom: 4rpx solid $col_098684;
 
 						}
 					}

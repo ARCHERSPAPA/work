@@ -55,8 +55,9 @@ function openPage(args) {
   }
 
   return new Promise((resolve, reject) => {
+	  
     const routers = getCurrentPages()
-    let route = null
+	let route = null
     if (routers.length !== 0) {
       const router = routers[routers.length - 1]
       route = router.route
@@ -82,11 +83,19 @@ function openPage(args) {
     }
     before(path, route, next)
     if (flag) {
-      uni[type]({
-        url: `/${path}?query=${queryStr}`,
-        success: resolve,
-        fail: reject
-      })
+		if(type === "switchTab"){
+			uni.switchTab({
+				url: `/${path}`,
+				success: resolve,
+				fail: reject
+			})
+		}else{
+			uni[type]({
+			  url: `/${path}?query=${queryStr}`,
+			  success: resolve,
+			  fail: reject
+			})
+		}
     }
   })
 }

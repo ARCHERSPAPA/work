@@ -1,0 +1,180 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.detail-price {
+	.price-header {
+		width: 100%;
+		overflow: hidden;
+		> div {
+			float: left;
+			padding: 16px;
+		}
+	}
+	.fix {
+		display: inline-block;
+		> a {
+			display: inline-block;
+			margin-right: 4px;
+			font-size: 14px;
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+	.text-right {
+		text-align: right;
+	}
+	.text-left {
+		text-align: left;
+	}
+	.text {
+		font-size: 14px;
+		font-family: "PingFang SC";
+		font-weight: 400;
+		line-height: 22px;
+		color: rgba(0, 0, 0, 0.65);
+		opacity: 1;
+		display: inline-block;
+	}
+	.text-bold {
+		font-size: 20px;
+		font-family: "PingFang SC";
+		font-weight: bold;
+		line-height: 28px;
+		color: rgba(0, 0, 0, 0.85);
+		opacity: 1;
+		display: inline-block;
+	}
+	.text-blink {
+		font-size: 20px;
+		font-family: "PingFang SC";
+		font-weight: bold;
+		line-height: 28px;
+		color: rgba(24, 144, 255, 1);
+		opacity: 1;
+	}
+	.textarea {
+		position: relative;
+		//.inp-h72{
+		//  height: 72px!important;
+		//}
+		//.inp-h152{
+		//  height: 152px!important;
+		//}
+		.count {
+			position: absolute;
+			right: 20px;
+			bottom: 20px;
+			> span {
+				color: #f92650;
+			}
+		}
+	}
+	//.price-remark{
+	//  width: 100%;
+	//  overflow: hidden;
+	//  .remark-text{
+	//    float: left;
+	//    width: calc(100% - 480px);
+	//    .text{
+	//      vertical-align: top;
+	//      float: left;
+	//    }
+	//    .textarea{
+	//      float: left;
+	//      min-height: 72px;
+	//      width: 100%;
+	//    }
+	//  }
+	//   .img-list{
+	//      max-width: 480px;
+	//      max-height: 152px;
+	//      float: right;
+	//      .remark-img{
+	//        width: 72px;
+	//        heihgt: 72px;
+	//        float:left;
+	//      }
+	//   }
+	//}
+
+	.img-list {
+		> .remark-img {
+			width: 72px;
+			height: 72px;
+			//margin: 4px;
+			position: relative;
+			@include compatibility(box-sizing, border-box);
+			&:nth-of-type(5n) {
+				margin-right: 0;
+			}
+
+			&:hover {
+				.close {
+					display: block;
+				}
+			}
+			.close {
+				display: none;
+				width: 100%;
+				height: 20px;
+				font-size: 14px;
+				color: #f92650;
+				background: rgba(0, 0, 0, 0.65);
+				text-align: center;
+				position: absolute;
+				left: 0;
+				bottom: 0;
+			}
+		}
+	}
+	.btn-fix {
+		padding: 20px 10px;
+	}
+	//tr th,
+	tr td {
+		max-width: 44px;
+		//padding: 16px;
+		@include compatibility(word-break, break-word);
+		@include ellipsis();
+		.limit-content {
+			@include ellipsis();
+		}
+		// 材料清单选择模板
+		.template {
+			display: inline-block;
+			font-size: 14px;
+			color: #007bff;
+			margin-right: 16px;
+			.templateAllName {
+				display: flex;
+				align-items: center;
+				.templateName {
+					max-width: 85px;
+					display: inline-block;
+					@include ellipsis;
+				}
+			}
+		}
+	}
+	tr th[colspan] {
+		text-align: left;
+	}
+}
+.drag-move {
+	background: #b5fafb;
+	font-size: 12px;
+	@include compatibility(transition, all 0.5s);
+	@include compatibility(user-select, none);
+	cursor: move;
+}
+.btns {
+	margin: -7px -16px 0px -15px;
+	text-align: right;
+	padding-top: 10px;
+	button {
+		margin-right: 24px;
+	}
+	button:first-child {
+		margin-right: 8px;
+	}
+}

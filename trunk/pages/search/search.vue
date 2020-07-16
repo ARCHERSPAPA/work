@@ -4,7 +4,7 @@
 		<view v-show="showSearchBar">
 			<view class="mkb-search-bar">
 				<uni-search-bar ref="searchBarRef" :radius="28.98" :placeholder="searchBar.placeholder" :cancel-text="'搜索'"
-				 :clear-button="'auto'" :cancel-color="'#f80'" @confirm="searchChange" @cancel="searchChange" />
+				 :clear-button="'auto'" :cancel-color="'#098684'" @confirm="searchChange" @cancel="searchChange" />
 			</view>
 		</view>
 
@@ -379,18 +379,20 @@
 				 * 设置选中的细项
 				 */
 				if (Object.keys(this.selectItems).length <= 0) {
-					this.menuList.forEach(menu => {
-						if (menu.key === Constant.searchKeys[1]) {
-							// 初始化预算有限时的选中条件
-							if (item.id === 10) {
-								this.selectItems[menu.key] = menu.detailList[2]
+					if(this.menuList && this.menuList.length > 0){
+						this.menuList.forEach(menu => {
+							if (menu.key === Constant.searchKeys[1]) {
+								// 初始化预算有限时的选中条件
+								if (item.id === 10) {
+									this.selectItems[menu.key] = menu.detailList[2]
+								} else {
+									this.selectItems[menu.key] = menu.detailList[0]
+								}
 							} else {
 								this.selectItems[menu.key] = menu.detailList[0]
 							}
-						} else {
-							this.selectItems[menu.key] = menu.detailList[0]
-						}
-					})
+						})
+					}
 				}
 				/**
 				 * 设置头部选择栏
@@ -791,7 +793,7 @@
 	.mkb-search {
 		&-bar {
 			height: 57.97rpx;
-			margin: 0 28.98rpx 14.49rpx;
+			margin: 14.49rpx 28.98rpx 14.49rpx;
 		}
 
 		&-head {
@@ -799,7 +801,7 @@
 			justify-content: space-between;
 			align-items: center;
 			height: 57.97rpx;
-			margin: 0 28.98rpx 14.49rpx;
+			margin: 14.49rpx 28.98rpx 14.49rpx;
 
 			&-select {
 				/* text{

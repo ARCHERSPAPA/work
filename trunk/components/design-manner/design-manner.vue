@@ -7,9 +7,9 @@
 			:class="index == idx?'design-manner-list active':'design-manner-list'"
 			@click="select(index, item.decorateStyle, item.backgImg)"
 		>
-			<mkb-img-cut :img-url="item.backgImg" class="backImg" />
+			<mkb-img-cut :img-url="item.backgImg + '?imageView2/2/w/1023/h/642/interlace/1'" class="backImg" />
 			<view class="design-manner-list-desc" :style="{ fontWeight: idx == index ? 'bold' : '400' }">{{ item.decorateStyle }}</view>
-			<view v-show="idx == index" class="design-manner-list-gou"><image src="../../static/search/xuanzhong.png" /></view>
+			<view v-show="idx == index" class="design-manner-list-gou"><image src="https://qiniu.madrock.com.cn/rev/project/ONLINE/44/f259ac6b-6a33-3c94-9849-88b5757114ce.png" /></view>
 		</view>
 	</view>
 </template>
@@ -55,8 +55,8 @@ export default {
 				designList.push({ designManner: item });
 			}
 			uni.setStorageSync('designList', designList);	
-			this.$openPage({ name: 'area', query: { type: 2, backImg: img } });
-			this.$emit('designMannerIdx', this.idx);
+			// this.$openPage({ name: 'area', query: { type: 2, backImg: img } });
+			this.$emit('designMannerIdx', this.idx,img);
 		},
 		// 初始数据
 		initData() {
@@ -71,6 +71,7 @@ export default {
 					return item.type == 2;
 				});
 				this.list = list;
+				this.$emit('designList',list);
 			}else{
 				/**
 				 * 从公众号进入一键设计
@@ -84,6 +85,7 @@ export default {
 							return item.type == 2;
 						});
 						this.list = list;
+						this.$emit('designList',list);
 						this.$store.commit("setCatalogues",res.data);
 						uni.setStorageSync('catalogues',res.data);
 					}else{
@@ -93,6 +95,11 @@ export default {
 						});
 					}
 				});
+				if (!uni.getStorageSync("allHouseType")) {
+					this.$http.getAllHouseType({}).then(res => {
+						this.$store.commit('setAllHouseType', res.data);
+					});
+				}
 			}
 		}
 	}
@@ -112,8 +119,8 @@ export default {
 		margin-bottom: 21.73rpx;
 	}
 	.active{
-		background: rgba(255,136,0,1);
-		border: 7.24rpx solid rgba(255,136,0,1);
+		background: $col_098684;
+		border: 7.24rpx solid $col_098684;
 	}
 	&-list {
 		width: 100%;

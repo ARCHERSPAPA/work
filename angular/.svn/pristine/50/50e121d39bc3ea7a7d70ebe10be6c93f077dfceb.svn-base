@@ -1,0 +1,174 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+import { Messages } from "../../../model/msg";
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import * as UserValidate from "../../../validate/user-validate";
+
+@Component({
+    selector: 'rev-finance-temp',
+    templateUrl: './finance-temp.component.html',
+    styleUrls: ['./finance-temp.component.scss','../finance.component.scss']
+})
+export class FinanceTempComponent implements OnInit {
+
+    public tempList: any;
+
+    public title: string;
+    public buttons: Array<any>;
+    public payList
+
+
+
+
+    //弹出框
+    public tempTitle: string;
+    public tempVisible: boolean = false;
+
+    public tempForm: FormGroup;
+    public tempName: string;
+
+    constructor(private req: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder) {
+
+    }
+
+    ngOnInit() {
+
+        this.title = "收款模板";
+
+        this.tempForm = this.fb.group({
+            tempName: [this.tempName, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(20)
+            ]]
+        });
+
+        this.buttons = [
+            {
+                name: '新建',
+                color: 'btn-primary'
+            }
+        ];
+
+        this.changeData();
+    }
+
+    delTemp(id) {
+        this.req.doPost({
+        url:"delPayTemplate",
+        data:{
+          id:id
+        },
+        success:res=>{
+          if (res && res.code == 200) {
+            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            this.changeData()
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+        
+          }
+        }
+        
+        })
+          }
+    handleName(e: any) {
+        if (e === this.buttons[0].name) {
+            this.editTemp();
+        }
+    }
+
+    addData(){
+
+    }
+    /**
+     * 获取数据源信息
+     */
+    changeData() {
+        this.req.doPost({
+            url: "selectPayTemplate",
+            success: res => {
+                if (res && res.code == 200) {
+                    this.tempList = res.data;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        })
+    }
+
+    /**
+     * 获取期数
+     * @param type 期数
+     */
+    getNumber(detail) {
+       return `${detail.length-1}期`
+    }
+/**
+ * 设置默认
+ *  * @param def 是否为默认0为非默认
+ */
+    defaultTemp(id:number,def:number) {
+        this.req.doPost({
+            url: 'updatePayTemplate',
+            data:{
+                defaultUse:1,
+                id:id
+            },
+            success:res=>{
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.changeData()
+                  } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                
+                  }
+            }
+        })
+    }
+
+    editTemp() {
+        this.tempTitle = "新增模板";
+        this.tempVisible = true;
+
+    }
+
+    /**
+     * 重新构建模板检测
+     * @param pays
+     * @returns {{}}
+     */
+    dramaticForm(pays) {
+        let obj = {};
+        if (pays && pays.length > 0) {
+            for (let i = 0; i < pays.length; i++) {
+                obj["pay" + i] = ['', [
+                    Validators.required,
+                    UserValidate.ValidatePrice
+                ]];
+                if (i > 0) {
+                    obj["percentage" + i] = ['', [
+                        Validators.required,
+                        Validators.min(0),
+                        Validators.max(1),
+                        UserValidate.ValidateNumDecimal
+                    ]];
+                }
+                obj["payTime" + i] = ['', [
+                    Validators.maxLength(50)
+                ]]
+                obj["remark" + i] = ['', [
+                    Validators.maxLength(120)
+                ]]
+            }
+        }
+        return obj;
+    }
+
+
+
+
+
+}

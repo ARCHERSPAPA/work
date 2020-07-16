@@ -4,6 +4,9 @@
     <view class="user-record-icon" :style="{'background-image':'url('+item.src+')'}" />
     <!-- <view  class="user-record-icon" ><uni-icons :type="item.icon" :color="item.color" size="40"/></view> -->
     <text class="user-record-text" @click="lister(item.url,item.index)">{{ item.text }}</text>
+    
+    <uni-icons class="user-record-right"  type="youjiantou" color="rgba(0,0,0,0.2)" size="28.98" /></view>
+
   </view>
 </template>
 
@@ -26,11 +29,9 @@ export default {
 
 <style lang="scss">
 	.user-record {
-		width: 100%;
-		// height: 108.69rpx;
-		border-bottom: 1.81rpx solid #dedede;
 		display: flex;
 		padding: 38.94rpx 16.3rpx;
+   
 		&-icon {
 			// display: inline-block;
 			width: 43.47rpx;
@@ -43,6 +44,10 @@ export default {
 			top: 5.43rpx;
 		}
 
+
+    &-right{
+      margin-right: 0;
+    }
 		&-text {
 			width: 100%;
 			font-size: 32.6rpx;

@@ -1,0 +1,1 @@
+<view class="order-cont"><block wx:if="{{viewSrc}}"><view class="order-cont-nest"><web-view class="order-cont-nest-web" src="{{viewSrc}}"></web-view></view></block></view>

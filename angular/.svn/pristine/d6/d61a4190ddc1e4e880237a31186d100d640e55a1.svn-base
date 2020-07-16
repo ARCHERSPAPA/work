@@ -1,0 +1,511 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ItemQuestComponent } from "../../../../plugins/item-quest/item-quest.component";
+import { ItemApplicantsComponent } from "../../../../plugins/item-applicants/item-applicants.component";
+import { RequestService } from "../../../../service/request.service";
+import { WarningService } from "../../../../service/warning.service";
+import { Messages } from "../../../../model/msg";
+import { getOptionName, getOptionTag, getOptionLetters,atob,btoa } from "../../../../model/methods";
+import { ItemUserComponent } from "../../../../plugins/item-user/item-user.component";
+import { Reg } from "../../../../model/reg";
+
+
+@Component({
+    selector: 'rev-examine-detail',
+    templateUrl: './examine-detail.component.html',
+    styleUrls: ['./../examine.component.scss', './examine-detail.component.scss'],
+})
+export class ExamineDetailComponent implements OnInit {
+
+    public title: string;
+    public switch: string;
+    public buttons: Array<any>;
+    public atags: Array<any>;
+    public nums: Array<any>;
+
+    //试题id
+    public eid: string;
+    //初始化title时
+    private initTitle: string;
+
+    /**
+     * 列表数据
+     */
+    public exams: Array<any>;
+
+
+    //判断是否是详情页。1是详情
+    public isDetail: number;
+    //查询
+    // public searchForm:FormGroup;
+    // public content:string;
+
+    /**
+     * 判定当前是否已经在考试中：1->考试前，2->已考试
+     * @type {number}
+     */
+    public state: number = 1;
+
+    public isVisible: boolean;
+    /**
+     * 发布时间
+     */
+    public startValue: Date;
+    /**
+     * 截止时间
+     */
+    public endValue: Date;
+
+    /**
+     * 开始时间判断
+     * @param {Date} startValue
+     * @returns {boolean}
+     */
+    // public disabledStartDate = (startValue: Date): boolean => {
+    //     if (!startValue || !this.endValue) return false;
+    //     return startValue.getTime() > this.endValue.getTime();
+    // }
+    //
+    // public disabledEndDate = (endValue: Date): boolean => {
+    //     if (!endValue || !this.startValue) return false;
+    //     return endValue.getTime() <= this.startValue.getTime();
+    // }
+
+    public examCount: number = 0;
+    public examRadio: string = "80%";
+    public examRadios: Array<any> = [, , , , , , , , , ,];
+    public type: number;
+
+    public editList;//编辑时传递数据到topic-title
+
+
+
+    constructor(private router: Router,
+        private activatedRoute: ActivatedRoute,
+        private modalService: NgbModal,
+        private req: RequestService,
+        private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.title = "试题名称";
+        this.nums = [
+            {
+                name: "选择题",
+                count: 0
+            },
+            {
+                name: "填空题",
+                count: 0
+            }
+        ];
+        this.atags = [
+            {
+                name: "添加选择题",
+                type: "click",
+                color: "btn-primary",
+            },
+            {
+                name: "添加填空题",
+                type: "click",
+                color: "btn-primary",
+            }
+        ];
+
+        this.activatedRoute.queryParams.subscribe(params => {
+         
+            if (params && params["eid"]) {
+                this.isDetail = params['isDetail']
+                this.eid = atob(params["eid"]);
+                // console.log(params["eid"])
+                // console.log(atob(params["eid"]))
+            } 
+        });
+        this.loadExam(this.eid);
+        this.loadExamDetail(this.eid);
+
+        this.buttons = [
+            {
+                name: "从题库中添加",
+                type: "click",
+                color: "btn-primary",
+                method: () => {
+                    let modal = this.modalService.open(ItemQuestComponent, {
+                        centered: true,
+                        keyboard: true,
+                        backdrop: true
+                    });
+                    modal.result.then(res => {
+                        this.addItem(res);
+                    }, rea => {
+                        // console.log(rea);
+                    })
+                }
+            }
+        ];
+    }
+    ngDoCheck() {
+        this.getExamAmount();
+    }
+    
+    /**
+     * 监听title的变化
+     * @param e
+     */
+    changeTitle(e) {
+        if (e == 'isSubmit') {
+            this.loadExamDetail(this.eid);
+        } else {
+            if (e) {
+                this.modifyExam('title', e);
+            } else {
+                this.title = this.initTitle;
+            }
+        }
+    }
+
+    /**
+     * 选择发布时间
+     * @param {Date} date
+     */
+    onStartChange(date: Date) {
+        this.startValue = date;
+        if (this.startValue) {
+            if (!this.endValue) {
+                this.modifyExam('startTime', new Date(this.startValue).getTime());
+            } else {
+                if (new Date(this.endValue).getTime() >= new Date(this.startValue).getTime()) {
+                    this.modifyExam('startTime', new Date(this.startValue).getTime());
+                } else {
+                    this.startValue = null;
+                    this.warn.onWarn("开始时间一定不能大于截止时间");
+                }
+            }
+        }
+    }
+
+    /**
+     * 选择截止时间
+     * @param {Date} date
+     */
+    onEndChange(date: Date) {
+        this.endValue = date;
+        if (this.endValue && this.startValue) {
+            if (new Date(this.startValue).getTime() <= new Date(this.endValue).getTime()) {
+                this.modifyExam('endTime', new Date(this.endValue).getTime());
+            } else {
+                this.endValue = null;
+                this.warn.onWarn("开始时间一定不能大于截止时间");
+            }
+        } else {
+            this.endValue = null;
+            this.warn.onWarn("先要选择开始时间");
+        }
+    }
+
+    /**
+     * 选择通过率
+     * @param e
+     */
+    radioChange(e: any) {
+        if (this.examRadio) {
+            this.modifyExam('percentage', parseInt(this.examRadio));
+        }
+    }
+
+    /**
+     * 查看考试人员
+     */
+    viewApplicants() {
+        let app = this.modalService.open(ItemApplicantsComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: true,
+            size: "lg"
+        });
+        app.componentInstance.eid = this.eid;
+       /*  app.result.then(res => {
+        }, rea => {
+        }) */
+    }
+
+    /**
+     * 选择考试人员
+     */
+    selectApplicants() {
+        let app = this.modalService.open(ItemUserComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: true,
+            size: "lg"
+        });
+        app.componentInstance.eid = this.eid;
+        app.result.then(res => {
+            if (res && res.length > 0) {
+                this.req.doPost({
+                    url: "addMemberExam",
+                    data: {
+                        examId: this.eid,
+                        members: this.rebuildUsers(res)
+                    },
+                    success: (result => {
+                        if (result && result.code == 200) {
+                            this.warn.onSuccess(result.msg || Messages.SUCCESS.DATA);
+                            this.loadExam(this.eid);
+                        } else {
+                            this.warn.onError(result.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+        }, rea => {
+            // console.log(rea);
+        })
+    };
+
+    rebuildUsers(users) {
+        let us = [];
+        if (users && users.length > 0) {
+            users.forEach(user => {
+                if (user.userType === 1) {
+                    us.push({
+                        memberId: user.id,
+                        memberType: user.userType,
+                        departmentName: user.departmentName,
+                        workerType: user.positionName
+                    })
+                } else if (user.userType === 2) {
+                    us.push({
+                        memberId: user.id,
+                        memberType: user.userType,
+                        workerType: user.workerType,
+                        departmentName: user.departmentName
+                    })
+                }
+            })
+        }
+        return us;
+    }
+
+    /**
+     * 加载考试头部信息
+     * @param id
+     */
+    loadExam(id) {
+        if (id) {
+            this.req.doPost({
+                url: "detailExam",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        let data = res.data;
+                        this.title = data.title ? data.title : '试题名称';
+                        this.initTitle = data.title ? data.title : '试题名称';
+                        this.examCount = data.joinNum ? data.joinNum : 0;
+                        this.startValue = data.startTime ? new Date(data.startTime) : null;
+                        this.endValue = data.endTime ? new Date(data.endTime) : null;
+                        this.examRadio = data.percentage ? data.percentage + '%' : '80%';
+                        this.nums[0].count = data.choiceNum ? data.choiceNum : 0;
+                        this.nums[1].count = data.clozeNum ? data.clozeNum : 0;
+                        if (data.startTime && data.startTime < data.currentTime) {
+                            this.state = 2;
+                        }
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 修改考试标题相关
+     * @param type 参数类型
+     * @param value 参数值域
+     */
+    modifyExam(type, value) {
+        if (this.eid) {
+            let params = {
+                id: this.eid
+            };
+            params[type] = value;
+            this.req.doPost({
+                url: "modifyExam",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        if (type === 'title') {
+                            this.title = value;
+                            this.initTitle = value;
+                        }
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        this.loadExam(this.eid);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 考试试题列表
+     * @param id
+     */
+    loadExamDetail(id) {
+        if (id) {
+            this.req.doPost({
+                url: "detailItemExam",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.exams = res.data;
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 区分选择或者答案
+     * @param type
+     * @returns {string}
+     */
+    getOptionTag(type) {
+        return getOptionTag(type);
+    }
+
+    /**
+     * 将数字转成中文数字
+     * @param i
+     * @returns {string}
+     */
+    getOptionName(i) {
+        return getOptionName(i);
+    }
+
+    getOptionLetter(index) {
+        return getOptionLetters(index);
+    }
+
+    /**
+     * 统计考试选择或者填空
+     */
+    getExamAmount() {
+        if (this.exams && this.exams.length > 0) {
+            this.nums[0].count = 0;
+            this.nums[1].count = 0;
+            this.exams.forEach(quest => {
+                if (quest.type === 1) {
+                    this.nums[0].count++;
+                } else if (quest.type === 2) {
+                    this.nums[1].count++;
+                }
+            })
+        }
+    }
+
+    /**
+     * 编辑
+     * @param type
+     * @param id
+     */
+    editItem(i) {
+        this.editList = i;
+    }
+
+    /**
+     * 删除
+     * @param id
+     */
+    deleteItem(id) {
+        if (id) {
+            this.req.doPost({
+                url: "deleteItemExam",
+                data: { id: id },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadExamDetail(this.eid);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 上移或者下移
+     * @param id
+     * @param bool: true->上移,false->下移
+     */
+    moveItem(id, bool) {
+        if (id) {
+            this.req.doPost({
+                url: "moveExam",
+                data: {
+                    id: id,
+                    type: bool ? 1 : -1
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadExamDetail(this.eid);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 从题库中添加
+     * @param id
+     */
+    addItem(id) {
+        if (id) {
+            this.req.doPost({
+                url: "addExam",
+                data: {
+                    id: this.eid,
+                    itemIds: [id]
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadExamDetail(this.eid);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+
+    styleItem(item) {
+        let divide = 1;
+        if (item.title) {
+            if (item.title.match(Reg.ALPHA_NUM_ZH_BLANK).join("").length > 60) {
+                divide = item.title ? Math.ceil(item.title.length / 110) : 1;
+            } else {
+                divide = item.title ? Math.ceil(item.title.length / 60) : 1;
+            }
+        }
+        if (item.type === 1) {
+            if (item.options.length <= 2) return ((divide * 24) / 2) + "px";
+            else
+                return ((Math.abs(item.options.length - divide) * 24) / 2) + "px";
+        } else if (item.type === 2) {
+            if (item.answers.length <= 2) return ((divide * 24) / 2) + "px";
+            else
+                return ((Math.abs(item.answers.length - divide) * 24) / 2) + "px";
+        }
+    }
+
+}

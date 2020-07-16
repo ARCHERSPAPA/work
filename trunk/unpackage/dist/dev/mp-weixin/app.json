@@ -1,0 +1,92 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/message/message",
+    "pages/chat/chat",
+    "pages/area/area",
+    "pages/manner/manner",
+    "pages/result/result",
+    "pages/search/search",
+    "pages/example/example",
+    "pages/example/example-site",
+    "pages/user/user",
+    "pages/site/site",
+    "pages/site-address/site-address",
+    "pages/out/out",
+    "pages/orders/orders",
+    "pages/auth/auth"
+  ],
+  "subPackages": [
+    {
+      "root": "pagesActivities",
+      "pages": [
+        "activity/activity"
+      ]
+    },
+    {
+      "root": "pagesOrders",
+      "pages": [
+        "order-sign/order-sign",
+        "order-captcha/order-captcha",
+        "order-contract/order-contract"
+      ]
+    },
+    {
+      "root": "pagesUser",
+      "pages": [
+        "user-info/user-info",
+        "user-record/user-record"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "在线装修",
+    "navigationBarBackgroundColor": "#098684",
+    "backgroundColor": "#098684",
+    "pageOrientation": "portrait"
+  },
+  "tabBar": {
+    "color": "#4D4D4D",
+    "custom": true,
+    "selectedColor": "#098684",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tabBar/home.png",
+        "selectedIconPath": "static/tabBar/select-home.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/message/message",
+        "iconPath": "static/tabBar/info.png",
+        "selectedIconPath": "static/tabBar/select-info.png",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "iconPath": "static/tabBar/home.png",
+        "selectedIconPath": "static/tabBar/select-home.png",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "iconPath": "static/tabBar/me.png",
+        "selectedIconPath": "static/tabBar/select-me.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "获取用户地理位置"
+    }
+  },
+  "usingComponents": {
+    "uni-icons": "/components/uni-icons/uni-icons",
+    "mkb-empty": "/components/mkb-empty/mkb-empty"
+  },
+  "sitemapLocation": "sitemap2.json"
+}

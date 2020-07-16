@@ -1,0 +1,185 @@
+import { Component, OnInit} from '@angular/core';
+import {InfoComponent} from '../../../../plugins/info/info.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {RequestService} from '../../../../service/request.service';
+import { ActivatedRoute } from '@angular/router';
+import {Messages} from '../../../../model/msg';
+import {WarningService} from '../../../../service/warning.service';
+
+import { NzModalService } from 'ng-zorro-antd';
+import {ExaminePersonComponent} from '../../../../plugins/examine-person/examine-person.component';
+
+
+@Component({
+
+  selector: 'app-examine-add',
+  templateUrl: './examine-add.component.html',
+  styleUrls: ['./examine-add.component.scss']
+})
+export class ExamineAddComponent implements OnInit {
+  public examineId: any;
+  public examineName: string;
+  public personList: Array<any> = []; // 全量更新集合
+  public examinePersonList: Array<any> = [];  // 项目人员
+  public radioValue = '2';  // 默认不允许修改审批人
+
+  constructor(
+      private modal: NgbModal,
+      private request: RequestService,
+      private activatedRoute: ActivatedRoute,
+      private warn: WarningService,
+      private modalService: NzModalService
+  ) { }
+
+  ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params.examineId) {
+        this.examineId = params.examineId;
+        this.loadExamineSelect();
+        this.loadExaminePersonList();
+      }
+      if (params && params.examineName) {
+        this.examineName = '编辑' + params.examineName;
+      }
+    });
+  }
+
+  handleClose(index) {
+    this.personList.splice(index, 1);
+  }
+
+  // 固定人员
+  handleAddPerson(item = '', i = 0) {
+    const that = this;
+    const info = that.modal.open(InfoComponent, {
+      centered: true,
+      keyboard: true,
+      backdrop: 'static'
+    });
+    info.componentInstance.type = 15;
+    info.componentInstance.memberList = this.personList;
+    if (item) {
+      info.componentInstance.member = item;
+    }
+    info.result.then((res) => {
+      const {id: employeeId, name, positionName, headImg } = res[0];
+      if (item) {
+        this.personList.splice(i, 1, {
+          headImg,
+          employeeId,
+          approver: name,
+          position: positionName,
+        });
+      } else {
+        this.personList.push({
+          headImg,
+          employeeId,
+          approver: name,
+          position: positionName,
+        });
+      }
+    }, (err) => {
+      console.log(err);
+    });
+  }
+
+  // 项目人员
+  handleAddProjectPerson(i) {
+    const item = this.examinePersonList[i];
+    const modal = this.modalService.create({
+      nzTitle: '选择项目人员',
+      nzContent: ExaminePersonComponent,
+      nzComponentParams: { examinePersonList: this.examinePersonList, item , i : i + '' },
+      nzFooter: [{
+        label: '关闭',
+        onClick: (componentInstance) => {
+          console.log(componentInstance);
+          modal.destroy();
+        }
+      }, {
+        label: '提交',
+        onClick: (componentInstance) => {
+          if (componentInstance.item === '' || componentInstance.item === null || componentInstance.item === undefined) {
+            this.warn.onSuccess('请选择项目人员');
+          } else {
+            modal.destroy(componentInstance.item);
+          }
+        }
+      }]
+    });
+    modal.afterOpen.subscribe((result) => console.log(result));
+    modal.afterClose.subscribe((result) => {
+      // todo 3.push进入全量更新array
+      console.log(result);
+    });
+  }
+
+  // 修改流程人员配置
+  handleChange(item, i) {
+    // todo 2.区分两种情况 固定人员和项目人员
+    if (1) {
+      this.handleAddPerson(item, i);
+    } else {
+      this.handleAddProjectPerson(i);
+    }
+  }
+
+  // 拉取审批流程详情
+  loadExamineSelect() {
+    const self = this;
+    this.request.doPost({
+      url: 'examineSelect',
+      data: {
+        id: this.examineId
+      }, success: res => {
+        self.personList = res.data.selectByExample;
+        if (res.data.state ) {
+          self.radioValue = res.data.state + '';
+        }
+      }
+    });
+  }
+
+  // 拉取项目人员
+  loadExaminePersonList() {
+    // todo 1.拉取固定人员信息
+    this.examinePersonList = [{
+      name: '刘林1',
+      job: '医生1'
+    }, {
+      name: '刘林2',
+      job: '医生2'
+    }, {
+      name: '刘林3',
+      job: '医生3'
+    }];
+  }
+
+  back(e) {
+    history.go(-1);
+  }
+
+  // 全量提交
+  handleExamineSave() {
+    const self = this;
+    const redactList = this.personList.map((item, index) => {
+      const { employeeId, approver, position } = item;
+      return { employeeId, approver, position, orderAddress: index + 1 };
+    });
+
+    this.request.doPost({
+      url: 'examineSave',
+      data: {
+        id: this.examineId,
+        redactList,
+        state: this.radioValue
+      }, success: res => {
+        if ( res.code && res.code === 200) {
+          self.loadExamineSelect();
+          self.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+        }
+      }
+    });
+  }
+}
+

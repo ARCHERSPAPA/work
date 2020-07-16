@@ -1,0 +1,537 @@
+import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Default} from "../../../model/constant";
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {
+    btoa,
+    changeToDecimal,
+    getAddAndDelByStatus,
+    hideAuditFailureByState,
+    showAddOrDelSubmitByState,
+    showAuditBtnByState,
+    showDetailByState, toInteger,showExamineState,showRecallByState
+} from "../../../model/methods";
+import {RegularService} from "../../../service/regular.service";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {QuoteService} from "../../../service/quote.service";
+import {Reg} from "../../../model/reg";
+import {HeaderService} from "../../../service/header.service";
+import {renderColors} from "../../../model/budget-method";
+import { InfoComponent } from "../../../plugins/info/info.component";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
+@Component({
+    selector: 'rev-regulation',
+    templateUrl: './regulation.component.html',
+    styleUrls: ['./../detail.scss', './../price/price.component.scss']
+})
+export class RegulationComponent implements OnInit {
+
+    @Input() cid: string;
+    @Input() aid: string;
+    @Input() details:any;
+
+    @Output() regularsEmitter: EventEmitter<any> = new EventEmitter<any>();
+
+
+    public state: number = Default.STATE.ITEM_5;
+
+    //正在修改的增减项目
+    public list: any;
+    //已经审核过的增减项目
+    public regulars: Array<any> = [];
+
+    //表示审核通过与否（type:0,type:1）;
+    public auditForm: FormGroup;
+    public type: number;
+    public auditVisible: boolean = false;
+    public msg: string = "";
+
+    public baseQuote: any;
+    //单项备注信息添加和修改
+    public remark:boolean = false;
+    public remarkForm: FormGroup;
+    public remarkId: string;
+    public remarkString: string = "";
+    public remarkDo: any;
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private warn: WarningService,
+                private reg: RegularService,
+                private fb: FormBuilder,
+                private quote: QuoteService,
+                private header:HeaderService,
+                private modalService: NgbModal) {
+    }
+
+    ngOnInit() {
+        try {
+            this.state = parseInt(this.activatedRoute.snapshot.paramMap.get("state"));
+        } catch (e) {
+            this.state = Default.STATE.ITEM_5;
+        }
+        if (this.cid) {
+            this.historyPause();
+        }
+        if (this.aid) {
+            this.reloadDetail(this.aid);
+        }
+
+        this.auditForm = this.fb.group({
+            msg: [this.msg, [
+                Validators.maxLength(120)
+            ]]
+        })
+
+        this.remarkForm = this.fb.group({
+            remarkId: [this.remarkId, [
+                Validators.required
+            ]],
+            remarkString: [this.remarkString, [
+                Validators.maxLength(100)
+            ]]
+        });
+    }
+
+
+    ngOnChanges(){
+        // console.log(this.list);
+        if(this.details){
+            this.renderPause(this.details);
+        }
+    }
+
+    ngAfterContentChecked() {
+        // if(this.aid){
+        //     this.list = this.reg.getDetails()?this.reg.getDetails():null;
+        // }
+        // if(this.list && this.list.pause && !this.list.pause.applyActualPrice){
+        //     this.list.pause.applyActualPrice = this.getTotal(this.list.details);
+        // }
+        if(this.header && this.header.getHeaderInfo()){
+            this.baseQuote = this.header.getHeaderInfo()["quoteBase"];
+        }
+        if(this.regulars && this.regulars.length > 0){
+            this.showAuditBtnByState();
+        }
+
+        if(this.reg.getTypeByParam("detail")){
+            this.reg.setTypeByParam("detail",false);
+            this.reloadDetail(this.aid);
+        }
+
+        if(this.reg.getTypeByParam("history")){
+            this.reg.setTypeByParam("history",false);
+            this.historyPause();
+        }
+
+        if(this.reg.getTypeByParam("change")){
+            this.reg.setTypeByParam("change",false);
+            this.reloadDetail(this.aid);
+        }
+
+    }
+
+    converseToDecimal(unit, num) {
+        let result = toInteger(unit,2)*toInteger(num,2)/Math.pow(10,4);
+        return changeToDecimal(result);
+    }
+
+    getTotal(o) {
+        let total = 0;
+        if (o && o.length > 0) {
+            for (let i of o) {
+                total += Number(i["totalPrice"]);
+            }
+        }
+        return total;
+    }
+
+    // submitItem() {
+    //     if (this.aid) {
+    //         let amount = this.getValueByParam("applyActualPrice");
+    //         let remark = this.getValueByParam("remark");
+    //
+    //         if (Reg.NUM_DECIMAL_INT.test(amount)) {
+    //             this.req.doPost({
+    //                 url: "savePause",
+    //                 data: {
+    //                     pauseId: this.aid,
+    //                     amount: amount,
+    //                     remark: remark
+    //                 },
+    //                 success: (res => {
+    //                     if (res && res.code == 200) {
+    //                         this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+    //                         this.historyPause();
+    //                         // this.reloadDetail(this.aid);
+    //                         this.reg.setTypeByParam("detail",true);
+    //                         // this.quote.loadQuoteHeadById(this.cid);
+    //                         this.quote.setTypeByParam("head",true);
+    //                     } else {
+    //                         this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+    //                         this.historyPause();
+    //                     }
+    //                 })
+    //             })
+    //         } else {
+    //             this.warn.onWarn(Messages.ERROR.INPUT);
+    //         }
+    //     }
+    // }
+
+    // getValueByParam(name) {
+    //     if (this.list && this.list.pause) {
+    //         return this.list.pause[name];
+    //     }
+    //     return null;
+    // }
+
+    disableByState(state) {
+        return showAddOrDelSubmitByState(state) && this.showDetailByState() && this.baseQuote && this.baseQuote.retreat === 0;
+    }
+
+    hideAuditFailureByState(state) {
+        return hideAuditFailureByState(state);
+    }
+
+    /**
+     * 添加工程管理费用的增减数值
+     * @returns {boolean}
+     */
+    showAuditBtnByState() {
+        // if(this.list && this.list.pause){
+        // && this.getLastHistoryByParam("type") === 0;
+        return showAuditBtnByState(this.getLastHistoryByParam("state")) && this.state === 5 && this.baseQuote && this.baseQuote.retreat === 0 && this.getNewLastHistoryByParam("isAudit") == 1;
+        // }
+        // return false;
+    }
+
+    getLastHistoryByParam(name) {
+        if (this.regulars && this.regulars.length > 0) {
+            return this.regulars[this.regulars.length - 1].pause["" + name + ""];
+        }
+        return null;
+    }
+
+    /**
+     * 拉取历史增减项目数据
+     */
+    historyPause() {
+        if (this.cid) {
+            this.req.doPost({
+                url: "historyPause",
+                data: {id: this.cid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.regulars = [];
+                        if(res.data && res.data.length > 0){
+                            this.regulars = res.data.filter(d => {
+                                d["expand"] = false;
+                                return !this.hideAuditFailureByState(d.state);
+                            });
+                        }
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    delItem(id) {
+        if (id && this.aid) {
+            this.req.doPost({
+                url: "delPause",
+                data: {
+                    pauseId: this.aid,
+                    infoId: id
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // this.reloadDetail(this.aid);
+                        this.reg.setTypeByParam("detail",true);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    auditItem(type) {
+        this.type = type;
+        this.auditVisible = true;
+    }
+
+    auditCancel() {
+        this.auditVisible = false;
+        this.auditForm.reset();
+        this.msg = "";
+    }
+
+    getNewLastHistoryByParam(name) {
+        if (this.regulars && this.regulars.length > 0) {
+            return this.regulars[this.regulars.length - 1]["" + name + ""];
+        }
+        return null;
+    }
+    auditOk() {
+        if (this.auditForm.valid) {
+            let aid = this.getLastHistoryByParam("id");
+            let isModify = this.getNewLastHistoryByParam("isModify");
+            let auditEmp = this.getNewLastHistoryByParam("auditEmp");
+            let params = {
+                pauseId: aid,
+                type: this.type,
+                msg: this.auditForm.value.msg
+            };
+            console.log(params)
+            if(this.type == 0){
+                this.req.doPost({
+                    url: "auditPause",
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.auditCancel();
+                            this.historyPause();
+                            this.reg.setTypeByParam("detail",true);
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }else{
+                if(isModify == 1 && auditEmp){
+                    this.auditCancel();
+                    let info = this.modalService.open(InfoComponent, {
+                        centered: true,
+                        keyboard: true,
+                        backdrop: "static"
+                    });
+                    info.componentInstance.type = 14;
+                    info.componentInstance.pauseId = aid;
+                    info.componentInstance.id = this.cid;
+                    info.componentInstance.member=auditEmp?auditEmp:'';
+                    info.componentInstance.reMsg = this.auditForm.value.msg;
+                    info.componentInstance.reType =this.type,
+                    info.result.then((res) => {
+                        this.historyPause();
+                        this.reg.setTypeByParam("detail",true);
+                    }) 
+                }else{
+                    this.req.doPost({
+                        url: "auditPause",
+                        data: params,
+                        success: (res => {
+                            if (res && res.code == 200) {
+                                this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                                this.auditCancel();
+                                this.historyPause();
+                                this.reg.setTypeByParam("detail",true);
+                            } else {
+                                this.warn.onError(res.msg || Messages.FAIL.DATA);
+                            }
+                        })
+                    })
+                }
+            }
+        }
+    }
+
+    showDetailByState() {
+        if (this.list && this.baseQuote) {
+            return getAddAndDelByStatus(this.baseQuote["state"]) && showDetailByState(this.list.pause.state);
+        }
+        return false;
+    }
+
+    getFinalPriceByTime() {
+        let final = Number(this.list.pause.finalPrice);
+        let apply = Number(this.list.pause.applyPrice);
+        let actual = this.list.pause.applyActualPrice;
+        if (Reg.NUM_DECIMAL_INT.test(actual)) {
+            return final - apply + Number(actual);
+        }
+        return final - apply;
+    }
+
+    /**
+     * 处理异步加载编辑的增减项
+     * @param aid
+     * @returns {Promise<any>}
+     */
+    // loadDetail(aid):Promise<any>{
+    //     return new Promise((resolve,reject) =>{
+    //         this.reg.loadDetail(aid,resolve,reject);
+    //     })
+    // }
+
+    reloadDetail(aid){
+        if(aid){
+            this.reg.loadDetail(aid).then(res =>{
+               this.renderPause(res);
+            }).catch((err)=>{
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    renderPause(result:any){
+        if(result){
+            this.list = result;
+            this.list["expand"] = true;
+            this.regularsEmitter.emit({list: result});
+        }
+        // if(this.list && this.list.pause && !this.list.pause.applyActualPrice){
+        //     this.list.pause.applyActualPrice = this.getTotal(this.list.details);
+        // }
+    }
+
+
+    /**
+     * 修改增减项目的颜色
+     * @param {string} color
+     */
+    selectColorChange(color:string,id:number,){
+        if(color && id){
+            this.req.doPost({
+                url:"modifyPauseColor",
+                data:{
+                    detailId: id,
+                    color: color
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    }else{
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    /**
+     * 重置当前颜色组
+     * @param {string} colours
+     * @returns {Array<string>}
+     */
+    renderColors(colours:string):Array<string>{
+        return renderColors(colours);
+    }
+
+    /**
+     * 加密url
+     * @param {string} id
+     * @returns {any}
+     */
+    btoa(id:string){
+        return btoa(id);
+    }
+
+    /**
+     * 监听当前操作项目的remark
+     */
+    pauseRemark(pause:any){
+        this.req.doPost({
+            url:"modifyPausePriceAndRemark",
+            data:{
+                pauseId: pause.id,
+                remark:pause.remark
+            },
+            success:(res =>{
+                if(res && res.code == 200){
+                    this.reg.setTypeByParam("change",true);
+                }else{
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+        this.reg.setTypeByParam("change",true);
+    }
+    /* 
+     *  当前审核状态
+     */
+    getExamineState(state){
+        return showExamineState(state);
+    }
+    /* 
+     * 展示撤回按钮
+     */
+    showRecallByState(state){
+        // !this.list
+        return showRecallByState(state) && this.getNewLastHistoryByParam("isApply") == 1 && !this.aid;
+    }
+
+    /* 
+     *  展示备注弹窗
+     */
+    showRemark(m:any){
+        console.log(m)
+        this.remark = true;
+        this.remarkId = m.id;
+        this.remarkString = m.remark;
+        this.remarkDo = m;
+    }
+
+    remarkCancel(){
+        this.remark = false;
+        this.remarkString = "";
+        this.remarkId = null;
+        this.remarkForm.reset();
+    }
+
+    remarkOk(){
+        this.remark = false;
+        if (this.remarkForm.valid) {
+            this.req.doPost({
+                url: "singleRemark",
+                data: {
+                    pauseDetailId: this.remarkId,
+                    remark: this.remarkString
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.remarkDo.remark = this.remarkString;
+                        this.remarkCancel();
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    // 增减项撤回 v2.2.4
+    reBack(id){
+        this.req.doPost({
+            url: "repealPause",
+            data: {
+                pauseId:id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    // this.reg.setTypeByParam("change",true);
+                    this.reg.setTypeByParam("history",true);
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    OnDestroy() {
+        this.list = null;
+        this.regulars = null;
+    }
+
+
+}

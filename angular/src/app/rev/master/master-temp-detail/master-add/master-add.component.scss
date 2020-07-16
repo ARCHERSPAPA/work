@@ -1,0 +1,31 @@
+.master-add {
+    &-title {
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        p {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 28px;
+            color: rgba(0, 0, 0, 0.85);
+        }
+        a{
+            font-size: 14px;
+        }
+    }
+    &-list{
+        margin-top: 24px;
+    }
+}
+.btns {
+    margin: 24px -24px -11px -24px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+      margin-right: 24px;
+    }
+    button:first-child {
+      margin-right: 8px;
+    }
+  }

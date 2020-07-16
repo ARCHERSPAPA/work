@@ -113,8 +113,8 @@
 				margin-bottom: 28.98rpx;
 			}
 			&.active {
-				background: rgba(255,243,229,1);
-				color: rgba(255,136,0,1);
+				background: $col_DDF3F3;
+				color: $col_098684;
 				padding: 10.86rpx 16.3rpx;
 				// &:after {
 				// 	content: '✓';

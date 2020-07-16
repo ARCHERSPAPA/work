@@ -1,0 +1,169 @@
+import {NgModule} from '@angular/core';
+
+// Module
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgZorroAntdModule, NzBreadCrumbModule} from 'ng-zorro-antd';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {SliderModule} from './slider.module';
+import {NgxAmapModule} from 'ngx-amap';
+import {ImageCropperModule} from 'ngx-img-cropper';
+
+// Component
+import {CountDownComponent} from '../plugins/times/count-down.component';
+import {QuickTreeComponent} from '../rev/quick/quick-tree.component';
+import {QuickComponent} from '../rev/quick/quick.component';
+
+import {DepartTreeComponent} from '../component/depart-tree/depart-tree.component';
+import {PermissionComponent} from '../component/permission/permission.component';
+import {BreadcrumbComponent} from '../user/user-info/breadcrumb/breadcrumb.component';
+import {RadioSwitchComponent} from '../component/radioSwitch/radioSwitch.component';
+import {LigatureComponent} from '../component/ligature/ligature.component';
+
+// pipe
+import {ExplainPipe, MaxPipe, FourPipe, NoticePipe, NoticeTwentyPipe} from '../pipes/explain.pipe';
+import {TranslateHTMLPipe} from '../pipes/translate-html.pipe';
+import {CompilePipe} from '../pipes/compile.pipe';
+
+import {LocalStorage} from '../model/local.storage';
+
+import {ModalComponent} from '../plugins/modal/modal.component';
+import {ItemComponent} from '../plugins/item/item.component';
+import {InfoComponent} from '../plugins/info/info.component';
+import {RelevantComponent} from '../plugins/relevant/relevant.component';
+import {LocationComponent} from '../plugins/location/location.component';
+import {ItemCartComponent} from '../plugins/item-cart/item-cart.component';
+import {InfoDepartTreeComponent} from '../plugins/info/info-depart-tree/info-depart-tree.component';
+import {InfoDesignersComponent} from '../plugins/info/info-designers/info-designers.component';
+import {InfoUserComponent} from '../plugins/info/info-user/info-user.component';
+import {InfoStrategyComponent} from '../plugins/info/info-strategy/info-strategy.component';
+import {EquipComponent} from '../plugins/equip/equip.component';
+import {EngineesComponent} from '../plugins/enginees/enginees.component';
+import {UploaderMultisComponent} from '../plugins/uploader-multis/uploader-multis.component';
+import {UploaderMultisInfoComponent} from '../plugins/uploader-multis-info/uploader-multis-info.component';
+import {ImgLargeComponent} from '../plugins/img-large/img-large.component';
+import {ItemQuestComponent} from '../plugins/item-quest/item-quest.component';
+import {ItemApplicantsComponent} from '../plugins/item-applicants/item-applicants.component';
+import {ItemUserComponent} from '../plugins/item-user/item-user.component';
+import {ItemDispatcherComponent} from '../plugins/item-dispatcher/item-dispatcher.component';
+import {ItemPublishComponent} from '../plugins/item-publish/item-publish.component';
+import {UploaderComponent} from '../plugins/uploader/uploader.component';
+import {UpfileComponent} from '../plugins/upfile/upfile.component';
+import {SectorComponent} from '../plugins/sector/sector.component';
+import {SectorTreeComponent} from '../plugins/sector/sector-tree.component';
+import {GpsComponent} from '../plugins/gps/gps.component';
+import {MapComponent} from '../plugins/map/map.component';
+import {NihaoComponent} from '../plugins/nihao/nihao.component';
+import {TitleComponent} from '../component/title/title.component';
+
+
+const COMPONENTS = [];
+const COMPONENTS_COSTOM = [
+    ModalComponent,
+    ItemComponent,
+    InfoComponent,
+    RelevantComponent,
+    LocationComponent,
+    ItemCartComponent,
+    InfoDepartTreeComponent,
+    InfoDesignersComponent,
+    InfoUserComponent,
+    InfoStrategyComponent,
+    EquipComponent,
+    EngineesComponent,
+    UploaderMultisComponent,
+    UploaderMultisInfoComponent,
+    ImgLargeComponent,
+    ItemQuestComponent,
+    ItemApplicantsComponent,
+    ItemUserComponent,
+    ItemDispatcherComponent,
+    ItemPublishComponent,
+    UploaderComponent,
+    UpfileComponent,
+    SectorComponent,
+    SectorTreeComponent,
+    GpsComponent,
+    MapComponent,
+    NihaoComponent,
+    TitleComponent
+];
+
+@NgModule({
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgZorroAntdModule,
+        NzBreadCrumbModule,
+        NgbModule,
+        SliderModule,
+        ImageCropperModule,
+        NgxAmapModule.forRoot({
+            apiKey: 'f765d6b350eb0744f00d395812e98ffc'
+        })
+    ],
+    declarations: [
+        TitleComponent,
+        DepartTreeComponent,
+        PermissionComponent,
+        BreadcrumbComponent,
+        RadioSwitchComponent,
+        CountDownComponent,
+        QuickTreeComponent,
+        QuickComponent,
+        ExplainPipe,
+        MaxPipe,
+        FourPipe,
+        NoticePipe,
+        NoticeTwentyPipe,
+        TranslateHTMLPipe,
+        CompilePipe,
+        /*****新增上传组件 2019-08-28****/
+        // UploadComponent,
+        /*****新增线条组件 2019-11-15*****/
+        LigatureComponent,
+        ...COMPONENTS,
+        ...COMPONENTS_COSTOM
+    ],
+    entryComponents: [
+        ...COMPONENTS,
+        ...COMPONENTS_COSTOM
+    ],
+    providers: [
+        LocalStorage
+    ],
+    exports: [
+        ...COMPONENTS,
+        ...COMPONENTS_COSTOM,
+
+        DepartTreeComponent,
+        PermissionComponent,
+        BreadcrumbComponent,
+        RadioSwitchComponent,
+        // CopyRightComponent,
+
+        FormsModule,
+        ReactiveFormsModule,
+        NgZorroAntdModule,
+        CountDownComponent,
+        QuickTreeComponent,
+        QuickComponent,
+
+        ExplainPipe,
+        MaxPipe,
+        FourPipe,
+        NoticePipe,
+        NoticeTwentyPipe,
+        TranslateHTMLPipe,
+        CompilePipe,
+
+        /*****新增上传组件 2019-08-28****/
+        // UploadComponent,
+        /*****新增线条组件 2019-11-15*****/
+        LigatureComponent,
+
+    ]
+})
+export class PublicModule {
+}

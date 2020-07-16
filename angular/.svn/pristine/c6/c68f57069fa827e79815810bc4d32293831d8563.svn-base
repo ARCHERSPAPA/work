@@ -1,0 +1,109 @@
+import { Component, OnInit } from '@angular/core';
+import { BaseService } from "../../../service/base.service";
+import { Messages } from "../../../model/msg";
+import { Router } from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
+import { setStyleBg } from 'src/app/model/methods';
+// import { Lightbox } from 'ngx-lightbox';
+
+@Component({
+  selector: 'rev-identify',
+  templateUrl: './identify.component.html',
+  styleUrls: ['./../merchant.component.scss', './identify.component.scss']
+})
+export class IdentifyComponent implements OnInit {
+  public title: string;
+  public state: number = 0;
+  public info: string = Messages.LOADING;
+  public exInfo: string = Messages.LOADING;
+  public _albums = [];
+  public index;
+  public license: string;
+  // 添加了icon的类型
+  public shows: string;
+  public name: string = Messages.LOADING;
+  public mobile: string = Messages.LOADING;
+  public code: string = Messages.LOADING;
+  public legal: string = Messages.LOADING;
+  public id: string = Messages.LOADING;
+  public fade: string;
+  public isVisible: boolean = false;
+
+  constructor(private base: BaseService,
+    private router: Router, 
+    // private _lightbox: Lightbox,
+    private activatedRoute: ActivatedRoute,) { }
+
+  ngOnInit() {
+    let that = this
+    this.title = "认证资料";
+
+    if (!this.base.getBaseCompanyId()) {
+      this.base.loadCompany();
+    }
+
+  }
+
+
+
+  fadein() {
+    this.fade = 'in'
+  }
+  openModal( src) {
+    this.index = 0;
+    this._albums = []
+        this._albums.push({ src:src, thumb: src })
+
+}
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.name = this.base.getCompanyName();
+      this.mobile = this.base.getCompanyPhone();
+      this.code = this.base.getCode();
+      this.legal = this.base.getLegal();
+      this.id = this.base.getIdCard();
+      this.state = this.base.getState();
+      this.info = this.getInfo(this.state);
+      this.exInfo = this.base.getExamineInfo();
+      this.license = this.base.getLicense();
+    }, 1000);
+  }
+  // 设置icon的类型
+  getInfo(state) {
+    switch (state) {
+      case 0:
+        this.shows = 'info-circle'
+        return "认证资料正在审核中";
+      case 1:
+        this.shows = 'info-circle'
+        return "认证资料审核未通过";
+      case 2:
+        this.shows = 'check-circle'
+        return "认证资料审核已通过";
+    }
+  }
+  // [routerLink]="'/rev/step/two'"
+  resetSubmit() {
+    this.router.navigate(["/rev/step/two"], {
+      relativeTo: this.activatedRoute
+  });
+  }
+  // openModal() {
+  //   this.isVisible = true;
+  // }
+
+  handleCancel() {
+    this.isVisible = false;
+  }
+  styleImg(img){
+    console.log(img)
+    if(img){
+      return setStyleBg(img,160,100);
+    }
+   
+}
+    styleLicense(src){
+        return {'background-image':'url('+((src.indexOf('?') > -1)?src:src+'?imageView/2/h/180')+')'};
+    }
+}

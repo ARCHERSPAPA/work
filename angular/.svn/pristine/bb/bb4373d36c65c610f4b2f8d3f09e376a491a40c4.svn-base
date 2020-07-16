@@ -1,0 +1,26 @@
+import { Component, Input, OnInit } from '@angular/core';
+@Component({
+    selector: 'examine-person',
+    templateUrl: './examine-person.component.html',
+    styleUrls: ['./examine-person.component.scss']
+})
+export class ExaminePersonComponent implements OnInit {
+    @Input() examinePersonList: Array<any> = [];
+    @Input() item: any;
+    @Input() i: any;
+
+    private radioValue = '0';
+    private style = {
+        display   : 'block',
+        height    : '30px',
+        lineHeight: '30px'
+    };
+
+    ngOnInit() {
+        this.radioValue = this.i;
+    }
+    handleSelect(item) {
+        this.item = item;
+    }
+
+}

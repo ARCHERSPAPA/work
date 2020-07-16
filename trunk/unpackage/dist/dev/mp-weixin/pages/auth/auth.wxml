@@ -1,0 +1,1 @@
+<view class="auth"><block wx:if="{{authImg}}"><view class="auth-img"><cover-image src="{{authImg}}"></cover-image></view></block><view class="auth-btn"><button open-type="getPhoneNumber" data-event-opts="{{[['getphonenumber',[['getPhoneNumber',['$event']]]]]}}" bindgetphonenumber="__e">手机号码授权</button></view></view>

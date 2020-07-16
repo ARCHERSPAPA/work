@@ -8,9 +8,9 @@
 					@click="select(index, item.decorateStyle)"
 				>
 					<view class="price-manner-all-item-select-img">
-						<mkb-img-cut :img-url="item.backgImg" class="backImg" />
+						<mkb-img-cut :img-url="item.backgImg + '?imageView2/2/w/480/h/480/interlace/1'" class="backImg" />
 						<view class="price-manner-all-item-select-img-desc" :style="{ fontWeight: idx == index ? 'bold' : '400' }">{{ item.decorateStyle }}</view>
-						<view v-show="idx == index" class="price-manner-all-item-select-img-gou"><image src="../../static/search/xuanzhong.png" /></view>
+						<view v-show="idx == index" class="price-manner-all-item-select-img-gou"><image src="https://qiniu.madrock.com.cn/rev/project/ONLINE/44/f259ac6b-6a33-3c94-9849-88b5757114ce.png" /></view>
 					</view>
 				</view>
 			</view>
@@ -43,6 +43,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.idx = -1;
 		this.initData();
 	},
 	methods: {
@@ -59,7 +60,7 @@ export default {
 				priceList[3].priceManner = item;
 			}
 			uni.setStorageSync('priceList', priceList);
-			this.$openPage({ name: 'result', query: { type: 1} });
+			// this.$openPage({ name: 'result', query: { type: 1} });
 			this.$emit('priceMannerIdx', this.idx);
 		},
 		// 初始数据
@@ -75,6 +76,7 @@ export default {
 					return item.type == 2;
 				});
 				this.list = list;
+				this.$emit('priceList',list);
 			}
 		}
 	}
@@ -95,8 +97,8 @@ $border-radius: 14.49rpx;
 		display: flex;
 		flex-wrap: wrap;
 		.active{
-			background: rgba(255,136,0,1);
-			border: 7.24rpx solid rgba(255,136,0,1);
+			background: $col_098684;
+			border: 7.24rpx solid $col_098684;
 		}
 		&-item {
 			&:nth-of-type(2n) {

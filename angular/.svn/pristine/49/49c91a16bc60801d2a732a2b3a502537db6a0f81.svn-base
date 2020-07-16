@@ -1,0 +1,175 @@
+import { Component, OnInit } from '@angular/core';
+declare var AMap: any;
+@Component({
+  selector: 'rev-stats-attendance',
+  templateUrl: './stats-attendance.component.html',
+  styleUrls: ['./stats-attendance.component.scss']
+})
+
+export class StatsAttendanceComponent implements OnInit {
+
+  //日历
+  public listDataMap = {
+    eight: [
+      { type: 'warning', content: 'This is warning event.' },
+      { type: 'success', content: 'This is usual event.' }
+    ],
+    ten: [
+      { type: 'warning', content: 'This is warning event.' },
+      { type: 'success', content: 'This is usual event.' },
+      { type: 'error', content: 'This is error event.' }
+    ],
+    eleven: [
+      { type: 'warning', content: 'This is warning event' },
+      { type: 'success', content: 'This is very long usual event........' },
+      { type: 'error', content: 'This is error event 1.' },
+      { type: 'error', content: 'This is error event 2.' },
+      { type: 'error', content: 'This is error event 3.' },
+      { type: 'error', content: 'This is error event 4.' }
+    ]
+  };
+  public path = [
+    new AMap.LngLat("104.065756", "30.659868"),
+    new AMap.LngLat("104.067717", "30.659867"),
+    new AMap.LngLat("104.069727", "30.659867"),
+    new AMap.LngLat("104.070737", "30.659867"),
+    new AMap.LngLat("104.072747", "30.659867"),
+    new AMap.LngLat("104.083747", "30.759867"),
+  ];
+
+  //地图
+  public map;
+  public defaultPosition: Array<any> = [104.065756, 30.659868];
+  constructor() { }
+  //表单
+  public statList;
+  public dataList=[{count:1,txt:'haha'},{count:1,txt:'haha'},{count:1,txt:'haha'},{count:1,txt:'haha'}];
+  ngOnInit() {
+    const that = this;
+    that.map = new AMap.Map('container', {
+      resizeEnale: true,
+      zoom: 10,
+      center: that.defaultPosition
+    });
+    that.map.plugin(['AMap.ToolBar'], function () {
+      const tool = new AMap.ToolBar({
+        position: 'RB',
+        offset: new AMap.Pixel(10, 100),
+        autoPosition: false,
+      });
+      tool.hideDirection();
+      that.map.addControl(tool);
+    });
+
+    this.renderLine();
+    this.renderMark();
+    console.log(this.path)
+    for (let i = 0; i < this.path.length - 1; i++) {
+      this.renderText(this.path[i], this.path[i + 1])
+    }
+    this.map.setFitView();//自适应
+  }
+
+  renderLine() {
+    let width = 24;
+    var canvasDir = document.createElement('canvas')
+    var context = canvasDir.getContext('2d');
+    canvasDir.width = width;
+    canvasDir.height = width;
+    context.strokeStyle = 'white';
+    context.lineJoin = 'round';
+    context.lineWidth = 8;
+    context.moveTo(-4, width - 4);
+    context.lineTo(width / 2, 6);
+    context.lineTo(width + 4, width - 4);
+    context.stroke();
+    var polyline = new AMap.Polyline({
+      path: this.path,
+      borderWeight: 4, // 线条宽度，默认为 1
+      strokeColor: '#1890FF', // 线条颜色
+      lineJoin: 'round', // 折线拐点连接处样式,
+      showDir: true,
+      dirImg: canvasDir,
+      strokeWeight: 10
+    });
+    this.map.add(polyline);
+  }
+
+  renderMark() {
+    let temp;
+    temp = `<div style='${this.getTextConStyle()}'>
+    <div style='${this.getOrderConStyle()}'>
+    1
+    </div>
+    <div style='${this.getInfoConStyle()}'>
+    <p>sdas
+    <p>sdaqwes
+    </div>
+    </div>`;
+    this.path.forEach((v, i) => {
+      let name;
+      name = new AMap.Marker({
+        draggable: true,
+        // icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+        position: [v.lng, v.lat],
+        content: temp
+      });
+      this.map.add(name);
+    })
+  }
+
+  renderText(pre, i) {
+    console.log(pre, i)
+    let Distance;
+    Distance = Math.round(pre.distance(i))
+    if (Distance > 100) {
+      Distance = `${(pre.distance(i) / 1000).toFixed(1)}km`;
+    } else {
+      Distance = `${Distance}m`;
+    }
+    let text = new AMap.Text({
+      text: Distance,
+      style: {
+        'background-color': 'white',
+        'border': '1px solid rgba(24,144,255,1)',
+        'padding': '8px',
+        'font-size': '14px',
+        'line-height': '22px',
+        'color': '#1890FF'
+      }
+
+    });
+    text.setPosition(pre.divideBy(2).add(i.divideBy(2)))
+    text.setMap(this.map)
+  }
+  getTextConStyle() {
+    return 'width:159px; \
+  height:59px;\
+  background:rgba(24,144,255,1);\
+  box-shadow:0px 2px 4px rgba(0,0,0,0.32);\
+  border-radius:60px;\
+  display:flex;\
+  transform: translate(-50%,0);'
+  }
+  getOrderConStyle() {
+    return 'width:36px;\
+  height:36px;\
+  background:rgba(255,255,255,1);\
+  border-radius:18px;\
+  text-align: center;\
+  line-height:36px;\
+  margin:12px 16px 0 8px;\
+  color:#1890FF;\
+  font-size:20px;'}
+  getInfoConStyle() {
+    return 'color:white'
+
+  }
+  getMonthData(date: Date): number | null {
+    if (date.getMonth() === 8) {
+      return 1394;
+    }
+    return null;
+  }
+}
+

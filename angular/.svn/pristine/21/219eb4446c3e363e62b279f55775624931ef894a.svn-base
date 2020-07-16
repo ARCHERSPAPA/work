@@ -1,0 +1,34 @@
+import { Component, OnInit } from '@angular/core';
+import {RequestService} from '../../../../service/request.service';
+
+@Component({
+  selector: 'app-examine-list',
+  templateUrl: './examine-list.component.html',
+  styleUrls: ['./../../personnel.component.scss', './examine-list.component.scss']
+})
+export class ExamineListComponent implements OnInit {
+  public title: string;
+  public examineList: Array<any>;
+
+  constructor(
+    private request: RequestService
+  ) { }
+
+  ngOnInit() {
+    this.title = '审批流程';
+
+    this.loadExamineList();
+  }
+
+  loadExamineList() {
+    const self = this;
+
+    this.request.doPost({
+      url: 'examineList',
+      data: {
+      }, success: res => {
+        self.examineList = res.data;
+      }
+    });
+  }
+}

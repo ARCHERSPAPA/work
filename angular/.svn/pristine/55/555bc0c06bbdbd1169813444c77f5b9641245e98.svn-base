@@ -1,0 +1,310 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="ant-modal-body"style="text-align:center" >
+    <div class="info">
+        <div class="info-content">
+            <div class="info-data">
+                <div class="info-item" *ngIf="type === 1" >
+                    <rev-info-depart-tree [departTree]="departList"[departDefault]="department"></rev-info-depart-tree>
+                </div>
+                <div class="info-item" *ngIf="showDesigner(type)">
+                    <rev-info-designers [designers]="showDesigners" (selectDesignerListener)="selectDesigner($event)"></rev-info-designers>
+                </div>
+                <!--<div class="info-item" *ngIf="showChiefs(type)">-->
+                    <!--&lt;!&ndash;<rev-info-chief></rev-info-chief>&ndash;&gt;-->
+                    <!--<rev-info-strategy [type]="3"></rev-info-strategy>-->
+                <!--</div>-->
+                <!--<div class="info-item" *ngIf="showSupervisors(type)">-->
+                    <!--&lt;!&ndash;<rev-info-supervisor></rev-info-supervisor>&ndash;&gt;-->
+                    <!--<rev-info-strategy [type]="4"></rev-info-strategy>-->
+                <!--</div>-->
+                <!--<div class="info-item" *ngIf="showLeaders(type)">-->
+                    <!--&lt;!&ndash;<rev-info-leader></rev-info-leader>&ndash;&gt;-->
+                    <!--<rev-info-strategy [type]="5"></rev-info-strategy>-->
+                <!--</div>-->
+                <div class="info-item" *ngIf="showStrategy(type)">
+                    <rev-info-strategy [type]="type" [member]="member" (selectUserLister)="selectUser($event)"></rev-info-strategy>
+                </div>
+                <div class="info-item" *ngIf="showCustomer()">
+                    <rev-info-user [id]="userId" [user]="quoteBase" [type]="type"
+                                   (cancelHandler)="exist($event)" (submitHandler)="submit($event)"></rev-info-user>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div  *ngIf="!showCustomer()"style="padding: 0px 16px 10px 16px;">
+    <div class="info">
+        <div class="info-content">
+            <div class="info-show">
+                <div *ngIf="type === 1">
+                    <!-- <ul class="info-simple">
+                        <li *ngIf="showDepart && showDepart['departmentName']">
+                        <span class="w10"><a href="javascript:void(0)" (click)="delDepart()" class="del"><i nz-icon
+                                                                                                            type="delete"></i></a></span>
+                            <span class="w90"
+                                  [title]="showDepart['departmentName']">{{showDepart['departmentName']}}</span>
+                        </li>
+                        <li *ngIf="!showDepart"><p>暂无部门选择</p></li>
+                    </ul> -->
+                </div>
+                <div *ngIf="showDesigner(type)">
+                            <nz-table
+                            [nzNoResult]="'暂无设计人员数据'"
+                            #DesignersTable  [nzFrontPagination]="false" [nzShowPagination]="false"
+                            nzTitle="已选" class="info-multi" [nzData]="showDesigners" nzSize="small">
+                            <thead>
+                              <tr>
+                                <th>姓名</th>
+                                <th>部门</th>
+                                <th>手机号</th>
+                                <th>分成</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let data of DesignersTable.data">
+                                <td>{{data.name?data.name:'--'}}</td>
+                                <td>{{data.departmentName?data.departmentName:'--'}}</td>
+                                <td>{{data.phone?data.phone:'--'}}</td>
+                                <td>
+                                    <nz-input-number class="text" placeholder="请输入修改比例" [(ngModel)]="data.percentage"
+                                                     max="100" min="1" step="1"></nz-input-number>
+                              </tr>
+                            </tbody>
+                          </nz-table>
+                        <!-- <li *ngFor="let designer of showDesigners" [hidden]="designer.type > 2">
+                        <span class="w10"><a href="javascript:void(0)" (click)="removeDesigner(designer)" class="del"
+                                             title="删除"><span nz-icon type="delete"></span></a></span>
+                            <span [title]="designer.name">{{designer.name?designer.name:'--'}}</span>
+                            <span
+                                    [title]="designer.departmentName">{{designer.departmentName?designer.departmentName:'--'}}</span>
+                            <span [title]="designer.phone">{{designer.phone}}</span>
+                            <span class="w30">
+                                    <input type="text" class="text" placeholder="请输入修改比例" [(ngModel)]="designer.percentage"
+                                    onkeyup="this.value=this.value.replace(/\D/g,'')"
+                                    onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                                    [disabled]="!designer.modify"/>
+                             <a href="javascript:void(0)" (click)="modifyRatio(designer)" *ngIf="!designer.modify">修改</a>
+                             <a href="javascript:void(0)" (click)="saveRatio(designer)" *ngIf="designer.modify">保存</a>
+                        </span>
+                        </li> -->
+                </div>
+                <div *ngIf="showChiefs(type)">
+                    <nz-table #ChiefTable  nzTitle="已选" class="info-multi"  [nzNoResult]="'暂无工长数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showChief"  >
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of ChiefTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="data.projectCount?data.projectCount:'--'">{{data.projectCount?data.projectCount:'--'}}</td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+                    <!-- <ul class="info-multi" *ngIf="showChief">
+                        <li> -->
+                            <!--<span class="w10"><a href="javascript:void(0)" (click)="removeMember(showChief)" class="del"><span class="anticon anticon-delete"></span></a></span>-->
+                            <!-- <span [title]="showChief.memberName?showChief.memberName:showChief.name?showChief.name:'--'">{{showChief.memberName?showChief.memberName:showChief.name?showChief.name:'--'}}</span>
+                            <span [title]="showChief.departmentName">{{showChief.departmentName?showChief.departmentName:'--'}}</span>
+                            <span [title]="showChief.phone">{{showChief.phone}}</span>
+                            <span [title]="">{{showChief.projectCount?showChief.projectCount:'--'}}</span>
+                        </li>
+                    </ul>
+                    <ul class="info-multi" *ngIf="!showChief">
+                        <li>
+                            <p>暂无工长数据</p>
+                        </li>
+                    </ul> -->
+                </div>
+                <div *ngIf="showSupervisors(type)">
+                    <nz-table #SupervisorTable nzTitle="已选" class="info-multi"  [nzNoResult]="'暂无监理数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showSupervisor" >
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of SupervisorTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="data.projectCount?data.projectCount:'--'">{{data.projectCount?data.projectCount:'--'}}</td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+                </div>
+                <div *ngIf="showLeaders(type)">
+                    <nz-table #LeaderTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无工程总监数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showLeader">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of LeaderTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="data.projectCount?data.projectCount:'--'">{{data.projectCount?data.projectCount:'--'}}</td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+                </div>
+                <div *ngIf="showpriceUser(type)">
+                    <nz-table #LeaderTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无审核人员数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showPriceUser">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                            <!-- <th>操作</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of LeaderTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="(data.projectCount+'')?data.projectCount:'--'">{{(data.projectCount+'')?data.projectCount:'--'}}</td>
+                            <!-- <td >
+                                <a href="javascript:void(0)" (click)="removeRelevant(data)" title="删除">删除</a>
+                            </td> -->
+                        </tr>
+                    </tbody>
+                </nz-table>
+                </div>
+                <div *ngIf="showchecker(type)">
+                    <nz-table #LeaderTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无审核人员数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showChecker">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                            <!-- <th>操作</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of LeaderTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="(data.projectCount+'')?data.projectCount:'--'">{{(data.projectCount+'')?data.projectCount:'--'}}</td>
+                            <!-- <td ><a href="javascript:void(0)" (click)="removeRelevant(data)"
+                            title="删除">删除</a></td> -->
+                        </tr>
+                    </tbody>
+                </nz-table>
+                </div>
+                <div *ngIf="showReusers(type)">
+                    <nz-table #ReuserTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无当前复用人员数据'"
+                    nzSize="small" [nzShowPagination]="false" [nzData]="showReuser" >
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>手机号</th>
+                            <th>在建项目</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of ReuserTable.data,let i=index">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.departmentName?data.departmentName:'--'">
+                                {{data.departmentName?data.departmentName:'--'}}</td>
+                            <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                            <td [title]="data.projectCount?data.projectCount:'--'">{{data.projectCount?data.projectCount:'--'}}</td>
+                        </tr>
+                    </tbody>
+                </nz-table>
+                    <!-- <ul class="info-multi" *ngIf="showReuser">
+                        <li>
+                            <span [title]="showReuser.memberName?showReuser.memberName:showReuser.name?showReuser.name:''">{{showReuser.memberName?showReuser.memberName:showReuser.name?showReuser.name:'--'}}</span>
+                            <span [title]="showReuser.departmentName">{{showReuser.departmentName?showReuser.departmentName:'--'}}</span>
+                            <span [title]="showReuser.phone">{{showReuser.phone}}</span>
+                            <span [title]="">{{showReuser.projectCount?showReuser.projectCount:'--'}}</span>
+                        </li>
+                    </ul>
+                    <ul class="info-multi" *ngIf="!showReuser">
+                        <li>
+                            <p>暂无当前复用人员数据</p>
+                        </li>
+                    </ul> -->
+                </div>
+                <div *ngIf="type === 7">
+                    <nz-table #ViewUserTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无查看人员数据'"
+                        nzSize="small" [nzShowPagination]="false" [nzData]="showViewUser" >
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>部门</th>
+                                <th>手机号</th>
+                                <th>在建项目</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of ViewUserTable.data,let i=index">
+                                <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                                <td [title]="data.departmentName?data.departmentName:'--'">
+                                    {{data.departmentName?data.departmentName:'--'}}</td>
+                                <td [title]="data.phone?data.phone:'--'">{{data.phone?data.phone:'--'}}</td>
+                                <td [title]="data.projectCount?data.projectCount:'--'">{{data.projectCount?data.projectCount:'--'}}</td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+                <div *ngIf="type === 15">
+                    <nz-table #ViewUserTable  nzTitle="已选" class="info-multi" [nzNoResult]="'暂无审批人员数据'"
+                              nzSize="small" [nzShowPagination]="false" [nzData]="showViewUser" >
+                        <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>职位</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let data of ViewUserTable.data">
+                            <td [title]="data.memberName?data.memberName:'--'">{{data.memberName?data.memberName:'--'}}</td>
+                            <td [title]="data.positionName?data.positionName:'--'">{{data.positionName?data.positionName:'--'}}</td>
+                        </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+            </div>
+            <div class="btns" >
+                <p *ngIf="msg" class="info-msg">{{msg}}</p>
+                <button nz-button nzType="default" (click)="exist()">关闭</button>
+                <button nz-button nzType="primary" (click)="submit($event)">提交</button>
+            </div>
+        </div>
+    </div>
+</div>

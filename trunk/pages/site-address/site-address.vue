@@ -14,7 +14,7 @@
 				</view>
 				<view class="item-info">
 					<text class="item-info-addr">{{site.address?site.address:'暂无位置信息'}}</text>
-					<view class="item-info-icon" v-if="site && site.distance == 0"><uni-icons type="yixuan" color="#FF8800" size="40" /></view>
+					<view class="item-info-icon" v-if="site && site.distance == 0"><uni-icons type="yixuan" :color="themeColor" size="40" /></view>
 				</view>
 				
 			</view>
@@ -41,6 +41,7 @@
 		},
 		data() {
 			return {
+				themeColor:Constant.defaultThemeColor,
 				keyword: '',
 				amapPlugin: null,
 				location: null,

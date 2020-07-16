@@ -1,0 +1,206 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+
+.graph-confirm {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.graph-lock {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: rgba(0, 0, 0, 0.45);
+  float: right;
+  overflow: hidden;
+}
+
+//图片渲染
+.graph-list {
+  margin-top: 24px;
+  overflow: hidden;
+  > li {
+    width: 160px;
+    height: 234px;
+    margin: 0 24px 24px 0;
+    float: left;
+    &.move{
+      cursor: move;
+      border: 1px dashed skyblue;
+    }
+    .graph-img {
+      width: 100%;
+      height: 160px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      .graph-del {
+        display: none;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 30px;
+        border-bottom-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+        font-size: 20px;
+        line-height: 30px;
+        text-align: center;
+        color: #f5222d;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 10;
+      }
+      .graph-audit {
+        position: absolute;
+        width: 100%;
+        height: 24px;
+        left: 0;
+        top: 0;
+        z-index: 9;
+        display: none;
+        overflow: hidden;
+        > a {
+          display: block;
+          width: 50%;
+          float: left;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 24px;
+          color: rgba(255, 255, 255, 1);
+          text-align: center;
+          text-decoration: none;
+        }
+        &-yes {
+          background: rgba(24, 144, 255, 1);
+          border-radius: 4px 0px 0px 0px;
+        }
+        &-no {
+          background: rgba(245, 34, 45, 1);
+          border-radius: 0px 4px 0px 0px;
+        }
+      }
+      .graph-audit-state {
+        position: absolute;
+        width: 100%;
+        height: 24px;
+        left: 0;
+        top: 0;
+        z-index: 9;
+        overflow: hidden;
+        > a {
+          display: block;
+          width: 50%;
+          float: right;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 24px;
+          color: rgba(255, 255, 255, 1);
+          border-radius: 0px 4px 0px 0px;
+          text-align: center;
+          text-decoration: none;
+        }
+        &-yes {
+          background: rgba(24, 144, 255, 0.45);
+        }
+        &-no {
+          background: rgba(245, 34, 45, 0.45);
+        }
+      }
+
+      &.graph-cdr{
+        background: url("./cdr.png") center center  no-repeat #F5F5F5;
+      }
+      &.graph-dwg{
+        background: url("./dwg.png") center center no-repeat #F5F5F5;
+      }
+      &.graph-default{
+        background:#F5F5F5;
+      }
+
+
+      &.graph-edit:hover {
+        .graph-del {
+          display: block;
+        }
+      }
+      &.graph-verify:hover {
+        .graph-audit {
+          display: block;
+        }
+        .graph-audit-state {
+          display: none;
+        }
+      }
+    }
+    .graph-box {
+      margin-top: 8px;
+      overflow: hidden;
+      &-name {
+        width: 82%;
+        float: left;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.45);
+        @include ellipsis;
+      }
+      &-eye {
+        width: 14%;
+        float: right;
+        font-size: 16px;
+        text-align: center;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.45);
+        cursor: pointer;
+        &.default{
+          cursor: default;
+        }
+        &.activated {
+          color: rgba(24, 144, 255, 1);
+        }
+      }
+    }
+
+    .graph-date {
+      width: 100%;
+      height: 22px;
+      overflow: hidden;
+      &-info{
+        width: 60%;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.45);
+        display: block;
+        float: left;
+      }
+      &-btn{
+        width: 40%;
+        display: block;
+        float: right;
+        text-align: right;
+         > i{
+            margin-left: 3px;
+            color: #1890ff;
+            cursor: pointer;
+         }
+      }
+    }
+
+    //.graph-btns{
+    //  width: 100%;
+    //  height: 22px;
+    //}
+
+  }
+
+}
+
+.no-data{
+  font-size: 14px;
+  line-height: 32px;
+  color: rgba(0,0,0,0.45);
+  font-weight: 400;
+}

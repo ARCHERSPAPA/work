@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-finance-temp',
+  templateUrl: './finance-temp.component.html',
+  styleUrls: ['./finance-temp.component.scss']
+})
+export class FinanceTempComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

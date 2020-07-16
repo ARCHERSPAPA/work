@@ -1,0 +1,264 @@
+///<reference path="staff/staff-list/staff-list.component.ts"/>
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {StaffComponent} from './staff/staff.component';
+import {PostComponent} from './post/post.component';
+import {DepartComponent} from './depart/depart.component';
+import {StaffAddComponent} from './staff/staff-add/staff-add.component';
+import {StaffListComponent} from './staff/staff-list/staff-list.component';
+import {PostListComponent} from './post/post-list/post-list.component';
+import {PostRoleComponent} from './post/post-role/post-role.component';
+import {GuardService} from '../../service/guard.service';
+import {WorkerComponent} from './worker/worker.component';
+import {WorkerListComponent} from './worker/worker-list/worker-list.component';
+import {WorkerAddComponent} from './worker/worker-add/worker-add.component';
+import {ReuseComponent} from './reuse/reuse.component';
+import {ReuseListComponent} from './reuse/reuse-list/reuse-list.component';
+import {AddressListComponent} from './address/address-list/address-list.component';
+import {AddressRoleComponent} from './address/address-role/address-role.component';
+import {AddressDetailComponent} from './address/address-detail/address-detail.component';
+import {AssociateComponent} from './associate/associate.component';
+import {WechatComponent} from './staff/wechat/wechat.component';
+import {ExamineListComponent} from './examine/examine-list/examine-list.component';
+import {ExamineAddComponent} from './examine/examine-add/examine-add.component';
+import {PhotosComponent} from './photos/photos.component';
+
+
+const routes: Routes = [
+    {
+        path: '',
+        redirectTo: 'staff',
+        pathMatch: 'full'
+    },
+
+    {
+        path: 'staff',
+        component: StaffComponent,
+        data: {
+            breadcrumb: '员工管理'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: StaffListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '员工列表'
+                }
+            },
+            {
+                path: 'add',
+                component: StaffAddComponent,
+                data: {
+                    breadcrumb: '员工编辑'
+                }
+            },
+            {
+                path: 'associate',
+                component: AssociateComponent,
+                data: {
+                    breadcrumb: '员工交接'
+                }
+
+            },
+            {
+                path: 'wechat',
+                component: WechatComponent,
+                data: {
+                    breadcrumb: '微信通知'
+                }
+            }
+
+        ]
+    },
+    {
+        path: 'worker',
+        component: WorkerComponent,
+        data: {
+            breadcrumb: '工人管理'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: WorkerListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '工人列表'
+                }
+            },
+            {
+                path: 'add',
+                component: WorkerAddComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '工人编辑'
+                }
+            }
+        ]
+
+    },
+    {
+        path: 'post',
+        component: PostComponent,
+        data: {
+            breadcrumb: '职位管理'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: PostListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '职位列表'
+                }
+            },
+            // {
+            //     path:"add",
+            //     component:PostAddComponent,
+            //     canActivate:[GuardService]
+            // },
+            {
+                path: 'role',
+                component: PostRoleComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '权限管理'
+                }
+            }
+        ]
+    },
+    {
+        path: 'depart',
+        component: DepartComponent,
+        canActivate: [GuardService],
+        data: {
+            breadcrumb: '部门列表'
+        }
+    },
+    {
+        path: 'reuse',
+        component: ReuseComponent,
+        data: {
+            breadcrumb: '复用人员'
+        },
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'list'
+            },
+            {
+                path: 'list',
+                component: ReuseListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '人员列表'
+                }
+            },
+        ]
+    },
+    {
+        path: 'address',
+        data: {
+            breadcrumb: '企业通讯录'
+        },
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'list'
+            },
+            {
+                path: 'list',
+                component: AddressListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '通讯录列表'
+                }
+            },
+            {
+                path: 'role',
+                component: AddressRoleComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '权限设置'
+                }
+            },
+            {
+                path: 'detail',
+                component: AddressDetailComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '成员详情'
+                }
+            }
+        ]
+    },
+    {
+        path: 'examine',
+        data: {
+            breadcrumb: '审批流程'
+        },
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'list'
+            },
+            {
+                path: 'list',
+                component: ExamineListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '审批流程列表'
+                }
+            },
+            {
+                path: 'add',
+                component: ExamineAddComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '审批流程编辑'
+                }
+            }
+        ]
+
+    },
+    {
+        path: 'photos',
+        component:
+        PhotosComponent,
+        canActivate: [GuardService],
+        data: {
+                breadcrumb: '图片设置'
+            }
+    }
+];
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class PersonnelRoutingModule {
+}

@@ -1,0 +1,135 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from "../../../service/request.service";
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {QuoteService} from "../../../service/quote.service";
+import {atob} from "../../../model/methods";
+import {Lightbox} from 'ngx-lightbox';
+
+@Component({
+    selector: 'rev-detail-notice',
+    templateUrl: './notice.component.html',
+    styleUrls: ['./../detail.scss', './notice.component.scss'],
+})
+export class NoticeComponent implements OnInit {
+
+    // public switch:string;
+
+    public isVisible: boolean = false;
+    public src: string;
+
+    public nid: string;
+    public cid: string;
+
+    public notices: Array<any>;
+
+    //放大图片
+    public _albums = [];
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private quote: QuoteService,
+                private request: RequestService,
+                private warn: WarningService,
+                private _lightbox: Lightbox) {
+    }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["nid"]) {
+                this.nid = atob(params["nid"]);
+                if (this.nid) {
+                    this.loadNotice(this.nid);
+                }
+
+            }
+        });
+    }
+
+    color(type: number) {
+        switch (type) {
+            case 1:
+                return 'green'
+            case 2:
+                return 'gold'
+            case 3:
+                return 'red'
+            default:
+                break;
+        }
+
+    }
+
+
+    openModal(imgs: Array<any>, index) {
+        this._albums = [];
+        imgs.forEach((i) => {
+            this._albums.push({ src: i.url });
+        })
+        this._lightbox.open(this._albums, index);
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.src = null;
+    }
+
+    loadNotice(id) {
+        let that = this;
+        that.request.doPost({
+            url: "detailNotice",
+            data: {id: id},
+            success: (res => {
+                if (res && res.code == 200) {
+                    // console.log(res);
+                    that.notices = res.data;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    handleNotice(id) {
+        let that = this;
+        // console.log(id);
+        that.request.doPost({
+            url: "handleNotice",
+            data: {id: id},
+            success: (res => {
+                if (res && res.code == 200) {
+                    // console.log(res);
+                    that.loadNotice(that.nid);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    getUrgency(urgent) {
+        switch (urgent) {
+            case 1:
+                return "一般紧急";
+            case 2:
+                return "比较紧急";
+            case 3:
+                return "非常紧急";
+            default:
+                return "一般紧急";
+        }
+    }
+
+    getState(state) {
+        switch (state) {
+            case 0:
+                return "未处理";
+            case 1:
+                return "已处理";
+            default:
+                return "未处理";
+        }
+    }
+
+}

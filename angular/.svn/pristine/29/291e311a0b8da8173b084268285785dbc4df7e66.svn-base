@@ -1,0 +1,41 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import {  btoa } from '../../../../model/methods';
+@Component({
+  selector: 'rev-master-temp',
+  templateUrl: './master-temp.component.html',
+  styleUrls: ['./master-temp.component.scss','../../master.component.scss']
+})
+export class MasterTempComponent implements OnInit {
+
+  public departTempList=[{quoteNo:123}];
+  public title: string;
+  public buttons;
+    constructor(
+      private router: Router,
+      private activatedRoute: ActivatedRoute,
+    ) { }
+
+    ngOnInit() {
+      this.title = '主材模板';
+      this.buttons = [{
+        color: 'btn-primary',
+        name: '新建'
+    }];
+    }
+    changeData() {
+
+    }
+    handleName($event){
+      this.router.navigate(['./../add'], { relativeTo: this.activatedRoute });
+
+    }
+
+    handleTemp(){
+
+    }
+    btoa(id: string) {
+      return btoa(id);
+  }
+}
+

@@ -17,10 +17,21 @@ export default {
 	LOADING_FINISH:"数据已加载完毕",
 	EMPTY_TEXT:"输入不能为空",
 	NO_MATCH_URL:"无效地址",
+	INPERFECT_INFO:"提交信息不完善",
 	
 	UPLOAD_IMG_LOADING:"上传图片中",
 	NO_IMG_ADDRESS:"暂未获取图片信息",
 	
-	SAVE_IMAGE_SUCCESS:"您的图片保存成功,赶快打开图片库分享到朋友圈，让更多人认识"
+	SAVE_IMAGE_SUCCESS:"您的图片保存成功,赶快打开图片库分享到朋友圈，让更多人认识",
+	POSTER_CREATE:"海报生成中",
+	POSTER_CREATE_ERR:"生成海报出现异常",
+	POSTER_DECODER:"海报解析中",
+	
+	NOT_FOUND_ERR:"未找到相关页面或信息",
+	ACTIVITY_EXPIRE_TIME:"活动已过期",
+	
+	SEND_CAPATCH_SUCCESS:"已成功发送验证码",
+	
+	PARAM_EMPTY:"参数为空或者获取参数异常,请联系客服人员处理"
 	
 }

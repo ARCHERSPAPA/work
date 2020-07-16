@@ -2,7 +2,7 @@
   <view class="mkb-tj-box">
     <view class="mkb-tj-box-item-image">
       <view class="mkb-tj-box-item-img">
-        <mkb-img-cut :img-url="getImgUrl" />
+        <mkb-img-cut :img-url="getImgUrl+'?imageView2/2/w/495/h/495'" />
       </view>
       <view class="mkb-tj-box-item-icon">
 		  <view v-if="item.styleImgs && item.styleImgs.length > 0" class="mkb-tj-box-item-flag">
@@ -17,9 +17,10 @@
 	  </view>
     </view>
     <view class="mkb-tj-box-item-block">
-      <text class="mkb-tj-box-item-block-name">{{ item.customerHouseAddress }}</text>
-      <view class="mkb-tj-box-item-block-price">
-        <text>¥{{ (item.finalPrice?item.finalPrice:0)|digit(4)|number(1,true) }}</text>
+      <view class="mkb-tj-box-item-block-name">{{ item.customerHouseAddress }}</view>
+      <view class="mkb-tj-box-item-block-price" v-if="item && item.finalPrice">
+        <text v-if="item.finalPrice >= 1000">¥{{item.finalPrice|digit(4)|number(1,true)}}万</text>
+		<text v-else>¥{{item.finalPrice|number(0,true) }}</text>
       </view>
     </view>
     <view class="mkb-tj-box-item-area">
@@ -128,28 +129,28 @@ export default {
 
 			&-block {
 				width: 331.52rpx;
-				display: flex;
+				height: 39.85rpx;
 				margin-top: 14.49rpx;
+				overflow: hidden;
 				&-name {
 					font-size: 28.98rpx;
 					font-weight: bold;
-					// line-height: 39.85rpx;
 					color: rgba(0, 0, 0, 0.90);
-					width: 100%;
+					width: 65%;
+					height: 100%;
+					float: left;
 					@include eclipse;
 				}
 
 				&-price {
 					font-size: 28.98rpx;
 					font-weight: 400;
-					// line-height: 39.85rpx;
-					color: rgba(255, 136, 0, 1);
-					position: relative;
+					color: $col_098684;
+					width: 30%;
+					height: 100%;
+					float:right;
 					text-align: right;
-					margin-left: 28.98rpx;
-					&:after {
-						content: "万"
-					}
+					@include eclipse;
 				}
 
 			}

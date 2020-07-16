@@ -1,0 +1,101 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.stats-attendance {
+    &-info {
+        margin: 24px 0 100px 0;
+        display: flex;
+        height: 520px;
+    }
+    &-date {
+        width: 50%;
+        position: relative;
+    }
+    &-supervisor {
+        position: absolute;
+        top: 12px;
+    }
+    &-table {
+        width: calc(50% - 48px);
+        margin-left: 48px;
+        .datas {
+            p {
+                font-size: 16px;
+                line-height: 22px;
+                color: rgba(0, 0, 0, 0.85);
+                span {
+                    font-size: 14px;
+                    line-height: 22px;
+                    color: rgba(0, 0, 0, 0.45);
+                    margin-left: 8px;
+                }
+            }
+            ul {
+                display: flex;
+                margin-top: 16px;
+                li {
+                    width: 20%;
+                    p {
+                        font-size: 14px;
+                        font-weight: 400;
+                        line-height: 22px;
+                        color: rgba(0, 0, 0, 0.45);
+                    }
+                    p:first-child {
+                        font-size: 20px;
+                        font-weight: 500;
+                        line-height: 28px;
+                        text-align: inherit;
+                        color: rgba(0, 0, 0, 0.85);
+                    }
+                }
+            }
+        }
+    }
+    &-head {
+        width: calc(100% + 48px);
+        margin: -24px -24px 0 -24px;
+        height: 192px;
+        background: #1890ff;
+        border-radius: 4px 4px 0px 0px;
+        display: flex;
+        span {
+            img {
+                width: 120px;
+                border-radius: 50%;
+                margin: 48px 24px 24px 24px;
+            }
+        }
+        ul {
+            margin-top: 72px;
+            font-size: 14px;
+            color: white;
+            li:first-child {
+                font-size: 24px;
+                line-height: 24px;
+                margin-bottom: 20px;
+            }
+        }
+    }
+}
+.temp-date {
+    text-align: right;
+    height: 70px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    &.date-disabled {
+        color: rgba(0, 0, 0, 0.25);
+        cursor: not-allowed;
+    }
+    .date-number {
+        font-size: 14px;
+        font-family: "PingFang SC";
+        font-weight: 400;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.65);
+    }
+}
+.notClick {
+    cursor: not-allowed !important;
+}

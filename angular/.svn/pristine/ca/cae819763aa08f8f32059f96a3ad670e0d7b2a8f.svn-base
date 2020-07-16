@@ -1,0 +1,97 @@
+<div class="staff-list" (click)=checkType()>
+  <div class="list-head">
+    <div class="search-bar">
+      <input nz-input placeholder="请输入员工姓名/帐号/手机号" [(ngModel)]="searchInfo" />
+      <button nz-button [nzType]="'primary'" (click)="searchData()">查询</button>
+    </div>
+  </div>
+  <div class="btns">
+    <button nz-button nzType="primary" type="submit" (click)="appPermission(1)" [disabled]='showButton()'>APP权限</button>
+  </div>
+  <div class="list-group-rev">
+    <div class="list-quick">
+      <div class="list-quick-title">快速查询</div>
+      <rev-depart-tree [type]="departType" (handleChangeData)="changeDepart($event)"
+                       [displayDepartmentId]="departmentId"></rev-depart-tree>
+    </div>
+    <div class="list-items">
+      <nz-table #nzTable [nzData]="staffList" [nzBordered]="true" [nzFrontPagination]="false" [(nzPageIndex)]='pageNo'
+        [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changePage()' nzSize="middle"
+        [nzShowPagination]='true' [nzLoading]="loading">
+        <thead nz-thead>
+          <tr>
+            <th nzShowCheckbox  [(nzChecked)]="isAllDisplayDataChecked"
+                [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"></th>
+            <th>姓名</th>
+            <th nz-th><span>账号</span></th>
+            <th nz-th><span>工号</span></th>
+            <th nz-th><span>手机号</span></th>
+            <th nz-th><span>性别</span></th>
+            <th nz-th><span>部门</span></th>
+            <th nz-th><span>职位</span></th>
+            <th nz-th><span>员工状态</span></th>
+            <th nz-th><span>备注</span></th>
+            <th nz-th><span>操作</span></th>
+          </tr>
+        </thead>
+        <tbody nz-tbody>
+          <tr *ngFor="let data of nzTable.data;let i = index">
+            <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()" *ngIf='data.state===0'></td>
+            <td  *ngIf='data.state!=0'></td>
+            <td [title]="data.name" class="w2">{{data.name?data.name:'--'}}</td>
+            <td nz-td title="{{data.account?data.account:'--'}}">{{data.account?data.account:'--'}}</td>
+            <td nz-td title="{{data.empNo?data.empNo:'--'}}">{{data.empNo?data.empNo:'--'}}</td>
+            <td nz-td title="{{data.phone?data.phone:'--'}}">{{data.phone?data.phone:'--'}}</td>
+            <td nz-td [ngSwitch]="data.sex" class="w1">
+              <span *ngSwitchCase="0">女</span>
+              <span *ngSwitchCase="1">男</span>
+              <span *ngSwitchDefault>----</span>
+            </td>
+            <td nz-td title="{{data.departmentName?data.departmentName:'--'}}">
+              {{data.departmentName?data.departmentName:'--'}}</td>
+            <td nz-td title="{{data.positionName?data.positionName:''}}" class="w3">
+              {{data.positionName?data.positionName:'--'}}</td>
+            <td nz-td [ngSwitch]="data.state" class="w2">
+              <span *ngSwitchCase="0">在职</span>
+              <span *ngSwitchCase="1">离职</span>
+              <span *ngSwitchCase="2">删除</span>
+              <span *ngSwitchDefault>----</span>
+            </td>
+            <td nz-td>
+              <nz-tooltip [nzTitle]="data.remarks"><span nz-tooltip>{{data.remarks | MaxPipe}}</span></nz-tooltip>
+            </td>
+            <td nz-td class="w16">
+              <div>
+                <a class="work_a" href="javascript:void(0)" (click)="appPermission(data)"
+                  *ngIf="data && data.state == 0">APP权限</a>
+                <a href="javascript:void(0)" class="work_a" *ngIf="data.state != 1" [routerLink]="['../wechat']"
+                  [queryParams]="{id:btoa(data.id)}">微信通知</a>
+                <a href="javascript:void(0)" class="work_a" *ngIf="data.state == 0" nz-popconfirm [nzTitle]="showTitle"
+                (click)='checkStaff(data.id)'
+                [nzCondition]='quitState===3'
+                  [nzOkText]="checkState(quitState)" [nzCancelText]="CancelText" (nzOnConfirm)="quitPage(data.id)"
+                  (nzOnCancel)="checkQuit(data.id)">离职</a>
+
+                <a href="javascript:void(0)" class="work_a" *ngIf="data.state == 1" nz-popconfirm
+                  nzTitle="删除员工账号后，该账号将无法登录" nzOkText="删除" nzCancelText="取消" (nzOnConfirm)="delStaff(data.id)">删除</a>
+                <a class="work_a" href="javascript:void(0)" [routerLink]="['./../add']"
+                  [queryParams]="{id:btoa(data.id)}" *ngIf="data && data.state == 0">修改</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="APP权限" [nzFooter]="true" (nzOnCancel)="handleCancel()"
+nzCancelText="关闭" nzOkText="提交"
+  (nzOnOk)="submit()">
+  <div nz-col [nzSpan]=10 style="text-align: right;line-height: 30px;margin-right: 24px;">
+    装修TOP项目展示范围
+  </div>
+  <nz-select style="width: 250px;" [(ngModel)]="appType" (ngModelChange)="handleAPPType($event)" nzAllowClear='false'
+    >
+    <nz-option *ngFor="let source of permissionList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
+  </nz-select>
+</nz-modal>

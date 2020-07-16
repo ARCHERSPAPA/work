@@ -1,0 +1,530 @@
+<div class="cview" [@bounce]="switch">
+    <h2>成都市家庭装饰装修工程施工合同条款</h2>
+    <p class="cnum">合同编号： {{cont && cont.agreement &&
+        cont.agreement.agreemetNo?cont.agreement.agreemetNo:'XXXXXXXX'}}</p>
+    <ul class="cbase">
+        <li>
+            <label class="label">发包方代表人（以下简称“甲方”）：</label>
+            <div class="inp"><input type="text" class="w9" readonly
+                    [value]="cont && cont.agreement && cont.agreement.theEmployer?cont.agreement.theEmployer:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">住所地址：</label>
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.officeArea?(cont.agreement.officeArea.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.officeArea?cont.agreement.officeArea:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">联系电话：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.contactNumber?cont.agreement.contactNumber:'/'" />
+            </div>
+            <label class="label">手机号：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.phoneNumber?cont.agreement.phoneNumber:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">承包方（以下简称“乙方”）：</label>
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.companyName?(cont.agreement.companyName.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.companyName?cont.agreement.companyName:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">单位地址：</label>
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.companyArea?(cont.agreement.companyArea.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.companyArea?cont.agreement.companyArea:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">法定代表人：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.companyLegalPerson?cont.agreement.companyLegalPerson:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">本工程总监：</label>
+            <div class="inp"><input type="text" readonly [value]="cont  && cont.majordomoName?cont.majordomoName:'/'" />
+            </div>
+            <label class="label">联系电话：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont  && cont.majordomoPhone?cont.majordomoPhone:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">本工程设计人：</label>
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.designerName?(cont.designerName.length)*2:20"
+                    [value]="cont && cont.designerName?cont.designerName:''" />
+            </div>
+            <label class="label">联系电话：</label>
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.designerPhone?(cont.designerPhone.length)+20:20"
+                    [value]="cont && cont.designerPhone?cont.designerPhone:''" />
+            </div>
+        </li>
+        <li>
+            <label class="label">本工程项目经理：</label>
+            <div class="inp"><input type="text" readonly [value]="cont  && cont.managerName?cont.managerName:'/'" />
+            </div>
+            <label class="label">联系电话：</label>
+            <div class="inp"><input type="text" readonly [value]="cont && cont.managerPhone?cont.managerPhone:'/'" />
+            </div>
+        </li>
+        <li>
+            <label class="label">本工程质量监督员：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.supervisorName?cont.supervisorName:'/'" />
+            </div>
+            <label class="label">联系电话：</label>
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.supervisorPhone?cont.supervisorPhone:'/'" /></div>
+        </li>
+    </ul>
+    <p class="ctip">
+        依照《中华人民共和国合同法》及其他有关法律、法规的规定，结合本市家庭装饰装修的特点，甲、乙双方在平等、自愿、协商一致的基础上，就乙方承包甲方的家庭装饰装修工程（以下简称“工程”）的有关事宜，达成以下条款：</p>
+    <dl>
+        <dt>第一条&nbsp;&nbsp;&nbsp;&nbsp;工程概况</dt>
+        <dd>1.1&nbsp;&nbsp;工程地点 :
+            <div class="inp"><input class="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.engineeringSurvey?(cont.agreement.engineeringSurvey.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.engineeringSurvey?cont.agreement.engineeringSurvey:'/'" />
+            </div>
+            ；工种面积：约
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.engineeringArea?cont.agreement.engineeringArea:'/'" />平方米
+            </div>
+        </dd>
+        <dd>1.2&nbsp;&nbsp;工程造价：￥
+            <div class="inp"><input class="text" readonly [value]="cont  && cont.finalPrice?cont.finalPrice:'0'" />
+            </div>
+            元，大写（人民币）：
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.finalPriceBigStyle?(cont.finalPriceBigStyle.length)*2:20"
+                    [value]="cont  && cont.finalPriceBigStyle?cont.finalPriceBigStyle:'/'" /></div>
+            ；（若要变更施工内容、变更材料，工程造价按实结算）
+        </dd>
+        <dd>1.3&nbsp;&nbsp;工程承包方方式，双方商定采取下列第
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.contractType?cont.agreement.contractType:'2'" />
+            </div>
+            种承包方式：
+        </dd>
+        <dd>（1）全包（含装修套装）。乙方包工、包全部材料（见附件四：乙方提供装饰装修材料明细表）；</dd>
+        <dd>（2）半包。乙方包工、包部分材料，甲方提供部分材料（见附件三：甲方提供装饰装修材料明细表；附件四：乙方提供装饰装修材料明细表）；</dd>
+        <dd>（3）整装。乙方包工、包全部材料；家具陈设软装施工到位（见附件四：乙方提供装饰装修材料明细表，可含家具陈设软装）；</dd>
+        <dd>（4）陈设软装。乙方包整体设计，家具陈设软装全部施工到位（见附件三：甲方提供装饰装修材料明细表；附件四：乙方提供装饰装修材料明细表，可含家具软装陈设品）。</dd>
+        <dd>1.4&nbsp;&nbsp;工程有效期限
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.engineeringTimeLimit?cont.agreement.engineeringTimeLimit :'/'" />
+            </div>
+            天；开工日期（拟）
+            <div class="inp"><input class="text" readonly
+                    *ngIf="cont && cont.agreement && cont.agreement.engineeringStartTime"
+                    [value]="(cont && cont.agreement && cont.agreement.engineeringStartTime)?(cont.agreement.engineeringStartTime|date:'yyyy年MM月dd日'):'/'" />
+                <input class="text" readonly
+                    [size]="cont && cont.agreement.engineeringStartTimeRemark?(cont.agreement.engineeringStartTimeRemark.length)*2:20"
+                    [value]="(cont && cont.agreement && cont.agreement.engineeringStartTimeRemark)?(cont.agreement.engineeringStartTimeRemark):'/'" />
+            </div>
+            <!--年-->
+            <!--<div class="inp"><input class="text" readonly-->
+            <!--[value]="cont && cont.agreement && cont.agreement.engineeringStartTime?(cont.agreement.engineeringStartTime|date:'MM'):'/'"/>-->
+            <!--</div>-->
+            <!--月-->
+            <!--<div class="inp"><input class="text" readonly-->
+            <!--[value]="cont && cont.agreement && cont.agreement.engineeringStartTime?(cont.agreement.engineeringStartTime|date:'dd'):'/'"/>-->
+            <!--</div>-->
+            ；竣工日期（拟）
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.engineeringStartTime?(engineeringEndTime |date:'yyyy年MM月dd日'):'/'" />
+            </div>
+            <!--年-->
+            <!--<div class="inp"><input class="text" readonly-->
+            <!--[value]="cont && cont.agreement && cont.agreement.engineeringStartTime?(engineeringEndTime |date:'MM'):'/'"/>-->
+            <!--</div>-->
+            <!--月-->
+            <!--<div class="inp"><input class="text" readonly-->
+            <!--[value]="cont && cont.agreement && cont.agreement.engineeringStartTime?(engineeringEndTime |date:'dd'):'/'"/>-->
+            <!--</div>-->
+            <!--日-->
+        </dd>
+    </dl>
+    <dl>
+        <dt>第二条&nbsp;&nbsp;&nbsp;&nbsp;工程监理</dt>
+        <dd>若本工程实行第三方监理，由甲方（或乙方）与监理公司另行签订《工程监理合同》，并将监理工程师的姓名、单位、联系方式及监理工程师的职责等通知乙方（或甲方）。</dd>
+    </dl>
+    <dl>
+        <dt>第三条&nbsp;&nbsp;&nbsp;&nbsp;施工图纸</dt>
+        <dd>双方商定施工图纸采取下列第
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.drawingType?cont.agreement.drawingType:'3'" />
+            </div>
+            种方式提供：
+        </dd>
+        <dd>3.1&nbsp;&nbsp;甲方自行设计并提供施工图纸，交图时间为
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.drawingDetail?(cont.agreement.drawingDetail|date:'yyyy'):'/'" />
+            </div>
+            年
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.drawingDetail?(cont.agreement.drawingDetail|date:'MM'):'/'" />
+            </div>
+            月
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.drawingDetail?(cont.agreement.drawingDetail|date:'dd'):'/'" />
+            </div>
+            日，图纸一式三份，甲方、乙方、施工队各执一份（见附件五：家庭装饰装修工程设计图纸）；
+        </dd>
+        <dd>3.2&nbsp;&nbsp;甲方委托乙方设计施工图纸，图纸一式三份，甲方、乙方、施工队各执一份（见附件五：家庭装饰装修工程设计图纸），设计费由甲方支付；</dd>
+        <dd>3.3&nbsp;&nbsp;设计施工图须经甲乙双方签字后生效。</dd>
+    </dl>
+    <dl>
+        <dt>第四条&nbsp;&nbsp;&nbsp;&nbsp;甲方义务</dt>
+        <dd>4.1&nbsp;&nbsp;开工前
+            <div class="inp"><input class="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.clearSite?cont.agreement.clearSite:'2'" />
+            </div>
+            天，为乙方入场施工创造条件, 清除影响施工的障碍物；对房屋中所存留的家具、陈设应采取保护措施，以不影响施工为原则。甲乙双方清点施工现场存留物品，填写“物品清单”，交由乙方保护；
+        </dd>
+        <dd>4.2&nbsp;&nbsp;开工前应提供施工期间的水源、电源，并说明使用注意事项；</dd>
+        <dd>4.3&nbsp;&nbsp;负责协调施工队与邻里之间的关系；</dd>
+        <dd>4.4&nbsp;&nbsp;禁止拆动室内承重结构，如确需拆、改建筑的承重、非承重结构或迁改厨、卫位置及设备管线，应负责到有关部门办理相关的审批手续；根据有关部门规定，甲方无权要求乙方移动或改造暖气、燃气管线；
+        </dd>
+        <dd>4.5&nbsp;&nbsp;参与对工程质量、施工进度的监督及对材料进场、工程竣工的验收。</dd>
+    </dl>
+    <dl>
+        <dt>第五条&nbsp;&nbsp;&nbsp;&nbsp;乙方义务</dt>
+        <dd>5.1&nbsp;&nbsp;严格执行《四川省成品住宅装修工程技术标准》DBJ 51/015-2013、《住宅室内装饰装修工程质量验收规范》 JGJ/T
+            304-2013，保证工程质量，按期完成工程；家庭装饰装修过程须按照《成都家装行业设计、施工、监理三项服务规程》，做好规范服务；
+        </dd>
+        <dd>5.2&nbsp;&nbsp;在甲方未正式提供有关部门的审批文件前，严禁改动建筑主体、承重结构、暖气及燃气管线等，否则应承担相应责任；</dd>
+        <dd>5.3&nbsp;&nbsp;严格执行本市有关施工现场管理的规定，不得扰民及污染环境；</dd>
+        <dd>5.4&nbsp;&nbsp;保护好宅内的家具和设施，保证住宅内上、下管道的畅通；</dd>
+        <dd>5.5&nbsp;&nbsp;保证施工现场的整洁，工程完工后负责清扫施工现场；</dd>
+        <dd>5.6&nbsp;&nbsp;因乙方在施工中违反物业管理规定被有关部门处罚而引起的罚款及赔偿责任，由乙方负责承担；</dd>
+        <dd>5.7&nbsp;&nbsp;乙方设计师负责对甲方提供咨询、设计、报价等相关服务。制定预算报价须严格依照《成都家装工程报价指导体系》；合同签订后，乙方执行工程施工的代表人为乙方派出的项目经理。甲方关于工程的相关事宜均与乙方项目经理联系，以确保工程中的统一指挥和管理；
+        </dd>
+        <dd>5.8&nbsp;&nbsp;施工期间，施工现场发生的责任与安全事故，由乙方或责任方承担；装修过程中，若甲方提出查看工地，需提前通知乙方项目经理并遵守施工现场管理规定；若甲方私自带人（尤其是未成年人）到施工现场，由此引发的人身安全等事故，由甲方负责，乙方不予承担责任。
+        </dd>
+    </dl>
+    <dl>
+        <dt>第六条&nbsp;&nbsp;&nbsp;&nbsp;工程变更</dt>
+        <dd>6.1&nbsp;&nbsp;为确保甲方工程质量、工期及保修服务，合同签订后如有工程项目或施工方式的变更，须由双方协商后签署书面协议《家庭装饰装修工程变更单》（见附件六：家庭装饰装修工程变更单），同时调整相关工程费用及工期，口头承诺或口头协议视为无效；凡甲方直接与乙方现场工作人员商定更改施工内容引起的一切后果，均由甲方承担；
+        </dd>
+        <dd>6.2&nbsp;&nbsp;合同签订后，甲方工程减项超过5%以上时，须向乙方支付减项总额8%的变更费。若甲方减项所用的材料乙方已定购或运到现场，甲方需另外支付材料来回托运、损耗及退货费用；若甲方要求减少的施工项目已施工，甲方需支付乙方该项目的施工费、材料费、管理费及拆除费；
+        </dd>
+        <dd>6.3&nbsp;&nbsp;甲方第二次支付工程款后增加的施工项目，乙方需在收到甲方该增加项目100%的工程款后方予以施工。</dd>
+    </dl>
+    <dl>
+        <dt>第七条&nbsp;&nbsp;&nbsp;&nbsp;材料供应</dt>
+        <dd>7.1&nbsp;&nbsp;由甲方提供的材料、设备，其规格、质量应符合设计要求（见附件三：甲方提供装饰装修材料明细表）。甲方应按时将材料、设备运到施工现场并提前通知乙方，双方共同验收并办理交接手续；若甲方未按时提供材料或材料的规格、质量不符合设计要求，由此而延误工期或影响工程质量，责任由甲方承担；
+        </dd>
+        <dd>7.2&nbsp;&nbsp;由乙方提供材料、设备的（见附件四：乙方提供装饰装修材料明细表），乙方应将材料、设备运到施工现场的时间提前通知甲方，双方共同验收；若乙方所供材料的品牌、规格、质量与明细表和报价单不符，甲方可以拒绝使用，由此而延误工期或影响工程质量，责任由乙方承担；
+        </dd>
+    </dl>
+    <dl>
+        <dt>第八条&nbsp;&nbsp;&nbsp;&nbsp;工期延误</dt>
+        <dd>8.1&nbsp;&nbsp;对以下原因造成的竣工日期延误，经甲方确认，工期相应顺延；</dd>
+        <dd>（1）工程量变化或设计变更；</dd>
+        <dd>（2）不可抗力；</dd>
+        <dd>（3）甲方未按时参加阶段验收而造成的停工；</dd>
+        <dd>（4）甲方同意工期顺延的其他情况。</dd>
+        <dd>8.2&nbsp;&nbsp;因甲方未按合同约定完成相应负责的工作而影响工期的，工期顺延；因甲方提供的材料、设备质量不合格而影响工程质量的，返工费用由甲方承担，工期顺延；</dd>
+        <dd>8.3&nbsp;&nbsp;甲方未按期支付工程款，合同工期相应顺延；</dd>
+        <dd>8.4&nbsp;&nbsp;因乙方供材或施工等原因不能按期完工的，工期不顺延；因乙方原因造成了工程质量存在问题的，由乙方返工整改，返工费用由乙方承担，工期不顺延。</dd>
+    </dl>
+    <dl>
+        <dt>第九条&nbsp;&nbsp;&nbsp;&nbsp;质量标准</dt>
+        <dd>9.1&nbsp;&nbsp;双方约定本工程施工质量按下列第
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.qtType?cont.agreement.qtType:'2'" />
+            </div>
+            项标准执行：
+        </dd>
+        <dd>（1）《 四川省成品住宅装修工程技术标准》 DBJ51/015-2013;</dd>
+        <dd>（2）《 住宅室内装饰装修工程质量验收规范》 JGJ/T304-2013；</dd>
+        <dd>（3）其他规定：
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.qtDetail?(cont.agreement.qtDetail.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.qtDetail?cont.agreement.qtDetail:'/'" />
+            </div>
+        </dd>
+        <dd>9.2&nbsp;&nbsp;施工过程中双方对工程质量发生争议时：</dd>
+        <dd>（1）可通过成都市消费者协会在成都市建筑装饰协会设立的家装维权投诉站进行调解（登录“便民装”微信公众平台）；</dd>
+        <dd>（2）如不服调解，由双方同意的工程质量检侧机构鉴定，所需费用及因此造成的损失，由责任方承担。双方均有责任，由双方根据其责任分别承担。</dd>
+    </dl>
+    <dl>
+        <dt>第十条&nbsp;&nbsp;&nbsp;&nbsp;工程验收和保修</dt>
+        <dd>10.1&nbsp;&nbsp;双方在施工过程中分下列三个阶段对工程质量进行验收：</dd>
+        <dd>（1）水、电管线，防水层及吊顶基层等隐蔽工程的验收；</dd>
+        <dd>（2）油漆、面层涂料施工前验收；</dd>
+        <dd>（3）竣工验收。</dd>
+        <dd>乙方应提前2天通知甲方参加各阶段验收，各阶段验收合格后应填写工程验收单（见附件七：工程验收单）。若甲方接到通知后，未按时参加验收，乙方有权停工等待，由此给乙方造成的工期延误及其他损失均由甲方承担。</dd>
+        <dd>10.2&nbsp;&nbsp;工程竣工验收合格并结清工程余款后，乙方向甲方办理移交手续（见附件八：工程结算单），并填写工程报修单（从竣工验收合格之日起计算，工程保修期2年。其中，有防水要求的卫生间、厨房等房间防渗漏为5年，供热与供冷系统为两个供暖期、供冷期。见附件九：工程报修单）。
+        </dd>
+    </dl>
+    <dl>
+        <dt>第十一条&nbsp;&nbsp;&nbsp;&nbsp;工程款支付方式</dt>
+        <dd>11.1&nbsp;&nbsp;双方约定按下列第
+            <div class="inp"><input type="text" readonly value="1" /></div>
+            种方式支付工程款：
+        </dd>
+        <dd>（1）合同生效后，甲方按下表中的约定直接向乙方财务部支付工程款：</dd>
+        <dd *ngIf="cont && cont.pays && cont.pays.length > 0">
+            <table>
+                <tr>
+                    <td>支付次数</td>
+                    <td>付款时间</td>
+                    <td>付款比例（%）</td>
+                    <td>支付金额（元）</td>
+                </tr>
+                <tr *ngFor="let pay of cont.pays" [hidden]="pay.type === 9">
+                    <td>{{getPayType(pay.type)}}</td>
+                    <td>{{pay.payTime?pay.payTime:'/'}}</td>
+                    <td>{{pay.percentage?pay.percentage:'/'}}</td>
+                    <td>{{pay.totalPrice?pay.totalPrice:'/'}}</td>
+                </tr>
+            </table>
+        </dd>
+        <!--<dd *ngIf="!cont.pays || cont.pays.length == 0">-->
+        <!--<table>-->
+        <!--<tr>-->
+        <!--<td>支付次数</td>-->
+        <!--<td>付款时间</td>-->
+        <!--<td>付款比例（%）</td>-->
+        <!--<td>支付金额（元）</td>-->
+        <!--</tr>-->
+        <!--<tr>-->
+        <!--<td>第一期</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--</tr>-->
+        <!--<tr>-->
+        <!--<td>第二期</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<tr>-->
+        <!--<td>第三期</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--</tr>-->
+        <!--<tr>-->
+        <!--<td>第四期</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--</tr>-->
+        <!--<tr>-->
+        <!--<td>第五期</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--<td>&#45;&#45;</td>-->
+        <!--</tr>-->
+        <!--</table>-->
+        <!--</dd>-->
+        <dd>(2) 其他支付方式及说明：
+            <div class="inp"><input type="text" size="20" value="/" readonly /></div>
+        </dd>
+        <dd>11.2&nbsp;&nbsp;工程验收合格后2日内，乙方应向甲方提交工程结算单，并将有关资料送交甲方。甲方接到资料后2日内如未有异议，双方应在工程结算单（见附件九：工程结算单）上签字，甲方并同时向乙方结清工程尾款，双方办理移交手续；
+        </dd>
+        <dd> 11.3&nbsp;&nbsp;甲方应将工程款直接交乙方财务部，工程款全部结清后，乙方应向甲方开具正规票据。若因甲方将工程款直接交给乙方施工人员而造成损失，责任由甲方自负。</dd>
+    </dl>
+    <dl>
+        <dt>第十二条&nbsp;&nbsp;&nbsp;&nbsp;违约责任</dt>
+        <dd>12.1&nbsp;&nbsp;合同签订后，合同任何一方提出解除合同或无论因何原因违约造成合同无法履行的，应及时通知另一方。经双方协商同意后，可办理终止或延期履行合同手续。违约方应向守约方支付工程造价
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.penalty?cont.agreement.penalty:'10'" />
+            </div>
+            %的违约金；若因此造成损失的，违约方应予以赔偿；
+        </dd>
+        <dd>12.2&nbsp;&nbsp;工程未验收合格或未结清尾款而未移交，甲方提前使用或擅自动用工程成品的，工程视为合格，由此而造成损失的由甲方负责，并视为甲方自动放弃保修及维修权利且乙方仍有追收尾款的权利；</dd>
+        <dd>12.3&nbsp;&nbsp;甲方未按期支付第二、三次工程款的，乙方可以停工，工期顺延；</dd>
+        <dd>12.4&nbsp;&nbsp;由于乙方原因，工程质量达不到双方约定的质量标准，由乙方负责整改，所需返工修理费用由乙方承担，工期不予顺延；</dd>
+        <dd>12.5&nbsp;&nbsp;由于甲方或乙方原因致使工期延误，每延误一日由责任方向对方支付工程总造价2 ‰（或：
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.liquidated?cont.agreement.liquidated:'/'" />
+            </div>
+            ）的违约金；
+        </dd>
+    </dl>
+    <dl>
+        <dt>第十三条&nbsp;&nbsp;&nbsp;&nbsp;合同争议的解决方式</dt>
+        <dd>双方发生争议协商解决不成时，按下列第
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.disputeType?cont.agreement.disputeType:'2'" />
+            </div>
+            种方式解决。
+        </dd>
+        <dd>（1）向
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.disputeDetail?(cont.agreement.disputeDetail.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.disputeDetail?cont.agreement.disputeDetail:'/'" />
+            </div>
+            仲裁委员会申请仲裁；
+        </dd>
+        <dd>（2）向人民法院起诉。</dd>
+    </dl>
+    <dl>
+        <dt>第十四条&nbsp;&nbsp;&nbsp;&nbsp;几项具体约定</dt>
+        <dd>14.1&nbsp;&nbsp;工程地在成都市绕城高速路外，收取远程施工费，费用为工程总造价3%-10%，由双方协商确定；</dd>
+        <dd>14.2&nbsp;&nbsp;因工程施工而产生的垃圾，由乙方负责清运到物管规定的堆放点，甲方应支付垃圾清运费用（人民币）
+            <div class="inp"><input type="text" readonly
+                    [size]="cont && cont.agreement && cont.agreement.clearPrice?(cont.agreement.clearPrice.length)*2:20"
+                    [value]="cont && cont.agreement && cont.agreement.clearPrice?cont.agreement.clearPrice:'详见预算'" />
+            </div>
+            元，（此费用不在工程款内）；
+        </dd>
+        <dd>14.3&nbsp;&nbsp;如本工地有甲方另行发包给第三方的项目（例如：中央空调、封装阳台、家装楼层、安装暖气门窗地板等），其施工安全、质量、卫生等责任由甲方督促第三方自行负责；</dd>
+        <dd>14.4&nbsp;&nbsp;施工期间，乙方每天的工作时间为：</dd>
+        <dd>上午
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructAmBeginTime?(cont.agreement.constructAmBeginTime|date:'HH'):'00'" />
+            </div>
+            点
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructAmBeginTime?(cont.agreement.constructAmBeginTime|date:'mm'):'30'" />
+            </div>
+            分 至
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructAmEndTime?(cont.agreement.constructAmEndTime|date:'HH'):'12'" />
+            </div>
+            点
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructAmEndTime?(cont.agreement.constructAmEndTime|date:'mm'):'00'" />
+            </div>
+            分；
+        </dd>
+        <dd>下午
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructPmBeginTime?(cont.agreement.constructPmBeginTime|date:'HH'):'12'" />
+            </div>
+            点
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructPmBeginTime?(cont.agreement.constructPmBeginTime|date:'mm'):'00'" />
+            </div>
+            分 至
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructPmEndTime?(cont.agreement.constructPmEndTime|date:'HH'):'23'" />
+            </div>
+            点
+            <div class="inp"><input type="text" readonly
+                    [value]="cont && cont.agreement && cont.agreement.constructPmEndTime?(cont.agreement.constructPmEndTime|date:'mm'):'30'" />
+            </div>
+            分。
+        </dd>
+    </dl>
+    <dl>
+        <dt>第十五条&nbsp;&nbsp;&nbsp;&nbsp;附则</dt>
+        <dd>15.1&nbsp;&nbsp;本合同签订后，该工程项目不得转包；</dd>
+        <dd>15.2&nbsp;&nbsp;甲、乙双方直接签订合同的，本合同一式两份，双方签字（盖章）后生效，甲、乙双方各持一份；</dd>
+        <dd>15.3&nbsp;&nbsp;凡在本市各家庭装饰装修市场或装修平台签订合同的，实行自愿备案的原则，本合同一式三份，甲、乙双方签字（盖章）后生效，送市场或平台管理部门备案，三方各持一份；</dd>
+        <dd>15.4&nbsp;&nbsp;合同履行完后自动终止；</dd>
+        <dd>15.5&nbsp;&nbsp;合同附件为本合同的组成部分，与本合同具有同等法律效力。</dd>
+        <dd></dd>
+    </dl>
+    <dl>
+        <dt>合同附件：</dt>
+        <dd>附件一：家庭装饰装修工程施工项目确认表（或主要区域功能设置选项表）</dd>
+        <dd>附件二：家庭装饰装修工程清单报价表</dd>
+        <dd>附件三：甲方提供装饰装修材料明细表 （可含家具软装陈设品）</dd>
+        <dd>附件四：乙方提供装饰装修材料明细表 （可含家具软装陈设品）</dd>
+        <dd>附件五：家庭装饰装修工程设计图纸</dd>
+        <dd>附件六：家庭装饰装修工程变更单</dd>
+        <dd>附件七：工程验收单</dd>
+        <dd>附件八：工程结算单</dd>
+        <dd>附件九：工程保修单</dd>
+    </dl>
+    <dl>
+        <dt>第十六条&nbsp;&nbsp;&nbsp;&nbsp;其他约定条款</dt>
+        <div *ngIf="cont && cont.appends && cont.appends.length > 0">
+            <dd *ngFor="let append of cont.appends">
+                <div class="inp"><input type="text" readonly
+                        [size]="append && append.content?(append.content.length)*2+10:20"
+                        [value]="append && append.content?append.content:'/'" /></div>
+            </dd>
+        </div>
+        <div *ngIf="!cont || (cont && cont.append  && cont.append.length == 0)">
+            <dd>
+                <div class="inp"><input type="text" readonly size="50" [value]="'/'" /></div>
+            </dd>
+        </div>
+    </dl>
+    <dl
+        *ngIf="(cont && cont.clause && cont.clause.length > 0) || ( cont && cont.preferential && cont.preferential.length > 0)">
+        <dt>第十七条&nbsp;&nbsp;补充条款</dt>
+        <dd>本条款为《成都市家庭装饰装修工程施工合同》组成部分，与合同具有同等效力，甲方（客户）应当仔细阅读并签字确认：</dd>
+        <dd>一、《成都市家庭装饰装修工程施工合同》自双方签字或盖章之日生效。</dd>
+        <dd>
+            二、若发生以下情况，工程相应顺延：1、所在小区物管不允许周末和节假日施工；2、因地暖、中央空调等其他施工作业及甲方自购主材、定制产品等原因影响乙方施工的；3、因冰冻、暴雨等恶劣天气或停电、游行等其他不可抗拒力因素造成无法正常施工的。
+        </dd>
+        <dd>三、自合同签订之日起，因甲方原因不能开工或停工达6个月以上（含6个月），乙方有权按本公司最新报价自动调整工程造价，双方另行签订变更合同。甲方若因此解除合同视为违约，应承担违约责任。</dd>
+        <dd>四、水电工程款及增加项目款与第二次工程款同时交纳。</dd>
+        <dd>五、甲方与乙方施工人员串通做私活，新增项目拒不向乙方申报、结算，则甲方构成违约，应支付违约金，乙方可单方面解除合同，且该增加项目乙方不承担保修责任。</dd>
+        <dd>
+            六、甲方支付工程款应严格遵守以下规定：1、甲方仅且只能向乙方财务收款人员支付合同第一次（首批款）、第二次（二批款）工程款，并由乙方出具盖有财务章的收款收据。2、工程结算尾款大于2000元（不含2000元）的，甲方也仅且只能向乙方财务收款人员支付该款，并由乙方出具加盖财务章的收款收据。3、甲方违反规定支付款项造成损失的由甲方自行承担。
+        </dd>
+        <dd>七、本合同约定的工程造价为图示理论工程量，结算时以实际发生的工程量为准，在甲方未增加工程项目的情况下，结算价未超过本合同约定的工程造价5%（含5%）的款项，甲方应当支付，超过部分可以拒付。</dd>
+        <dd>八、乙方开展赠品等优惠酬宾活动以以下书面约定为准，乙方员工私自承诺的无效。具体优惠活动如下：</dd>
+
+        <dd *ngFor="let prefer of cont.preferential">
+            <div class="inp"><input type="text" readonly
+                    [size]="prefer && prefer.content?(prefer.content.length)*2+10:20"
+                    [value]="prefer && prefer.content?prefer.content:'/'" /></div>
+        </dd>
+
+        <dd *ngIf="cont && cont.preferential && cont.preferential.length == 0">
+            <div class="inp"><input type="text" readonly size="50" [value]="'/'" /></div>
+        </dd>
+        <dd>九、工程竣工验收合格甲方（客户）在合同约定期限内未结清尾款，本合同约定的尚未交付的赠品作废，乙方不再交付，并不予办理保修卡。且乙方保留继续追收之权利。</dd>
+        <dd>十、其他约定条款：</dd>
+        <dd *ngFor="let cla of cont.clause">
+            <div class="inp"><input type="text" readonly [size]="cla && cla.content?(cla.content.length)*2+10:20"
+                    [value]="cla && cla.content?cla.content:'/'" /></div>
+        </dd>
+        <dd *ngIf="cont && cont.clause && cont.clause.length == 0">
+            <div class="inp"><input type="text" readonly size="50" [value]="'/'" /></div>
+        </dd>
+    </dl>
+    <dl class="split">
+        <dd>
+            <p *ngIf="cont && cont.agreement && cont.agreement.agreementType== 0"><span>甲方</span>(签字)：</p>
+            <p *ngIf="cont && cont.agreement && cont.agreement.agreementType== 1"><span>甲方</span>(盖章)：</p>
+            <p *ngIf="cont && cont.agreement && cont.agreement.agreementType== 0">&nbsp;</p>
+            <p *ngIf="cont && cont.agreement && cont.agreement.agreementType== 1">法定代表人（签字）</p>
+            <p>&nbsp;</p>
+            <p class="right">&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;日</p>
+        </dd>
+        <dd>
+            <p><span>乙方</span>(盖章)：</p>
+            <p>法定代表人（签字）</p>
+            <p>委托代理人（签字）</p>
+            <p class="right">&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;日</p>
+        </dd>
+    </dl>
+    <dl>
+        <dd>
+            <p>家庭装饰装修市场或装修平台管理部门备案意见（合同备案签章）: </p>
+        </dd>
+    </dl>
+    <dl class="split">
+        <dd>
+            <p>委托代理人（签字）:</p>
+            <p>&nbsp;&nbsp;</p>
+            <p>&nbsp;&nbsp;</p>
+            <p>&nbsp;&nbsp;</p>
+        </dd>
+        <dd>
+            <p>联系电话：</p>
+            <p>&nbsp;&nbsp;</p>
+            <p>&nbsp;&nbsp;</p>
+            <p class="right">&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;日</p>
+        </dd>
+    </dl>
+</div>

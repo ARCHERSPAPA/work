@@ -1,0 +1,150 @@
+<div (click)="close()">
+    <nz-spin nzTip="加载中" [nzSpinning]="isSpinning">
+        <ul class="sketch-data">
+            <li>
+                <p>{{toBeDistributeCount | number:'1.0'}}</p>
+                <p>待派单</p>
+            </li>
+            <li>
+                <p>{{toBeStartedCount | number:'1.0'}}</p>
+                <p>待开工</p>
+            </li>
+            <li>
+                <p>{{constructionCount | number:'1.0'}}</p>
+                <p>施工中</p>
+            </li>
+            <li>
+                <p>{{acceptanceCheck | number:'1.0'}}</p>
+                <p>待验收</p>
+            </li>
+        </ul>
+        <div class="sketch-time" (click)="open($event)">
+            <div class="time-left">
+                <p>{{startTime | date:'MM-dd'}}</p>
+                <p>{{startTime | date:'yyyy'}}</p>
+            </div>
+            <div class="line">
+                监理发布的动态数据
+            </div>
+            <div class="time-right">
+                <p>{{endTime | date:'MM-dd'}}</p>
+                <p>{{endTime | date:'yyyy'}}</p>
+            </div>
+            <nz-range-picker class="btn1" nzSize="large" [(ngModel)]="dateRange" [nzOpen]="timeFlag"
+                (ngModelChange)="onChange($event)" [nzDisabledDate]="disabledDate"></nz-range-picker>
+        </div>
+        <div class="vis">
+            <div id="container"></div>
+        </div>
+    </nz-spin>
+    <div class="detail">详细数据</div>
+    <div class="table_sketch">
+        <a class="upload" href="javascript:void(0)" (click)="exportToExcel()" *ngIf="tabIndex === 1">下载报表</a>
+        <nz-tabset [nzTabPosition]="'top'" [nzType]="'card'" [nzSelectedIndex]="tabIndex"
+            (nzSelectChange)="changeTab($event)">
+            <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab">
+                <div class="sketch-table">
+                    <nz-table 
+                        *ngIf="tabIndex === 0"
+                        #filterTable [nzData]="topData" 
+                        [nzFrontPagination]="false"
+                        [nzLoading]="isTopLoading" 
+                        [(nzPageIndex)]='pageNo' 
+                        [(nzPageSize)]="pageSize" 
+                        [nzTotal]="total"
+                        (nzPageIndexChange)="changePage()"
+                        [nzShowPagination]="true">
+                        <thead (nzSortChange)="sort($event)" nzSingleSort>
+                            <tr>
+                                <th>监理</th>
+                                <th nzShowSort nzSortKey="joinCount" [nzSort]="joinCountSort">负责工地</th>
+                                <th nzShowSort nzSortKey="allDynamic" [nzSort]="allDynamicSort">动态总数</th>
+                                <th nzShowSort nzSortKey="activeCount" [nzSort]="activeCountSort">去重动态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of filterTable.data">
+                                <td>{{data.name}}</td>
+                                <td>{{data.joinCount}}</td>
+                                <td>{{data.allDynamic }}</td>
+                                <td>{{data.activeCount}}</td>
+                                <td>
+                                    <a href="javascript:void(0)" [routerLink]="['./../attendance']"
+                                        [queryParams]="{pid:btoa(data.id)}">
+                                        查看
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                    <nz-table 
+                        *ngIf="tabIndex === 1" 
+                        #nzTable 
+                        [nzFrontPagination]="false" 
+                        [(nzPageIndex)]='pageNo'
+                        [(nzPageSize)]="pageSize" 
+                        [nzTotal]="total" 
+                        (nzPageIndexChange)='changeData()'
+                        [nzShowPagination]='true' 
+                        [nzData]="tableList" 
+                        [nzLoading]="isTableSpinning">
+                        <thead>
+                            <tr>
+                                <th>发布时间</th>
+                                <th>监理</th>
+                                <th>工长</th>
+                                <th>客户</th>
+                                <th>楼盘房号</th>
+                                <th>户型</th>
+                                <th>面积</th>
+                                <th>装修类型</th>
+                                <th>进度</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of nzTable.data">
+                                <td nz-td title="{{item.createDate | date:'yyyy-MM-dd HH:mm:ss'}}"
+                                    *ngIf="item.createDate">
+                                    {{item.createDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                                </td>
+                                <td *ngIf="!item.createDate">--</td>
+                                <td nz-td title="{{item.supervisorName?item.supervisorName:''}}">
+                                    {{item.supervisorName?item.supervisorName:'--'}}
+                                </td>
+                                <td nz-td title="{{item.wokerName?item.wokerName:''}}">
+                                    {{item.wokerName?item.wokerName:'--'}}
+                                </td>
+                                <td nz-td title="{{item.customerName?item.customerName:''}}">
+                                    {{item.customerName?item.customerName:'--'}}
+                                </td>
+                                <ng-container
+                                    *ngIf="item.customerHouseAddress || item.customerRoomNumber; else elseTemplate">
+                                    <td nz-td title="{{item.customerHouseAddress}}{{item.customerRoomNumber}}"
+                                        class="table-eclipse">
+                                        {{item.customerHouseAddress}}{{item.customerRoomNumber}}
+                                    </td>
+                                </ng-container>
+                                <ng-template #elseTemplate>
+                                    <td nz-td>--</td>
+                                </ng-template>
+                                <td nz-td title="{{item.customerHouseType?item.customerHouseType:''}}">
+                                    {{item.customerHouseType?item.customerHouseType:'--'}}
+                                </td>
+                                <td nz-td title="{{item.customerHouseArea?item.customerHouseArea:''}}">
+                                    {{item.customerHouseArea?item.customerHouseArea:'--'}}
+                                </td>
+                                <td nz-td title="{{item.type?item.type:''}}">
+                                    {{item.type?item.type:'--'}}
+                                </td>
+                                <td nz-td title="{{item.stageName?item.stageName:''}}">
+                                    {{item.stageName?item.stageName:'--'}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+            </nz-tab>
+        </nz-tabset>
+    </div>
+</div>

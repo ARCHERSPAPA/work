@@ -7,18 +7,18 @@
       <messageItem v-show="allConversation.length!== 0" :all-conversation="allConversation" />
     </view>
     <view>{{ conversationList }}</view>
-    <tab-bar :selected="1"/>
+    <!-- <custom-tab-bar :selected="1"/> -->
   </view>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
 import messageItem from './message-item/message-item'
-import tabBar from '../../components/tab-bar/tab-bar.vue'
+// import customTabBar from '../../custom-tab-bar/index'
 export default {
   components: {
     messageItem,
-    tabBar
+    // customTabBar
   },
   data() {
     return {
@@ -34,7 +34,12 @@ export default {
   	}
   },
   onShow() {
-
+    const page = this.$mp.page  
+    if (typeof page.getTabBar === 'function' &&  page.getTabBar()) {  
+      page.getTabBar().setData({  
+        selected: 1  
+      })  
+    }
   },
   methods: {
   },

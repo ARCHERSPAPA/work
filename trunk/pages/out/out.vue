@@ -13,33 +13,34 @@
 
 		data() {
 			return {
-				redirectUrl: ''
+				redirectUrl: '',
+				title:''
 			};
 		},
 		onLoad(option) {
+			uni.showLoading();
+			let params = option.query || this.$parseURL().query;
 			console.log(option);
-			let redirect = option.url || this.$parseURL().url;
-			if(redirect){
-				// console.log(redirect);
-				// let url  = `${httpConfig.baseURL}/h5/view/view.html?redirect=${encodeURIComponent(redirect)}`;
-				// uni.showModal({
-				// 	title:"modal",
-				// 	content:JSON.stringify(url),
-				// 	success: () => {
-				// 		this.redirectUrl = url;
-				// 	}
-				// })
-				this.redirectUrl = redirect;
+			try{
+				uni.hideLoading();
+				let outer = JSON.parse(decodeURIComponent(params));
+				this.redirectUrl = outer.url;
+				uni.setNavigationBarTitle({
+					title: outer.title?outer.title:''
+				})
 				
-			}else{
-				uni.showToast({
-					icon: none,
-					title: Messages.NO_MATCH_URL,
+			}catch(e){
+				uni.hideLoading();
+				uni.showModal({
+					title:"提示",
+					content:Messages.NO_MATCH_URL,
 					success: () => {
 						uni.navigateBack();
 					}
-				});
+				})
 			}
+				
+				
 		}
 	}
 </script>

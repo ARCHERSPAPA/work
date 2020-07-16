@@ -1,0 +1,5 @@
+<div class="client" style="padding:0">
+  <div class="content">
+      <router-outlet></router-outlet>
+  </div>
+</div>

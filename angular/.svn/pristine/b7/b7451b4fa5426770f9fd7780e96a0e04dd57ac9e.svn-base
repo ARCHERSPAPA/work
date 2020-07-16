@@ -1,0 +1,82 @@
+<div class="user-info">
+    <div class="head">
+        <rev-breadcrumb [breads]="breads"></rev-breadcrumb>
+    </div>
+    <div class="content">
+        <rev-user-info-step [currentIndex]="3"></rev-user-info-step>
+        <div class="form">
+            <form nz-form [formGroup]="resetForm">
+                <nz-form-item style="text-align: center;margin-bottom: 8px;">
+                    <nz-form-label nzFor="password">密码</nz-form-label>
+                    <nz-form-control class="layout">
+                        <input nz-input type="password" nzSize='large' id="newPassword" formControlName="newPassword"
+                            (ngModelChange)="updateConfirmValidator()" autocomplete="off" />
+                        <nz-form-explain
+                            *ngIf="resetForm.get('newPassword').dirty && resetForm.get('newPassword').errors"
+                            style="position: absolute;">
+                            <ng-container *ngIf="resetForm.get('newPassword').hasError('required')">
+                                密码必填
+                            </ng-container>
+                            <ng-container *ngIf="resetForm.get('newPassword').hasError('pwd')">
+                                必须包含数字和字母，且能输入数字、字母和下划线
+                            </ng-container>
+                            <ng-container *ngIf="resetForm.get('newPassword').hasError('minlength')">
+                                至少输入8位字符
+                            </ng-container>
+                            <ng-container *ngIf="resetForm.get('newPassword').hasError('maxlength')">
+                                至多输入32位字符
+                            </ng-container>
+                        </nz-form-explain>
+                        <!-- <div *ngIf="!resetForm.get('newPassword').valid && !resetForm.get('newPassword').pristine"
+                             class="ant-form-explain ng-star-inserted">
+                                    <span *ngIf="resetForm.hasError('required',['newPassword'])"
+                                          class="ng-trigger ng-trigger-helpMotion">密码必填</span>
+                            <span *ngIf="resetForm.hasError('pwd',['newPassword'])"
+                                  class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;必须包含数字和字母，且能输入数字、字母和下划线
+                            </span>
+                            <span *ngIf="resetForm.hasError('minlength',['newPassword'])"
+                                  class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至少输入8位字符</span>
+                            <span *ngIf="resetForm.hasError('maxlength',['newPassword'])"
+                                  class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;至多输入32位字符</span>
+                        </div> -->
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item style="text-align: center;">
+                    <nz-form-label nzFor="checkPassword" style="width: 5em;margin-left: -33px;    vertical-align: top;">确认密码</nz-form-label>
+                    <nz-form-control class="layout">
+                        <input nz-input type="password" nzSize='large' formControlName="checkPassword"
+                            id="checkPassword" autocomplete="off" />
+                            <nz-form-explain
+                            *ngIf="resetForm.get('checkPassword').dirty && resetForm.get('checkPassword').errors"
+                            >
+                            <ng-container *ngIf="resetForm.get('checkPassword').hasError('required')">
+                                确认密码必填
+                            </ng-container>
+                            <ng-container *ngIf="resetForm.get('checkPassword').hasError('confirm')">
+                                两次密码输入不一致
+                            </ng-container>
+                        </nz-form-explain>
+                        <!-- <div *ngIf="!resetForm.get('checkPassword').valid && !resetForm.get('checkPassword').pristine"
+                            class="ant-form-explain ng-star-inserted">
+                            <span *ngIf="resetForm.hasError('required',['checkPassword'])"
+                                class="ng-trigger ng-trigger-helpMotion">确认密码必填</span>
+                            <span *ngIf="resetForm.hasError('confirm',['checkPassword'])"
+                                class="ng-trigger ng-trigger-helpMotion">&nbsp;&nbsp;两次密码输入不一致</span>
+                        </div> -->
+                    </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item nz-row>
+                    <nz-form-control [nzSpan]="3" [nzOffset]="8">
+                        <button nz-button nzType="default" nzBlock (click)="cancel()">取消
+                        </button>
+                    </nz-form-control>
+                    <nz-form-control [nzSpan]="3" [nzOffset]="3">
+                        <button nz-button nzType="primary" nzBlock (click)="submit()" [disabled]="!resetForm.valid">提交
+                        </button>
+                    </nz-form-control>
+                </nz-form-item>
+            </form>
+        </div>
+    </div>
+</div>

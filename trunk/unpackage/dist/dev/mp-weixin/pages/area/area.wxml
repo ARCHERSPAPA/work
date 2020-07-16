@@ -1,0 +1,1 @@
+<view class="mkb-area"><price-area vue-id="b2859ec0-1" listArea="{{inputArea}}" pIdx="{{areaIndex}}" queryId="{{queryId}}" layoutIndex="{{layoutIndex}}" layoutList="{{layoutList}}" data-event-opts="{{[['^areaIdx',[['getAreaIdx']]]]}}" bind:areaIdx="__e" bind:__l="__l"></price-area></view>

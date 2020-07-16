@@ -1,0 +1,43 @@
+<div class="staff-list">
+  <div class="list-head">
+    <div class="search-bar">
+      <button nz-button [nzType]="'primary'" (click)="addData(true)">添加</button>
+    </div>
+  </div>
+
+    <div class="list-items">
+      <nz-table #nzTable [nzData]="finTempList" [nzBordered]="true" [nzFrontPagination]="false"  nzSize="middle"
+        [nzShowPagination]='true'>
+        <thead nz-thead>
+          <tr>
+            <th>名称</th>
+            <th nz-th><span>期数</span></th>
+            <th nz-th><span>编辑人</span></th>
+            <th nz-th><span>编辑时间</span></th>
+            <th nz-th><span>操作</span></th>
+          </tr>
+        </thead>
+        <tbody nz-tbody>
+          <tr *ngFor="let data of nzTable.data;let i = index">
+            <td >{{data.name}}</td>
+            <td  >{{getNumber(data.details[0].type)}}</td>
+            <td >{{data.createTime|date:'yyyy-MM-dd'}}</td>
+            <td nz-td title="{{data.account?data.account:'--'}}">{{data.account?data.account:'--'}}</td>
+            <td nz-td title="{{data.account?data.account:'--'}}">{{data.account?data.account:'--'}}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+<!-- 
+<nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="APP权限" [nzFooter]="true" (nzOnCancel)="handleCancel()"
+nzCancelText="关闭" nzOkText="提交"
+  (nzOnOk)="submit()">
+  <div nz-col [nzSpan]=10 style="text-align: right;line-height: 30px;margin-right: 24px;">
+    装修TOP项目展示范围
+  </div>
+  <nz-select style="width: 250px;" [(ngModel)]="appType" (ngModelChange)="handleAPPType($event)" nzAllowClear='false'
+    >
+    <nz-option *ngFor="let source of permissionList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
+  </nz-select>
+</nz-modal> -->

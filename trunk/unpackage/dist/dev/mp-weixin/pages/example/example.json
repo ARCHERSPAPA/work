@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "案例详情",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "mkb-tab-bar": "/components/mkb-tab-bar/mkb-tab-bar",
+    "mkb-tab-case": "/components/mkb-tab-case/mkb-tab-case",
+    "uni-icons": "/components/uni-icons/uni-icons",
+    "mkb-back-top": "/components/mkb-back-top/mkb-back-top",
+    "example-head": "/pages/example/example-head"
+  }
+}

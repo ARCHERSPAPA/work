@@ -1,8 +1,9 @@
 <template>
 	<!-- v-if="menuList[0].detailList.length > 0" -->
 	<view class="design-result">
-		<view class="design-result-head" :style="{ background: flag ? 'rgba(255,136,0,1)' : '#FFFFFF' }">
-			<view class="design-result-head-term" :style="{ color: flag ? '#FFFFFF' : 'rgba(0,0,0,0.40)' }">您筛选的条件</view>
+		<view class="design-result-head" :style="{ background: flag ? 'rgba(0,0,0,0)' : '#FFFFFF' }">
+			<!-- :style="{ color: flag ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.40)' }" -->
+			<view class="design-result-head-term">您筛选的条件</view>
 			<view class="price-result-select">
 				<price-select
 					:ref="'slFilter'"
@@ -14,7 +15,7 @@
 					@changeFlag="receptFlag"
 				/>
 			</view>
-			<view class="design-result-head-refer">系统为您设计以下参考案例</view>
+			<!-- <view class="design-result-head-refer">系统为您设计以下参考案例</view> -->
 		</view>
 		<scroll-view v-if="list && list.length > 0" scroll-y class="design-result-list" @scrolltolower="loadMore">
 			<view v-for="item of list" :key="item.id" class="design-result-list-item" @click="toDetail(item)">
@@ -24,7 +25,8 @@
 							<swiper-item v-for="(itemImg, index) in item.coverImgs" :key="index"><image :src="itemImg" mode="aspectFill" /></swiper-item>
 						</swiper>
 					</uni-swiper-dot>
-					<mkb-img-cut v-if="item.state == 8" :img-url="item.coverImgs && item.coverImgs.length == 1 ? item.coverImgs[0] : defaultImg" class="carousel-swiper" />
+					<mkb-img-cut v-if="item.state == 8 && item.coverImgs && item.coverImgs.length == 1 " :img-url="item.coverImgs[0] + '?imageView2/2/w/1041/h/630/interlace/1'" class="carousel-swiper" />
+					<mkb-img-cut v-if="item.state == 8 && !item.coverImgs" :img-url="defaultImg" class="carousel-swiper" />
 					<uni-swiper-dot v-if="item.surfaceImgs.length > 1 && item.state !== 8" :info="item.surfaceImgs" :current="current" :mode="mode">
 						<swiper class="carousel-swiper" circular @change="change">
 							<swiper-item v-for="(itemImg, index) in item.surfaceImgs" :key="index">
@@ -32,13 +34,16 @@
 							</swiper-item>
 						</swiper>
 					</uni-swiper-dot>
-					<!-- <image :src="item.surfaceImgs && item.surfaceImgs.length == 1?item.surfaceImgs[0].imgUrl:defaultImg" class="carousel-swiper" v-if="item.state !== 8"></image> -->
 					<mkb-img-cut
-						v-if="item.state !== 8"
-						:img-url="item.surfaceImgs && item.surfaceImgs.length == 1 ? item.surfaceImgs[0].imgUrl : defaultImg"
+						v-if="item.state !== 8 && item.surfaceImgs && item.surfaceImgs.length == 1"
+						:img-url="item.surfaceImgs[0].imgUrl + '?imageView2/2/w/1041/h/630/interlace/1'"
 						class="carousel-swiper"
 					/>
-
+					<mkb-img-cut
+						v-if="item.state !== 8 && !item.surfaceImgs"
+						:img-url="defaultImg"
+						class="carousel-swiper"
+					/>
 					<view v-if="item.fabulousCount" class="design-result-list-item-img-hand">
 						<i class="iconfont" style="font-size: 28.98rpx;color: rgba(255,255,255,1);display: inline-block;margin-right: 14.49rpx;">&#xe60c;</i>
 						<text>{{ item.fabulousCount }}</text>
@@ -92,6 +97,7 @@ import priceSelect from '../price-select/sl-filter.vue';
 import Messages from '../../util/messages.js';
 import Constant from '../../util/constant.js';
 import mkbImgCut from '../mkb-img-cut/mkb-img-cut.vue';
+import {copyUrl} from '../../util/modal.js';
 export default {
 	components: {
 		uniSwiperDot,
@@ -247,13 +253,15 @@ export default {
 				console.log('error');
 			} else {
 				let designList = uni.getStorageSync('designList');
+				designList[0].designManner = val.style;
+				designList[1].designDectype = val.decorateType;
 				designList[2].designArea = val.area ? val.area.slice(0, val.area.indexOf('m²')) : designList[2].designArea;
 				designList[3].designLayout = val.layout;
 				uni.setStorageSync('designList', designList);
 				this.params.style = val.style;
 				this.params.decorateType = val.decorateType;
 				this.params.houseArea = val.area ? val.area.slice(0, val.area.indexOf('m²')) : designList[2].designArea;
-				this.params.customerHouseType = val.layout;
+				this.params.customerHouseType = val.layout == '全部'?'': val.layout;
 				this.getList(true);
 			}
 		},
@@ -320,7 +328,7 @@ export default {
 		 * 跳转out外网桥梁页面
 		 */
 		handleGoOut(url) {
-			this.$openPage({ name: 'out', query: { url } });
+			copyUrl(url);
 		},
 
 		/**
@@ -346,19 +354,20 @@ export default {
 $border-radius: 14.49rpx 14.49rpx 0px 0px;
 .design-result {
 	@include fontStyle;
+	height: 100vh;
+	background: rgba(0,0,0,0.03);
 	&-head {
 		width: 100%;
-		height: 282.6rpx;
-		background: rgba(255, 136, 0, 1);
+		height:159.42rpx;
 		font-size: 28.98rpx;
 		padding-top: 43.47rpx;
 		box-sizing: border-box;
 		&-term {
-			color: rgba(255, 255, 255, 0.8);
+			color: rgba(0,0,0,0.40);
 			margin-left: 28.98rpx;
 		}
 		&-refer {
-			color: rgba(255, 255, 255, 0.8);
+			color: rgba(0,0,0,0.40);
 			margin-left: 28.98rpx;
 			margin-top: 28.98rpx;
 		}
@@ -368,10 +377,11 @@ $border-radius: 14.49rpx 14.49rpx 0px 0px;
 		// padding-right: 28.98rpx;
 		box-sizing: border-box;
 		height: calc(100vh - 282.6rpx);
-		position: absolute;
-		top: 253.62rpx;
+		background: rgba(0,0,0,0);
+		/* position: absolute;
+		top: 253.62rpx; */
 		&-item {
-			width: calc(100% - 32px);
+			width: calc(100% - 57.97rpx);
 			padding-bottom: 28.98rpx;
 			box-sizing: border-box;
 			background: rgba(255, 255, 255, 1);
@@ -402,6 +412,10 @@ $border-radius: 14.49rpx 14.49rpx 0px 0px;
 					}
 					swiper-item {
 						border-radius: $border-radius;
+						image{
+							width: 100%;
+							height: 100%;
+						}
 					}
 				}
 				.carousel-swiper-item {
@@ -427,7 +441,7 @@ $border-radius: 14.49rpx 14.49rpx 0px 0px;
 				margin: 28.98rpx 28.98rpx 0;
 				view {
 					font-size: 28.98rpx;
-					color: rgba(255, 136, 0, 1);
+					color: $col_098684;
 					margin-top: 14.49rpx;
 					&:first-child {
 						font-size: 43.47rpx;
@@ -468,11 +482,11 @@ $border-radius: 14.49rpx 14.49rpx 0px 0px;
 					height: 100%;
 					line-height: 72.46rpx;
 					font-size: 28.98rpx;
-					color: rgba(255, 136, 0, 1);
+					color: $col_098684;
 					@include flex;
 					i {
 						font-size: 36.23rpx;
-						color: #ff8800;
+						color: $col_098684;
 						margin-right: 14.49rpx;
 					}
 				}

@@ -1,0 +1,39 @@
+<div class="master_temp_list">
+  <div class="master-head">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+  </div>
+    <nz-table class="master-warp"
+    #rowSelectionTable
+    [nzData]="departTempList"
+    [nzShowPagination]="false"
+    [nzFrontPagination]="false"
+    (nzPageIndexChange)='changeData()' 
+    nzSize="middle"
+  >
+    <thead>
+      <tr>
+        <th>名称</th>
+        <th>编辑人</th>
+        <th>编辑时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+        <td  [nzTitle]="item.quoteNo?item.quoteNo:'暂无数据显示'"
+    nz-tooltip>{{item.quoteNo?item.quoteNo:'--'}}</td>
+        <td>{{item.customerName?item.customerName:'--'}}</td>
+        <td>{{item.customerHouseAddress?item.customerHouseAddress:'--'}}</td>
+        <td >
+          <a href="javascript:void(0)" 
+       nz-popconfirm nzTitle="删除后数据无法恢复"
+          nzOkText="删除" (nzOnConfirm)="handleTemp()">删除</a>
+          <a href="javascript:void(0)" class="ml-8" >默认</a>
+          <a href="javascript:void(0)"  class="ml-8" [routerLink]="['./../add']"
+          [queryParams]="{id:btoa(1)}"
+          [skipLocationChange]="true">详情</a>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

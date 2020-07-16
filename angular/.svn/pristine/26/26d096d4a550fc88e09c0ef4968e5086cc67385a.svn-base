@@ -1,0 +1,100 @@
+<div class="stats-attendance">
+    <div class="stats-attendance-head">
+        <span>
+            <img src="http://tqiniu.madrock.com.cn/rev/imgs/c75d59da-a831-e711-d2b8-9d867fdb3cfa.png" alt="">
+        </span>
+        <ul>
+            <li>Archer</li>
+            <li>工兵</li>
+        </ul>
+    </div>
+    <div class="stats-attendance-info">
+        <div class="stats-attendance-date">
+            <nz-calendar class="attend-date" [nzDateFullCell]="dateCellTpl" [nzFullscreen]="true"
+            (ngModelChange)="modalChange($event)"
+                [(ngModel)]="currentDate">
+            </nz-calendar>
+            <!-- <nz-calendar [(ngModel)]="currentDate" (ngModelChange)="modalChange($event)" style="height:510px ;">
+                <ul *nzDateCell="let date" class="events">
+                    <ng-container [ngSwitch]=" showInfo()">
+                        <ng-container *ngSwitchCase="showInfo()">
+                            <li *ngFor="let item of listDataMap.eight">
+                                <nz-badge nzStatus="item.type" [nzText]="item.content"></nz-badge>
+                            </li>
+                        </ng-container>
+
+                    </ng-container>
+                </ul>
+                <ng-container *nzMonthCell="let month">
+                    <div *ngIf="getMonthData(month) as monthData" class="notes-month">
+                        <section>{{ monthData }}</section>
+                        <span>Backlog number</span>
+                    </div>
+                </ng-container>
+            </nz-calendar> -->
+        </div>
+        <div class="stats-attendance-table">
+            <div class="datas" style="margin-bottom: 24px;">
+                <p>3月数据<span>(巡查里程：800km)</span></p>
+                <ul>
+                    <li *ngFor="let item of dataList">
+                        <p>{{item.count}}</p>
+                        <p>{{item.txt}}</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="datas" style="padding:24px 0 24px 0;border-top:1px solid rgba(232,232,232,1)">
+                <p>3月数据<span>(巡查里程：800km)</span></p>
+                <ul>
+                    <li *ngFor="let item of dataList">
+                        <p>{{item.count}}</p>
+                        <p>{{item.txt}}</p>
+                    </li>
+                </ul>
+            </div>
+            <nz-table #nzTable [nzData]="statList">
+                <thead>
+                    <tr>
+                        <th nzCustomFilter>
+                            楼盘房号
+                        </th>
+                        <th>发布时间</th>
+                        <th>发布机型</th>
+                        <th> 相距距离 <button nz-button nz-popover nzTitle="说明" nzContent="发布动态时的位置与项目的位置距离"
+                                style="float: right;border: none !important;" nzPlacement="topLeft"> <i nz-icon
+                                    type="question" theme="outline"></i></button></th>
+                        <!-- <th nzShowFilter [nzFilters]="filterAddressArray" (nzFilterChange)="filterAddressChange($event)">Address</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of nzTable.data">
+                        <td>{{data.name}}</td>
+                        <td>{{data.age}}</td>
+                        <td>{{data.name}}</td>
+                        <td>{{data.age}}</td>
+                        <!-- <td>{{data.address}}</td> -->
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+    <div id="container" style="width: 100%;height: 544px;"></div>
+</div>
+<ng-template #dateCellTpl let-date>
+    <div *ngIf="showDate(date)">
+        <div class="temp-date" >
+            <div class="date-number">{{date.getDate()}}</div>
+            <div style="text-align: left;">
+                <nz-badge nzStatus="processing" [nzText]="getconut(date)+'条'"></nz-badge>
+                <br>
+                <nz-badge nzStatus="warning" [nzText]="getDistance(date)+'km'"></nz-badge>
+                <br>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!showDate(date)">
+        <div class="temp-date" >
+            <div class="date-number">{{date.getDate()}}</div>
+        </div>
+    </div>
+</ng-template>

@@ -617,8 +617,8 @@
 				line-height: 34.98rpx;
 
 				&.active {
-					background: rgba(255, 243, 229, 1);
-					color: rgba(255, 136, 0, 1);
+					background: $col_DDF3F3;
+					color: $col_098684;
 					padding: 10.86rpx 16.3rpx;
 				}
 
@@ -656,19 +656,19 @@
 			view {
 				width: 217.39rpx;
 				height: 79.71rpx;
-				border: 1px solid rgba(255, 136, 0, 1);
+				border: 1px solid $col_098684;
 				opacity: 1;
 				border-radius: 22px;
 				font-size: 28.98rpx;
 				font-family: 'PingFang SC';
 				font-weight: 400;
-				color: rgba(255, 136, 0, 1);
+				color: $col_098684;
 				text-align: center;
 				line-height: 79.71rpx;
 
 				&:last-child {
 					color: rgba(255, 255, 255, 1);
-					background: rgba(255, 136, 0, 1);
+					background: $col_098684;
 				}
 			}
 		}

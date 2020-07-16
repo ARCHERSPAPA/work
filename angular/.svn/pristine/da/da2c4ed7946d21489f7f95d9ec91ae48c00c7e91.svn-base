@@ -1,0 +1,108 @@
+
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgZorroAntdModule, NzBreadCrumbModule} from 'ng-zorro-antd';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+
+
+import {CountDownComponent} from "../plugins/times/count-down.component";
+import {QuickTreeComponent} from "../rev/quick/quick-tree.component";
+import {QuickComponent} from "../rev/quick/quick.component";
+import {LocalStorage} from "../model/local.storage";
+//上传步骤三专用
+// import {UploadComponent} from "../plugins/upload/upload.component";
+
+// 副标题组件
+import {TitleComponent} from "../component/title/title.component";
+// 人员快速查询组件
+import {DepartTreeComponent} from "../component/depart-tree/depart-tree.component";
+// 权限组件
+import {PermissionComponent} from "../component/permission/permission.component";
+// 面包屑
+import {BreadcrumbComponent} from "../user/user-info/breadcrumb/breadcrumb.component";
+// 单选切换
+import {RadioSwitchComponent} from "../component/radioSwitch/radioSwitch.component";
+import {SliderModule} from "./slider.module";
+//滑动验证组件
+
+// pipe
+import {ExplainPipe, MaxPipe, FourPipe, NoticePipe, NoticeTwentyPipe} from "../pipes/explain.pipe";
+import {TranslateHTMLPipe} from "../pipes/translate-html.pipe";
+import {CompilePipe} from "../pipes/compile.pipe";
+import {LigatureComponent} from "../component/ligature/ligature.component";
+
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgZorroAntdModule,
+        NzBreadCrumbModule,
+        NgbModule,
+        SliderModule,
+
+    ],
+    declarations: [
+        TitleComponent,
+        DepartTreeComponent,
+        PermissionComponent,
+        BreadcrumbComponent,
+        RadioSwitchComponent,
+        // SliderComponent,
+
+
+        CountDownComponent,
+        QuickTreeComponent,
+        QuickComponent,
+
+        ExplainPipe,
+        MaxPipe,
+        FourPipe,
+        NoticePipe,
+        NoticeTwentyPipe,
+        TranslateHTMLPipe,
+        CompilePipe,
+
+        /*****新增上传组件 2019-08-28****/
+        // UploadComponent,
+        /*****新增线条组件 2019-11-15*****/
+        LigatureComponent
+
+    ],
+    providers: [
+        LocalStorage
+    ],
+    exports: [
+        TitleComponent,
+        DepartTreeComponent,
+        PermissionComponent,
+        BreadcrumbComponent,
+        RadioSwitchComponent,
+        // CopyRightComponent,
+
+        FormsModule,
+        ReactiveFormsModule,
+        NgZorroAntdModule,
+        CountDownComponent,
+        QuickTreeComponent,
+        QuickComponent,
+
+        ExplainPipe,
+        MaxPipe,
+        FourPipe,
+        NoticePipe,
+        NoticeTwentyPipe,
+        TranslateHTMLPipe,
+        CompilePipe,
+
+        /*****新增上传组件 2019-08-28****/
+        // UploadComponent,
+        /*****新增线条组件 2019-11-15*****/
+        LigatureComponent
+    ]
+})
+export class PublicModule {
+}

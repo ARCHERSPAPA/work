@@ -2,7 +2,7 @@
   <view class="chatInput">
     <input v-model="msgInfo" type="text" placeholder="输入聊天内容" cursor-spacing="10">
     <view class="chooseImg" @tap="handleChooseImg()">
-      <uni-icons type="shejitu" color="#BDC1D5" size="50.72" />
+      <uni-icons type="shejitu" color="rgba(0,0,0,0.7)" size="50.72" />
     </view>
     <view class="chooseImg" @tap="sendMsg()">
       发送
@@ -143,9 +143,8 @@ export default {
       width: 84.34rpx;
       height: 54.34rpx;
       line-height: 54.34rpx;
-
       margin-left: 18.11rpx;
-
+      color: #098684;
     }
   }
 </style>

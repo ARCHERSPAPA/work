@@ -1,0 +1,445 @@
+import {Component, OnInit} from '@angular/core';
+import {RegularService} from "../../service/regular.service";
+import {Default, OFFER_DEFAULT_DATA} from "../../model/constant";
+import {WarningService} from "../../service/warning.service";
+import {RequestService} from "../../service/request.service";
+import {ConfigService} from "../../service/config.service";
+import {QuoteService} from "../../service/quote.service";
+import {atob, changeToDecimal, hideAuditFailureByState, ObjToArrByImg, toInteger,showExamineState} from "../../model/methods";
+import {ActivatedRoute} from '@angular/router';
+import {Messages} from "../../model/msg";
+import {renderColors} from "../../model/budget-method";
+
+
+@Component({
+    selector: 'rev-view-quote',
+    templateUrl: './view-quote.component.html',
+    styleUrls: ['./../../rev/detail/detail.scss', './../../rev/detail/price/price.component.scss'],
+})
+export class ViewQuoteComponent implements OnInit {
+
+    //body拉取data数据
+    public data: any;
+    public loading:boolean = false;
+
+    //备注信息
+    public remarks: string = "";
+    public discount: number = 0;
+
+    public cid: string;
+    public aid: string;
+
+
+    //成交价
+    public finalPrice: number;
+    //计算的总价
+    public totalPrice: number;
+    //优惠金额
+    public preferentialPrice: number;
+
+    public type: number;
+
+    //工程管理费用
+    public engineerFee: number = -1;
+    public ratio: number = 0.08;
+
+
+
+    //单项备注信息添加和修改
+    public remarkImgs: Array<any> = [];
+    //查看图片大图
+    public isVisible: boolean = false;
+    public largeImg: string;
+
+    public regulars:any;
+    public list:any;
+
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+
+    constructor(private request: RequestService,
+                private warn: WarningService,
+                private quote: QuoteService,
+                private config: ConfigService,
+                private reg: RegularService,
+                private activatedRoute:ActivatedRoute) {
+    }
+
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe((params) => {
+            if(params && params["type"]){
+                this.type = Number.parseInt(params["type"]);
+            }
+            if (params && params["cid"]) {
+                this.cid = atob(params["cid"]);
+                if(this.type){
+                    this.reloadData(this.cid,this.type);
+                }else{
+                    this.reloadData(this.cid);
+                    this.loadQuoteHead(this.cid);
+                    this.historyPause(this.cid);
+                }
+            }
+            if (params && params["aid"]) {
+                this.aid = atob(params["aid"]);
+                if(this.aid !== 'undefined' && !this.type){
+                    this.reloadDetail(this.aid);
+                }
+            }
+
+
+        });
+    }
+
+    // ngDoCheck(){
+        // if(this.quote && this.quote.getQuoteInfo()){
+        //     this.remarkImgs = (this.quote.getQuoteInfo()["remarkPhotos"] && this.quote.getQuoteInfo()["remarkPhotos"].length > 0) ? this.combineImgs(this.quote.getQuoteInfo()["remarkPhotos"]):[];
+        //     this.remarks = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["remark"]?this.quote.getQuoteInfo()["quoteBase"]["remark"]:"";
+        //     this.preferentialPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["preferentialPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["preferentialPrice"] : 0;
+        //     this.totalPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["totalPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["totalPrice"] : 0;
+        //     this.finalPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["finalPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["finalPrice"] : 0;
+        // }
+    // }
+
+
+
+
+    renderData(data) {
+        this.data = this.componentData(OFFER_DEFAULT_DATA, data);
+        if(this.type > 0){
+           this.data = this.data.filter(d =>{
+                return d.type === this.type;
+            });
+        }else{
+            this.data = this.data.filter(d =>{
+                return d.type !== Default.OFFER_ITEM.ITEM_5;
+            })
+        }
+    }
+
+    componentData(dfs, data) {
+        if (data && data.length > 0) {
+            let defs = dfs.map(df => {
+                df["expand"] = true;
+                let d = data.filter(d => {
+                    d["expand"] = true;
+                    if(d.infoMaps && d.infoMaps.length > 0){
+                        d.infoMaps.forEach(info =>{
+                            info["expand"] = true;
+                        })
+                    }
+                    return d && d.type === df.type;
+                });
+                return df = d && d.length > 0? d[0]:df;
+            });
+            return defs;
+        }
+        return dfs;
+    }
+
+
+    getTitle(type: number) {
+        switch (type) {
+            case 2:
+                return "主材";
+            case 3:
+                return "个性化项目";
+            case 4:
+                return "其它项目";
+            default:
+                return "其它";
+        }
+    }
+
+    /**
+     * 重构根据type适用table表格
+     * @param {number} type
+     * @returns {boolean}
+     */
+    // showSubByType(type: number) {
+    //     switch (type) {
+    //         case 2:
+    //             return true;
+    //         case 3:
+    //             return true;
+    //         case 5:
+    //             return true;
+    //         default:
+    //             return false;
+    //     }
+    // }
+
+    //主材或者个性化
+    showSubByType1(type: number) {
+        switch (type) {
+            case 2:
+                return true;
+            case 3:
+                return true;
+            case 5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    //其它项目
+    showSubByType2(type: number) {
+        return type && type === 4;
+    }
+
+    //工程管理费专用
+    showSubByType3(type: number) {
+        return type && type === 6;
+    }
+
+    //设计费专用
+    showSubByType4(type: number) {
+        return type && type === 7;
+    }
+
+
+    //放大图片
+    openLarge(e, src) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.isVisible = true;
+        this.largeImg = src;
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.largeImg = null;
+    }
+
+    getMainColumn(source, type) {
+        let total = 0;
+        if (source && source.length > 0) {
+            for (let so of source) {
+                if (so && so["infos"] && so["infos"].length > 0) {
+                    for (let s of so["infos"]) {
+                        total += this.changeToInt(s[type] ? s[type] : 0, 2) * this.changeToInt(s["num"] ? s["num"] : 0, 2);
+                    }
+                }
+            }
+        }
+        return (Number(total) / Math.pow(10, 4));
+    }
+
+    getDesignTotal(designs, type) {
+        let total: number = 0;
+        if (designs && designs.length > 0) {
+            for (let des of designs) {
+                if (des.yn) {
+                    total += this.changeToInt(des[type], 2);
+                }
+            }
+        }
+        return (Number(total) / Math.pow(10, 2));
+    }
+
+    combineImgs(o) {
+        return ObjToArrByImg(o);
+    }
+
+    //拉取增减项(历史)
+    historyPause(cid) {
+        if (cid) {
+            this.request.doPost({
+                url: "historyPause",
+                data: {id:cid},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.regulars = [];
+                        if(res.data && res.data.list.length > 0){
+                            this.regulars = res.data.list.filter(d => {
+                                d["expand"] = true;
+                                return !this.hideAuditFailureByState(d.state);
+                            });
+                        }
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    hideAuditFailureByState(state) {
+        return hideAuditFailureByState(state);
+    }
+
+    renderRemark(i, info, items) {
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                if (item.id === i.id) {
+                    i.remark = info;
+                }
+            })
+        }
+    }
+
+    /**
+     * 将小数转化成正数
+     * @param num
+     * @param curve
+     * @returns {number | any}
+     */
+    changeToInt(num, curve) {
+        return toInteger(num, curve);
+    }
+
+
+    /**
+     * 重新渲染数据（body）
+     */
+    reloadData(cid,...args) {
+        this.loading = true;
+        this.quote.loadData(cid,...args)
+        .then(res => {
+            this.loading = false;
+            this.renderData(res);
+        }).catch(err => {
+            this.loading = false;
+            this.warn.onError(err);
+        });
+    }
+
+    /**
+     * 备注图片设置
+     * @param src
+     * @returns {{"background-image": string; "background-size": string}}
+     */
+    showRemarkImgBg(src) {
+        return {
+            "background-image": "url(" + (src.indexOf('?') > 0 ? src : src + '?imageView2/2/w/72/h/72') + ")",
+            "background-size": "100% 100%"
+        }
+    }
+
+    /**
+     * 转成小数
+     * @param unit
+     * @param num
+     * @returns {any}
+     */
+    converseToDecimal(unit, num) {
+        let result = this.changeToInt(unit,2)*this.changeToInt(num,2)/Math.pow(10,4);
+        return changeToDecimal(result);
+    }
+
+    /**
+     * 计算出总额
+     * @param source 数据源
+     * @param type 计算单位
+     * @returns {number}
+     */
+    getTotal(source, type) {
+        let total: number = 0;
+        if (source && source.length > 0) {
+            for (let s of source) {
+                total += this.converseToDecimal(s[type] ? s[type] : 0, s["num"] ? s["num"] : 0);
+            }
+        }
+        return total;
+    }
+
+
+    /**
+     * 处理异步加载编辑的增减项
+     * @param aid
+     * @returns {Promise<any>}
+     */
+    reloadDetail(aid){
+        if(aid){
+            this.reg.loadDetail(aid).then(res =>{
+                this.renderPause(res);
+            }).catch((err)=>{
+                this.warn.onError(err);
+            })
+        }
+    }
+
+    renderPause(result:any){
+        if(result){
+            this.list = result;
+            this.list["expand"] = true;
+        }
+
+        if(this.list && this.list.pause && !this.list.pause.applyActualPrice){
+            this.list.pause.applyActualPrice = this.getTotal(this.list.details,'totalPrice');
+        }
+    }
+
+    loadQuoteHead(id){
+        this.quote.loadQuoteHeadById(id)
+            .then(data =>{
+                this.renderHead(data);
+            })
+            .catch(err =>{
+                this.warn.onError(err);
+            })
+    }
+
+    renderHead(data){
+        this.remarkImgs = (data && data.remarkPhotos && data.remarkPhotos.length > 0)?this.combineImgs(data.remarkPhotos):[];
+        this.remarks = (data && data.quoteBase && data.quoteBase.remark)?data.quoteBase.remark:"";
+        this.preferentialPrice = (data && data.quoteBase && data.quoteBase.preferentialPrice)?data.quoteBase.preferentialPrice:0;
+        this.totalPrice = (data && data.quoteBase && data.quoteBase.totalPrice)?data.quoteBase.totalPrice:0;
+        this.finalPrice = (data && data.quoteBase && data.quoteBase.finalPrice)?data.quoteBase.finalPrice:0;
+    }
+
+    /**
+     * 重置当前颜色组
+     * @param {string} colours
+     * @returns {Array<string>}
+     */
+    renderColors(colours:string):Array<string>{
+       return renderColors(colours);
+    }
+
+    /**
+     * 计算其它项目（分支）
+     * @param source
+     * @param type
+     * @returns {number}
+     */
+    getDiscountTotal(source,type){
+        let total: number = 0;
+        if (source && source.length > 0) {
+            for (let s of source) {
+                total += this.changeToInt(s[type],2);
+            }
+        }
+        return Number(total)/Math.pow(10,2);
+    }
+
+    /**
+     * 计算其它项目（主干）
+     * @param source
+     * @param type
+     * @returns {number}
+     */
+    getOtherTotal(source, type) {
+        let total: number = 0;
+        if (source && source.length > 0) {
+            for (let so of source) {
+                if (so && so["infos"] && so["infos"].length > 0) {
+                    for (let s of so["infos"]) {
+                        total += this.changeToInt(s[type] ? s[type] : 0, 2)
+                    }
+                }
+
+            }
+        }
+        return (Number(total) / Math.pow(10, 2));
+    }
+
+    /* 
+     *  当前审核状态
+     */
+    getExamineState(state){
+        return showExamineState(state);
+    }
+}

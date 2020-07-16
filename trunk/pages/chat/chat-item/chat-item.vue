@@ -10,7 +10,7 @@
     <block v-if="itemInfo.type == 'TIMTextElem'">
       <view
         :class="itemInfo.flow === 'out'?'isMyWordStyle':'isOtherWordStyle'"
-        style="border-radius: 10rpx;padding:24.45rpx 22.64rpx;font-size: 30rpx;max-width: 60%;"
+        style="border-radius: 14.49rpx;padding:23.55rpx 28.98rpx;font-size: 30rpx;max-width: 60%;color: #000;opacity: 0.9;"
       >
         {{ itemInfo.payload.text }}
       </view>
@@ -33,22 +33,22 @@
       </view>
 
       <view v-else class="custom" @tap="handleGoDetail(itemInfo.payload.data)">
-        <view :class="itemInfo.payload.data.textType === 2?'custom-textType':'custom-textType-my'">
+        <view :class="itemInfo.flow === 'out'?'custom-textType':'custom-textType-my'">
           <view v-if="itemInfo.payload.data.textType === 1" class="ellipsis-beyond">我想咨询该项目相关内容！</view>
           <view v-if="itemInfo.payload.data.textType === 2" class="ellipsis-beyond">我希望现场参观此工地！</view>
-          <view v-if="itemInfo.payload.data.textType === 3">23232</view>
         </view>
         <view class="custom-info">
           <image :src="itemInfo.payload.data.img" />
           <view>
             <text class="custom-info-title ellipsis-beyond">{{ itemInfo.payload.data.title || '暂无' }}</text>
+            <text class="custom-info-price" v-if="itemInfo.payload.data">¥{{ (itemInfo.payload.data?itemInfo.payload.data.price:'0')|digit(4)|number(1,true) }}万</text>
             <text v-if="itemInfo.payload.data.textType === 1" class="custom-info-address ellipsis-beyond">
               {{ itemInfo.payload.data.decorateType   || '暂无'  }} / {{ itemInfo.payload.data.customerHouseType  || '暂无' }}
             </text>
             <text v-if="itemInfo.payload.data.textType === 2" class="custom-info-address ellipsis-beyond">
               {{ itemInfo.payload.data.address  || '暂无'  }}
             </text>
-            <text class="custom-info-price" v-if="itemInfo.payload.data">¥{{ (itemInfo.payload.data?itemInfo.payload.data.price:'0')|digit(4)|number(1,true) }}万</text>
+            
           </view>
         </view>
       </view> 
@@ -108,7 +108,7 @@ export default {
     },
 
     handleGoDetail(item) {
-		// console.log(item);
+		//console.log(item);
 	  if(item.state === 8 || item.textType === 1){
 		  this.$openPage({ name: 'example', query: { quoteId:item.quoteId,nature:item.nature }})
 	  }	else{
@@ -132,7 +132,8 @@ export default {
     flex-direction:row;
   }
   .isMyWordStyle {
-      background-color: #8fcbf7;
+      // background-color: #8fcbf7;
+      background-color: #9AD6CD;
       color: #80CAF4;
       margin-right: -1rpx;
       margin-left: 14rpx;
@@ -149,27 +150,32 @@ export default {
   }
 
   .custom{
-    width: 452.89rpx;
+    width: 445.65rpx;
   }
   .custom-textType,.custom-textType-my{
-    background-color: #80CAF4;
-    color: #fff;
-    border-radius:27.17rpx 0 0 0;
+    color: #000;
+    opacity: 0.9;
+    border-radius:14.49rpx 14.49rpx 0 0;
     padding: 15.39rpx 17.21rpx;
     width: calc(100% - 34.42rpx);
   }
   .custom-textType-my{
-    background-color: #F7F8F9;
-    color: #000;
+   background-color: #F0F0F0;
+   color: #000;
+  }
+  .custom-textType{
+    background-color: #9AD6CD;
+    
   }
   .custom-info{
     background-color: #fff;
-    padding: 18.11rpx;
+    padding: 28.98rpx;
     display: flex;
     align-items: center;
     image{
-      width: 108.6rpx;
-      height: 108.6rpx;
+      width: 144.92rpx;
+      height: 144.92rpx;
+      border-radius: 14.49rpx;
       margin-right: 17.21rpx;
     }
     &>view{
@@ -177,28 +183,44 @@ export default {
       justify-content: center;
       align-items: left;
       flex-direction: column;
-      width: calc(100% - 125.81rpx);
+      width: calc(100% - 162.13rpx);
     }
     &-title{
       font-weight: 500;
+      color: #000;
+      font-size: 28.98rpx;
+      opacity: 0.9;
     }
-    &-address{
+    &-address{		
       font-size: 25.36rpx;
-      color: #B7B8BA;
-      padding: 7.24rpx 0;
+      color: #000;
+      opacity: 0.4;
     }
     &-price{
-      color: #FF8800;
+      color: #098684;
+      // padding: 7.24rpx 0;
+      margin: 18.11rpx 0;
+      font-size: 25.36rpx;
     }
+  }
+  
+  .ellipsis-beyond{
+	  display: inline-block;
+	  width: 100%;
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow:ellipsis;
   }
 
   .img-info{
 
     .img-info-img{
-      border-radius: 54.34rpx 0 54.34rpx 54.34rpx;
+      border-radius: 14.49rpx;
+      // border-radius: 54.34rpx 0 54.34rpx 54.34rpx;
     }
     .img-info-img-isMy{
-       border-radius:0  54.34rpx  54.34rpx 54.34rpx;
+      border-radius: 14.49rpx;
+       // border-radius:0  54.34rpx  54.34rpx 54.34rpx;
     }
     image{
 

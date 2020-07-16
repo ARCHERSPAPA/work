@@ -1,0 +1,428 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../service/request.service";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {UploaderMultisComponent} from "../../../plugins/uploader-multis/uploader-multis.component";
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {Router, ActivatedRoute} from '@angular/router';
+import {WarningService} from "../../../service/warning.service";
+import {Messages} from "../../../model/msg";
+import {QiNiuService} from "../../../service/qi-niu.service";
+import {HttpResponse} from '@angular/common/http';
+import {NzMessageService} from 'ng-zorro-antd';
+import {atob} from "../../../model/methods";
+// import { Lightbox, LightboxConfig } from 'ngx-lightbox';
+
+@Component({
+    selector: 'rev-contract-detail',
+    templateUrl: './contract-detail.component.html',
+    styleUrls: ['./contract-detail.component.scss']
+})
+export class ContractDetailComponent implements OnInit {
+
+    public detailTitle: string;
+    public defaultTitle: string;
+    public title: string;
+    public fileName: string;
+
+    public state: string;//0已使用，1未使用
+    public id: string;
+    public fileId: number;
+    public index: number = 0;
+
+    // 区分是图片还是文件
+    public pageType: string;
+    //展示放大图片
+    public largeImg: string;
+    public showLargeImg: boolean;
+    public contractForm: FormGroup;
+    public isVisible: boolean;
+    public _albums = [];
+    public imgIndex;
+    public isClose: number;
+    public isFirst: number;
+    //判断是否是设计师
+    public isDesigners: boolean;
+    public split: string = 'annex';
+    public content: string = '上传图片';
+    // 拉取的附件数据
+    public contractList;
+    // public qnLocation = 'http://tqiniu.madrock.com.cn/';
+    // 添加附件时的数据（图片，文件）
+    //区分报价
+    public isOfer: any;
+    //报价ID
+    public oferId: string;
+
+    public preTitle: string;
+    public addContractList: object = {
+        "addImgs": [],
+        "addFiles": []
+    };
+
+    public errorImg:string = "http://tqiniu.madrock.com.cn/rev/graph/TEST/4001/5bbf9195-3b65-8cf6-22bf-134fb11545ca.jpg";
+
+    constructor(private router: Router,
+                private req: RequestService,
+                private activatedRoute: ActivatedRoute,
+                private fb: FormBuilder,
+                private modalService: NgbModal,
+                private route: ActivatedRoute,
+                private warn: WarningService,
+                // private _LightboxConfig: LightboxConfig,
+                // private _lightbox: Lightbox,
+                private qn: QiNiuService,
+                private msg: NzMessageService) {}
+
+
+
+    ngOnInit() {
+
+        if (!this.id) {
+            this.contractList = [];
+        }
+        this.addContractList['addTitle'] = this.detailTitle;
+        this.route.queryParams.subscribe(params => {
+                this.state = params["state"];
+            // this.state = queryParams.state;
+            this.isClose = params.isClose;
+            this.isDesigners = params.isDesigners;
+            if (params && params["id"]) {
+                this.id = atob(params["id"]);
+            }
+            // this.id = params.id;
+            if (params && params["oferId"]){
+            this.oferId = atob(params.oferId);
+            }
+            if(params && params["type"]){
+                this.pageType = params["type"];
+            }
+            // this.pageType = params.type;
+            this.isFirst = params.isFirst;
+            if (params.isOfer) {
+                this.isOfer = params.isOfer;
+            }
+
+            if (this.id) {
+                this.loadDetail();
+            }
+        });
+        this.title = '详情';
+        this.detailTitle = this.pageType === '1' ? '文件附件' : '图片附件';
+        this.contractForm = this.fb.group({
+            detailTitle: [this.detailTitle, [
+                Validators.maxLength(20),
+                Validators.required
+            ]]
+        });
+
+
+    }
+
+    // 加载详情列表
+    loadDetail() {
+        let self = this;
+        let URL;
+
+        if (this.isOfer == 1 && this.isFirst == 0) {
+            URL = 'getOfferContractListDetail';
+
+        } else {
+            URL = "getContractdetail";
+        }
+        this.req.doPost({
+            url: URL,
+            data: {
+                'id': self.id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    self.detailTitle = res.data.attachName;
+                    self.defaultTitle = self.detailTitle;
+                    self.contractList = res.data.list;
+                    if (self.pageType === '1' && res.data.list != []) {
+                        self.fileId = res.data.list[0].id;
+                    }
+                    res.data.list.forEach(imgs => {
+                        if (imgs.url.split('/')[0] == 'undefined') {
+                            let newImg = imgs.url.split('/').splice(2, imgs.url.split('/').length);
+                            newImg.unshift('http://qiniu.madrock.com.cn/rev');
+                            newImg = newImg.join('/')
+                            self.addContractList["addImgs"].push(newImg);
+                        } else {
+                            self.addContractList["addImgs"].push(imgs.url);
+                        }
+                    });
+                }
+            })
+        })
+    }
+
+    // 添加图片
+    addUserImg() {
+        if (this.isClose == 1 || this.isFirst == 1 || this.isDesigners == false) {
+            this.msg.create('error', `当前状态不可编辑`);
+        } else {
+            const self = this;
+            const modalRef = this.modalService.open(UploaderMultisComponent, {
+                centered: true,
+                keyboard: false
+            });
+            modalRef.componentInstance.name = "新增图片";
+            modalRef.componentInstance.open = true;
+            modalRef.componentInstance.split = this.split;
+            modalRef.componentInstance.cid = this.id ? this.id : Math.ceil(Math.random() * 100);
+            modalRef.result.then((result) => {
+                let detailImage = result;
+                let param = {};
+                let URL;
+                param['urls'] = detailImage;
+                param['id'] = self.id;
+                if (self.isOfer) {
+                    param['quoteId'] = self.oferId
+                    URL = 'addOfferContractListImage'
+                } else {
+                    URL = 'addContractImage'
+                }
+                //  单个图片上传
+                if (self.id) {
+                    self.addContractList['addImgs'] = result;
+                    self.req.doPost({
+                        url: URL,
+                        data: param,
+                        success: (res => {
+                            if (res && res.code == 200) {
+                                this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                                this.loadDetail();
+                            } else {
+                                this.warn.onError(res.msg || Messages.FAIL.DATA);
+                            }
+                        })
+                    })
+                } else {
+                    detailImage.forEach((i, e) => {
+                        self.contractList.push({'url': i, 'id': e + self.index});
+                        self.addContractList['addImgs'].push(i)
+                        self.index = e + self.index;
+                    })
+                }
+            })
+        }
+
+    }
+
+    // 添加附件文件
+    handleFileChange(e) {
+        if (this.isClose == 1 || this.state === '1' || this.isFirst == 1 || this.isDesigners == false) {
+            this.msg.create('error', `当前状态不可编辑`);
+        } else {
+            this.fileName = e.target.files[0].name;
+            const self = this;
+            const files = e.target.files;
+            const file = files[0];
+            self.getToken().then(res => {
+                self.qn.postFile(this.renderFile(file), res.uptoken).subscribe(event => {
+                    if (event && event instanceof HttpResponse) {
+                        self.addContractList['addFiles'] = [];
+                        self.addContractList['addFiles'].push(res.url + '/' + event.body['key']);
+                        if (self.id) {
+                            self.editFile(res.url + '/' + event.body['key']);
+                        }
+                    }
+                });
+            }).catch(err => {
+                self.warn.onError(err);
+            })
+        }
+    }
+
+
+    getToken(): Promise<any> {
+        let that = this;
+        return new Promise((resolve, reject) => {
+            that.req.doPostImg({
+                url: "token",
+                success: (res => {
+                    if (res && res.code == 200) {
+                        let token = JSON.parse(res.data);
+                        resolve(token);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    renderFile(file) {
+        file["cid"] = this.id;
+        file["progress"] = 0;
+        file["show"] = true;
+        file["success"] = false;
+        file["uploadString"] = this.split;
+        return file
+
+    }
+
+    editFile(url: string) {
+        let reqURL;
+        let param = {};
+        param['url'] = url;
+        if (this.isOfer) {
+            reqURL = 'editOfferContractListFile';
+            param['accId'] = this.fileId;
+        } else {
+            reqURL = 'editContractFile';
+            param['detailId'] = this.fileId;
+        }
+        param['id'] = this.id;
+        this.req.doPost({
+            url: reqURL,
+            data: param,
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.loadDetail();
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+    editTitle() {
+        if (this.isClose == 1 || this.isFirst == 1 || this.isDesigners == false) {
+            this.msg.create('error', `当前状态不可编辑`);
+        } else {
+            this.isVisible = true;
+        }
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.showLargeImg = false;
+        if (this.id) {
+            this.detailTitle = this.defaultTitle;
+        } else if (this.preTitle) {
+            this.detailTitle = this.preTitle;
+        }
+        else {
+            this.detailTitle = this.pageType === '1' ? '文件附件' : '图片附件';
+        }
+    }
+
+    contractSubmitTitle() {
+        let URL;
+        let param = {};
+        param['id'] = this.id;
+        param['attachName'] = this.detailTitle;
+        if (this.isOfer) {
+            param['quoteId'] = this.oferId;
+            URL = 'editOfferContractListTitle';
+        } else {
+            URL = 'editContractTitle';
+        }
+        if (this.id) {
+            this.req.doPost({
+                url: URL,
+                data: param,
+                success: (res => {
+                    this.isVisible = false;
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadDetail();
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        } else {
+            this.addContractList['addTitle'] = this.detailTitle;
+            this.preTitle = this.detailTitle;
+            this.isVisible = false;
+        }
+
+    }
+
+    // 添加附件时保存按钮
+    saveContract() {
+        let uploaderURLs;
+        if (this.pageType === '1') {
+            uploaderURLs = this.addContractList['addFiles'];
+        } else {
+            uploaderURLs = this.addContractList['addImgs'];
+        }
+        if (uploaderURLs && uploaderURLs.length > 0) {
+
+
+            this.req.doPost({
+                    url: 'saveContractList',
+                    data: {
+                        'attachName': this.detailTitle,
+                        'urls': uploaderURLs,
+                        'type': this.pageType
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.router.navigate(['../'], {relativeTo: this.activatedRoute});
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                }
+            )
+        } else {
+            this.warn.onWarn("请先添加附件，再保存")
+        }
+    }
+
+    delContractDetail(id: number, index: number) {
+        if (this.isClose == 1 || this.isFirst == 1 || this.isDesigners == false || this.state === '1') {
+            this.msg.create('error', `当前状态不可编辑`);
+        } else {
+            let URL;
+            let param = {};
+            if (this.isOfer) {
+                URL = 'delOfferContractListImage';
+                param['accId'] = id;
+                param['quoteId'] = this.oferId;
+            } else {
+                URL = 'delContractFile';
+                param['detailId'] = id
+            }
+            param['id'] = this.id;
+            if (this.id) {
+                this.req.doPost({
+                    url: URL,
+                    data: param,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.loadDetail();
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            } else {
+                this.contractList.splice(index, 1);
+                this.addContractList['addImgs'].splice(index, 1)
+            }
+        }
+    }
+    openLarge( index) {
+
+        this.imgIndex = index;
+        this._albums = []
+        this.contractList.forEach((i) => {
+            this._albums.push({ src: i.url })
+        })
+    }
+    // openLarge(index) {
+    //     // console.log(this.contractList)
+    //     let _albums = []
+     
+    //     this._lightbox.open(_albums, index);
+    // }
+
+}

@@ -1,0 +1,130 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+.detail-contract {
+	margin: 0 0 24px 0;
+	.contract-state {
+		width: 308px;
+		height: 40px;
+		margin: 0 auto;
+		margin-bottom: 35px;
+	}
+	.contract-select {
+		width: 100%;
+		height: 40px;
+		background: rgba(245, 245, 245, 1);
+		border-radius: 4px 0px 0px 4px;
+		margin-bottom: 24px;
+		line-height: 40px;
+		nz-radio-group {
+			width: 100%;
+			label {
+				width: 50%;
+				margin: 0;
+				text-align: center;
+			}
+		}
+	}
+	.btn-fix {
+		text-align: right;
+		margin-top: 16px;
+		//     position: fixed;
+		//     bottom: 50%;
+		//     left: 50%;
+		button:last-child {
+			margin-left: 24px;
+		}
+	}
+	.contract-head {
+		font-size: 0;
+		margin-bottom: 20px;
+		overflow: hidden;
+		:root .ant-dropdown-menu-item:hover{
+			background-color: #e6f7ff;
+			color: #1890ff;
+		}
+		&:after {
+			content: "";
+			clear: both;
+		}
+		.title {
+			display: inline-block;
+			font-size: 16px;
+			font-family: "PingFang SC";
+			font-weight: bold;
+			line-height: 24px;
+			color: rgba(0, 0, 0, 0.85);
+			margin: 0;
+		}
+		.fix {
+			float: right;
+			> a {
+				display: inline-block;
+				font-size: 12px;
+				line-height: 24px;
+				margin-left: 10px;
+			}
+		}
+		.custom {
+			float: right;
+			font-size: 12px;
+			line-height: 24px;
+			margin-left: 10px;
+			color: rgba(24, 144, 255, 1);
+			cursor: pointer;
+		}
+		.contract-icon {
+			font-size: 14px;
+			color: #000;
+		}
+		.template {
+			display: inline-block;
+			font-size: 14px;
+			color: rgba(24, 144, 255, 1);
+			margin-left: 16px;
+			/* ::ng-deep .ant-select-selection{
+        border: 0;
+      }  
+      ::ng-deep .ant-select-selection{
+        box-shadow: none;
+      }
+      ::ng-deep .ant-select-arrow{
+        color:rgba(24,144,255,1);
+      } */
+		}
+		.contract-template-icon {
+			font-size: 12px;
+			color: rgba(24, 144, 255, 1);
+		}
+	}
+	.textarea {
+		position: relative;
+		.count {
+			position: absolute;
+			right: 5px;
+			bottom: -20px;
+			> span {
+				color: #f92650;
+			}
+		}
+	}
+}
+tr th,
+tr td {
+	max-width: 100px;
+	font-size: 14px;
+	@include ellipsis();
+}
+.padCut {
+	padding: 0 !important;
+}
+.abolish {
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.85);
+	margin-bottom: 16px;
+	margin-top: -4px;
+	&:after,
+	&:before {
+		content: "";
+		display: table;
+	}
+}

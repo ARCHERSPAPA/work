@@ -1,0 +1,184 @@
+<div class="article">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="content">
+        <div class="detail-list">
+            <div class="list-head">
+                <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)" style='display:inline-block'></radio-switch>
+                <div class="search-bar">
+                    <!--<form method="post" [formGroup]="searchForm">-->
+                    <!---->
+                    <!--<div class="inp" style="width:57%">-->
+                    <!--<input nz-input type="text" class="text" placeholder="请输入楼盘名称"-->
+                    <!--formControlName="name" name="name" autocomplete="off" maxlength="32"-->
+                    <!--[(ngModel)]="name"/>-->
+                    <!--<button nz-button [nzType]="'primary'" type="submit" [disabled]="!searchForm.valid"-->
+                    <!--(click)="changeData(true)">查询-->
+                    <!--</button>-->
+                    <!--<div [hidden]="searchForm.get('name').valid || searchForm.get('name').pristine"-->
+                    <!--class="error">-->
+                    <!--<span [hidden]="!searchForm.hasError('account',['name'])">输入楼盘名称的格式不正确</span>-->
+                    <!--</div>-->
+                    <!--</div>-->
+                    <!--</form>-->
+                    <form nzForm [formGroup]="searchForm" >
+                        <div nz-row [nzGutter]="24" >
+                            <div nz-col nzSpan="8">
+                                <nz-form-item>
+                                    <nz-form-control >
+                                        <input id="name" type="text" nz-input formControlName="name" name="name"
+                                               [(ngModel)]="name" autocomplete="off" placeholder="请输入楼盘名称"/>
+                                        <nz-form-explain
+                                                *ngIf="searchForm.get('name').dirty && searchForm.get('name').errors">
+                                            输入楼盘名称的格式不正确
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div nz-col nzSpan="6">
+                                <nz-form-item>
+                                    <nz-form-control >
+                                        <nz-select name="costState" (ngModelChange)="log(1,$event)"[ngModelOptions]="{standalone: true}"
+                                                   [(ngModel)]="costState">
+                                            <nz-option *ngFor="let option of optionList" [nzValue]="option.id" [nzLabel]="option.content"></nz-option>
+                                            <!--<nz-option nzValue="-1" nzLabel="全部"></nz-option>-->
+                                            <!--<nz-option nzValue="0" nzLabel="未上传成本表"></nz-option>-->
+                                            <!--<nz-option nzValue="1" nzLabel="未提交至工长"></nz-option>-->
+                                            <!--<nz-option nzValue="2" nzLabel="待确认成本"></nz-option>-->
+                                            <!--<nz-option nzValue="3" nzLabel="已确认成本"></nz-option>-->
+                                            <!--<nz-option nzValue="4" nzLabel="已签署合同"></nz-option>-->
+                                        </nz-select>
+                                    </nz-form-control >
+                                    </nz-form-item>
+                            </div>
+                            <div nz-col nzSpan="6">
+                                <nz-form-item>
+                                    <nz-form-control  >
+                                        <nz-select name="applyState" [ngModelOptions]="{standalone: true}" (ngModelChange)="log(2,$event)"
+                                                   [(ngModel)]="applyState" nzPlaceHolder="请选择搜索类型">
+                                            <nz-option *ngFor="let option of stateList" [nzValue]="option.id" [nzLabel]="option.content"></nz-option>
+                                        </nz-select>
+                                    </nz-form-control >
+                                    </nz-form-item>
+                            </div>
+                            <div nz-col nzSpan="4">
+                                <nz-form-item>
+                                    <nz-form-control >
+                                        <button nz-button nzType="primary" (click)="changeData()">查询</button>
+                                </nz-form-control >
+                            </nz-form-item>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            <div class="list-group-rev">
+                <nz-table #nzTable [nzData]="regularList" [nzBordered]="true" [nzFrontPagination]="false"
+                          [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" [nzLoading]
+                          (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]="true">
+                    <thead nz-thead>
+                    <tr>
+                        <th nz-th><span>项目楼盘</span></th>
+                        <th nz-th><span>装修类型</span></th>
+                        <th nz-th><span>项目状态</span></th>
+                        <th nz-th><span>设计师</span></th>
+                        <th nz-th><span>工长</span></th>
+                        <th nz-th><span>申请人</span></th>
+                        <th nz-th><span>申请时间</span></th>
+                        <th nz-th><span>金额</span></th>
+                        <th nz-th><span>审核状态</span></th>
+                        <th nz-th nzWidth="200px"><span>成本状态</span></th>
+                        <th nz-th><span>操作</span></th>
+                    </tr>
+                    </thead>
+                    <tbody nz-tbody>
+                    <tr nz-tbody-tr *ngFor="let regular of nzTable.data">
+                        <td nz-td [title]="regular.customerHouseAddress?regular.customerHouseAddress:''">
+                            {{regular.customerHouseAddress?regular.customerHouseAddress:'--'}}
+                        </td>
+                        <td nz-td>
+                            {{regular.projectType?getTypeName(regular.projectType):'--'}}
+                        </td>
+                        <td nz-td>
+                            {{regular.projectState?getStateName(regular.projectState):'--'}}
+                        </td>
+                        <td nz-td [title]="regular.designerName?regular.designerName:''">
+                            {{regular.designerName?regular.designerName:'--'}}
+                        </td>
+                        <td nz-td [title]="regular.workerName?regular.workerName:''">
+                            {{regular.workerName?regular.workerName:'--'}}
+                        </td>
+                        <td nz-td [title]="regular.applyName?regular.applyName:''">
+                            {{regular.applyName?regular.applyName:'--'}}
+                        </td>
+                        <td nz-td>
+                            {{regular.createTime?(regular.createTime|date:'yyyy-MM-dd'):'--'}}
+                        </td>
+                        <td nz-td>
+                            {{regular.applyActualPrice?(regular.applyActualPrice >
+                            0?'+':'')+(regular.applyActualPrice|number:'1.2'):'0.00'}}
+                        </td>
+                        <td nz-td>{{getAuditStateName(regular.state)}}</td>
+                        <td nz-td nzWidth="200px">{{getCostStateName(regular.costState)}}</td>
+                        <td nz-td>
+                            <a href="javascript:void(0)" [routerLink]="['./../detail/price',5]"
+                               [queryParams]="{cid:btoa(regular.quoteId)}">详情</a>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </nz-table>
+                <!-- <div class="page" *ngIf="regularList && regularList.length > 0">
+                    <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                    <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                                   [nzTotal]="total"
+                                   (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+                </div> -->
+                <!-- <ul class="item-body" *ngIf="!regularList || (regularList && regularList.length == 0)">
+                    <p>暂无数据信息显示</p>
+                </ul> -->
+                <!-- <div class="list-items">
+                    <ul class="item-head">
+                        <li>项目楼盘</li>
+                        <li>装修类型</li>
+                        <li>项目状态</li>
+                        <li>设计师</li>
+                        <li>工长</li>
+                        <li>申请人</li>
+                        <li>申请时间</li>
+                        <li>金额</li>
+                        <li>审核状态</li>
+                        <li>操作</li>
+                    </ul>
+                    <ul class="item-body" *ngFor="let regular of regularList">
+                        <li [title]="regular.customerHouseAddress?regular.customerHouseAddress:''">
+                            {{regular.customerHouseAddress?regular.customerHouseAddress:'--'}}
+                        </li>
+                        <li>{{regular.projectType?getTypeName(regular.projectType):'--'}}</li>
+                        <li>{{regular.projectState?getStateName(regular.projectState):'--'}}</li>
+                        <li [title]="regular.designerName?regular.designerName:''">{{regular.designerName?regular.designerName:'--'}}</li>
+                        <li [title]="regular.workerName?regular.workerName:''">{{regular.workerName?regular.workerName:'--'}}</li>
+                        <li [title]="regular.applyName?regular.applyName:''">{{regular.applyName?regular.applyName:'--'}}</li>
+                        <li>{{regular.createTime?(regular.createTime|date:'yyyy-MM-dd'):'--'}}</li>
+                        <li>{{regular.applyActualPrice?(regular.applyActualPrice > 0?'+':'')+(regular.applyActualPrice|number:'1.2'):'0.00'}}</li>
+                        <li>{{getAuditStateName(regular.state)}}</li>
+                        <li><a href="javascript:void(0)" [routerLink]="['./../detail/price',5]"
+                               [queryParams]="{cid:regular.quoteId}">详情</a></li>
+                    </ul>
+                    <div class="page" *ngIf="regularList && regularList.length > 0">
+                        <ng-template #totalTemplate let-total>当前第{{pageNo}}页 / 共{{total}}条数据</ng-template>
+                        <nz-pagination [nzSize]="'small'" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                                       [nzTotal]="total"
+                                       (nzPageIndexChange)="changeData()" [nzShowTotal]="totalTemplate"></nz-pagination>
+                    </div>
+                    <ul class="item-body" *ngIf="!regularList || (regularList && regularList.length == 0)">
+                        <p>暂无数据信息显示</p>
+                    </ul>
+                </div> -->
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,117 @@
+<div class="stats-attendance">
+    <div class="stats-attendance-head" >
+        <span>
+            <img [src]="headInfo.avatar" alt="">
+        </span>
+        <ul>
+            <li>{{headInfo.name?headInfo.name:'--'}}</li>
+            <li>{{headInfo.positionName?headInfo.positionName:'--'}}</li>
+        </ul>
+    </div>
+    <div class="stats-attendance-info">
+        <div class="stats-attendance-date">
+            <div class="stats-attendance-supervisor">
+                <nz-select style="width: 224px;height: 32px;" nzPlaceHolder="请选择监理" [(ngModel)]="selectSupervisor"
+                    (ngModelChange)="selectsupervisor($event)">
+                    <ng-container *ngFor="let  supervisor of  supervisor">
+                        <nz-option [nzLabel]="supervisor.name" [nzValue]="supervisor.id"></nz-option>
+                    </ng-container>
+                </nz-select>
+            </div>
+            <nz-calendar class="attend-date" [nzDateFullCell]="dateCellTpl" [nzFullscreen]="true"
+
+            (ngModelChange)="modalChange($event)" [(ngModel)]="Date">
+            </nz-calendar>
+        </div>
+        <div class="stats-attendance-table">
+            <div class="datas" style="margin: 11px 0 24px 0;" >
+                <p>{{currentDate.getMonth()+1}}月数据<span>(巡查里程：{{fixedNum(allDistanc?allDistanc:0)}})</span></p>
+                <ul>
+                    <li>
+                        <p>{{dataList.monthly.totalSiteCount?dataList.monthly.totalSiteCount:0}}</p>
+                        <p>负责工地</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.monthly.startSiteCount?dataList.monthly.startSiteCount:0}}</p>
+                        <p>开工工地</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.monthly.finishSiteCount?dataList.monthly.finishSiteCount:0}}</p>
+                        <p>验收竣工</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.monthly.postCount?dataList.monthly.postCount:0}}</p>
+                        <p>动态总数</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.monthly.uniquePostCount?dataList.monthly.uniquePostCount:0}}</p>
+                        <p>去重的动态数</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="datas" style="padding:24px 0 24px 0;border-top:1px solid rgba(232,232,232,1)"*ngIf="dataList">
+                <p>{{currentDate.getMonth()+1}}月{{currentDate.getDate()}}日数据</p>
+                <ul>
+                    <li>
+                        <p>{{dataList.daily.totalSiteCount?dataList.daily.totalSiteCount:0}}</p>
+                        <p>负责工地</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.daily.postCount?dataList.daily.postCount:0}}</p>
+                        <p>动态总数</p>
+                    </li>
+                    <li>
+                        <p>{{dataList.daily.uniquePostCount?dataList.daily.uniquePostCount:0}}</p>
+                        <p>去重的动态数</p>
+                    </li>
+                </ul>
+            </div>
+            <nz-table #nzTable [nzData]="dataList.dailyDetail"[nzShowPagination]='false'[nzScroll]="{ y: '240px' }" [nzLoading]="Loading"  *ngIf="dataList">
+                <thead>
+                    <tr>
+                        <th nzCustomFilter>
+                            楼盘房号
+                        </th>
+                        <th>发布时间</th>
+                        <th>发布机型</th>
+                        <th> 相距距离 <button nz-button nz-popover nzTitle="说明" nzContent="发布动态时的位置与项目的位置距离"
+                                style="float: right;border: none !important;" nzPlacement="topLeft"> <i nz-icon
+                                    type="question" theme="outline"></i></button></th>
+                        <!-- <th nzShowFilter [nzFilters]="filterAddressArray" (nzFilterChange)="filterAddressChange($event)">Address</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of nzTable.data" >
+                        <td nz-td [title]="data.address?data.address:''">{{data.address?data.address:'--'}}
+                        </td>
+                        <td nz-td>{{data.postDate|date:'yy-MM-dd'}}</td>
+                        <td nz-td [title]="data.phoneModel?data.phoneModel:''">{{data.phoneModel?data.phoneModel:'--'}}
+                        </td>
+                        <td nz-td [title]="data.mileage ?data.mileage:''">{{data.mileage?data.mileage:'--'}}
+                        </td>
+                        <!-- <td>{{data.address}}</td> -->
+                    </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+    <div id="container" style="width: 100%;height: 544px;"></div>
+</div>
+<ng-template #dateCellTpl let-date >
+    <div *ngIf="showDate(date)" >
+        <div class="temp-date">
+            <div class="date-number">{{date.getDate()}}</div>
+            <div style="text-align: left;">
+                <nz-badge nzStatus="processing" [nzText]="getconut(date)+'条'"></nz-badge>
+                <br>
+                <nz-badge nzStatus="warning" [nzText]="getDistance(date)"></nz-badge>
+                <br>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!showDate(date)">
+        <div class="temp-date " [ngStyle]="{'cursor':showMouse(date) ? 'not-allowed' : 'point' }">
+            <div class="date-number" [ngStyle]="{'color':showMouse(date) ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.65)' }">{{date.getDate()}}</div>
+        </div>
+    </div>
+</ng-template>

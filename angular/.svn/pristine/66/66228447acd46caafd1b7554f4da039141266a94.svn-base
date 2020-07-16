@@ -1,0 +1,76 @@
+<div class="master">
+    <div class="master-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+        <input type='file' #uploadFile accept=".xlsx, .xls" id="import" style="visibility: hidden;height:0;" ngModel
+               (change)="handleFileChange($event)">
+    </div>
+    <div class="master-warp" style="margin-top:-18px">
+        <!---查询条件--->
+        <div nz-row>
+            <div nz-col nzSpan="10" nzOffset="14" class="text-right mb-16">
+                <form nz-form [nzLayout]="'inline'" [formGroup]="materForm" (ngSubmit)="loadData(true)">
+                    <nz-form-item>
+                        <nz-form-control>
+                            <input nz-input formControlName="searchInfo"
+                                   id="searchInfo" placeholder="请输入要查询的主材名称"/>
+                        </nz-form-control>
+                    </nz-form-item>
+                    <nz-form-item>
+                        <nz-form-control>
+                            <button nz-button nzType="primary" [disabled]="!materForm.valid">查询</button>
+                        </nz-form-control>
+                    </nz-form-item>
+                </form>
+            </div>
+        </div>
+        <!---列表展示--->
+        <nz-table #nzTable [nzData]="dataSource" [nzFrontPagination]="false" [nzBordered]="true"
+                  [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                  (nzPageIndexChange)="loadData()" nzSize="middle" [nzLoading]="loading">
+            <thead>
+            <tr>
+                <th width="5%">编号</th>
+                <th width="45%">报价表名</th>
+                <th width="20%">导入时间</th>
+                <!--<th>是否默认</th>-->
+                <th width="15%">是否上架</th>
+                <th width="15%">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of nzTable.data">
+                <td>{{getCompileById(data.id)}}</td>
+                <td nz-tooltip [nzTitle]="data.versionName" nzPlacement="topLeft">
+                    {{data.versionName?data.versionName:'--'}}
+                </td>
+                <td>{{data.createTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                <!---v2.1.9版本取消--->
+                <!--<td [ngSwitch]="data.defaultVsersion">-->
+                <!--<span *ngSwitchCase="0">&#45;&#45;</span>-->
+                <!--<span *ngSwitchCase="1">默认报价表</span>-->
+                <!--<span *ngSwitchDefault>&#45;&#45;</span>-->
+                <!--</td>-->
+                <td class="col_w_10" [ngSwitch]="data.state">
+                    <span *ngSwitchCase="0">未上架</span>
+                    <span *ngSwitchCase="1">已上架</span>
+                    <span *ngSwitchDefault>--</span>
+                </td>
+                <td>
+                    <a href="javascript:void(0)" [routerLink]="['./../detail']"
+                       [queryParams]="{state:data.state,sid:data.id,title:data.versionName}"
+                     >详情</a>
+                    <a href="javascript:void(0)" class="ml-8"
+                       *ngIf="data.state === 0" nz-popconfirm nzTitle="删除后数据无法恢复"
+                       nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)">删除</a>
+                    <!--<a href="javascript:void(0)" class="master_a" (click)="handleOperate('def',data)"-->
+                    <!--*ngIf="data.state === 1 && data.defaultVsersion === 0">设为默认</a>-->
+                    <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('on',data)"
+                       *ngIf="data.state === 0">上架</a>
+                    <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('off',data)"
+                       *ngIf="data.state === 1">下架</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>

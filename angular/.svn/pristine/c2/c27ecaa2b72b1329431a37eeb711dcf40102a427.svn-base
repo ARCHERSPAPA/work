@@ -1,0 +1,70 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="examineName"></rev-title>
+    </div>
+    <div class="person-content">
+        <div class="examine">
+            <div class="examine_person">
+                <div class="personTitle">默认审批人</div>
+
+                <div *ngIf="personList && personList.length > 0" >
+                    <div *ngFor="let item of personList;let i = index; let last = last"
+                         class="personItem" (click)="handleChange(item,i)">
+                        <div class="personItem_explain">
+                            {{i === 0?'一审批人':i===1?'二审批人':i===2?'三审批人': i=== 3?'四审批人':''}}
+                        </div>
+                        <div class="personItem_head" title="编辑">
+                            <img [src]="item.headImg" alt="">
+                            <i title="删除" class="examine_icon" (click)="handleClose(i)" nz-icon type="close"></i>
+                            <div class="personItem_head_dots" *ngIf="!last">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="personItem_box" *ngIf="(item && (item.chooseType === 1 || !item.chooseType)) || (item && item.chooseType === 2 && item.chooseProject !== 4)">
+                            <span class="personItem_box_name">{{item.approver}}</span>
+                            <span class="personItem_box_job">{{item.position}}</span>
+                        </div>
+                        <!--<div class="personItem_job" *ngIf="item && (item.chooseProject !== 4 || !item.chooseProject)">{{item.position}}</div>-->
+                        <div class="personItem_box" *ngIf="item && item.chooseType === 2 && item.chooseProject === 4">
+                            <span class="personItem_box_custom">客户</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div  class="personItem personItem_add" *ngIf="personList.length < 4">
+                <nz-dropdown  [nzPlacement]="'bottomLeft'">
+                    <a nz-dropdown style="display: inline-block">
+                        <img src="assets/images/examine-add.png" alt="">
+                    </a>
+                    <ul nz-menu nzSelectable  style="width: 200px">
+                        <li nz-menu-item (click)="selectItemType(1)">
+                            <a>固定人员</a>
+                        </li>
+                        <li nz-menu-item  (click)="selectItemType(2)">
+                            <a>项目人员</a>
+                        </li>
+                    </ul>
+                </nz-dropdown>
+                </div>
+
+            </div>
+            <div class="examine_permission">
+                <div class="permissionTitle">修改权限</div>
+                <div class="permissionWrap">
+                    <nz-radio-group [(ngModel)]="radioValue">
+                        <label nz-radio class="radioBtn" nzValue="1">允许修改审批人</label>
+                        <label nz-radio class="radioBtn"  nzValue="2">不允许修改审批人</label>
+                    </nz-radio-group>
+                </div>
+            </div>
+            <div class="examine_operation">
+                <button title="返回列表页" nz-button [nzType]="'default'" (click)="back($event)">返回</button>
+                <button title="提交" nz-button [nzType]="'primary'" (click)="handleExamineSave()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

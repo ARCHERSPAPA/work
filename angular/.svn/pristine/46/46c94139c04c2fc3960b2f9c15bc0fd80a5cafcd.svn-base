@@ -1,0 +1,322 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from '../../../../service/request.service';
+import {NzNotificationService} from 'ng-zorro-antd';
+
+import {FormBuilder, FormGroup, FormControlName, Validators} from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import {UserService} from '../../../../service/user.service';
+import {Messages} from '../../../../model/msg';
+import {WarningService} from '../../../../service/warning.service';
+import {Default} from '../../../../model/constant';
+
+
+@Component({
+    selector: 'rev-master-detail',
+    templateUrl: './master-detail.component.html',
+    styleUrls: ['./../../master.component.scss']
+})
+export class MasterDetailComponent implements OnInit {
+
+
+    public dataSource: Array<any> = [];
+    public title: string;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public buttons: Array<any>;
+
+    public isVisible = false;
+    public state: string;
+    public versionName: string;
+    public versionId: number;
+    //修改versionName表单
+    public itemForm: FormGroup;
+    public itemName: string;
+
+
+    public categoryList: Array<any> = [];
+    public category: any;
+    public projectName = '';
+
+    public editForm: FormGroup;
+    public item: any;
+    public isEditVisible = false;
+
+    constructor(private route: ActivatedRoute,
+                private req: RequestService,
+                private fb: FormBuilder,
+                private user: UserService,
+                private warn: WarningService) {
+    }
+
+    ngOnInit() {
+        this.title = '主材详情';
+        this.buttons = [
+            {
+                name: '下载版本'
+            }
+        ];
+
+        this.route.queryParams.subscribe(params => {
+            if (params) {
+                this.state = params['state'];
+                this.versionName = params['title'];
+                this.versionId = params['sid'];
+                if (this.versionId) {
+                    this.loadData();
+                    this.getCategoryList();
+                }
+            }
+
+        });
+
+        this.itemForm = this.fb.group({
+            itemName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+
+        this.editForm = this.fb.group({
+            category: ['', []
+            ],
+            projectName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]],
+            brand: ['', [
+                Validators.maxLength(30)
+            ]],
+            specifications: ['', [
+                // Validators.maxLength(30)
+            ]],
+            modelNum: ['', [
+                Validators.maxLength(30)
+            ]],
+            material: ['', [
+                Validators.maxLength(30)
+            ]],
+            colours: ['', [
+                Validators.maxLength(30)
+            ]],
+            unit: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]],
+            univalent: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            primeCost: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            offerExplain: ['', [
+                Validators.maxLength(1000)
+            ]]
+        });
+
+        // this.editForm.valueChanges.subscribe(form =>{
+        //     this.dirtyValid(this.editForm);
+        // })
+    }
+
+    // 获取详情list
+    loadData(...args) {
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        const param = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+            versionId: this.versionId,
+            findAll: 1,
+        };
+
+        if (this.user.getCompanyId()) {
+            param['companyId'] = this.user.getCompanyId();
+        }
+
+        if (this.projectName || this.category) {
+            param['projectName'] = this.projectName;
+            param['category'] = this.category;
+        }
+        this.req.doPost({
+            url: 'mouldInfoList',
+            data: param,
+            success: (res => {
+                if (res && res.code === 200) {
+                    this.dataSource = res.data.pageSet;
+                    this.total = res.data.total;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    // 获取类别list
+    getCategoryList() {
+        this.req.doPost({
+            url: 'categoryList',
+            data: {
+                versionId: this.versionId
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.categoryList = res.data;
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+
+    // 编辑信息
+    showEditModal(data) {
+        this.item = data;
+        this.isEditVisible = true;
+        this.dirtyValid(this.editForm);
+    }
+
+    dirtyValid(form: any) {
+        if (form && form.controls) {
+            for (const i in form.controls) {
+               form.controls[i].markAsDirty();
+               form.controls[i].updateValueAndValidity();
+            }
+        }
+    }
+
+    //提交数据
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.editForm.valid) {
+            const values = this.editForm.value;
+            let params = {
+                id: this.item.id
+            };
+            params = Object.assign(params, values);
+            this.req.doPost({
+                url: 'mouldInfoUpd',
+                data: params,
+                success: (res => {
+                    this.handleCancel();
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // this.loadData();
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    handleCancel() {
+        this.isEditVisible = false;
+        this.item = null;
+        this.loadData();
+    }
+
+    // 修改版本名
+    showModal(name: string) {
+        this.isVisible = true;
+        this.itemName = name;
+    }
+
+    //修改版本名后提交
+    handleItemOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.itemForm.valid) {
+            const versionName = this.itemForm.value.itemName.trim();
+            this.req.doPost({
+                url: 'mouldUpd',
+                data: {
+                    id: this.versionId,
+                    versionName: versionName
+                },
+                success: (res => {
+                    this.handleItemCancel();
+                    if (res && res.code === 200) {
+                        this.versionName = versionName;
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+
+        }
+    }
+
+    //修改取消
+    handleItemCancel() {
+        this.isVisible = false;
+        this.itemForm.reset();
+    }
+
+    // 导出模板
+    handleDownExcel() {
+        this.req.doPostDown({
+            url: 'downExl',
+            data: {
+                id: this.versionId,
+                versionType: '1'
+            },
+            success: (res => {
+                // if(res && res.code == 200){
+                const blob = new Blob([res], {type: 'application/vnd.ms-excel'});
+                if (window.navigator.msSaveOrOpenBlob) {
+                    navigator.msSaveBlob(blob);
+                } else {
+                    const elink = document.createElement('a');
+                    elink.download = this.title.replace(/(^\s*)|(\s*$)/g, '') + '.xls';
+                    elink.style.display = 'none';
+                    elink.href = URL.createObjectURL(blob);
+                    document.body.appendChild(elink);
+                    elink.click();
+                    document.body.removeChild(elink);
+                }
+                // }else{
+                //     this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                // }
+            })
+        });
+    }
+
+    // 删除
+    handleDel(id) {
+        const that = this;
+        this.req.doPost({
+            url: 'mouldInfoUpd',
+            data: {
+                id: id,
+                state: 2
+            },
+            success: function (res) {
+                if (res.code === 200) {
+                    that.pageNo = 1;
+                    that.loadData();
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        });
+    }
+
+    handleName(name: string) {
+        if (name === this.buttons[0].name) {
+            this.handleDownExcel();
+        }
+    }
+
+
+}
+
+

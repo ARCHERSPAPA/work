@@ -1,0 +1,70 @@
+.poster-canvas{
+	position: fixed;
+	top: -10000px;
+	left:0;
+}
+.poster {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	z-index: 999999;
+	left: 0;
+	top: 0;
+	background: rgba(0, 0, 0, 0.4);
+	// background:yellow;
+	overflow: hidden;
+
+	&-close {
+		display: inline-block;
+		position: fixed;
+		right: 2%;
+		top: 1%;
+		z-index: 100;
+	}
+
+	&-img {
+		width: 90%;
+		height: 85%;
+		position: fixed;
+		left: 5%;
+		right: 5%;
+		top: 5%;
+		bottom: 10%;
+		z-index: 99;
+		overflow: hidden;
+
+		.image {
+			width: 100%;
+			height: 100%
+		}
+	}
+
+	&-btns {
+		width: 100%;
+		height: 20%;
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		z-index: 99;
+		text-align: center;
+		// background: rgba(255, 255, 255, 1);
+
+		&-item {
+			display: inline-block;
+			background: $col_098684;
+			font-size: 28.98rpx;
+			font-weight: bold;
+			width: 246.37rpx;
+			height: 79.71rpx;
+			line-height: 79.71rpx;
+			color: rgba(255, 255, 255, 1);
+			border-radius: 39.85rpx;
+			position: absolute;
+			left: 50%;
+			margin-left: -123.18rpx;
+			bottom: 10%;
+		}
+
+	}
+}
+

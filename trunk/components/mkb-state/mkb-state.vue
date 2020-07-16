@@ -97,38 +97,68 @@ export default {
 		display: inline-block;
 		opacity: 1;
 		border-radius: 0 14.49rpx 0 14.49rpx;
-		font-size: 25.36rpx;
+		// font-size: 25.36rpx;
+    font-size: 21.73rpx;
 		font-weight: 400;
 		text-align: center;
 		padding: 10.86rpx 25.36rpx;
-		color: rgba(255, 255, 255, 1);
-		background: transparent;
+		// color: rgba(255, 255, 255, 1);
 
-		&.finish {
-			background: rgba(255, 136, 0, 1);
-		}
+    line-height: 36.23rpx;
+    text{
+    
+    }
+ 
 
-		&.going {
-			background: rgba(130, 204, 245, 1);
-		}
+		// &.finish {
+		// 	// background: rgba(255, 136, 0, 1);
+		// 	background: #DDF3F3;
+      
+		// }
+
+		// &.going {
+		// 	// background: rgba(130, 204, 245, 1);
+  //     background-color: #000000;
+  //     opacity: 0.03;
+		// }
 	}
 
 	.mkb-state2 {
 		width: 101.44rpx;
 		height: 36.23rpx;
+    line-height: 36.23rpx;
 		background: transparent;
 		border-radius: 3.62rpx;
-		font-size: 25.36rpx;
+		// font-size: 25.36rpx;
+    font-size: 21.73rpx;
 		font-weight: 400;
 		text-align: center;
-		color: rgba(255, 255, 255, 1);
+   
+    text{
+      
+    }
+		// &.finish {
+		// 	background: #DDF3F3;
+		// }
 
-		&.finish {
-			background: rgba(255, 136, 0, 1);
-		}
-
-		&.going {
-			background: rgba(130, 204, 245, 1);
-		}
+		// &.going {
+			
+		// }
 	}
+  
+  .finish{
+     background-color: #DDF3F3;
+    text{
+      opacity: 0.7;
+      color: #098684;
+    }
+  }
+  .going{
+    background-color: rgba(0,0,0,0.03);
+
+    text{
+      color: #000000;
+      opacity: 0.7;
+    }
+  }
 </style>

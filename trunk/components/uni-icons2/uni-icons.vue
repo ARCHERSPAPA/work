@@ -38,7 +38,14 @@ export default {
 
 	@font-face {
 		font-family: uniicons;
-		src:url('../../static/fonts/iconfont.ttf?t=1570759488837') format('truetype')
+		// src:url('../../static/fonts/iconfont.ttf?t=1570759488837') format('truetype')
+		 // font-family: 'iconfont';  /* project id 1698274 */
+		  src: url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.eot');
+		  src: url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.eot?#iefix') format('embedded-opentype'),
+		  url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.woff2') format('woff2'),
+		  url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.woff') format('woff'),
+		  url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.ttf') format('truetype'),
+		  url('//at.alicdn.com/t/font_1698274_dmk1m6a4ays.svg#iconfont') format('svg');
 	}
 
 	.uni-icons {

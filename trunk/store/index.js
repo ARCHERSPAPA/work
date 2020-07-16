@@ -31,6 +31,8 @@ const store = new Vuex.Store({
     setSearchInfo: '',
     commonFlag: 'true',
     randCode: null,
+	// 全部户型
+	allHouseType:[]
 
    
   },
@@ -109,6 +111,11 @@ const store = new Vuex.Store({
       state.catalogues = status
       uni.setStorageSync('catalogues', status)
     },
+	// 全部户型存储
+	setAllHouseType(state, status){
+		state.allHouseType = status	
+		uni.setStorageSync('allHouseType', status)
+	},
 
     // 公共状态
     setFlag(state, flag) {
@@ -124,6 +131,17 @@ const store = new Vuex.Store({
       state.randCode = code
       uni.setStorageSync('randCode', code)
     },
+	setSystemInfo(state,info){
+		state.sysInfo = info;
+		uni.setStorageSync("systemInfo",info);
+	},
+	
+	//授权用户登录与否(true:已登录，false:未登录或者手机号未授权)
+	setAuthFlag(state,data){
+		state.authFlag = data;
+		uni.setStorageSync("authFlag",data)
+	}
+	
   },
   actions: {
     setUserInfo(context, provider) {
@@ -164,9 +182,24 @@ const store = new Vuex.Store({
     setFlag(context, provider) {
       context.commit('setFlag', provider)
     },
+	//设置登录随机码
     setRandCode(context, provider) {
       context.commit('setRandCode', provider)
-    }
+    },
+	// 全部户型
+	setAllHouseType(context, provider){
+		context.commit('setAllHouseType', provider)
+	},
+	//获取手机基础信息
+	setSystemInfo(context,provider){
+		context.commit("setSystemInfo",provider)
+	},
+	
+	//授权用户登录信息标识
+	setAuthFlag(context,provider){
+		context.commit("setAuthFlag",provider)
+	}
+		
   },
   modules: {
     conversation,

@@ -1,0 +1,17 @@
+{
+  "navigationBarTitleText": "在线装修",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50,
+  "usingComponents": {
+    "uni-search-bar": "/components/uni-search-bar/uni-search-bar",
+    "mkb-type": "/components/mkb-type/mkb-type",
+    "mkb-img-cut": "/components/mkb-img-cut/mkb-img-cut",
+    "uni-icons": "/components/uni-icons/uni-icons",
+    "mkb-recommend": "/components/mkb-recommend/mkb-recommend",
+    "mkb-back-top": "/components/mkb-back-top/mkb-back-top",
+    "skeleton": "/components/skeleton/index",
+    "mkb-state": "/components/mkb-state/mkb-state",
+    "mkb-search-item": "/components/mkb-search-item/mkb-search-item",
+    "custom-tab-bar": "/custom-tab-bar/index"
+  }
+}

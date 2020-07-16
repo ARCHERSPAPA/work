@@ -1,0 +1,201 @@
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { RequestService } from '../../service/request.service';
+import { Messages } from '../../model/msg';
+import { UserService } from '../../service/user.service';
+import { WarningService } from '../../service/warning.service';
+import { GuardService } from '../../service/guard.service';
+
+
+@Component({
+    selector: 'rev-depart-tree',
+    templateUrl: './depart-tree.component.html',
+    styleUrls: ['./depart-tree.component.scss']
+})
+export class DepartTreeComponent implements OnInit {
+    private departmentId: string;
+    private departUrl: string;
+
+    public nodes: Array<any>;
+
+    /**
+     * 控制权限
+     */
+    public permit: number;
+    public p:any;
+    //分类型判定拉取数据标准
+    @Input() type: any;
+
+    @Input() isPermit = false;
+
+
+    /**
+     * 区别是页面显示还是弹出框内显示
+     * @type {boolean}
+     */
+
+    @Input() isModal = true;
+
+    @Output() handleChangeData: EventEmitter<any> = new EventEmitter<any>();
+    @Output() isHandleChangeData: EventEmitter<any> = new EventEmitter<any>();
+
+
+    constructor(private request: RequestService,
+        private user: UserService,
+        private warn: WarningService,
+        private guard: GuardService) { }
+
+    ngOnInit() {
+        // if(!this.type){
+        // switch (this.user.getQuickQueryDepartType()) {
+        //     case 0: this.departUrl = this.getParamUrl(10); break;
+        //     case 1: this.departUrl = this.getParamUrl(11); break;
+        //     case 2: this.departUrl = this.getParamUrl(12); break;
+        //     default: this.departUrl = this.getParamUrl(this.type);
+        // }
+
+        // }
+
+        this.departUrl = this.getParamUrl(this.type);
+        if (this.guard.saftyGuard()) {
+            this.loadDepartment();
+        }
+        // this.permit = this.isPermit ? 0 : this.user.getQuickQueryDepartType();
+    }
+
+    // 拉取部门信息
+    loadDepartment() {
+        const that = this;
+        this.request.doPost({
+            url: this.departUrl,
+            data: {},
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.nodes = this.renderList(res.data);
+                    if(sessionStorage.getItem('params')){
+                        that.renderIndex(that.nodes)
+                    }else{
+                        that.nodes[0].selected = true;
+                    }
+                    that.departmentId = that.nodes[0].value;
+                    that.handleChangeData.emit(that.departmentId);
+
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    renderIndex(items){
+        let params = JSON.parse(sessionStorage.getItem('params'))
+        items.forEach((item,i) => {
+            if( item.id == params.did){
+                this.nodes[i].selected = true;
+            }else{
+                if(item.children){
+                    item.children.forEach((secondItem,secondeIdx)=>{
+                        if( secondItem.id == params.did){
+                            this.nodes[i].expanded = true;
+                            this.nodes[i]["children"][secondeIdx].selected = true
+                        }else{
+                            if(secondItem.children){
+                                secondItem.children.forEach((thirdItem,thirdIdx)=>{
+                                    if(thirdItem.id == params.did){
+                                        this.nodes[i].expanded = true;
+                                        this.nodes[i]["children"][secondeIdx].expanded = true;
+                                        this.nodes[i]["children"][secondeIdx]["children"][thirdIdx].selected = true;
+                                    }else{
+                                        if(thirdItem.children){
+                                            thirdItem.children.forEach((fourItem,fourIdx)=>{
+                                                if(fourItem.id == params.did){
+                                                    this.nodes[i].expanded = true;
+                                                    this.nodes[i]["children"][secondeIdx].expanded = true;
+                                                    this.nodes[i]["children"][secondeIdx]["children"][thirdIdx].expanded = true;
+                                                    this.nodes[i]["children"][secondeIdx]["children"][thirdIdx]["children"][fourIdx].selected = true;
+                                                }
+                                            })                                           
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                       
+                    })
+                }
+            }
+            
+        });
+    }
+    renderList(items) {
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                item['key'] = item['id'];
+                item['title'] = item['name'];
+                item['value'] = item['id'];
+                item['isLeaf'] = item['children'] && item['children'].length > 0 ? false : true;
+                if (item['children'] && item['children'].length > 0) {
+                    item['children'] = this.renderList(item['children']);
+                }
+            });
+        }
+        return items;
+    }
+
+
+    // 根据id拉取部门信息
+    // onExpandChange(e): void {
+    //     if (e.node.getChildren().length === 0 && e.node.isExpanded) {
+    //         this.request.doPost({
+    //             url: this.departUrl,
+    //             data: {
+    //                 superiorDepartmentId: e.node.key
+    //             },
+    //             success: (res => {
+    //                 if (res && res.code == 200) {
+    //                     for (let i = 0; i < res.data.length; i++) {
+    //                         res.data[i]['title'] = res.data[i].name;
+    //                         res.data[i]['value'] = res.data[i].id;
+    //                         res.data[i]['key'] = res.data[i].id;
+    //                         res.data[i]['isLeaf'] = !res.data[i].ownSubset
+    //                     }
+    //                     e.node.addChildren(res.data)
+    //                 } else {
+    //                     this.warn.onError(res.msg || Messages.FAIL.DATA);
+    //                 }
+    //             })
+    //         });
+    //     }
+    // }
+
+    // 拉取工人列表
+    changeDataClick(e): void {
+        this.departmentId = e.node.origin.id;
+        this.isHandleChangeData.emit(true);
+        this.handleChangeData.emit(this.departmentId);
+    }
+
+    //获取相应的地址
+    getParamUrl(type) {
+        switch (Number(type)) {
+            // case 1:
+            //     return "listDepart";
+            // case 2:
+            //     return "listDepartAdd";
+            // case 3:
+            //     return "listDepartAddEmp";
+            // case 4:
+            //     return "listDepartSearch";
+            case 10:
+                return 'listDepartAll';
+            case 11:
+                return 'listDepartIn';
+            case 12:
+                return 'listDepartSon';
+            //企业通讯录
+            case 100:
+                return 'listDepartAddressBook';
+            default:
+                return 'listDepartAll';
+        }
+    }
+}

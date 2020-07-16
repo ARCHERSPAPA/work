@@ -4,13 +4,13 @@ export default {
 	 * @param {Object} val 值域
 	 * @param {Object} div 截取位数
 	 */
-  number: (val, div, bool) => {
+  number: (val, div, bool = false) => {
     if (!bool) {
       return Number(val).toFixed(div)
     } else {
       if (val && val.length > 0) {
         const values = []
-        const split = val.split('.')
+        const split = String(val).split('.')
         if (split.length > 0) {
           values.push(split[0] ? split[0] : 0)
           if (!split[1]) {
@@ -34,6 +34,7 @@ export default {
       return Number(val).toFixed(div)
     }
   },
+ 
   /**
 	 * 分位数
 	 * @param {Object} val
@@ -57,9 +58,10 @@ export default {
           }
         }
       }
-      return result.join('') + (decimal.length > 0 ? ('.' + decimal.toString()) : '')
+      return result.join('') + (decimal && decimal.length > 0 ? ('.' + decimal.toString()) : '')
     }
   },
+ 
   /**
 	 * 时间格式化
 	 * @param {Object} date 当前时间值（一般为时间戳）
@@ -92,16 +94,16 @@ export default {
     }
     return fmt
   },
-  /**
+
+	/**
 	 * 根据要求对数据作取万相关处理
 	 * @param {Object} val 当前数据
 	 * @param {Object} dig 位数调整
 	 */
   digit: (val, dig) => {
-
     if (!val) return val
     if (val) {
-      const nums = val.toString().split('.')
+      const nums = String(val).split('.')
      
       const iteger = nums[0].split(''); const decimal = nums[1]
       // 对整数位数取值;
@@ -139,29 +141,21 @@ export default {
 			  })
 		  }
 	  }
-	  /**
-	   * var newStr
-					if (name === undefined || name === null || name === '') {
-						return false
-					}
-					if (name === '客户') {
-						return name
-					}
+  },
 
-					if (name.length === 2) {
-						newStr = name.substr(0, 1) + '*'
-					} else if (name.length > 2) {
-						var char = ''
-						for (let i = 0, len = name.length - 1; i < len; i++) {
-							char += '*'
-						}
-						// newStr = name.substr(0, 1) + char + name.substr(-1, 1);
-						newStr = name.substr(0, 1) + char
-					} else {
-						newStr = name
-					}
-					return newStr
-	   */
-  }
+  /**
+   * 加密信息
+   * @param {Object} val
+   * @param {Object} start 开始位置
+   * @param {Object} end 结束位置
+   * @param {Object} symbol 加密后显示的符号
+   */
+  encodeStr(val,start = 3,end = 7,symbol = "*"){
+	  if(!val) return;
+	  else{
+		  let str = String(val);
+		  return str.replace(str.substring(start,end),symbol.repeat(end-start));
+	  }
+  }		
 
 }

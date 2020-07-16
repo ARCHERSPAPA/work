@@ -5,23 +5,30 @@
         <view class="mesItem-head">
           <!-- 头像 -->
           <view v-if="item.type === 'C2C'">
-
             <image :src="item.userProfile.avatar || '/static/im/avatar.png'" />
           </view>
           <!-- 未读数 -->
           <!-- <text v-if="item.unreadCount> 0">99+</text> -->
-          <text v-if="item.unreadCount> 0">{{ item.unreadCount }}</text>
+          
         </view>
         <!-- 最后一条消息 -->
         <view class="mesItem-cnt">
           <text v-if="item.type === 'C2C'" class="mesItem-name ellipsis-beyond">{{ item.userProfile.nick || item.userProfile.userID }}</text>
-          <text v-if="item.lastMessage.type == 'TIMTextElem'" class="mesItem-text ellipsis-beyond">{{ item.lastMessage.payload.text }}</text>
-          <text v-else-if="item.lastMessage.payload.data.type == 'example'" class="mesItem-text ellipsis-beyond">[案例]</text>
-          <text v-else-if="item.lastMessage.payload.data.type  == 'img'" class="mesItem-text ellipsis-beyond">[图片]</text>
+          
+          <view>
+            <text v-if="item.lastMessage.type == 'TIMTextElem'" class="mesItem-text ellipsis-beyond">{{ item.lastMessage.payload.text }}</text>
+            <text v-else-if="item.lastMessage.payload.data.type == 'example'" class="mesItem-text ellipsis-beyond">[案例]</text>
+            <text v-else-if="item.lastMessage.payload.data.type  == 'img'" class="mesItem-text ellipsis-beyond">[图片]</text>
+            <text class="unreadCount" v-if="item.unreadCount> 0">{{ item.unreadCount }}</text>
+            <!-- <text class="unreadCount" >12</text> -->
+          </view>
+          
+          
+         
         </view>
         <!-- 会话时间 -->
         <!-- <view class="mesItem-time">{{ formatTime(item.lastMessage.lastTime* 1000,2) }}</view> -->
-        <view class="mesItem-time">{{ item.lastMessage.lastTime*1000 | format('yyyy/MM/dd') }}</view>
+        <view class="mesItem-time">{{ item.lastMessage.lastTime*1000 | format('hh:ss') }}</view>
       </view>
     </view>
 
@@ -163,7 +170,7 @@ export default {
 
   .mesItem{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     padding: 28.98rpx;
     padding-bottom: 0;
     align-content: center;
@@ -171,10 +178,10 @@ export default {
     position:relative;
     &-head{
       position: relative;
-      margin-right: 25.36rpx;
+      margin-right: 14.49rpx;
       image{
-        width: 99.9rpx;
-        height: 99.9rpx;
+        width: 86.95rpx;
+        height: 86.95rpx;
         border-radius: 100%;
       }
       text{
@@ -193,26 +200,50 @@ export default {
       }
     }
     &-cnt{
-      width: calc(100% - 183.22rpx);
+      width: calc(100% - 101.44rpx);
     }
     &-name{
       width: 60%;
       display: block;
-      margin-bottom: 19.02rpx;
-      font-size: 36.23rpx;
+      // margin-bottom: 19.02rpx;
+     
+      color: #000;
+      opacity: 0.9;
+      font-size: 28.98rpx;
       font-weight: 500;
     }
     &-text{
-      width: 100%;
+      width: calc(100% - 36.23rpx);
       display: inline-block;
-      color: #B7B8BA;
-      padding-bottom: 33.51rpx;
+      // font-size: 25.36rpx;
+      font-size:28.98rpx;
+      color: #000;
+      opacity: 0.4;
+      padding-top: 19.02rpx;
+      // padding-bottom: 33.51rpx;
+      padding-bottom: 30.79rpx;
       border-bottom: 0.9rpx solid #DEDEDE;
     }
+    .unreadCount{
+      float: right;
+      display: inline-block;
+      width: 36.23rpx;
+      height: 36.23rpx;
+      line-height: 36.23rpx;
+      border-radius: 100%;
+       margin-top: 19.02rpx;
+      // position: absolute;
+      // right: 0;
+      // top:0;
+      font-size: 25.36rpx;
+      color: #fff;
+      background-color: #FA5151;
+      text-align: center;
+    }
     &-time{
-      width: 126.81rpx;
-      font-size: 21.73rpx;
-      color: #B7B8BA;
+      font-size: 25.36rpx;
+      color: #000;
+      opacity: 0.4;
       position:absolute;
       right: 28.98rpx;
       top:28.98rpx;

@@ -1,0 +1,197 @@
+import { Component, Input, TemplateRef, ViewChild , OnInit} from '@angular/core';
+import {InfoComponent} from '../../../../plugins/info/info.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {RequestService} from '../../../../service/request.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import {Messages} from '../../../../model/msg';
+import {WarningService} from '../../../../service/warning.service';
+import { NzModalRef, NzModalService } from 'ng-zorro-antd';
+// import {NihaoComponent} from '../../../../plugins/nihao/nihao.component';
+
+
+@Component({
+  selector: 'app-examine-add',
+  templateUrl: './examine-add.component.html',
+  styleUrls: ['./examine-add.component.scss']
+})
+export class ExamineAddComponent implements OnInit {
+  public examineId: any;
+  public examineName: string;
+  public personList: Array<any> = [];
+
+  public radioValue = '2';
+
+  constructor(
+      private modal: NgbModal,
+      private request: RequestService,
+      private activatedRoute: ActivatedRoute,
+      private warn: WarningService,
+      private modalService: NzModalService
+  ) { }
+
+  ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params.examineId) {
+        this.examineId = params.examineId;
+        this.loadExamineSelect();
+      }
+      if (params && params.examineName) {
+        this.examineName = '编辑' + params.examineName;
+      }
+    });
+  }
+
+  handleClose(index) {
+    this.personList.splice(index, 1);
+  }
+
+  // 增加item
+  handleAddPerson() {
+    const that = this;
+    const info = that.modal.open(InfoComponent, {
+      centered: true,
+      keyboard: true,
+      backdrop: 'static'
+    });
+    info.componentInstance.type = 15;
+    info.componentInstance.memberList = this.personList;
+
+    info.result.then((res) => {
+      const {id: employeeId, name, positionName, headImg } = res[0];
+      this.personList.push({
+        headImg,
+        employeeId,
+        approver: name,
+        position: positionName,
+      });
+    }, (err) => {
+    });
+  }
+
+  handleAddProjectPerson() {
+    // const modal = this.modalService.create({
+    //   nzTitle: 'Modal Title',
+    //   nzContent: NihaoComponent,
+    //   nzComponentParams: {
+    //     title: 'title in component',
+    //     subtitle: 'component sub title，will be changed after 2 sec'
+    //   },
+    //   nzFooter: [{
+    //     label: 'change component tilte from outside',
+    //     onClick: (componentInstance) => {
+    //       componentInstance.title = 'title in inner component is changed';
+    //     }
+    //   }]
+    // });
+    //
+    // modal.afterOpen.subscribe(() => console.log('[afterOpen] emitted!'));
+    //
+    // // Return a result when closed
+    // modal.afterClose.subscribe((result) => console.log('[afterClose] The result is:', result));
+    //
+    // // delay until modal instance created
+    // window.setTimeout(() => {
+    //   const instance = modal.getContentComponent();
+    //   instance.subtitle = 'sub title is changed';
+    // }, 2000);
+  }
+
+  // 修改item
+  handleChange(item, i) {
+    const that = this;
+    const info = that.modal.open(InfoComponent, {
+      centered: true,
+      keyboard: true,
+      backdrop: 'static'
+    });
+    info.componentInstance.type = 15;
+    info.componentInstance.member = item;
+    info.componentInstance.memberList = this.personList;
+    info.result.then((res) => {
+      const {id: employeeId, name, positionName, headImg } = res[0];
+      this.personList.splice(i, 1, {
+        headImg,
+        employeeId,
+        approver: name,
+        position: positionName,
+      });
+    }, (err) => {
+    });
+  }
+
+  // 拉取详情
+  loadExamineSelect() {
+    const self = this;
+
+    this.request.doPost({
+      url: 'examineSelect',
+      data: {
+        id: this.examineId
+      }, success: res => {
+        self.personList = res.data.selectByExample;
+        if (res.data.state ) {
+          self.radioValue = res.data.state + '';
+        }
+
+      }
+    });
+  }
+
+  back(e) {
+    history.go(-1);
+  }
+
+  // 提交
+  handleExamineSave() {
+    const self = this;
+
+    const redactList = this.personList.map((item, index) => {
+      const { employeeId, approver, position } = item;
+      return { employeeId, approver, position, orderAddress: index + 1 };
+    });
+
+    this.request.doPost({
+      url: 'examineSave',
+      data: {
+        id: this.examineId,
+        redactList,
+        state: this.radioValue
+      }, success: res => {
+        if ( res.code && res.code === 200) {
+          self.loadExamineSelect();
+          self.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+        }
+      }
+    });
+
+
+  }
+
+
+}
+
+
+// @Component({
+//   selector: 'nz-modal-custom-component',
+//   template: `
+//     <div>
+//       <h2>{{ title }}</h2>
+//       <h4>{{ subtitle }}</h4>
+//       <p>
+//         <span>Get Modal instance in component</span>
+//         <button nz-button [nzType]="'primary'" (click)="destroyModal()">destroy modal in the component</button>
+//       </p>
+//     </div>
+//   `
+// })
+// export class NzModalCustomComponent {
+//   @Input() title: string;
+//   @Input() subtitle: string;
+//
+//   constructor(private modal: NzModalRef) { }
+//
+//   destroyModal(): void {
+//     this.modal.destroy({ data: 'this the result data' });
+//   }
+// }
+

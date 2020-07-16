@@ -1,0 +1,43 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+import { Messages } from "../../../model/msg";
+@Component({
+  selector: 'rev-finance-temp',
+  templateUrl: './finance-temp.component.html',
+  styleUrls: ['./finance-temp.component.scss']
+})
+export class FinanceTempComponent implements OnInit {
+  public searchInfo;
+  public finTempList;
+  constructor(private req: RequestService,
+    private warn: WarningService) {
+
+  }
+
+  ngOnInit() {
+    this.changeData()
+  }
+  changeData() {
+    this.req.doPost({
+      url: "selectPayTemplate",
+      success: res => {
+        if (res && res.code == 200) {
+          this.finTempList = res.data;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  getNumber(type: number) {
+    if (type == 9) {
+      return '定金';
+    } else {
+      return `${type}期`;
+    }
+  }
+  addData() {
+
+  }
+}

@@ -1,0 +1,92 @@
+<div class="master-add">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    <div class="master-add-title">
+        <p>
+            {{tempName}}
+        </p>
+        <a href="javascript:void(0)" (click)='editTitle()'>修改</a>
+    </div>
+    <div class="master-add-list master-warp">
+        <nz-table #rowSelectionTable [nzData]="tempAddList" [nzShowPagination]="false" [nzFrontPagination]="false"
+            (nzPageIndexChange)='changeData()' nzSize="middle">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of rowSelectionTable.data,let i=index,let isFirst ='first',let isLast='last'" >
+                    <td [nzTitle]="item.materialName?item.materialName:'--'" nz-tooltip>{{item.materialName?item.materialName:'--'}}
+                    </td>
+                    <td>
+                        <a href="javascript:void(0)"  nz-popconfirm nzTitle="确定删除项目吗?" nzOkText="删除"
+                            (nzOnConfirm)="delTemp(item.id)">删除</a>
+                        <a href="javascript:void(0)" class="ml-8" (click)="moveTemp(item.id,rowSelectionTable.data[i+1].id)" *ngIf="!isLast">下移</a>
+                        <a href="javascript:void(0)" class="ml-8" (click)="moveTemp(item.id)"*ngIf="!isFirst">置顶</a>
+                        <a href="javascript:void(0)" class="ml-8" (click)="moveTemp(item.id,rowSelectionTable.data[i-1].id)"*ngIf="!isFirst">上移</a>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="titleIsVisible" nzTitle="编辑名称" [nzFooter]="null"(nzOnCancel)="handleCancel()" >
+    <form nz-form [formGroup]="tempTitleForm">
+        <nz-form-item>
+    <div nz-col [nzSpan]=8 style="text-align: right;line-height: 30px;margin-right: 24px;">
+        模板名称
+    </div>
+    <nz-form-control [nzSpan]="14">
+        <input nz-input [(ngModel)]="tempName" formControlName="tempName" maxlength=10 minlength=1/>
+        <nz-form-explain *ngIf="tempTitleForm.get('tempName').dirty && tempTitleForm.get('tempName').errors">
+            <ng-container *ngIf="tempTitleForm.get('tempName').hasError('required')">
+                名称必填
+            </ng-container>
+            <ng-container *ngIf="tempTitleForm.get('tempName').hasError('minlength')">
+                至少输入1位字符
+            </ng-container>
+            <ng-container *ngIf="tempTitleForm.get('tempName').hasError('maxlength')">
+                至多输入10位字符
+            </ng-container>
+        </nz-form-explain>
+    <br>
+</nz-form-control>
+</nz-form-item>
+<div class="btns">
+    <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+    <button nz-button nzType="primary" [disabled]="!tempTitleForm.valid" (click)="editTemp()">修改
+    </button>
+</div>
+</form>
+</nz-modal>
+<nz-modal nzWidth="33vw" [(nzVisible)]="addIsVisible" nzTitle="添加主材" [nzFooter]="null" 
+(nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="tempMateriaForm">
+        <nz-form-item>
+    <div nz-col [nzSpan]=8 style="text-align: right;line-height: 30px;margin-right: 24px;">
+        主材名称
+    </div>
+    <nz-form-control [nzSpan]="14">
+        <input nz-input [(ngModel)]="materialName"formControlName="materialName" maxlength=10 minlength=1 />
+        <nz-form-explain *ngIf="tempMateriaForm.get('materialName').dirty && tempMateriaForm.get('materialName').errors">
+            <ng-container *ngIf="tempMateriaForm.get('materialName').hasError('required')">
+                名称必填
+            </ng-container>
+            <ng-container *ngIf="tempMateriaForm.get('materialName').hasError('minlength')">
+                至少输入1位字符
+            </ng-container>
+            <ng-container *ngIf="tempMateriaForm.get('materialName').hasError('maxlength')">
+                至多输入10位字符
+            </ng-container>
+        </nz-form-explain>
+    <br>
+</nz-form-control>
+</nz-form-item>
+    <div class="btns">
+        <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+        <button nz-button nzType="primary" [disabled]="!tempMateriaForm.valid" (click)="addTemp()">确定
+        </button>
+    </div>
+</form>
+</nz-modal>

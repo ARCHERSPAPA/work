@@ -4,7 +4,7 @@
 			<view class="filter-content" v-for="(item, index) in menuList" :key="index" v-if="menuIndex == index">
 				<view v-if="item.isSort" class="area-all">
 					<view class="area">房屋面积</view>
-					<input type="number" v-model="iptValue" @focus="onFocus" @blur="onBlur" @input="onInput" :disabled="disabledState">
+					<input type="number" v-model="iptValue" @focus="onFocus" @blur="onBlur" @input="onInput" :disabled="disabledState" :focus="getFocus">
 					<view class="area-btn">
 						<view @click="cancel()">取消</view>
 						<view @click="sortTap('area')">确认</view>
@@ -15,7 +15,7 @@
 						<text>{{item.detailTitle}}</text>
 					</view>
 					<view class="filter-content-detail">
-						<text v-for="(detailItem,idx) in selectDetailList" :key="idx" class='filter-content-detail-item-default' :style="{'background-color':detailItem.isSelected?'rgba(255,243,229,1)':'rgba(0,0,0,0.05)','color':detailItem.isSelected?'rgba(255,136,0,1)':'rgba(0,0,0,0.90)'}"
+						<text v-for="(detailItem,idx) in selectDetailList" :key="idx" class='filter-content-detail-item-default' :class="detailItem.isSelected?'active':'unactive'"
 						 @tap="itemTap(idx,selectDetailList,item.isMutiple,item.key)">
 							<text>
 								{{detailItem.title}}
@@ -30,6 +30,7 @@
 </template>
 
 <script>
+	import Constant from '../../util/constant.js';
 	export default {
 		data() {
 			return {
@@ -43,7 +44,8 @@
 				defaultSelectedTitleObj: {},
 				iptValue:'',
 				changeDetailList:[],
-				disabledState:false
+				disabledState:false,
+				getFocus:false
 			};
 		},
 		props: {
@@ -105,7 +107,6 @@
 				for (let i = 0; i < this.menuList.length; i++) {
 					let item = this.menuList[i];
 					if (!this.independence && item.defaultSelectedIndex != null && item.defaultSelectedIndex.toString().length > 0) { // 处理并列菜单默认值
-
 						if (item.isMutiple) {
 							obj[item.key] = [];
 							item.detailList[0].isSelected = false;
@@ -135,244 +136,46 @@
 				this.result = obj;
 				return obj;
 			},
-			// 重置所有选项，包括默认选项，并更新result
-			resetAllSelect(callback) {
-				let titles = [];
-				for (let i = 0; i < this.menuList.length; i++) {
-					this.resetSelected(this.menuList[i].detailList,this.menuList[i].key);
-					titles[this.menuList[i].key] = this.menuList[i].title;
-				}
-				let obj = {
-					'result': this.result,
-					'titles': titles,
-					'isReset': true
-				}
-				this.$emit("confirm", obj);
-				callback(this.result);
-			},
-			// 重置选项为设置的默认值，并更新result
-			resetSelectToDefault(callback) {
-				for (let i = 0; i < this.menuList.length; i++) {
-					this.selectDetailList = this.menuList[i].detailList;
-
-					if (this.menuList[i].defaultSelectedIndex) {
-						if (Array.isArray(this.menuList[i].defaultSelectedIndex)) { // 把所有默认的为false的点为true
-							for (let j = 0; j < this.menuList[i].defaultSelectedIndex.length; j++) {
-								if (this.selectDetailList[this.menuList[i].defaultSelectedIndex[j]].isSelected == false) {
-									this.itemTap(this.menuList[i].defaultSelectedIndex[j], this.selectDetailList, this.menuList[i].isMutiple, this
-										.menuList[i].key)
-								}
-							}
-						} else {
-							this.itemTap(this.menuList[i].defaultSelectedIndex, this.selectDetailList, this.menuList[i].isMutiple, this.menuList[
-								i].key)
-						}
-
-						// 获取非默认项的下标
-						let unDefaultSelectedIndexArr = this.getUnDefaultSelectedIndex(this.menuList[i])
-						// 把所有不是默认的为true的点为false
-						for (let j = 0; j < unDefaultSelectedIndexArr.length; j++) {
-							if (this.selectDetailList[unDefaultSelectedIndexArr[j]].isSelected == true) {
-								this.itemTap(unDefaultSelectedIndexArr[j], this.selectDetailList, this.menuList[i].isMutiple, this
-										.menuList[i].key)
-							}
-						}
-					}
-
-
-				}
-
-				this.selectedObj = this.defaultSelectedObj;
-				this.result = this.defaultSelectedObj;
-				let obj = {
-					'result': this.result,
-					'titles': this.defaultSelectedTitleObj,
-					'isReset': true
-				}
-				this.$emit("confirm", obj);
-				callback(this.result)
-			},
-			getUnDefaultSelectedIndex(menuListItem) { // 获取非默认项
-				let tempDefault = menuListItem.defaultSelectedIndex;
-				if (!Array.isArray(tempDefault)) {
-					tempDefault = [tempDefault];
-				}
-				// 获取所有项的下标 组成新的数组
-				let all = [];
-				for (let i = 0; i < menuListItem.detailList.length; i++) {
-					all.push(i)
-				}
-				// 将默认选中的数组与所有项的数组的不同值合并为一个新数组
-				var unDefaultSelectedIndex = tempDefault.filter(function(v) {
-					return !(all.indexOf(v) > -1)
-				}).concat(all.filter(function(v) {
-					return !(tempDefault.indexOf(v) > -1)
-				}));
-				return unDefaultSelectedIndex;
-			},
-			resetMenuList(val) {
-				this.menuList = val;
-				this.$emit('update:menuList', val)
-			},
 			menuTabClick(index) {
 				this.menuIndex = index;
 				this.selectDetailList = this.menuList[index].detailList;
 				this.selectedKey = this.menuList[index].key;
-				// 如果是独立菜单
-				if (this.independence && !this.menuList[index].isSort) {
-					if (JSON.stringify(this.independenceObj) == '{}') {
-						this.initIndependenceObj(index);
-					} else {
-						for (let key in this.independenceObj) {
-							if (key != this.selectedKey) {
-								this.initIndependenceObj(index);
-								this.resetSelected(this.menuList[index].detailList, this.selectedKey);
-							}
-						}
-					}
-
-				}
-				if (this.independence && this.menuList[index].isSort) {
-
-					this.independenceObj = {};
-
-
-				}
-				if (this.independence) {
-					let idx = this.menuList[index].defaultSelectedIndex;
-					if (idx != null && idx.toString().length > 0) { // 处理独立菜单默认值
-						if (this.menuList[index].isMutiple) {
-							for (let i = 0; i < idx.length; i++) {
-								if (this.menuList[index].detailList[idx[i]].isSelected == false) {
-									this.itemTap(idx[i], this.menuList[index].detailList, true, this.selectedKey);
-								}
-
-							}
-						} else {
-							if (this.menuList[index].detailList[idx].isSelected == false) {
-
-								this.itemTap(idx, this.menuList[index].detailList, false, this.selectedKey);
-
-							}
-						}
-
-					}
-				}
-
-
 				// #ifdef H5
 				this.selectedObj = this.selectedObj;
 				this.$forceUpdate();
 				// #endif
 			},
-			initIndependenceObj(index) {
-				this.independenceObj = {};
-				if (this.menuList[index].isMutiple) {
-					this.independenceObj[this.selectedKey] = [];
-				} else {
-					this.independenceObj[this.selectedKey] = '';
-				}
-			},
 			itemTap(index, list, isMutiple, key) {
-				
-				if (isMutiple == true) {
-					
-					list[index].isSelected = !list[index].isSelected;
-					if (index == 0) {
-						this.resetSelected(list, key)
-						if (!this.independence) {
-							this.selectedTitleObj[key] = list[index].title;
+				if (this.independence) {
+					this.independenceObj[this.selectedKey] = list[index].value;
+					this.result = this.independenceObj;
+				} else {
+					this.selectedObj[key] = list[index].value;
+					this.result = this.selectedObj;
+					this.selectedTitleObj[this.selectedKey] = list[index].title;
+					console.log(this.result)
+					if(this.designIpt === 1){
+						if(this.result.layout == ''){
+							this.result.layout = "户型"
 						}
-					} else {
-						list[0].isSelected = false
-						if (list[index].isSelected) {
-							if (this.independence) {
-								this.independenceObj[this.selectedKey].push(list[index].value);
-							} else {
-								this.selectedObj[key].push(list[index].value);
-							}
-						} else {
-							list[index].isSelected = false;
-							if (this.independence) {
-								var idx = this.independenceObj[this.selectedKey].indexOf(list[index].value);
-								this.independenceObj[this.selectedKey].splice(idx, 1);
-							} else {
-								var idx = this.selectedObj[key].indexOf(list[index].value);
-								this.selectedObj[key].splice(idx, 1);
-							}
-
-						}
-						if (this.independence) {
-							this.result = this.independenceObj;
-						} else {
-							this.result = this.selectedObj;
-						}
-
+						this.selectedTitleObj['layout'] = this.result.layout == '全部'?'户型':this.result.layout;
 					}
-				} else {
-					/* if (index == 0) {
-						// this.resetSelected(list, key)
-						
-						if (!this.independence) {
-							this.selectedTitleObj[key] = list[index].title;
-						}
-					} else { */
-						// list[0].isSelected = false
-						// this.sureClick()
-						if (this.independence) {
-							this.independenceObj[this.selectedKey] = list[index].value;
-							this.result = this.independenceObj;
-						} else {
-							this.selectedObj[key] = list[index].value;
-							this.result = this.selectedObj;
-							// this.selectedTitleObj[key] = list[index].title;
-							this.selectedTitleObj[this.selectedKey] = list[index].title;
-							this.sureClick()
-						}
-
-						for (let i = 0; i < list.length; i++) {
-							if (index == i) {
-								list[i].isSelected = true
-							} else {
-								list[i].isSelected = false
-							}
-						}
-					// }
-				}
-				// #ifdef H5
-				this.$forceUpdate();
-				// #endif
-			},
-			resetSelected(list, key) {
-				console.log(list, key)
-				if (typeof this.result[key] == 'object') {
-					this.result[key] = [];
-					this.selectedTitleObj[key] = list[0].title;
-				} else {
-					this.result[key] = '';
-					this.selectedTitleObj[key] = list[0].title;
+					this.sureClick();
 				}
 				for (let i = 0; i < list.length; i++) {
-					if (i == 0) {
-						list[i].isSelected = true;
+					if (index == i) {
+						list[i].isSelected = true
 					} else {
-						list[i].isSelected = false;
+						list[i].isSelected = false
 					}
 				}
+		
 				// #ifdef H5
 				this.$forceUpdate();
 				// #endif
 			},
 			// index,list,key
 			sortTap(key) {
-				/* let priceList = uni.getStorageSync('priceList');
-				let designList = uni.getStorageSync('designList');
-				let houseArea = priceList[1].priceArea;
-				let houseDesignArea = priceList[1].priceArea; */
-				
-				// houseArea !== this.iptValue.slice(0,this.iptValue.indexOf('m²'))
-				// this.getDetailList(this.iptValue.slice(0,this.iptValue.indexOf('m²')))
-				console.log(this.selectedTitleObj)
 				if(this.iptValue.indexOf('m²') == -1){
 					this.selectedObj[key] = this.iptValue + 'm²';
 					this.selectedTitleObj[key] = this.iptValue + 'm²';
@@ -389,7 +192,6 @@
 					'titles': this.selectedTitleObj,
 					'isReset': false
 				}
-				console.log(obj)
 				let area = this.iptValue;
 				if(area.indexOf('m²') == -1){
 					area = area + 'm²'
@@ -398,18 +200,26 @@
 				this.$http.getCategoryByArea({area}).then(res=>{
 					if(res && res.code == 200){
 						let houseTypes = res.data;
+						uni.setStorageSync('layoutList',houseTypes);
 						if(res.data.length > 0){
 							houseTypes = houseTypes.map(item=>{return{'title':item, 'value':item}});
-							// houseTypes.unshift({'title':'全部', 'value':'全部'})
 						}else{
 							houseTypes = [];
 						}
 						houseTypes.unshift({'title':'全部', 'value':'全部'});
 						if(this.designIpt === 1){
 							console.log('设计')
-							/* this.menuList[3].detailList = houseTypes;
-							this.menuList[3].defaultSelectedIndex = 0; */
-							this.$emit('houseTypes',houseTypes,this.selectedTitleObj)
+							this.menuList[3].detailList = houseTypes;
+							this.menuList[3].defaultSelectedIndex = 0;
+							let styleIndex = this.menuList[0].detailList.findIndex(item=>{
+								return item.title == this.selectedTitleObj.style
+							})
+							let decIndex = this.menuList[1].detailList.findIndex(item=>{
+								return item.title == this.selectedTitleObj.decorateType
+							})
+							this.menuList[0].defaultSelectedIndex = styleIndex;
+							this.menuList[1].defaultSelectedIndex = decIndex;
+							// this.$emit('houseTypes',houseTypes,this.selectedTitleObj)
 						}else{
 							console.log('报价')
 							this.menuList[2].detailList = houseTypes;
@@ -419,20 +229,19 @@
 					}
 				})
 			},
-			/* getDetailList(area){
-				
-			}, */
 			cancel(){
 				this.iptValue = this.selectedTitleObj['area'];
 				this.$emit("confirm", 'cancel');				
 			},
 			// 输入框获得焦点
 			onFocus(){
+				this.getFocus = true;
 				this.iptValue = this.iptValue.slice(0,this.iptValue.indexOf('m²'))
 			},
 			// 输入框失去焦点
 			onBlur(){
 				this.disabledState = false;
+				this.getFocus = false;
 				let regex=/^[0]+/;
 				this.iptValue=this.iptValue.replace(regex,'');
 				if(this.iptValue == ''){
@@ -448,7 +257,13 @@
 				if(this.iptValue.length > 4){
 					uni.showModal({
 					    title: '输入的内容不能超过4位',
-						showCancel:false
+						showCancel:false,
+						confirmColor:Constant.defaultThemeColor,
+						success:res=>{
+							if (res.confirm) {
+								this.getFocus = true;
+							} 
+						}
 					});
 					this.iptValue = this.iptValue.slice(0,4);
 					this.disabledState = true;
@@ -461,9 +276,6 @@
 					'isReset': false
 				}
 				this.$emit("confirm", obj);
-			},
-			resetClick(list, key) {
-				this.resetSelected(list, key)
 			}
 		}
 	}
@@ -471,7 +283,6 @@
 
 <style lang="scss">
 	@import "../../mixin/common.scss";
-	$orange:rgba(255,136,0,1);
 	.filter-content {
 		/* background-color: #F6F7F8; */
 		@include fontStyle;
@@ -484,6 +295,14 @@
 		}
 		&-detail{
 			padding-left: 28.98rpx;
+			.active{
+				background: $col_DDF3F3;
+				color: $col_098684;
+			}
+			.unactive{
+				background:rgba(0,0,0,0.05);
+				color:rgba(0,0,0,0.90);
+			}
 			/* &-item-active{
 				height: 57.97rpx;
 				background: rgba(0, 0, 0, 0.05);
@@ -559,12 +378,12 @@
 			view{
 				width:217.39rpx;
 				height: 79.71rpx;
-				border:1px solid $orange;
+				border:1px solid $col_098684;
 				border-radius:39.85rpx;
 				font-size:28.98rpx;
 				@include fontStyle;
 				line-height:79.71rpx;
-				color:$orange;
+				color:$col_098684;
 				background: #FFFFFF;
 				display: inline-block;
 				position: absolute;
@@ -577,7 +396,7 @@
 				}
 				&:last-child{
 					font-weight:bold;
-					background:$orange;
+					background:$col_098684;
 					color:rgba(255,255,255,1);
 					right: 105.07rpx;
 					border: none;

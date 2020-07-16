@@ -1,0 +1,343 @@
+import {Injectable} from '@angular/core';
+import {HttpHeaders, HttpParams, HttpClient, HttpParameterCodec} from '@angular/common/http';
+
+import {Md5} from 'ts-md5/dist/md5';
+import {UserService} from './user.service';
+import {ApiService} from './api.service';
+import {Base64} from 'js-base64';
+import {UUID} from 'angular2-uuid';
+import qs from 'qs';
+import {CookieService} from 'ngx-cookie-service';
+import {Default} from '../model/constant';
+
+@Injectable()
+export class RequestService {
+
+    public commonParam: any;
+
+    constructor(private http: HttpClient,
+                private userInfo: UserService,
+                private api: ApiService,
+                private cookie: CookieService) {
+        this.commonParam = {
+            timestamp: new Date().getTime() + '',
+            h5: 0,
+            large: 1
+        };
+    }
+
+    doPost(req) {
+
+        const that = this;
+
+        /***header设置***/
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        });
+
+        /***组装param***/let params = {
+            para: JSON.stringify(req.data)
+        };
+
+        this.carryH5(req.h5, params);
+        params = Object.assign(this.commonParam, params);
+        if (that.userInfo && that.userInfo.getId() && that.userInfo.getKey()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.userInfo.getKey());
+        } else if (!!that.cookie.get('userId')) {
+            params['userId'] = that.cookie.get('userId');
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.cookie.get('userKey'));
+        }
+
+
+        // console.log(params);
+        let httpParams = new HttpParams();
+
+
+        // console.log(params);
+        for (const key in params) {
+            // httpParams = httpParams.set(encodeURIComponent(key),encodeURIComponent(params[key]));
+            httpParams = httpParams.set(key, params[key]);
+        }
+
+
+        that.http.post(this.api.getUrl(req.url), qs.stringify(params),
+            {
+                headers: headers,
+                observe: 'body',
+                responseType: 'json',
+                withCredentials: true
+            }).subscribe(
+            res => {
+                // console.log(res)
+                req.success(res);
+            },
+            err => {
+                if (req.error) {
+                    req.error(err);
+                } else {
+                    that.onErrorHandler(err);
+                }
+            });
+    }
+
+    doPostDown(req) {
+
+        const that = this;
+
+        /***header设置***/
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        });
+
+        /***组装param***/
+        let params = {
+            para: JSON.stringify(req.data)
+        };
+
+        this.carryH5(req.h5, params);
+        params = Object.assign(this.commonParam, params);
+
+        if (that.userInfo && that.userInfo.getId() && that.userInfo.getKey()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.userInfo.getKey());
+        } else {
+            params['userId'] = that.cookie.get('userId');
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.cookie.get('userKey'));
+        }
+
+        let httpParams = new HttpParams();
+
+        for (const key in params) {
+            httpParams = httpParams.set(key, params[key]);
+        }
+
+        that.http.post(this.api.getUrl(req.url), httpParams,
+            {
+                headers: headers,
+                observe: 'body',
+                responseType: 'arraybuffer',
+                withCredentials: true
+            }).subscribe(
+            res => {
+                req.success(res);
+            },
+            err => {
+                if (req.error) {
+                    req.error(err);
+                } else {
+                    that.onErrorHandler(err);
+                }
+            });
+    }
+
+    doPostImg(requestObj) {
+        const that = this;
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        });
+        const params = {
+            timestamp: new Date('2020-01-01').getTime().toString(),
+            para: requestObj.data ? requestObj.data : 'id=0',
+            h5: '0',
+            terminal: '2',
+            version: Default.VERSION
+        };
+        if (that.userInfo && that.userInfo.getId()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp' + params['timestamp']);
+        } else {
+            params['userId'] = that.cookie.get('userId');
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.cookie.get('userKey'));
+        }
+
+        const param = new HttpParams({
+            fromObject: params
+        });
+
+        that.http.post(that.api.getApp(requestObj.url), param,
+            {
+                headers: headers,
+                observe: 'body',
+                responseType: 'json',
+                withCredentials: true
+            }).subscribe(
+            res => {
+                requestObj.success(res);
+            },
+            err => {
+                if (requestObj.error) {
+                    requestObj.error(err);
+                } else {
+                    that.onErrorHandler(err);
+                }
+            });
+
+    }
+
+    doPostFile(requestObj) {
+        let uploadUrl = '';
+        if (window.location.protocol === 'http:') {
+            uploadUrl = 'http://upload.qiniup.com/';
+        } else {
+            uploadUrl = 'https://upload.qiniup.com/';
+        }
+        
+        const formData = new FormData();
+        formData.append('file', requestObj.file);
+        formData.append('key', 'rev/cost/' + new Date().getTime() + '_' + this.repleaceSpecial(requestObj.file.name));
+        formData.append('token', requestObj.token);
+        return this.http.post(uploadUrl, formData);
+    }
+
+    repleaceSpecial(name) {
+        return name.replace(/\+/g, '_').replace(/#/g, '_').replace(/&/g, '_').replace(/%/g, '_');
+    }
+
+    doPostQiniu(requestObj) {
+        const key = 'rev/imgs/' + UUID.UUID() + '.png';
+        const keyBase = Base64.encode(key);
+        const xhr = new XMLHttpRequest();
+        let uploadUrl = '';
+        if (window.location.protocol === 'http:') {
+            uploadUrl = 'http://upload.qiniup.com/putb64/-1/key/' + keyBase;
+        } else {
+            uploadUrl = 'https://upload.qiniup.com/putb64/-1/key/' + keyBase;
+        }
+        
+
+        xhr.open('POST', uploadUrl, true);
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+        xhr.setRequestHeader('Authorization', 'UpToken ' + requestObj.token);
+        xhr.send(requestObj.img.split(',')[1]);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                requestObj.success(JSON.parse(xhr.responseText));
+            } else {
+                requestObj.error(xhr.responseText);
+            }
+        };
+        xhr.onerror = requestObj.error;
+    }
+
+    doPostApp(req) {
+        const that = this;
+
+        /***header设置***/
+        const headers: HttpHeaders = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        });
+        headers.set('auth', '0');
+
+        const params = {
+            timestamp: new Date().getTime().toString(),
+            para: typeof req.data === 'string' ? req.data : JSON.stringify(req.data),
+            h5: '0',
+            terminal: '2',
+            version: Default.VERSION
+        };
+        if (that.userInfo && that.userInfo.getId()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp' + params['timestamp']);
+        } else {
+            params['userId'] = that.cookie.get('userId');
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp']);
+        }
+
+
+        if (that.userInfo && that.userInfo.getId() && that.userInfo.getKey()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.userInfo.getKey());
+            params['auth'] = 0;
+        }
+
+        const param = new HttpParams({
+            fromObject: params
+        });
+
+        that.http.post(this.api.getApp(req.url), param,
+            {
+                headers: headers,
+                observe: 'body',
+                responseType: 'json',
+                withCredentials: true
+            }).subscribe(
+            res => {
+                req.success(res);
+            },
+            err => {
+                if (req.error) {
+                    req.error(err);
+                } else {
+                    that.onErrorHandler(err);
+                }
+            });
+    }
+
+    doGet(req) {
+        const that = this;
+
+        /***header设置***/
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        });
+
+        /***组装param***/
+        let params = {
+            para: JSON.stringify(req.data)
+        };
+
+        this.carryH5(req.h5, params);
+        params = Object.assign(this.commonParam, params);
+
+        if (that.userInfo && that.userInfo.getId() && that.userInfo.getKey()) {
+            params['userId'] = that.userInfo.getId();
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.userInfo.getKey());
+        } else {
+            params['userId'] = that.cookie.get('userId');
+            params['sign'] = Md5.hashStr('userId=' + params['userId'] + '&timestamp=' + params['timestamp'] + '&' + that.cookie.get('userKey'));
+        }
+
+
+        const param = new HttpParams({
+            fromObject: params
+        });
+
+        that.http.get(this.api.getUrl(req.url),
+            {
+                headers: headers,
+                observe: 'body',
+                params: param,
+                responseType: 'json',
+                withCredentials: true
+            }).subscribe(
+            res => {
+                req.success(res);
+            },
+            err => {
+                if (req.error) {
+                    req.error(err);
+                } else {
+                    that.onErrorHandler(err);
+                }
+            });
+    }
+
+    //特殊要求
+    doGetExport(req) {
+        window.location.href = this.api.getUrl(req.url) + '?quoteId=' + req.quoteId;
+    }
+
+    onErrorHandler(err) {
+        console.log(err);
+    }
+
+    carryH5(h5, param) {
+        if (typeof h5 === 'number' && !isNaN(h5)) {
+            return param['h5'] = h5;
+        } else if (typeof h5 === 'string' && h5 != '') {
+            return param['h5'] = h5;
+        }
+    }
+
+}

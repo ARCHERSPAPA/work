@@ -1,6 +1,6 @@
 @charset "utf-8";
 %defaultBgCss{
-	background:rgba(77,77,77,0.03);
+	background:rgba(0,0,0,0.03);
 }
 @mixin eclipse {
 	overflow: hidden;
@@ -15,3 +15,13 @@
 	align-items: center;
 	justify-content: center;
 }
+
+/**
+ * 主题色控制
+ */
+$col_098684: #098684;
+/**
+ * 镂空背景色控制
+ */
+$col_DDF3F3:#DDF3F3;
+

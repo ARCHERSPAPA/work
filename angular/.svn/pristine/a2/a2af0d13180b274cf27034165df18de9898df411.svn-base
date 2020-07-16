@@ -1,0 +1,250 @@
+import {Component, OnInit, Input, ElementRef} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {Messages} from "../../model/msg";
+import {RequestService} from "../../service/request.service";
+import {WarningService} from "../../service/warning.service";
+import axios from 'axios';
+import {saveAs} from "file-saver";
+import {getUrlName} from "../../model/methods";
+
+@Component({
+    selector: 'rev-img-large',
+    templateUrl: './img-large.component.html',
+    styleUrls: ['./img-large.component.scss']
+})
+export class ImgLargeComponent implements OnInit {
+    //查看图片title
+    @Input() title: string;
+
+    //查看图片的source
+    @Input() index: number;
+
+    @Input() imgs:Array<any>;
+
+    @Input() isAudit:boolean = false;
+
+    //图片总数
+    public total:number = 0;
+
+    private movePos = {
+        x: 0,
+        y: 0
+    };
+    private isMove: boolean = false;
+
+    private imgDom: any;
+    private moveDom: any;
+
+    //当前图片对象信息
+    private image:any;
+
+
+
+    constructor(private el: ElementRef,
+                public activeModal: NgbActiveModal,
+                private req:RequestService,
+                private warn:WarningService) {
+    }
+
+    ngOnInit() {
+        if(this.imgs && this.imgs.length > 0){
+            this.image = this.imgs[this.index];
+            this.total = this.imgs.length - 1;
+        }else{
+            this.index = 0;
+        }
+
+        this.imgDom = this.el.nativeElement.querySelector("#imageLarge");
+
+        this.moveDom = this.el.nativeElement.querySelector("#moveLarge");
+
+
+    }
+
+    /**
+     * 滚轮事件
+     * @param e
+     */
+    onMouseWheel(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        let zoom = parseInt(this.imgDom.style.zoom, 10) || 100;
+        zoom += e.wheelDelta / 12;
+        if (zoom > 100) {
+            this.imgDom.style.zoom = zoom + "%";
+            this.imgDom.style.transform = 'scale('+(zoom/100)+')';
+        }
+    }
+
+    /**
+     * 自定义放大或者缩小
+     * @param e
+     */
+    onZoom(e){
+        e.stopPropagation();
+        e.preventDefault();
+        let zoom = parseInt(this.imgDom.style.zoom, 10) || 100;
+        zoom += 20;
+        if (zoom > 100) {
+            this.imgDom.style.zoom = zoom + "%";
+        }
+    }
+
+    /**
+     * 鼠标拖动
+     * @param e
+     */
+    onMove(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.isMove) {
+            let zoom = parseInt(this.imgDom.style.zoom ? this.imgDom.style.zoom : 100) / 100;
+
+            let l = parseInt(e.clientX),
+                t = parseInt(e.clientY);
+
+
+            let iw = Number(this.imgDom.width),
+                ih = Number(this.imgDom.height),
+                mw = Math.floor(this.imgDom.width * zoom),
+                mh = Math.floor(this.imgDom.height * zoom);
+
+            let ml = Math.floor(l - this.movePos.x),
+                mt = Math.floor(t - this.movePos.y);
+
+            if (ml != 0) {
+                if (Math.abs(ml) >= (mw - iw)) {
+                    ml = (mw - iw) * Math.pow(-1, ((ml < 0) ? 1 : 2));
+                }
+            }
+
+            if (mt != 0) {
+                if (Math.abs(mt) >= (mh - ih)) {
+                    mt = (mh - ih) * Math.pow(-1, ((mt < 0) ? 1 : 2));
+                }
+            }
+
+            this.moveDom.style.left = ml + "px";
+            this.moveDom.style.top = mt + "px";
+
+        }
+    }
+
+    onDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        //获取当前元素已经移动的坐标位移
+        let ol = parseInt(this.moveDom.offsetLeft ? this.moveDom.offsetLeft : 0),
+            ot = parseInt(this.moveDom.offsetTop ? this.moveDom.offsetTop : 0);
+        this.movePos = {
+            x: parseInt(e.clientX) - ol,
+            y: parseInt(e.clientY) - ot
+        }
+        this.isMove = true;
+    }
+
+    onUp(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.isMove = false;
+    }
+
+    onLeave(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.isMove = false;
+    }
+
+    onReset(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.moveDom.style.left = "0px";
+        this.moveDom.style.top = "0px";
+        this.imgDom.style.zoom = "100%";
+    }
+
+    /**
+     * 前一页
+     * @param e
+     */
+    onPrev(e){
+        e.stopPropagation();
+        e.preventDefault();
+        this.onReset(e);
+        this.index = this.index - 1;
+        if(this.index <= 0){
+            this.index = 0;
+        }
+        this.image = this.imgs[this.index];
+        this.title = this.image.fileName?this.image.fileName:'查看大图';
+    }
+
+    /**
+     * 后一页
+     * @param e
+     */
+    onNext(e){
+        e.stopPropagation();
+        e.preventDefault();
+        this.onReset(e);
+        console.log(this.index);
+        this.index = this.index + 1;
+        if(this.index >= this.imgs.length - 1){
+            this.index = this.imgs.length - 1;
+        }
+        this.image = this.imgs[this.index];
+        this.title = this.image.fileName?this.image.fileName:'查看大图';
+    }
+
+    /**
+     * 下载图片
+     * @param $event
+     */
+    downLoad(e,imageObj){
+        e.stopPropagation();
+        e.preventDefault();
+        let that = this;
+        axios.get(imageObj.url, {
+            responseType: 'blob',
+            headers : {
+                'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
+            }
+        }).then(function(res){
+            saveAs(res.data,imageObj.fileName?imageObj.fileName:getUrlName(imageObj.url));
+        }).catch(function(error){
+            console.error(error);
+            that.warn.onMsgError(JSON.stringify(error));
+        });
+    }
+
+    setAudit(e:any,image:any){
+        e.stopPropagation();
+        e.preventDefault();
+        image["examineState"] = image["examineState"]?0:1;
+        this.doAuditGraph(image);
+    }
+
+
+    /**
+     * 审核
+     * @param e
+     */
+    doAuditGraph(graph:any){
+        if(graph && graph.id){
+            this.req.doPost({
+                url:"auditDrawing",
+                data:{
+                    imgId: graph.id,
+                    examineState: graph.examineState
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    }else{
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+}

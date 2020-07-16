@@ -1,0 +1,496 @@
+@charset "UTF-8";
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* 自定义-文字颜色 */
+.font-color-activity {
+  color: #FA322D;
+}
+.uni-spacing-col-lg {
+  font-size: 24rpx;
+}
+/* 自定义-背景颜色 */
+/* 自定义-列表文字大小 */
+/**
+ * 主题色控制
+ */
+/**
+ * 镂空背景色控制
+ */
+.poster-canvas {
+  position: fixed;
+  top: -10000px;
+  left: 0;
+}
+.poster {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 999999;
+  left: 0;
+  top: 0;
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.poster-close {
+  display: inline-block;
+  position: fixed;
+  right: 2%;
+  top: 1%;
+  z-index: 100;
+}
+.poster-img {
+  width: 90%;
+  height: 85%;
+  position: fixed;
+  left: 5%;
+  right: 5%;
+  top: 5%;
+  bottom: 10%;
+  z-index: 99;
+  overflow: hidden;
+}
+.poster-img .image {
+  width: 100%;
+  height: 100%;
+}
+.poster-btns {
+  width: 100%;
+  height: 20%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 99;
+  text-align: center;
+}
+.poster-btns-item {
+  display: inline-block;
+  background: #098684;
+  font-size: 28.98rpx;
+  font-weight: bold;
+  width: 246.37rpx;
+  height: 79.71rpx;
+  line-height: 79.71rpx;
+  color: white;
+  border-radius: 39.85rpx;
+  position: absolute;
+  left: 50%;
+  margin-left: -123.18rpx;
+  bottom: 10%;
+}
+.mkb-activity {
+  overflow-x: hidden;
+}
+.mkb-activity .auth-btn {
+  margin: 50% 28.98rpx;
+  background: #DDF3F3;
+  color: #098684;
+}
+.mkb-activity .activity-home {
+  min-height: 100%;
+  background: #fb4529;
+}
+.mkb-activity .activity-home .home-img {
+  width: 100%;
+  text-align: center;
+}
+.mkb-activity .activity-home .home-img .image {
+  width: 100%;
+}
+.mkb-activity .activity-home .home-cnt-side1 {
+  width: calc(100% - 57.96rpx);
+  position: relative;
+  margin: 0 28.98rpx;
+  padding-bottom: 28.98rpx;
+  box-sizing: border-box;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity {
+  position: relative;
+  background: white;
+  border-radius: 28.98rpx;
+  padding: 79.71rpx 0 43.47rpx;
+  z-index: 9;
+  margin-bottom: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-title {
+  width: 362.31rpx;
+  height: 72.46rpx;
+  background: #fedad4;
+  border: 3.62rpx solid #fb4529;
+  box-shadow: 0 3.62rpx 7.24rpx #fb4529;
+  border-radius: 14.49rpx;
+  position: absolute;
+  left: 50%;
+  margin-left: -181.16rpx;
+  top: -36.23rpx;
+  z-index: 10;
+  text-align: center;
+  line-height: 72.46rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-title .title-text {
+  display: block;
+  width: 100%;
+  color: #fb4529;
+  position: relative;
+  z-index: 9;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-title .title-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: #FFF;
+  opacity: 0.8;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-interval {
+  text-align: center;
+  margin-bottom: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-interval .interval {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-interval .interval-text {
+  display: inline-block;
+  font-size: 28.98rpx;
+  font-family: Microsoft YaHei;
+  font-weight: 400;
+  line-height: 57.97rpx;
+  color: #fb4529;
+  margin-right: 14.49rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-interval .interval-time {
+  display: inline-block;
+  background: #fb4529;
+  line-height: 57.97rpx;
+  border-radius: 14.49rpx;
+  color: #fff;
+  padding: 0 12.68rpx;
+  margin-right: 14.49rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-interval .interval-mark {
+  font-size: 28.98rpx;
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+  line-height: 57.97rpx;
+  color: #fb4529;
+  margin-right: 14.49rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: nowrap;
+          flex-wrap: nowrap;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+  margin-bottom: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text-block {
+  position: relative;
+  line-height: 36.23rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text-block .icon-line {
+  width: 43.47rpx;
+  height: 3.62rpx;
+  background: #fb4529;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text-block .icon-circle {
+  width: 10.86rpx;
+  height: 10.86rpx;
+  border-radius: 10.86rpx;
+  background: #fb4529;
+  position: absolute;
+  right: 0;
+  top: -5.43rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text-block.icon-left {
+  -webkit-transform: rotate(0);
+          transform: rotate(0);
+  margin-right: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-text-block.icon-right {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+  margin-left: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code {
+  margin: 0 43.47rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-title, .mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-rand {
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-title {
+  font-size: 28.98rpx;
+  line-height: 38.04rpx;
+  color: #fb4529;
+  display: block;
+  text-align: center;
+  margin-bottom: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-rand {
+  padding: 43.47rpx 48.91rpx;
+  border-radius: 28.98rpx;
+  line-height: 76.08rpx;
+  position: relative;
+  overflow: hidden;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-rand-text {
+  position: relative;
+  z-index: 9;
+  color: #fb4529;
+  font-size: 57.97rpx;
+  display: block;
+  text-align: center;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-code .code-rand-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+  background: #fb4529;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress {
+  padding: 0 76.08rpx;
+  margin-bottom: 57.97rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text {
+  width: 100%;
+  height: 57.97rpx;
+  margin-top: 25.35rpx;
+  position: relative;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-start, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-middle, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-end {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  padding: 0 7.24rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-start .triggle, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-middle .triggle, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-end .triggle {
+  display: inline-block;
+  border-width: 10.86rpx;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.06) transparent;
+  position: absolute;
+  top: -21.73rpx;
+  left: 50%;
+  margin-left: -10.86rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-start .text, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-middle .text, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-end .text {
+  font-size: 25.36rpx;
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+  line-height: 43.47rpx;
+  color: rgba(0, 0, 0, 0.4);
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-start .mask, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-middle .mask, .mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-end .mask {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 7.24rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-start {
+  left: -25.36rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-middle {
+  left: calc(50% - 70.65rpx);
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-progress .progress-text-end {
+  right: -25.36rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns {
+  padding: 0 86.95rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-fight, .mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-share {
+  width: 100%;
+  font-size: 36.23rpx;
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+  line-height: 101.44rpx;
+  border-radius: 50.72rpx;
+  outline: none;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-fight {
+  color: white;
+  background: #fb4529;
+  box-shadow: 0 21.73rpx 43.47rpx rgba(251, 69, 41, 0.5);
+  margin-bottom: 43.47rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-fight.disabled {
+  opacity: 0.2;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-share {
+  border: 3.62rpx solid #fb4529;
+  color: #fb4529;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-share::after {
+  background: transparent;
+  border-color: transparent;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-btns .btn-share:hover {
+  background: transparent;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-fb {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+  padding: 0 43.47rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-fb .fb-flex {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+          flex: 1;
+  text-align: center;
+  outline: 0;
+  border: 0;
+  background: transparent;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-fb .fb-flex::after {
+  border: 0;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-fb .fb-flex-icon {
+  height: 105.07rpx;
+  margin-bottom: 14.49rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-fb .fb-flex-text {
+  display: block;
+  margin-top: 14.49rpx;
+  font-size: 28.98rpx;
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+  line-height: 38.04rpx;
+  color: #fb4529;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-state {
+  margin: 0 126.81rpx;
+  text-align: center;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-state .state-circle {
+  width: 144.92rpx;
+  height: 144.92rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto 28.98rpx;
+  line-height: 144.92rpx;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-state .state-circle-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #FB4529;
+  opacity: 0.2;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-activity-state .state-text {
+  display: block;
+  font-size: 28.98rpx;
+  font-family: 'Microsoft YaHei';
+  font-weight: 400;
+  line-height: 38.04rpx;
+  color: #fb4529;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-info-text {
+  position: relative;
+  z-index: 9;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-imgs {
+  padding: 0 43.47rpx;
+  position: relative;
+  z-index: 9;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-imgs-item {
+  width: 72.46rpx;
+  height: 72.46rpx;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 19.92rpx;
+  overflow: hidden;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-imgs-item:last-child {
+  margin-right: 0;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-imgs-item image {
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+}
+.mkb-activity .activity-home .home-cnt-side1 .side-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0.88;
+  border-radius: 28.98rpx;
+  z-index: 1;
+}
+.mkb-activity .activity-home .home-cnt-side1 button {
+  background: transparent;
+}
+.mkb-activity .activity-home .home-cnt-side1 button::after {
+  border: 0;
+}
+.mkb-activity .activity-home .home-cnt-side2 {
+  width: 100%;
+  margin-top: 28.98rpx;
+}
+.mkb-activity .activity-home .home-cnt-side2 image {
+  width: 100%;
+  display: block;
+}
+

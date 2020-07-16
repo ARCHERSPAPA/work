@@ -1,0 +1,1 @@
+<view class="mkb-type"><text class="mkb-type-text">{{text}}</text></view>

@@ -1,0 +1,136 @@
+.examine{
+  margin: 72px;
+  margin-top: 48px;
+  &_person{
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+
+    .personTitle{
+      display: inline-block;
+      margin-right: 24px;
+      vertical-align: middle;
+      opacity: 0.85;
+      text-align: right;
+    }
+    .personItem{
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      width: 84px;
+      font-size: 14px;
+      margin-right: 66px;
+      transition: all 2s;
+
+      &_explain{
+        margin-bottom: 16px;
+      }
+      &_head{
+        position: relative;
+        width: 64px;
+        height: 64px;
+        margin: 0 10px;
+        cursor: pointer;
+        img{
+          width: 64px;
+          height: 64px;
+          border-radius: 100%;
+        }
+        i{
+          color: white;
+          display: inline-block;
+          cursor: pointer;
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          text-align: center;
+          line-height: 18px;
+          background-color: #F5222D;
+          right: -2px;
+          top: -2px;
+          border-radius: 100%;
+          z-index: 999;
+          transition: all 0.7s;
+          &:hover{
+            transform:rotate(180deg);
+          }
+        }
+        &_dots{
+          position: absolute;
+          top: 21.5px;
+          right: -48px;
+          span{
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 100%;
+            background:#000;
+            margin-right: 8px;
+            &:nth-child(1){
+              opacity: 0.08;
+            }
+            &:nth-child(2){
+              opacity: 0.16;
+            }
+            &:nth-child(3){
+              opacity: 0.24;
+              margin-right: 0;
+            }
+          }
+        }
+      }
+      &_name{
+        opacity: 0.85;
+        margin: 8px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        white-space:nowrap;
+      }
+      &_job{
+        opacity: 0.45;
+      }
+
+    }
+    .personItem_add{
+      cursor: pointer;
+      vertical-align: middle;
+      padding-top: 37px;
+      height: 159px;
+
+      img{
+        width: 64px;
+        height: 64px;
+        border-radius: 100%;
+      }
+    }
+  }
+  &_permission{
+    .permissionTitle{
+      width: 80px;
+      text-align: right;
+      display: inline-block;
+      margin-right: 24px;
+      vertical-align: top;
+      opacity: 0.85;
+    }
+    .permissionWrap{
+      display: inline-block;
+      vertical-align: top;
+    }
+  }
+  &_operation{
+    margin-top: 24px;
+    margin-left: 104px;
+    text-align: left;
+    button{
+      margin-right: 24px;
+    }
+  }
+
+  .radioBtn{
+    width: 30px;
+    height: 30px;
+    display: block;
+  }
+}

@@ -1,0 +1,57 @@
+<div class="master-add">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    <div class="master-add-title">
+        <p>
+            {{tempName}}
+        </p>
+        <a href="javascript:void(0)" (click)='editTitle()'>修改</a>
+    </div>
+    <div class="master-add-list master-warp">
+        <nz-table #rowSelectionTable [nzData]="tempAddList" [nzShowPagination]="false" [nzFrontPagination]="false"
+            (nzPageIndexChange)='changeData()' nzSize="middle">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of rowSelectionTable.data,let i=index">
+                    <td [nzTitle]="item.name?item.name:'暂无数据显示'" nz-tooltip>{{item.name?item.name:'--'}}
+                    </td>
+                    <td>
+                        <a href="javascript:void(0)"  nz-popconfirm nzTitle="确定删除项目吗?" nzOkText="删除"
+                            (nzOnConfirm)="delTemp()">删除</a>
+                        <a href="javascript:void(0)" class="ml-8">下移</a>
+                        <a href="javascript:void(0)" class="ml-8">置顶</a>
+                        <a href="javascript:void(0)" class="ml-8">上移</a>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+<nz-modal nzWidth="33vw" [(nzVisible)]="titleIsVisible" nzTitle="编辑名称" [nzFooter]="true" nzCancelText="关闭" nzOkText="添加"
+(nzOnCancel)="handleCancel()"
+    (nzOnOk)="addTemp()">
+
+    <div nz-col [nzSpan]=8 style="text-align: right;line-height: 30px;margin-right: 24px;">
+        模板名称
+    </div>
+    <div nz-col [nzSpan]=13>
+        <input nz-input [(ngModel)]="tempName" />
+    </div>
+    <br>
+</nz-modal>
+<nz-modal nzWidth="33vw" [(nzVisible)]="addIsVisible" nzTitle="添加主材" [nzFooter]="true" nzCancelText="关闭" nzOkText="修改"
+(nzOnCancel)="handleCancel()"
+    (nzOnOk)="editTemp()">
+
+    <div nz-col [nzSpan]=8 style="text-align: right;line-height: 30px;margin-right: 24px;">
+        主材名称
+    </div>
+    <div nz-col [nzSpan]=13>
+        <input nz-input [(ngModel)]="materialName" />
+    </div>
+    <br>
+</nz-modal>

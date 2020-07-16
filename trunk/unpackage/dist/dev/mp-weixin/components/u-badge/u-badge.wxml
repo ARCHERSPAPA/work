@@ -1,0 +1,1 @@
+<block wx:if="{{show}}"><view class="{{['u-badge-box u-badge data-v-7bb5dada','u-'+type,size=='mini'?'u-badge-mini':'']}}" style="{{'z-index:999;'+('top:'+(offset[0]+'rpx')+';')+('right:'+(offset[1]+'rpx')+';')+('position:'+(absolute?'absolute':'static')+';')}}">{{''+showText+''}}</view></block>

@@ -1,0 +1,506 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from '../../../service/request.service';
+import { WarningService } from '../../../service/warning.service';
+import { UserService } from '../../../service/user.service';
+import { Messages } from '../../../model/msg';
+import { Router, ActivatedRoute } from '@angular/router';
+import { atob } from '../../../model/methods';
+declare var AMap: any;
+@Component({
+  selector: 'rev-stats-attendance',
+  templateUrl: './stats-attendance.component.html',
+  styleUrls: ['./stats-attendance.component.scss']
+})
+
+export class StatsAttendanceComponent implements OnInit {
+
+  //日历
+  public currentDate = new Date();
+  public Date = new Date();
+  public DateInfo;
+  public supervisor = [];
+  public selectSupervisor;
+  public attendTimeRange: any = {
+    startTime: 1577808000000,
+    endTime: Date.now()
+  };
+
+  public path = [
+
+  ];
+  public lock = true;
+
+
+  //头部
+  public empId;
+  public companyId;
+  public headInfo = { avatar: '', name: '', positionName: '' };
+
+  //地图
+  public map;
+  public mapList;
+  public markers = [];
+  public defaultPosition: Array<any> = [104.065756, 30.659868];
+  public nextPath;
+
+  //表单
+  public statList;
+
+  public dataList;
+  constructor(
+    private req: RequestService,
+    private warn: WarningService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private user: UserService,
+  ) { }
+
+
+
+  ngOnInit() {
+    this.getSerchList();
+    const that = this;
+    this.path.forEach(v => {
+      v['k'] = 0;
+    })
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params.pid) {
+        this.empId = atob(params.pid);
+        this.selectSupervisor = Number(this.empId);
+      }
+    })
+    that.map = new AMap.Map('container', {
+      resizeEnale: true,
+      zoom: 10,
+      center: that.defaultPosition
+    });
+    that.map.plugin(['AMap.ToolBar'], function () {
+      const tool = new AMap.ToolBar({
+        position: 'RB',
+        offset: new AMap.Pixel(10, 100),
+        autoPosition: false,
+      });
+      tool.hideDirection();
+      that.map.addControl(tool);
+    });
+
+    this.map.setFitView();//自适应
+
+  }
+  ngDoCheck() {
+    // console.log(this.path)
+    if (this.user.getCompanyName() && this.lock && this.empId) {
+      this.companyId = this.user.getCompanyId();
+      // this.empId = this.user.getEmployeeId();
+      this.getDateInfo(new Date());
+      this.getMapList(new Date());
+      this.getTableList(Date.now());
+      this.lock = false;
+    }
+    // console.log(new Date(this.currentDate).getMonth())
+  }
+  //地图
+  renderLine(path) {
+    let width = 24;
+    var canvasDir = document.createElement('canvas')
+    var context = canvasDir.getContext('2d');
+    canvasDir.width = width;
+    canvasDir.height = width;
+    context.strokeStyle = 'white';
+    context.lineJoin = 'round';
+    context.lineWidth = 8;
+    context.moveTo(-4, width - 4);
+    context.lineTo(width / 2, 6);
+    context.lineTo(width + 4, width - 4);
+    context.stroke();
+    var polyline = new AMap.Polyline({
+      path: path,
+      borderWeight: 3, // 线条宽度，默认为 1
+      strokeColor: '#1890FF', // 线条颜色
+      lineJoin: 'round', // 折线拐点连接处样式,
+      showDir: true,
+      dirImg: canvasDir,
+      strokeWeight: 10
+    });
+    this.map.add(polyline);
+  }
+
+  getTextTemp(i, address, distance, dynamic, time) {
+    return `<div class="marker"style='${this.getTextConStyle(dynamic)}'>
+  <div style='${this.getOrderConStyle(dynamic)} '>
+  ${dynamic ? i : ''}
+  </div>
+  <div style='${this.getInfoConStyle(dynamic)}'>
+  <p  style='${this.showStyle(dynamic)}'> ${address}
+  <p style='${this.getTextShowStyle(dynamic)}'> <span>${new Date(time).getHours()}:${new Date(time).getMinutes()}</span>  /  ${this.fixedNum(distance)}
+  </div>
+  </div>
+  <div style='${this.getDtStyle()}'></div>
+  `
+
+      ;
+  }
+
+  renderMark() {
+
+    var that = this;
+    let click = false;
+    let mar = []
+    let curArr = this.mapList.quote.concat(this.mapList.list);
+    let offset;
+    if (!this.mapList.list) {
+      this.mapList.list = [];
+    }
+    if (!this.mapList.quote) {
+      this.mapList.quote = [];
+    }
+    // console.log(this.mapList.quote.concat(this.mapList.list))
+    curArr.forEach((v, i) => {
+      console.log(v)
+      let name;
+
+      if (i > 0 && this.nextPath.latitude == v.latitude && this.nextPath.longitude == v.longitude) {
+        offset = new AMap.Pixel(-16 + i * 12, -20 + i * 12)
+      } else {
+        offset = new AMap.Pixel(0, 0)
+      }
+      this.nextPath = v;
+
+      click = v['k'] ? true : false;
+
+      name = new AMap.Marker({
+        position: [v.longitude, v.latitude],
+        content: this.getTextTemp(i, v.customerHouseAddress, v.distance, v.dynamic, v.dynamicTime),
+        offset: offset,
+        topWhenClick: click,
+        zIndex: click ? (1000 + i + 1) : 100 + i
+      });
+      mar.push(name)
+      this.markers = mar;
+
+      AMap.event.addListener(name, 'click', function (e) {
+        that.mapList.quote.forEach(i => {
+          that.setMarkers();
+          if (i.longitude == v.longitude && i.latitude == v.latitude) {
+            i['k'] = 1
+          } else {
+            i['k'] = 0;
+          }
+        })
+      });
+
+    })
+    // console.log(this.markers)
+    // console.log(this.map)
+    this.map.add(this.markers);
+  }
+
+  fixedNum(num) {
+    if (num) {
+      if (num > 100) {
+        return (num / 1000).toFixed(1) + 'km'
+      } else {
+        return num.toFixed(0) + 'm'
+      }
+    } else {
+      return '--'
+    }
+
+  }
+
+  setMarkers() {
+
+    // this.map.clear()
+
+        this.map.remove(this.markers)
+
+
+      this.renderMark();
+
+  }
+
+  renderText(pre, i, Distance) {
+    // console.log(pre, i, Distance)
+    let preN = new AMap.LngLat(pre[0], pre[1]);
+    let preI = new AMap.LngLat(i[0], i[1]);
+    let text = new AMap.Text({
+      text: this.fixedNum(Distance),
+      style: {
+        'background-color': 'white',
+        'border': '1px solid rgba(24,144,255,1)',
+        'padding': '8px',
+        'font-size': '14px',
+        'line-height': '22px',
+        'color': '#1890FF'
+      }
+
+    });
+    text.setPosition(preN.divideBy(2).add(preI.divideBy(2)))
+    text.setMap(this.map)
+  }
+
+  getMapList(date) {
+    this.req.doPost({
+      url: 'statAttendanceMap',
+      data: {
+        date: Date.parse(date),
+        empId: this.empId,
+        companyId: this.companyId
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          console.log(res)
+          let path = []
+          // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.mapList = res.data;
+          if (this.mapList && this.mapList.coordinate && this.mapList.coordinate.length > 0) {
+            this.mapList.coordinate.forEach(map => {
+              this.renderText(map.startCoordinate, map.endCoordinate, map.distance)
+            });
+          }
+          if (this.mapList && this.mapList.quote && this.mapList.quote.length > 0) {
+            this.mapList.quote.forEach(map => {
+              if (map.dynamic) {
+                path.push(new AMap.LngLat(map.longitude, map.latitude))
+              }
+            });
+            // this.renderMark();
+            this.setMarkers();
+          }
+          console.log(path)
+
+          this.renderLine(path);
+
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  showStyle(dy) {
+    console.log(dy)
+    if (!dy) {
+      return `width: 100%;\
+      text-align: center;`
+    }
+
+  }
+  getTextShowStyle(dy) {
+    return `display:${dy ? 'block' : 'none'}`
+  }
+  getTextConStyle(dy) {
+    return `width:${dy ? '192px' : '123px'}; \
+  height:59px;\
+  background:rgba(24,144,255,1);\
+  box-shadow:0px 2px 4px rgba(0,0,0,0.32);\
+  border-radius:60px;\
+  display:flex;\
+  transform: translate(-50%,-50%);\
+  text-align: ${dy ? 'inherit' : 'center'};
+
+`
+  }
+  getOrderConStyle(dy) {
+    return `width:36px;\
+  height:36px;\
+  background:rgba(255,255,255,1);\
+  border-radius:18px;\
+  text-align: center;\
+  line-height:36px;\
+  margin:12px 16px 0 8px;\
+  color:#1890FF;\
+  font-size:20px;\
+  display:${dy ? 'block' : 'none'}
+  `}
+
+  getDtStyle() {
+    return `position:absolute;left:-10px;top:29px;z-index:9;
+      width:0;height:0;border-right:10px solid transparent;
+      border-left: 10px solid transparent;
+      border-top:10px solid rgba(24,144,255,1)`;
+  }
+
+
+  getInfoConStyle(dy) {
+    if (!dy) {
+      return 'color:white;\
+      width: 100%;\
+      line-height: 50px;'
+    } else {
+      return 'color:white'
+    }
+
+  }
+
+
+
+  //表单
+  getTableList(date) {
+    this.req.doPost({
+      url: 'statAttendanceTable',
+      data: {
+        employeeId: this.empId,
+        date: Date.parse(this.currentDate + '')
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.dataList = res.data;
+          if (!this.dataList.monthly) {
+            this.dataList.monthly = [];
+          }
+          if (!this.dataList.daily) {
+            this.dataList.daily = [];
+          }
+          if (res.data && res.data.employee) {
+            this.headInfo['positionName'] = res.data.employee.positionName ? res.data.employee.positionName : '--';
+            this.headInfo['name'] = res.data.employee.name ? res.data.employee.name : '--';
+            this.headInfo['avatar'] = res.data.employee.headImg ? res.data.employee.headImg : 'https://qiniu.madrock.com.cn/rev/imgs/435467b6-6b9e-2a36-a51b-bde1d77a31ce.png';
+          } else {
+            this.headInfo['positionName'] = '--';
+            this.headInfo['name'] = '--';
+            this.headInfo['avatar'] = 'https://qiniu.madrock.com.cn/rev/imgs/435467b6-6b9e-2a36-a51b-bde1d77a31ce.png';
+          }
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+
+  //日历
+  getSerchList() {
+    this.req.doPost({
+      url: 'statAttendanceEmp',
+      success: (res => {
+        if (res && res.code == 200) {
+          if (res.data && res.data.length > 0) {
+            res.data.forEach(Supervisor => {
+              this.supervisor.push({ name: Supervisor.name, id: Supervisor.id })
+            });
+          }
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    });
+  }
+  selectsupervisor(e) {
+    this.empId = e;
+    this.getDateInfo(this.currentDate);
+    this.getMapList(this.currentDate);
+    this.getTableList(this.currentDate);
+    this.currentDate = new Date();
+    this.Date = new Date();
+  }
+  changeDate(state) {
+    console.log(this.attendTimeRange.start > Date.parse(this.currentDate + ''))
+    console.log(Date.now() < Date.parse(this.currentDate + ''))
+    // if (state) {
+    // this.map.remove(this.markers);
+    this.getTableList(this.currentDate);
+    this.getDateInfo(this.currentDate)
+    this.getMapList(this.currentDate)
+
+    // if (this.markers) {
+    //   this.renderMark();
+    // }
+    // }
+
+  }
+  modalChange(e) {
+    if (Date.parse(e) <= this.attendTimeRange.endTime && this.attendTimeRange.startTime <= Date.parse(e)) {
+      this.currentDate = e;
+      this.changeDate(true)
+    } else {
+      this.currentDate = new Date();
+      this.Date = new Date();
+    }
+    console.log(this.currentDate)
+
+  }
+  getDateInfo(date) {
+    this.req.doPost({
+      url: 'statAttendanceDate',
+      data: {
+        date: Date.parse(date),
+        empId: this.empId,
+        companyId: this.companyId
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.DateInfo = res.data;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+
+  showDate(date: Date) {
+    if (this.DateInfo && this.DateInfo.length > 0) {
+      return this.justShowByDay(date, this.DateInfo);
+    }
+  }
+  showMouse() {
+    if (this.attendTimeRange.start > Date.parse(this.currentDate + '')) {
+      if (this.attendTimeRange.endTime < Date.parse(this.currentDate + '')) {
+        return true;
+      } else {
+        return false;
+      }
+
+    } else {
+      return false
+    }
+  }
+  //判断年、月、日
+  justShowByDay(ct, st) {
+    let a = []
+    a = st.filter(v => {
+      const c = new Date(ct),
+        s = new Date(v.date)
+      var cy, sy, cm, sm, cd, sd;
+
+      cy = Number(c.getFullYear());
+      sy = Number(s.getFullYear());
+
+
+      cm = Number(c.getMonth());
+      sm = Number(s.getMonth());
+
+
+      cd = Number(c.getDate());
+      sd = Number(s.getDate());
+      return sy == cy && sm == cm && sd == cd
+    })
+
+
+    // console.log(a)
+    return a.length > 0 ? true : false;
+  }
+  getconut(date) {
+    // console.log(date)
+    let a
+    if (this.DateInfo && this.DateInfo.length > 0) {
+      a = this.DateInfo.filter(v => {
+        let newDate = new Date(v.date)
+        return newDate.getDate() == date.getDate()
+      });
+      return a && a.length == 1 ? a[0].num : 0;
+    }
+  }
+  getDistance(date) {
+    let a
+    a = this.DateInfo.filter(v => {
+      let newDate = new Date(v.date)
+      return newDate.getDate() == date.getDate()
+    });
+    return a && a.length == 1 ? this.fixedNum(a[0].distance) : '0米';
+  }
+
+}
+

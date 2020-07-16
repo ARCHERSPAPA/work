@@ -11,8 +11,7 @@
 				</view>
 				<view class="mkb-site-search-item search-item-box">
 					<!-- <mkb-search-bar :bar="searchBar" @confirmInput="confirmInput"></mkb-search-bar> -->
-					<uni-search-bar :radius="28.98" :cancelButton="'none'" 
-					:placeholder="'请填写您想查询的小区'" @confirm="confirmInput"></uni-search-bar>
+					<uni-search-bar :radius="28.98" :cancelButton="'none'" :placeholder="'请填写您想查询的小区'" @confirm="confirmInput"></uni-search-bar>
 				</view>
 			</view>
 
@@ -58,7 +57,7 @@
 
 	import Constant from '../../util/constant.js'
 	import Messages from '../../util/messages.js'
-  	
+
 	import mkbDropdown from '../../components/mkb-dropdown/mkb-dropdown.vue'
 	import uniSearchBar from '../../components/uni-search-bar/uni-search-bar.vue'
 	import {
@@ -71,7 +70,7 @@
 			mkbDropdown,
 			uniSearchBar
 		},
-		
+
 		data() {
 			return {
 				searchBar: {
@@ -96,38 +95,37 @@
 				siteList: [],
 				clickMore: true,
 				dropDownShow: false,
-				dropDownItems:[
-				{
-					value: 0,
-					content:"默认排序",
-					actived:false
-				},
-				{
-					value: 1,
-					content:"距离从近到远",
-					actived:true
-				},
-				{
-					value: 2,
-					content:"面积从大到小",
-					actived:false
-				},
-				{
-					value: 3,
-					content:"面积从小到大",
-					actived:false
-				},
-				{
-					value: 4,
-					content:"预算从高到低",
-					actived:false
-				},
-				{
-					value: 5,
-					content:"预算从低到高",
-					actived:false
-				}
-			],
+				dropDownItems: [{
+						value: 0,
+						content: "默认排序",
+						actived: false
+					},
+					{
+						value: 1,
+						content: "距离从近到远",
+						actived: true
+					},
+					{
+						value: 2,
+						content: "面积从大到小",
+						actived: false
+					},
+					{
+						value: 3,
+						content: "面积从小到大",
+						actived: false
+					},
+					{
+						value: 4,
+						content: "预算从高到低",
+						actived: false
+					},
+					{
+						value: 5,
+						content: "预算从低到高",
+						actived: false
+					}
+				],
 				//加载数据提醒
 				loading: true
 			}
@@ -255,7 +253,7 @@
 				});
 				uni.getLocation({
 					type: 'wgs84',
-					altitude:true,
+					altitude: true,
 					geocode: true,
 					success: (res) => {
 						uni.hideLoading();
@@ -276,43 +274,20 @@
 				});
 			},
 
+		
 			/**
-			 * 根据经纬坐标显示名称
-			 * @param {Object} geocodes
+			 * 解析坐标经纬度
+			 * @param {Object} geo
 			 */
-			// rendereGeocoder(geocodes) {
-			// 	let that = this;
-			// 	uni.showLoading({
-			// 		title: "数据解析中"
-			// 	});
-
-			// 	wxMap.reverseGeocoder({
-			// 		location: geocodes,
-			// 		success: (res) => {
-			// 			uni.hideLoading();
-			// 			that.siteName = res.result.address_component.street;
-			// 		},
-			// 		fail: (err) => {
-			// 			console.log(err);
-			// 			uni.hideLoading();
-			// 			uni.showModal({
-			// 				title: "提示",
-			// 				showCancel: false,
-			// 				content: Messages.FAIL_RESOLVE
-			// 			})
-			// 		}
-			// 	})
-			// },
-			
-			rendereGeocoder(geo){
+			rendereGeocoder(geo) {
 				let that = this;
-				
+
 				uni.request({
-					url:"https://restapi.amap.com/v3/geocode/regeo",
-					data:{
+					url: "https://restapi.amap.com/v3/geocode/regeo",
+					data: {
 						key: amapConfig.jsKey,
 						poitype: amapConfig.types.join(","),
-						extentions:"all",
+						extentions: "all",
 						//经度在前，维度在后
 						location: geo
 					},
@@ -321,7 +296,7 @@
 						that.siteName = data.data.regeocode.formatted_address;
 					}
 				})
-				
+
 			},
 
 			/**
@@ -330,7 +305,7 @@
 			loadData() {
 				let that = this;
 				// #ifdef MP-WEIXIN
-				if(that.siteList.length === 0){
+				if (that.siteList.length === 0) {
 					that.loading = true;
 				}
 				uni.showLoading();
@@ -350,7 +325,7 @@
 					params["address"] = that.address;
 				}
 				that.saveLocation(params.latitude, params.longitude);
-				
+
 				that.$http.getSiteResults(params).then(res => {
 					uni.hideLoading();
 					that.loading = false;
@@ -463,20 +438,20 @@
 			 * @param {Object} quoteId
 			 */
 			toDetail(item) {
-				if(item.state === 8){
+				if (item.state === 8) {
 					this.$openPage({
 						name: 'example',
 						query: {
-							quoteId:item.id,
-							nature:item.nature,
+							quoteId: item.id,
+							nature: item.nature,
 						}
 					});
-				}else{
+				} else {
 					this.$openPage({
 						name: 'exampleSite',
 						query: {
-							quoteId:item.id,
-							nature:item.nature,
+							quoteId: item.id,
+							nature: item.nature,
 						}
 					});
 				}
@@ -513,11 +488,12 @@
 
 		&-fixed {
 			position: fixed;
-			left: 28.98rpx;
-			right: 28.98rpx;
+			left: 0;
 			top: 0;
+			width: calc(100% - 57.96rpx);
 			background: rgba(255, 255, 255, 1);
 			z-index: 99;
+			padding: 14.49rpx 28.98rpx;
 		}
 
 		&-search {
@@ -581,6 +557,7 @@
 					height: 3.62rpx;
 					background: transparent;
 					margin: 0 auto;
+
 					&.active {
 						background: rgba(0, 0, 0, 0.9);
 					}
@@ -607,7 +584,7 @@
 						width: 57.97rpx;
 						text-align: right;
 						margin: 10.73rpx 0;
-						border-left: 1.81rpx solid rgba(0,0,0,0.1);
+						border-left: 1.81rpx solid rgba(0, 0, 0, 0.1);
 					}
 
 					// .tab-sort-img {
@@ -629,7 +606,7 @@
 		}
 
 		&-list {
-			margin-top: 126.81rpx;
+			margin-top: 155.79rpx;
 		}
 	}
 </style>

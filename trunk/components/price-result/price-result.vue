@@ -1,7 +1,8 @@
 <template>
 	<view v-if="menuList[0].detailList.length > 0" class="price-result">
-		<view class="price-result-term" :style="{ background: flag ? 'rgba(255,136,0,1)' : '#FFFFFF' }">
-			<view class="price-result-term-title" :style="{ color: flag ? '#FFFFFF' : 'rgba(0,0,0,0.40)' }">您筛选的条件</view>
+		<view class="price-result-term" :style="{ background: flag ? 'rgba(0,0,0,0)' : '#FFFFFF' }">
+			<!-- :style="{ color: flag ? 'rgba(0,0,0,0.40)' : 'rgba(0,0,0,0.40)' }" -->
+			<view class="price-result-term-title">您筛选的条件</view>
 			<view class="price-result-select">
 				<price-select
 					:ref="'slFilter'"
@@ -14,38 +15,38 @@
 				/>
 			</view>
 		</view>
-		<view class="price-result-middle">
+		<!-- <view class="price-result-middle">
 			<view class="price-result-middle-eva">预估报价</view>
 			<view class="price-result-middle-mind">智能系统根据当前市场行情估算的三个档次总价，可点击查看报价相近的实际案例；实际报价以量房实测为准</view>
-		</view>
+		</view> -->
 		<view v-if="list && list.length > 0" class="price-result-all">
 			<view v-for="(item, index) of list" :key="index" class="price-result-list">
 				<view class="price-result-list-desc">
-					<view class="price-result-list-desc-left">
-						<text>第{{ item.top_info }}档总价{{ (item.top_price ? item.top_price : 0) | digit(4) | number(1, true) }}万左右</text>
-					</view>
-					<view class="price-result-list-desc-right">
-						<view @click="toSearch(item)">
-							<text>相似案例</text>
-							<i class="iconfont" style="display: inline-block;font-size: 25.36rpx;color: rgba(255,255,255,0.8);">&#xe626;</i>
+					<view class="price-result-list-desc-top">
+						<view class="price-result-list-desc-left">
+							<text>第{{ item.top_info }}档</text>
+						</view>
+						<view class="price-result-list-desc-right">
+							<view @click="toSearch(item)">
+								<text>相似案例</text>
+								<i class="iconfont" style="display: inline-block;font-size: 25.36rpx;color: rgba(0,0,0,0.4);">&#xe626;</i>
+							</view>
 						</view>
 					</view>
+					<view>总价{{ (item.top_price ? item.top_price : 0) | digit(4) | number(1, true) }}万左右</view>
 				</view>
 
-				<view v-show="item.offer" class="price-result-list-con" @click="toDetail(item.offer)">
+				<view v-if="item.offer" class="price-result-list-con" @click="toDetail(item.offer)">
 					<view class="price-result-list-con-img">
 						<mkb-img-cut
+							v-if="item.offer.state == 8"
 							class="backImg"
-							:img-url="
-								item.offer.state == 8
-									? item.offer.coverImgs[0]
-										? item.offer.coverImgs[0]
-										: defaultImg
-									: item.offer.surfaceImgs[0].imgUrl
-									? item.offer.surfaceImgs[0].imgUrl
-									: defaultImg
-							"
+							:img-url="item.offer.coverImgs && item.offer.coverImgs[0]? item.offer.coverImgs[0] + '?imageView2/2/w/216/h/216/interlace/1' : defaultImg"
 						/>
+						<mkb-img-cut
+							v-else
+							class="backImg"
+							:img-url="item.offer.surfaceImgs && item.offer.surfaceImgs[0].imgUrl? item.offer.surfaceImgs[0].imgUrl + '?imageView2/2/w/216/h/216/interlace/1': defaultImg"/>
 					</view>
 					<view class="price-result-list-con-middle">
 						<view>{{ item.offer.customerHouseAddress }}</view>
@@ -55,12 +56,15 @@
 					<!-- ¥{{(item.offer.finalPrice?item.offer.finalPrice:0)|digit(4)|number(1,true)}}万 -->
 					<view class="price-result-list-con-money">¥{{ item.offer.finalPrice }}万</view>
 				</view>
+				<view v-else class="price-result-list-noCon">
+					暂无数据
+				</view>
 			</view>
 		</view>
-		<view v-else style="color: #fff;text-align: center;">
+		<!-- <view v-else style="color: #000;text-align: center;">
 			<text v-if="loading">暂无查询数据</text>
-			<!-- <mkb-empty :text="'暂无查询数据'"></mkb-empty> -->
-		</view>
+		</view> -->
+		<view v-else><mkb-empty :text="'暂无查询数据'" v-if="loading" /></view>
 	</view>
 </template>
 
@@ -69,6 +73,7 @@ import priceSelect from '../price-select/sl-filter.vue';
 import Messages from '../../util/messages.js';
 import Constant from '../../util/constant.js';
 import mkbImgCut from '../mkb-img-cut/mkb-img-cut.vue';
+
 export default {
 	components: {
 		priceSelect,
@@ -324,21 +329,21 @@ export default {
 
 <style lang="scss">
 @import '../../mixin/common.scss';
-$orange: rgba(255, 136, 0, 1);
 $border-radius: 14.49rpx 0px 0px 14.49rpx;
 .price-result {
 	@include fontStyle;
-	background: $orange;
+	background: rgba(0,0,0,0.03);
 	height: 100vh;
 	&-term {
 		width: 100%;
-		height: 184.78rpx;
-		background: $orange;
+		height: 141.3rpx;
+		// background: $orange;
 		font-size: 28.98rpx;
 		padding-top: 43.47rpx;
 		box-sizing: border-box;
+		margin-bottom: 30.79rpx;
 		&-title {
-			color: rgba(255, 255, 255, 0.8);
+			color: rgba(0,0,0,0.40);
 			margin-left: 28.98rpx;
 		}
 	}
@@ -361,79 +366,86 @@ $border-radius: 14.49rpx 0px 0px 14.49rpx;
 	&-all {
 		padding-bottom: 28.98rpx;
 		box-sizing: border-box;
-		background: $orange;
+		background: rgba(0,0,0,0);
 	}
 
 	// 结果列表
 	&-list {
-		margin-top: 28.98rpx;
+		margin: 28.98rpx 28.98rpx 0;
 		padding: 0 28.98rpx;
 		box-sizing: border-box;
+		background:rgba(255,255,255,1);
+		box-shadow:0px 14.49rpx 28.98rpx rgba(0,0,0,0.05);
+		border-radius:14.49rpx;
 		&-desc {
-			height: 72.46rpx;
-			line-height: 72.46rpx;
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 14.49rpx;
-			color: #ffffff;
+			height: 144.92rpx;
+			color: rgba(0,0,0,0.40);
+			border-bottom: 1px solid rgba(0,0,0,0.06);
+			padding-top: 32.6rpx;
+			box-sizing: border-box;
+			font-size:25.36rpx;
+			&-top{
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 7.24rpx;
+			}
 			&-left {
+				color: rgba(0,0,0,0.9);
 				font-size: 32.6rpx;
 				font-weight: bold;
 			}
 			&-right {
-				color: rgba(255, 255, 255, 0.8);
 				font-size: 25.36rpx;
 			}
+		}
+		&-noCon{
+			height: 202.89rpx;
+			text-align: center;
+			line-height: 202.89rpx;
+			font-size: 28.98rpx;
+			
 		}
 		&-con {
 			display: flex;
 			justify-content: space-between;
+			padding-top: 28.98rpx;
+			box-sizing: border-box;
 			background: rgba(255, 255, 255, 1);
-			box-shadow: 0px 14.49rpx 28.98rpx rgba(0, 0, 0, 0.05);
 			opacity: 1;
-			border-radius: 14.49rpx;
-			height: 246.37rpx;
+			height: 202.89rpx;
 			&-img {
-				width: 173.91rpx;
-				height: 246.37rpx;
-				border-radius: $border-radius;
+				width: 144.92rpx;
+				height: 144.92rpx;
+				border-radius: 14.49rpx;
 				.backImg {
 					width: 100%;
 					height: 100%;
-					border-radius: $border-radius;
+					border-radius: 14.49rpx;
 					view {
 						width: 100%;
 						height: 100%;
-						border-radius: $border-radius;
+						border-radius: 14.49rpx;
 					}
-				}
-				image {
-					width: 100%;
-					height: 100%;
-					border-radius: $border-radius;
 				}
 			}
 			&-middle {
 				font-size: 25.36rpx;
 				color: rgba(0, 0, 0, 0.4);
-				padding-top: 43.47rpx;
-				box-sizing: border-box;
+				margin-right: 68.84rpx;
 				view {
-					margin-bottom: 14.49rpx;
+					margin-bottom: 18.11rpx;
 					&:nth-of-type(1) {
-						font-size: 43.47rpx;
+						margin-bottom: 14.49rpx;
+						font-size: 28.98rpx;
 						font-weight: bold;
 						color: rgba(0, 0, 0, 0.9);
 					}
 				}
 			}
 			&-money {
-				font-size: 43.47rpx;
+				font-size: 28.98rpx;
 				font-weight: bold;
-				color: $orange;
-				padding-top: 43.47rpx;
-				box-sizing: border-box;
-				margin-right: 28.98rpx;
+				color:rgba(9,134,132,1);
 			}
 		}
 	}
