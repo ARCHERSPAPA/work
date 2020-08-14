@@ -24,20 +24,6 @@
                     <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
                     <td colspan="3"  width="20%">{{data.pause && data.pause.name?data.pause.name:'增减项目'}}</td>
                     <td colspan="4" width="25%" *ngIf="data.states && data.states.length > 0" [nzTitle]="allProgress" nz-tooltip>
-                        <!-- <div *ngIf="data.states && data.states.length == 1" class="limit-content">
-                            <ng-container *ngIf="data.states[0].state == 10 || data.states[0].state == 11; else elseTemplate">
-                                {{data.states[0].name}}（{{data.states[0].position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                            </ng-container>
-                            <ng-template #elseTemplate>
-                                <ng-container *ngIf="data.states[0].state == 40 || data.states[0].state == 41; else elseTemplate">
-                                    {{data.states[0].name}}{{getExamineState(data.states[0].state)}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                </ng-container>
-                                <ng-template #elseTemplate>
-                                    {{data.states[0].name}}（{{data.states[0].position}}）{{getExamineState(data.states[0].state)}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                </ng-template>
-                            </ng-template>
-                        </div> -->
-                        <!--  && data.states.length > 1 -->
                         <div *ngIf="data.states">
                             <div class="limit-content">
                                 {{data.states[0].name}}（{{data.states[0].position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}
@@ -46,49 +32,19 @@
                             <div class="limit-content" *ngIf=" data.states.length > 1">
                                 {{data.states[data.states.length-1].name}}
                                 {{ data.states[data.states.length-1].position ? '（' + data.states[data.states.length-1].position + '）':''}}
-                             <!--    {{data.states[data.states.length-1].state == 40 || data.states[data.states.length-1].state == 41 ? '':'（' + data.states[data.states.length-1].position + '）'}} -->
                                 {{getExamineState(data.states[data.states.length-1].state)}} 
                                 {{(data.states[data.states.length-1].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                <!-- <ng-container *ngIf="data.states[data.states.length-1].state == 40 || data.states[data.states.length-1].state == 41; else elseTemplate">
-                                    {{data.states[data.states.length-1].name}}{{getExamineState(data.states[data.states.length-1].state)}} {{(data.states[data.states.length-1].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                </ng-container>
-                                <ng-template #elseTemplate>
-                                    {{data.states[data.states.length-1].name}}（{{data.states[data.states.length-1].position}}）{{getExamineState(data.states[data.states.length-1].state)}} {{(data.states[data.states.length-1].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                </ng-template> -->
                             </div>
                         </div>
                         <ng-template #allProgress>
-                            <!-- <div *ngIf="data.states && data.states.length == 1">
-                                <ng-container *ngIf="data.states[0].state == 10 || data.states[0].state == 11; else elseTemplate">
-                                    {{data.states[0].name}}（{{data.states[0].position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                </ng-container>
-                                <ng-template #elseTemplate>
-                                    <ng-container *ngIf="data.states[0].state == 40 || data.states[0].state == 41; else elseTemplate">
-                                        {{data.states[0].name}}{{getExamineState(data.states[0].state)}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                    </ng-container>
-                                    <ng-template #elseTemplate>
-                                        {{data.states[0].name}}（{{data.states[0].position}}）{{getExamineState(data.states[0].state)}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                    </ng-template>
-                                </ng-template>
-                            </div> -->
-                            <!-- && data.states.length > 1 -->
                             <ul *ngIf="data.states">
                                 <li *ngFor="let item of data.states; let i=index">
                                     <div *ngIf="i == 0">
                                         {{item.name}}（{{item.position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}{{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
                                     </div>
                                     <div *ngIf="i !== 0">
-                                        {{item.name}}
-                                        <!-- {{item.state == 40 || item.state == 41 ? '':'（' + item.position + '）'}} -->
-                                        {{item.position ? '（' + item.position + '）':''}}
-                                        {{getExamineState(item.state)}} 
+                                        {{item.name}}{{item.position ? '（' + item.position + '）':''}}{{getExamineState(item.state)}} 
                                         {{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                        <!-- <ng-container *ngIf="item.state == 40 || item.state == 41; else elseTemplate">
-                                            {{item.name}}{{getExamineState(item.state)}} {{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                        </ng-container>
-                                        <ng-template #elseTemplate>
-                                            {{item.name}}（{{item.position}}）{{getExamineState(item.state)}} {{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
-                                        </ng-template> -->
                                     </div>
                                 </li>
                             </ul>
@@ -398,9 +354,3 @@ nzCancelText="取消" (nzOnCancel)="remarkCancel()" (nzOnOk)="remarkOk()">
         </form>
     </div>
 </nz-modal>
-<!-- 增减项全部进度 -->
-<!-- <ng-template #allProgress>
-    <ul>
-        <li>{{data.states[0].name}}（{{data.states[0].position}}）{{data.pause && data.pause.name?data.pause.name:'增减项目'}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}</li>
-    </ul>
-</ng-template> -->

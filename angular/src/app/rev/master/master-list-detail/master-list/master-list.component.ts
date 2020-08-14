@@ -2,9 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 
 import {HttpHeaders, HttpParams, HttpClient} from '@angular/common/http';
 import {ApiService} from '../../../../service/api.service';
-import {RequestService} from '../../../../service/request.service';
+
 import { NzNotificationService } from 'ng-zorro-antd';
 import {Default} from '../../../../model/constant';
+import {RequestService} from '../../../../service/request.service';
 import {WarningService} from '../../../../service/warning.service';
 import {Messages} from '../../../../model/msg';
 import {FormGroup, FormBuilder} from '@angular/forms';
@@ -27,7 +28,7 @@ export class MasterListComponent implements OnInit {
     public total = Default.PAGE.PAGE_TOTAL;
 
     //查询条件
-    public searchInfo: string;
+    public searchInfo: string = "";
     public materForm: FormGroup;
 
     public httpOptions = {
@@ -54,10 +55,12 @@ export class MasterListComponent implements OnInit {
                 name: '批量导入'
             }];
 
-        this.loadData();
         this.materForm = this.fb.group({
             searchInfo: [this.searchInfo, []]
         });
+
+        this.loadData();
+
     }
 
     loadData(...args) {
@@ -66,14 +69,18 @@ export class MasterListComponent implements OnInit {
             this.pageNo = Default.PAGE.PAGE_NO;
             this.total = Default.PAGE.PAGE_TOTAL;
         }
+        let params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+            versionType: 1
+        };
+        if(this.searchInfo){
+            params["name"] = this.searchInfo.trim();
+        }
+
         this.service.doPost({
             url: 'mouldList',
-            data: {
-                pageNo: this.pageNo,
-                pageSize: this.pageSize,
-                versionType: 1, //版本类别
-                name: this.searchInfo
-            },
+            data: params,
             success: (res => {
                 this.loading = false;
                 if (res && res.code === 200) {
@@ -98,10 +105,11 @@ export class MasterListComponent implements OnInit {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('versionType', '1');
-
+        
         this.httpClient.post(this.apiService.getUrl('upExl'), formData, this.httpOptions)
             .subscribe(
                 (res: any) => {
+                    console.log(res)
                     if (res.code === 200) {
                         that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
                         that.loadData();

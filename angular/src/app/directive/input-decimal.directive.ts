@@ -30,7 +30,8 @@ export class InputDecimalDirective {
     @HostBinding('style.color') color: string;
     @HostBinding('style.borderColor') bc: string = null;
 
-    //role代表不同角色传参role=1:代表报价时修改，
+    //role代表不同角色传参
+    //role=1: 代表报价时修改，
     //role=2：增减项目的数量调整
     //role=3: 增减项目列表中的实付款
     //role=4：增减项目中最终的实付款
@@ -49,6 +50,7 @@ export class InputDecimalDirective {
     //计算公式
     @Input('formula') formula: string;
 
+    //当前输入数字
     @Input() num: string;
 
     //增减项目id
@@ -63,6 +65,7 @@ export class InputDecimalDirective {
     @HostListener('keyup', ['$event']) onKeyup(e) {
         e.stopPropagation();
         e.preventDefault();
+        console.log("key up in here");
 
         this.role = Number(this.role);
         const val = this.el.nativeElement.value;
@@ -106,6 +109,10 @@ export class InputDecimalDirective {
     @HostListener('blur', ['$event']) onBlur(e) {
         e.stopPropagation();
         e.preventDefault();
+        if(!this.num) {
+            this.color = null;
+            this.bc = null;
+        }
         if (this.formula && Reg.OPERATOR_SYMBOL.test(this.formula)) {
             this.color = null;
             this.bc = null;
@@ -164,7 +171,8 @@ export class InputDecimalDirective {
                     this.warn.onMsgWarn(Messages.ERROR.NOT_VALUE_ZERO);
                 }
 
-            } else if (this.role === 2) {
+            }
+            else if (this.role === 2) {
                 const params = {
                     id: this.id,
                     num: this.el.nativeElement.value,
@@ -183,7 +191,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 3) {
+            }
+            else if (this.role === 3) {
                 const params = {
                     id: this.id,
                     price: this.el.nativeElement.value,
@@ -202,7 +211,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 4) {
+            }
+            else if (this.role === 4) {
                 // console.log(this.el.nativeElement.value);
                 // this.reg.loadDetail(this.pauseId);
                 this.req.doPost({
@@ -219,7 +229,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 5) {
+            }
+            else if (this.role === 5) {
                 this.req.doPost({
                     url: 'costEngineer',
                     data: {
@@ -234,7 +245,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 6) {
+            }
+            else if (this.role === 6) {
                 this.req.doPost({
                     url: 'costDesign',
                     data: {
@@ -252,7 +264,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 7) {
+            }
+            else if (this.role === 7) {
                 this.req.doPost({
                     url: 'savePriceOrRemark',
                     data: {
@@ -269,7 +282,8 @@ export class InputDecimalDirective {
                         }
                     })
                 });
-            } else if (this.role === 8) {
+            }
+            else if (this.role === 8) {
                 this.req.doPost({
                     url: 'savePriceOrRemark',
                     data: {
@@ -277,21 +291,14 @@ export class InputDecimalDirective {
                         price: this.el.nativeElement.value
                     },
                     success: (res => {
-                        // if (res && res.code == 200) {
-                        //     // this.quote.setTypeByParam("data", true);
-                        //     // this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
-                        //
-                        // } else {
-                        //     this.quote.setTypeByParam("price",true);
-                        //     this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
-                        // }
                         if (res && res.code !== 200) {
                             this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
                         }
                         this.quote.setTypeByParam('price', true);
                     })
                 });
-            } else if (this.role === 10) {
+            }
+            else if (this.role === 10) {
                 const formula = this.el.nativeElement.value;
                 if (Reg.OPERATOR_SYMBOL.test(formula)) {
                     let cformula = this.el.nativeElement.value;
@@ -316,6 +323,25 @@ export class InputDecimalDirective {
                     num: this.num
                 });
             }
+            else if (this.role === 11){
+                this.req.doPost({
+                    url:"updateMasterActivityPrice",
+                    data:{
+                        id: this.id,
+                        activityPrice: this.num
+                    },
+                    success:(res =>{
+                        console.log(res);
+                        if(res && res.code == 200){
+                            this.changeValue.emit({
+                                value: this.el.nativeElement.value
+                            })
+                        }else{
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
         } else {
             this.el.nativeElement.focus();
             this.warn.onWarn(Messages.ERROR.INPUT);
@@ -334,6 +360,8 @@ export class InputDecimalDirective {
             case 7:
                 return true;
             case 10:
+                return true;
+            case 11:
                 return true;
             default:
                 return false;

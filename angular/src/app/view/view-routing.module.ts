@@ -4,7 +4,7 @@ import {Routes, RouterModule} from '@angular/router';
 import {ViewContractComponent} from './view-contract/view-contract.component';
 import {ViewQuoteComponent} from './view-quote/view-quote.component';
 import {ViewExplainComponent} from './view-explain/view-explain.component';
-
+import { ViewMaterialsComponent } from './view-materials/view-materials.component';
 const routes: Routes = [
     {
         path: 'contract',
@@ -17,7 +17,11 @@ const routes: Routes = [
     {
         path: 'explain',
         component: ViewExplainComponent
-    }
+    },
+    {
+      path: 'print',
+      component: ViewMaterialsComponent
+  }
 ];
 
 @NgModule({

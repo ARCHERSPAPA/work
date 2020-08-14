@@ -304,10 +304,11 @@
         <div nz-col nzSpan="8">
             <div nz-row nzType="flex" nzJustify="left" nzAlign="top" class="img-list">
                 <div nz-col class="remark-img ml-8" *ngFor="let img of remarkImgs;let i = index"
-                     [ngStyle]="showRemarkImgBg(img)" (click)="openLarge($event,img)"
+                     [ngStyle]="showRemarkImgBg(img)" (click)="openLarge(remarkImgs,i)"
                      [ngClass]="{'mb-8': remarkImgs.length > 4 && i < 5}">
                 </div>
             </div>
+        </div>
     </div>
 
     <div nz-row class="mt-20" *ngIf="(type !== 5) || !type">
@@ -369,13 +370,14 @@
                 </tr>
                 <tr *ngIf="data.details && data.details.length > 0" [nzExpand]="data.expand">
                     <td></td>
-                    <td colspan="12">
+                    <td colspan="13">
                         <nz-table #innerTable [nzData]="data.details" [nzFrontPagination]="false"
                                   [nzShowPagination]="false">
             <thead>
             <tr>
                 <th>名称</th>
                 <th>类别</th>
+                <th>品牌</th>
                 <th>规格</th>
                 <th>型号</th>
                 <th>材质</th>
@@ -385,9 +387,9 @@
                 <th>数量</th>
                 <th>合计/应收</th>
                 <th>实收</th>
-                <th *ngIf="state !== 6">说明</th>
-                <th *ngIf="state === 6">成本单价</th>
-                <th *ngIf="state === 6">成本合计</th>
+                <th>说明</th>
+                <!--<th *ngIf="state === 6">成本单价</th>-->
+                <!--<th *ngIf="state === 6">成本合计</th>-->
                 <th>备注</th>
             </tr>
             </thead>
@@ -395,6 +397,7 @@
             <tr *ngFor="let inner Of innerTable.data">
                 <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
                 <td [title]="inner.category?inner.category:''">{{inner.category?inner.category:'--'}}</td>
+                <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}</td>
                 <td [title]="inner.specifications?inner.specifications:0">
                     {{inner.specifications?inner.specifications:'--'}}
                 </td>
@@ -415,13 +418,13 @@
                 <td *ngIf="state !== 6" [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'"
                     nzPlacement="topLeft" nz-tooltip>{{inner.offerExplain?inner.offerExplain:'--'}}
                 </td>
-                <td *ngIf="state === 6">{{(inner.primeCost?inner.primeCost:0)|number:'1.2'}}</td>
-                <td *ngIf="state === 6">{{(inner.primetotalPrice?inner.primetotalPrice:0)|number:'1.2'}}</td>
+                <!--<td *ngIf="state === 6">{{(inner.primeCost?inner.primeCost:0)|number:'1.2'}}</td>-->
+                <!--<td *ngIf="state === 6">{{(inner.primetotalPrice?inner.primetotalPrice:0)|number:'1.2'}}</td>-->
                 <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'"
                 nzPlacement="topLeft" nz-tooltip>{{inner.remark?inner.remark:'--'}}</td>
             </tr>
             <tr>
-                <td colspan="12"  [nzTitle]="data.pause && data.pause.remark?data.pause.remark:'暂无备注信息'"
+                <td colspan="13"  [nzTitle]="data.pause && data.pause.remark?data.pause.remark:'暂无备注信息'"
                     nzPlacement="topLeft" nz-tooltip>备注：{{data.pause && data.pause.remark?data.pause.remark:'暂无备注信息'}}</td>
             </tr>
             </tbody>
@@ -529,10 +532,3 @@
     </div>
 </ng-template>
 
-<!---放大图片--->
-<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" (nzOnCancel)="handleCancel()"
-          [nzFooter]="null" nzWidth="1000">
-    <div class="large-img" *ngIf="largeImg">
-        <img [src]="largeImg"/>
-    </div>
-</nz-modal>

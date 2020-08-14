@@ -48,8 +48,8 @@ export class ViewQuoteComponent implements OnInit {
     //单项备注信息添加和修改
     public remarkImgs: Array<any> = [];
     //查看图片大图
-    public isVisible = false;
-    public largeImg: string;
+    public albums:Array<any> = [];
+    public imgIndex: number;
 
     public regulars: any;
     public list: any;
@@ -91,18 +91,6 @@ export class ViewQuoteComponent implements OnInit {
 
         });
     }
-
-    // ngDoCheck(){
-        // if(this.quote && this.quote.getQuoteInfo()){
-        //     this.remarkImgs = (this.quote.getQuoteInfo()["remarkPhotos"] && this.quote.getQuoteInfo()["remarkPhotos"].length > 0) ? this.combineImgs(this.quote.getQuoteInfo()["remarkPhotos"]):[];
-        //     this.remarks = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["remark"]?this.quote.getQuoteInfo()["quoteBase"]["remark"]:"";
-        //     this.preferentialPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["preferentialPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["preferentialPrice"] : 0;
-        //     this.totalPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["totalPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["totalPrice"] : 0;
-        //     this.finalPrice = this.quote.getQuoteInfo()["quoteBase"] && this.quote.getQuoteInfo()["quoteBase"]["finalPrice"] ? this.quote.getQuoteInfo()["quoteBase"]["finalPrice"] : 0;
-        // }
-    // }
-
-
 
 
     renderData(data) {
@@ -152,23 +140,6 @@ export class ViewQuoteComponent implements OnInit {
         }
     }
 
-    /**
-     * 重构根据type适用table表格
-     * @param {number} type
-     * @returns {boolean}
-     */
-    // showSubByType(type: number) {
-    //     switch (type) {
-    //         case 2:
-    //             return true;
-    //         case 3:
-    //             return true;
-    //         case 5:
-    //             return true;
-    //         default:
-    //             return false;
-    //     }
-    // }
 
     //主材或者个性化
     showSubByType1(type: number) {
@@ -201,17 +172,14 @@ export class ViewQuoteComponent implements OnInit {
 
 
     //放大图片
-    openLarge(e, src) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.isVisible = true;
-        this.largeImg = src;
+    openLarge(src, index) {
+        this.imgIndex = index;
+        this.albums = [];
+        src.forEach(img => {
+            this.albums.push({ src: img });
+        });
     }
 
-    handleCancel() {
-        this.isVisible = false;
-        this.largeImg = null;
-    }
 
     getMainColumn(source, type) {
         let total = 0;

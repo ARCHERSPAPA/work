@@ -8,16 +8,17 @@
         <!---查询条件--->
         <div nz-row>
             <div nz-col nzSpan="10" nzOffset="14" class="text-right mb-16">
-                <form nz-form [nzLayout]="'inline'" [formGroup]="materForm" (ngSubmit)="loadData(true)">
+                <form nz-form [nzLayout]="'inline'" [formGroup]="materForm">
                     <nz-form-item>
                         <nz-form-control>
-                            <input nz-input formControlName="searchInfo"
-                                   id="searchInfo" placeholder="请输入要查询的主材名称"/>
+                            <input nz-input formControlName="searchInfo" [(ngModel)]="searchInfo"
+                                   placeholder="请输入要查询的主材名称"/>
                         </nz-form-control>
                     </nz-form-item>
                     <nz-form-item>
                         <nz-form-control>
-                            <button nz-button nzType="primary" [disabled]="!materForm.valid">查询</button>
+                            <button nz-button nzType="primary" [disabled]="!materForm.valid"
+                            (click)="loadData(true)">查询</button>
                         </nz-form-control>
                     </nz-form-item>
                 </form>

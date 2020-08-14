@@ -44,7 +44,7 @@ export const Default = {
         MAX_DATA: 500,  //添加最大单量500（项目详情中报价预算、材料清单）
         FORMATTER: ['jpg', 'png', 'gif', 'webp']
     },
-    VERSION: '2.2.5',
+    VERSION: '2.2.6',
     NAME: {
         MATERIALS: '材料清单',
         SERIES: '装修类型',
@@ -101,6 +101,11 @@ export const topProjectTypes = [
      { id: 12, name: '增减项目' },
      { id: 15, name: '待客户确认开工' },
      { id: 16, name: '待确认合同' },
+];
+export const modelRoleTypes = [
+    { label: '销售统计', value: 9, checked: false  },
+    { label: '工地考勤', value: 10, checked: false  },
+
 ];
 export const qtTypes = [
     {
@@ -338,4 +343,11 @@ export const AUDIT_TYPES = [
     {key: 2, value:"项目工长"},
     {key: 3, value:"项目监理"},
     {key: 4, value:"客户"},
+]
+
+//活动版本的活动状态
+export const ACTIVITY_STATE = [
+    {key: -1, value:"已结束"},
+    {key: 0, value:"未开始"},
+    {key: 1, value:"进行中"}
 ]

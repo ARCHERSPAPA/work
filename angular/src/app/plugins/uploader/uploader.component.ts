@@ -1,10 +1,10 @@
-import {Component, OnInit, Input, ViewChild, Output} from '@angular/core';
-import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {CropperSettings, Bounds, ImageCropperComponent} from 'ngx-img-cropper';
+import { Component, OnInit, Input, ViewChild, Output } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { CropperSettings, Bounds, ImageCropperComponent } from 'ngx-img-cropper';
 
-import {RequestService} from '../../service/request.service';
-import {Messages} from '../../model/msg';
-import {Default} from '../../model/constant';
+import { RequestService } from '../../service/request.service';
+import { Messages } from '../../model/msg';
+import { Default } from '../../model/constant';
 
 
 @Component({
@@ -26,7 +26,8 @@ export class UploaderComponent implements OnInit {
      */
     @Input() fileData: any;
     @Output() isVisible = true;
-
+    @Input() size: number = Default.UPLOAD.MAX_SIZE;
+    @Input() hasCut: boolean = true;
 
 
     public data: any;
@@ -39,11 +40,13 @@ export class UploaderComponent implements OnInit {
 
     public msg: string;
     public isClick = false;
+    public fileName: string;
+    public currentImg: string;
 
     @ViewChild('cropper', undefined) cropper: ImageCropperComponent;
 
     constructor(public activeModal: NgbActiveModal,
-                private request: RequestService) {
+        private request: RequestService) {
 
         this.cropperSettings = new CropperSettings();
         this.cropperSettings.minWidth = 10;
@@ -72,11 +75,14 @@ export class UploaderComponent implements OnInit {
         this.cropperSettings.touchRadius = 20;
 
         this.data = {};
+
+
     }
 
     ngOnInit() {
         this.name = this.name ? this.name : Default.NAME.UPLOAD_IMG;
         const that = this;
+        // document.querySelector('.chk').click();
         if (this.fileData) {
             const img: any = new Image();
             const file: File = this.fileData;
@@ -91,7 +97,8 @@ export class UploaderComponent implements OnInit {
 
             fileReader.onload = function (loadEvent: any) {
                 img.src = loadEvent.target.result;
-                that.cropper.setImage(img);
+                if (that.hasCut) { that.cropper.setImage(img); }
+
             };
 
             fileReader.readAsDataURL(file);
@@ -99,6 +106,7 @@ export class UploaderComponent implements OnInit {
     }
 
     fileChangeListener(e: any) {
+
         const that = this;
         const img: any = new Image();
         const file: File = e.target.files[0];
@@ -112,14 +120,24 @@ export class UploaderComponent implements OnInit {
             e.target.value = '';
             return;
         }
-
+        if(size >this.size * 1024){
+            that.showMsg(`只能上传${this.size}M以内的图片`);
+            e.target.value = '';
+            return;
+        }
+        console.log(file)
+        this.fileName=file.name;
         fileReader.onload = function (loadEvent: any) {
             img.src = loadEvent.target.result;
-            that.cropper.setImage(img);
+            if (that.hasCut) { that.cropper.setImage(img) } else {
+                that.data.image = img.src;
+                that.onClickImage(0)
+            }
         };
 
         fileReader.readAsDataURL(file);
         e.target.value = '';
+        
     }
 
     cropped(bounds: Bounds) {
@@ -128,8 +146,8 @@ export class UploaderComponent implements OnInit {
         // console.log(this.cropperSettings);
     }
 
-    onClickImage() {
-
+    onClickImage(click) {
+        console.log(this.data)
         const that = this;
         if (that.data.image) {
             that.isClick = true;
@@ -171,20 +189,24 @@ export class UploaderComponent implements OnInit {
                                 success: (data => {
 
                                     // setTimeout(()=>{
-                                        that.isClick = false;
-                                        if (data && data.key) {
-                                            that.activeModal.close({image: uploadUrl + '/' + data.key + ''});
-
+                                    that.isClick = false;
+                                    if (data && data.key) {
+                                        if (click) {
+                                            that.activeModal.close({ image: uploadUrl + '/' + data.key + '',fileName:that.fileName });
                                         } else {
-
-                                            that.showMsg(Messages.UPLOAD.FAIL);
+                                            that.currentImg = uploadUrl + '/' + data.key + ''
                                         }
+
+                                    } else {
+                                   
+                                        that.showMsg(Messages.UPLOAD.FAIL);
+                                    }
                                     // },3000);
 
                                 }),
                                 error: (err => {
                                     // console.log(err);
-                                    if (err) {
+                                    if (err && click) {
                                         that.isClick = false;
                                         that.showMsg(Messages.UPLOAD.NET_BUSY);
                                     }
@@ -204,7 +226,6 @@ export class UploaderComponent implements OnInit {
             that.showMsg(Messages.UPLOAD.EMPTY);
         }
     }
-
     showMsg(msg) {
         this.msg = msg;
         setTimeout(() => {

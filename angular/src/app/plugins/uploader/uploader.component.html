@@ -5,11 +5,12 @@
     <div class="ant-modal-header">
         <div class="ant-modal-title">{{name}}</div>
     </div>
-    <div class="ant-modal-body clearfix" style="width:100%;height:340px;overflow:hidden;">
+    <div class="ant-modal-body clearfix" style="width:100%;height:340px;overflow:hidden;text-align: center;">
         <p class="error" *ngIf="msg" style="text-align: center;"><span>{{msg}}</span></p>
-        <div class="rev-img-cropper">
+        <div class="rev-img-cropper"*ngIf="hasCut">
             <img-cropper #cropper [image]="data" [settings]="cropperSettings" (onCrop)="cropped($event)"></img-cropper>
         </div>
+        <img [src]="currentImg" *ngIf='currentImg'style="width:200px" alt="">
         <!--<div class="rev-img-cnt">-->
             <!--<div class="rev-img-btn">-->
             <!--<button type="button" class="ant-btn ant-btn-primary">选择图片</button>-->
@@ -27,11 +28,11 @@
     </div>
     <div class="ant-modal-footer">
         <div class="rev-btn">
-            <button type="button" class="ant-btn ant-btn-primary">选择图片</button>
+            <button type="button" class="ant-btn ant-btn-primary chk">选择图片</button>
             <input type="file" (change)="fileChangeListener($event)" accept="image/jpeg,image/png,image/jpg"/>
         </div>
         <div class="rev-btn">
-            <button type="button" class="ant-btn ant-btn-primary" [disabled]="isClick" (click)="onClickImage()">确定</button></div>
+            <button type="button" class="ant-btn ant-btn-primary" [disabled]="isClick" (click)="onClickImage(1)">确定</button></div>
     </div>
     <canvas id="canvas"></canvas>
 </div>

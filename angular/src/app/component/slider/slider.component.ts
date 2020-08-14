@@ -52,7 +52,7 @@ export class SliderComponent implements OnInit {
     ngOnInit() {
         setTimeout(() => {
             this.inits();
-        }, 200);
+        }, 300);
     }
 
 }

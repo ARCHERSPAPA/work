@@ -17,6 +17,7 @@ import {DepartService} from '../service/depart.service';
 import {ArticleService} from '../service/article.service';
 import {RichTextService} from '../service/rich-text.service';
 
+
 @NgModule({
     imports: [
         CommonModule,
@@ -28,7 +29,7 @@ import {RichTextService} from '../service/rich-text.service';
     ],
     declarations: [
         StepsComponent,
-        MasterComponent,
+        MasterComponent
     ],
     providers: [
         DepartService,

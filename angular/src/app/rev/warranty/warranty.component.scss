@@ -1,22 +1,19 @@
 @charset "utf-8";
-.warranty{
-  overflow: hidden;
-  .content{
+.warranty {
+  //overflow: hidden;
+  .content {
     padding-top: 48px;
-    .warranty_table{
+    .warranty_table {
       margin-top: 12px;
     }
   }
-  tr td{
+  tr td {
     font-size: 14px;
   }
 
 }
-.notice-head{
+
+.notice-head {
   display: flex;
   justify-content: space-between;
-}
-.split{
-  border-bottom: 8px solid rgba(240,242,245,1) ;
-  width: 100%;
 }

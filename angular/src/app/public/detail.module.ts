@@ -22,7 +22,7 @@ import {DynamicsComponent} from '../rev/detail/dynamics/dynamics.component';
 import {AssessmentComponent} from '../rev/detail/assessment/assessment.component';
 import {RegulationComponent} from '../rev/detail/regulation/regulation.component';
 import {MakingsComponent} from '../rev/detail/makings/makings.component';
-import {InputDecimalDirective} from '../directive/input-decimal.directive';
+// import {InputDecimalDirective} from '../directive/input-decimal.directive';
 import {RegularService} from '../service/regular.service';
 import {GraphComponent} from '../rev/detail/graph/graph.component';
 import {RouterModule} from '@angular/router';
@@ -39,6 +39,9 @@ import {ViserModule} from 'viser-ng';
 import {HeaderService} from '../service/header.service';
 import {BufferService} from '../service/buffer.service';
 import {ItemQuantityComponent} from '../rev/detail/item-quantity/item-quantity.component';
+import {InputModule} from "./input.module";
+// import {SelectBrandComponent} from '../component/selectBrand/selectBrand.component';
+
 
 
 @NgModule({
@@ -50,22 +53,24 @@ import {ItemQuantityComponent} from '../rev/detail/item-quantity/item-quantity.c
     ViserModule,
     UploadModule,
     ImgviewModule,
+    InputModule,
     NgZorroAntdModule.forRoot(),
     BsDatepickerModule.forRoot(),
     TimepickerModule.forRoot(),
       /**
        *拖动模块引入
       //  */
-      DragulaModule.forRoot()
-
+      DragulaModule.forRoot(),
+      
   ],
   declarations: [
-      InputDecimalDirective,
+      // InputDecimalDirective,
       PriceComponent,
       HeadComponent,
       ContractComponent,
       NoticeComponent,
       DataComponent,
+      // SelectBrandComponent, //
       DynamicsComponent,
       AssessmentComponent,
       RegulationComponent,
@@ -79,7 +84,7 @@ import {ItemQuantityComponent} from '../rev/detail/item-quantity/item-quantity.c
       ItemQuantityComponent
   ],
   exports: [
-      InputDecimalDirective,
+      // InputDecimalDirective,
       PriceComponent,
       HeadComponent,
       ContractComponent,
@@ -93,7 +98,8 @@ import {ItemQuantityComponent} from '../rev/detail/item-quantity/item-quantity.c
       SettleDetailAttendComponent,
       DispatchComponent,
       ItemQuantityComponent,
-      ViserModule
+      ViserModule,
+      // SelectBrandComponent
   ],
   providers: [
       RequestService,

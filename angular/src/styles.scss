@@ -1059,4 +1059,8 @@ body {
   border: 1px solid #ccc;
 }
 
-
+.top-split{
+  border-bottom: 8px solid #F0F2F5;
+  width: calc(100% + 48px);
+  margin: 0 -24px;
+}

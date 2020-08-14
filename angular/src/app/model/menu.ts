@@ -70,6 +70,17 @@ export const menus = [
             // }
         ]
     },
+    //v2.2.6 新增材料商
+    {
+      catalogName:'材料商管理',
+      name:'supplier',
+      catalogs:[
+          {
+              catalogName:'材料商管理',
+              go:'supplier/material'
+          }
+      ]
+    },
     {
         catalogName: '产品管理',
         name: 'product',
@@ -144,6 +155,14 @@ export const menus = [
             {
                 catalogName: '主材模板',
                 go: 'master/tempDetail'
+            },
+            {
+                catalogName: '销售版本',
+                go: 'master/saleDetail'
+            },
+            {
+                catalogName:'活动管理',
+                go:'master/promotionDetail'
             }
         ]
     },

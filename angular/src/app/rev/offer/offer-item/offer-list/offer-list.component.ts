@@ -172,17 +172,17 @@ export class OfferListComponent implements OnInit {
             this.phone = '';
             this.customerHouseAddress = '';
         }
-        this.router.navigate(['./'], {
-            queryParams: {
-                page: this.pageNo,
-                did: this.departmentId,
-                type: this.type,
-                name: this.name,
-                phone: this.phone,
-                customerHouseAddress: this.customerHouseAddress,
-                quoteNo: this.quoteNo
-            }, relativeTo: this.activatedRoute
-        });
+        // this.router.navigate(['./'], {
+        //     queryParams: {
+        //         page: this.pageNo,
+        //         did: this.departmentId,
+        //         type: this.type,
+        //         name: this.name,
+        //         phone: this.phone,
+        //         customerHouseAddress: this.customerHouseAddress,
+        //         quoteNo: this.quoteNo
+        //     }, relativeTo: this.activatedRoute
+        // });
     }
 
     //翻页
@@ -380,7 +380,7 @@ export class OfferListComponent implements OnInit {
      * @param e
      */
     changeDepart(e: any) {
-        // console.log(e);
+        console.log(e);
         if (e.selected) {
             this.departmentId = e.id;
             this.pageNo = Default.PAGE.PAGE_NO;

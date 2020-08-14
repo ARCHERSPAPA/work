@@ -37,6 +37,7 @@ export class TitleComponent implements OnInit {
 
     //显示的数据
     @Input() num: number;
+    @Input() isNewPage: boolean=true;
 
     @Input() isVisible: boolean;
     @Input() showBorder = true;
@@ -55,16 +56,5 @@ export class TitleComponent implements OnInit {
         this.isVisible = true;
         this.isopen.emit(this.isVisible);
         this.handleName.emit(name);
-
     }
-    //
-    // link() {
-    //   setTimeout(
-    //     function() {
-    //       window.open(window.location.href = this.atags.link, '_blank');
-    //     }, 300
-    //   );
-    //
-    // }
-
 }

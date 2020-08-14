@@ -1715,3 +1715,34 @@ export function showRecallByState(state) {
             return false;
     }
 }
+
+/**
+ * 根据活动状态显示活动文案
+ * @param {number} status
+ * @returns {string}
+ */
+export function getPromotionStateName(status:number){
+    switch(status){
+        case 1: return "进行中";
+        case 2: return "已结束";
+        default: return "未开始";
+    }
+}
+
+/**
+ * 根据时间来显示活动状态
+ * @param d
+ * @returns {number}
+ */
+export function getPromotionState(d:any){
+    let state = 0,time = new Date().getTime();
+    if(d && d["startTime"] && d["endTime"]){
+        if(d["startTime"] < time && d["endTime"] > time) state = 1;
+        else if(d["startTime"] < time && d["endTime"] < time) state = 2;
+        else state = 0;
+    }else{
+       if(d && d["startTime"] && d["startTime"] > time) state = 0;
+       else state = 1;
+    }
+    return state;
+}

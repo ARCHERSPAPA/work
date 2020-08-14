@@ -17,6 +17,7 @@ export class RadioSwitchComponent implements OnInit {
 
 
   public radioValue: number;
+
   constructor() {}
 
   ngOnInit() {
@@ -25,6 +26,7 @@ export class RadioSwitchComponent implements OnInit {
 
 
   handleClick() {
+
     this.handleSwitch.emit(this.radioValue);
   }
 }

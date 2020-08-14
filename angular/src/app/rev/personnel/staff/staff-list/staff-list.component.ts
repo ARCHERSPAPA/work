@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RequestService } from '../../../../service/request.service';
 import { WarningService } from '../../../../service/warning.service';
-import { Default, appTypes, topProjectTypes } from '../../../../model/constant';
+import { Default, appTypes, topProjectTypes, modelRoleTypes } from '../../../../model/constant';
 import { Messages } from '../../../../model/msg';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../../service/user.service';
@@ -32,6 +32,8 @@ export class StaffListComponent implements OnInit {
     public departType: number;
     public isVisible: Boolean = false;
     public appType = 1;
+    public modelRole;
+    public modelRoleType = [];
     public permissionList;
     public id: Array<any> = [];
 
@@ -67,6 +69,8 @@ export class StaffListComponent implements OnInit {
     ngOnInit() {
         this.permissionList = appTypes;
         this.topProjectList = topProjectTypes;
+        this.modelRole = modelRoleTypes;
+        this.modelRoleType = new Array(this.modelRole.length).fill('');
         this.departType = transformQuickDepartType(this.user.getQuickQueryDepartType());
         this.activatedRoute.queryParams.subscribe((params) => {
             if (params) {
@@ -85,11 +89,20 @@ export class StaffListComponent implements OnInit {
             }
         })
     }
+    //APP查看工地和销售权限
+    updateSingleChecked(e) {
+        e.forEach((v, i) => {
+            if (v['checked']) {
+                this.modelRoleType.splice(i, 1, v['value'])
+            } else {
+                this.modelRoleType.splice(i, 1, '')
+            }
+        })
+    }
+
     checkType() {
         this.lock = true;
     }
-
-
     /**
      * 监听部门回显
      * @param e
@@ -152,40 +165,63 @@ export class StaffListComponent implements OnInit {
             this.quitState = null;
         }
     }
-
+    /**
+     * app权限
+     * @param data 列表数据
+     */
     appPermission(data) {
-        this.isVisible = true;
+        this.isVisible = true;           //全选
         if (data === 1) {
             this.appType = 1;
             this.topProjectState = [];
-            this.contractRole=0;
-            // this.showAppState=false;
+            this.contractRole = 0;
             this.staffList.forEach(v => {
                 if (v['checked']) {
                     this.id.push(v['id']);
                 }
             });
         } else {
-            // this.showAppState=true;
-            this.id.push(data.id);
-            this.topProjectState = [];
-            this.appType = data.appJurisdiction;
-            if(data.topShowState){
-                let nums = data.topShowState.split(",");
-                if(nums && nums.length > 0){
-                    nums.forEach(v=>{
-                        v = parseInt(v);
-                        console.log(typeof v)
-                        this.topProjectState.push(v);
-                    })
-                }
-            }else{
-                this.topProjectState=[]
-            }
-            this.contractRole=data.createContract;
+            this.renderData(data);
         }
-
     }
+
+    renderData(data) {
+        console.log(this.modelRoleType)
+        this.id.push(data.id); //单独选某一个人       
+        this.appType = data.appJurisdiction;
+        this.topProjectState=[];
+        this.modelRoleType=[];
+        if (data.topShowState) {
+            let nums = data.topShowState.split(",");
+            if (nums && nums.length > 0) {
+                nums.forEach((v) => {
+                    v = parseInt(v);
+                    this.topProjectState.push(v)
+                })
+            }
+        } else {
+            this.topProjectState = [];
+        }
+        if (data.moduleShowState) {
+            console.log(data.moduleShowState)
+            let nums = data.moduleShowState.split(",");
+            if (nums && nums.length > 0) {
+                nums.forEach(v => {
+                    this.modelRole.forEach((i,index) => {
+                        if (i.value == v) {
+                            v = parseInt(v);
+                            this.modelRoleType.splice(index,1,v);
+                            i['checked'] = true;
+                        }
+                    });
+                })
+            }
+        } else {
+            this.modelRoleType = [];
+        }
+        this.contractRole = data.createContract;
+    }
+
     //单个选择
     refreshStatus() {
         const allChecked = this.staffList.filter(value => value.state != 1).every(value => value.checked === true);
@@ -219,12 +255,16 @@ export class StaffListComponent implements OnInit {
     handleCancel() {
         this.isVisible = false;
         this.id.length = 0;
+        this.modelRoleType = [];
+        this.modelRole.forEach(i => {
+            i['checked'] = false;
+        });
     }
     /**
      *     APP新建合同权限
      */
     configContractRole(e) {
-        this.contractRole=e?1:0;
+        this.contractRole = e ? 1 : 0;
     }
     /**
    * 装修TOP项目展示范围
@@ -236,8 +276,7 @@ export class StaffListComponent implements OnInit {
      * 装修TOP项目展示状态
      */
     handleTOPState(e) {
-        // this.contractRole=e?1:0;
-        // console.log(this.contractRole)
+
     }
     checkState(state) {
         if (state == null || state == 3) {
@@ -252,13 +291,15 @@ export class StaffListComponent implements OnInit {
             data: {
                 id: this.id,
                 appJurisdiction: this.appType,
-                topShowState:this.topProjectState?this.topProjectState.join(','):'',
-                createContract:this.contractRole
+                topShowState: this.topProjectState ? this.topProjectState.join(',') : '',
+                createContract: this.contractRole,
+                moduleShowState: this.modelRoleType.filter(v => v).join(',')
             }, success: res => {
                 if (res && res.code == 200) {
                     this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
                     this.isAllDisplayDataChecked = false;
                     this.isVisible = false;
+                    this.modelRole = modelRoleTypes;
                     this.changeData();
                 } else {
                     this.warn.onError(res.msg || Messages.FAIL.DATA);
@@ -291,6 +332,7 @@ export class StaffListComponent implements OnInit {
                     that.staffList = res.data.pageSet;
                     this.isAllDisplayDataChecked = false;
                     this.indeterminate = false;
+                    this.modelRoleType=[];
                     this.id = [];
                     that.staffList.filter(v => {
                         v['checked'] = false;

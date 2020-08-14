@@ -57,6 +57,7 @@ import {TitleComponent} from '../component/title/title.component';
 import {ExaminePersonComponent} from '../plugins/examine-person/examine-person.component';
 
 
+
 const COMPONENTS = [];
 const COMPONENTS_COSTOM = [
     ModalComponent,
@@ -86,7 +87,7 @@ const COMPONENTS_COSTOM = [
     GpsComponent,
     MapComponent,
     TitleComponent,
-    ExaminePersonComponent
+    ExaminePersonComponent,
 ];
 
 @NgModule({

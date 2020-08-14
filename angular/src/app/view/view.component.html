@@ -1,10 +1,10 @@
 <div class="rev">
-  <div class="rev-head">
+  <div class="rev-head" *ngIf='!isPrint'>
     <rev-head [visible]="true"></rev-head>
   </div>
   <div class="rev-content">
       <router-outlet></router-outlet>
-      <div class="ant-back-top top" revGoTop>
+      <div class="ant-back-top top" revGoTop *ngIf='!isPrint'>
         <div class="ant-back-top-content"><div class="ant-back-top-icon"></div></div>
       </div>
   </div>

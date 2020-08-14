@@ -22,6 +22,7 @@ export function ValidatePassword(fc: FormControl) {
 }
 
 
+
 /***验证密码组***/
 export function ValidatePasswordGroup(fc: FormControl) {
   const initPwd = fc.get('pwd').value as FormControl;
@@ -202,6 +203,17 @@ export function ValidateIdCard(fc: FormControl) {
         idCard: {valid: false}
     };
 }
+
+/**
+ * serverCode验证
+ */
+export function ValidateServeCard(fc: FormControl) {
+  if (!fc.value) { return true; }
+  return Reg.SERVER_CODE.test(fc.value) ? null : {
+    serverCode: {valid: false}
+  };
+}
+
 
 /**
  * 验证小数规则（只能是0-1的小数）小数精确到后两位

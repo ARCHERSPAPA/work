@@ -37,7 +37,7 @@ export class RevComponent implements OnInit {
         private iconService: NzIconService,
         private role: RoleService) {
         this.iconService.fetchFromIconfont({
-            scriptUrl: '//at.alicdn.com/t/font_1455291_40kjz2aeb3.js'
+            scriptUrl: '//at.alicdn.com/t/font_1455291_anffrgt4fn.js'
         });
 
         router.events.subscribe((event) => {
@@ -64,8 +64,8 @@ export class RevComponent implements OnInit {
     }
 
     ngOnInit() {
-        // this.reloadMenu();
-        this.renderMenu(menus);
+        this.reloadMenu();
+        // this.renderMenu(menus);
     }
 
     ngDoCheck() {
@@ -207,8 +207,10 @@ export class RevComponent implements OnInit {
                 return 'iconkefuguanli';
             case 'cost':
                 return 'iconchengbenguanli';
-            case 'material':
+            case 'master':
                 return 'iconzhucaiguanli';
+            case 'supplier':
+                return 'iconcailiaoshangguanli';
             case 'client':
                 return 'iconkehuguanli';
             case 'offer':

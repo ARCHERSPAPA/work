@@ -94,14 +94,19 @@
   <div nz-col [nzSpan]=10 style="text-align: right;line-height: 30px;margin: 24px 24px 0 0;" >
     装修TOP项目展示状态
   </div>
-  <nz-select style="width: 250px;margin-top: 24px;"  nzMode="multiple"[(ngModel)]="topProjectState" (ngModelChange)="handleTOPState($event)"
+  <nz-select style="width: 250px;margin-top: 24px;"  nzMode="multiple"[(ngModel)]="topProjectState" (ngModelChange)="handleTOPState($event)" nzPlaceHolder='请选择项目展示状态'
     nzAllowClear='false' >
     <nz-option *ngFor="let source of topProjectList" [nzValue]="source.id" [nzLabel]="source.name"></nz-option>
   </nz-select>
   <div nz-col [nzSpan]=10 style="text-align: right;line-height: 30px;margin: 24px 24px 0 0;" >
     APP新建合同权限
   </div>
-  <nz-switch [ngModel]="contractRole" [ngModelOptions]="{standalone: true}" style="margin-top: 24px;"(ngModelChange)="configContractRole($event)"
+  <nz-switch [ngModel]="contractRole" [ngModelOptions]="{standalone: true}" style="margin-top: 24px;width: 44%;"(ngModelChange)="configContractRole($event)"
     nzCheckedChildren="可新建" nzUnCheckedChildren="不可新建"  ></nz-switch>
+  <br>
+    <div nz-col [nzSpan]=10 style="text-align: right;line-height: 30px;margin: 24px 24px 0 0; width: 100%;  float: initial;" >
+      模板查看权限
+      <nz-checkbox-group style="    margin: 0 88px 0 20px;" [(ngModel)]="modelRole" (ngModelChange)="updateSingleChecked($event)"></nz-checkbox-group>
+      </div>
   <br>
 </nz-modal>

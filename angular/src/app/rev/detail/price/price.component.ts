@@ -74,7 +74,7 @@ export class PriceComponent implements OnInit {
     public branchId: number;
     //修改单个大项时用
     public oldName: string;
-    public imgIndex;
+
 
 
     public branchItem: any;
@@ -128,7 +128,10 @@ export class PriceComponent implements OnInit {
     public preferentialPrice: number;
 
     public state: number = Default.STATE.ITEM_1;
+
+    //图片广大
     public _albums = [];
+    public imgIndex;
     //工程管理费用
     public engineerFee = -1;
     public ratio = 0.08;
@@ -2172,7 +2175,7 @@ export class PriceComponent implements OnInit {
     regularListener(e: any) {
         if (e && e.list) {
             this.pauseList = e.list;
-            console.log(this.pauseList);
+            // console.log(this.pauseList);
             /* let bool = this.showTipByPrice(this.pauseList.pause.applyActualPrice, this.pauseList.ratio);
             if(this.baseQuote.lockingBudget == 1){
                 this.showAddOrDelTitle = "预算已开始成本审核，请需修改联系成本同事解除锁定"

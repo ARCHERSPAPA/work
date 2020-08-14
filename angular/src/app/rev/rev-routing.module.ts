@@ -40,6 +40,13 @@ const routes: Routes = [
         }
     },
     {
+        path: 'supplier',
+        loadChildren: './supplier/supplier.module#SupplierModule',
+        data: {
+            breadcrumb: '材料商管理'
+        }
+    },
+    {
         path: 'temp',
         loadChildren: './template/template.module#TemplateModule',
         data: {

@@ -48,7 +48,7 @@ export class WarningService {
 
     onModalInfo(obj: any) {
         this.modal.info({
-            nzTitle: obj.title,
+            nzTitle: obj.title?obj.title:'温馨提示',
             nzContent: obj.content,
             nzOnOk: () => {
                 obj.ok();

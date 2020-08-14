@@ -316,7 +316,7 @@ export const Urls = {
     editOfferContractListFile: '/diy/large/quote/accessory/putOneFile',
     delOfferContractListFile: '/diy/large/quote/accessory/removeAccessory',
     getModifyPrice: '/diy/large/quoteAgreement/modifyPrice',
-    withdrawalConfirmation:'/diy/large/quote/withdrawalConfirmation',
+    withdrawalConfirmation: '/diy/large/quote/withdrawalConfirmation',
     //微信通知
     getQrcode: '/api/wx/account/getQrcodeByTop',
     submitWx: '/large/sys/setNotice',
@@ -399,6 +399,41 @@ export const Urls = {
     masterTempMaterialDel: '/large/quote/add/reduce/deleteData',
     masterTempMove: '/large/quote/add/reduce/moveData',
     masterTempTop: '/large/quote/add/reduce/firstData',
+
+
+    //销售版本
+    versionList: '/diy/large/sell/version/queryByName',
+    versionShelves: '/diy/large/sell/version/shelves',
+    versionCopy: '/diy/large/sell/version/copy',
+    versionDel: '/diy/large/sell/version/deleteVersion',
+    versionQueryMaterial: '/diy/large/sell/version/queryMaterial',
+    versionSave: '/diy/large/sell/version/save',
+    versionAddDetail: '/diy/large/sell/version/addDetail',
+    versionDelDetail: '/diy/large/sell/version/deleteDetail',
+    materialByList: '/diy/large/material/byList', //查询所有的已通过活动
+
+
+
+    //主材管理之活动版本
+    promotionList: "/diy/large/material/list",
+    promotionDel: "/diy/large/material/deleteOneActivity",
+    promotionAdd: "/diy/large/material/addOneActivity",
+    promotionBack: "/diy/large/material/returnActivity",
+    supplierList: "/diy/large/material/supplier/materialSupplierListBySelect",
+    promotionSubmitAudit: "/diy/large/material/sumbitMaterial",
+    promotionEdit: "/diy/large/material/updateOneActivity",
+    activityMasterListNo: "/diy/large/material/selectNoMaterialList",
+    activityMasterListIn: "/diy/large/material/selectMaterialList",
+    activityMasterDel: "/diy/large/material/deleteMaterial",
+
+    masterBrand: "/diy/large/material/brand",
+    masterCategory: "/diy/large/material/category",
+
+    addMasterToActivity: "/diy/large/material/addMaterial",
+    delMasterInActivity: "/diy/large/material/deleteMaterial",
+    auditMasterInActivity: "/diy/large/material/sumbitMaterial",
+    updateMasterActivityPrice: "/diy/large/material/updateActivityPrice",
+
 
     // 价格范围
     priceList: '/diy/large/offer/package/price/list',
@@ -520,11 +555,11 @@ export const Urls = {
     statisticalConstructionSite: '/diy/large/quote/statistical/statisticalConstructionSite',
     statisticalConstructionSiteInfo: '/diy/large/quote/statistical/statisticalConstructionSiteInfo',
     statisticalConstructionSiteInfoDw: '/diy/large/quote/statistical/statisticalConstructionSiteInfoDw',
-    statisticalConstructionSiteTop:'/diy/large/quote/statistical/topStatisticalConstructionSite',
-    statAttendanceDate:'/diy/large/quote/calendar',
-    statAttendanceMap:'/diy/large/quote/mapView',
-    statAttendanceTable:'/diy/large/user/board/data',
-    statAttendanceEmp:'/diy/large/user/board/employee/list',
+    statisticalConstructionSiteTop: '/diy/large/quote/statistical/topStatisticalConstructionSite',
+    statAttendanceDate: '/diy/large/quote/calendar',
+    statAttendanceMap: '/diy/large/quote/mapView',
+    statAttendanceTable: '/diy/large/user/board/data',
+    statAttendanceEmp: '/diy/large/user/board/employee/list',
     //小程序案例
     smallProgramList: '/small/program/case/list',
     smallProgramDetails: '/small/program/case/details',
@@ -546,5 +581,29 @@ export const Urls = {
     newSmallAddBrand: '/small/program/case/page/add/brand',
     newSmallEditBrand: '/small/program/case/page/update/brand',
     newSmallProgramMaterls: '/small/program/case/page/select/brand',
-};
+    //材料商模块
 
+    materialImportExcel: "/diy/large/material/detail/importExcel",
+    detailMaterialList: "/diy/large/material/detail/queryMaterial",
+    submitMaterialAudit: "/diy/large/material/detail/submitReview",
+    submitMaterialRecall: "/diy/large/material/detail/recall",
+    createMaterialSave: '/diy/large/material/detail/save',
+    getMarterialBrand: '/diy/large/material/brand',                  //材料下拉列表
+    getMarterialCategory: '/diy/large/material/category',
+    materialDorpList: '/diy/large/material/supplier/materialSupplierListBySelect',
+    materialList: '/diy/large/material/supplier/materialSupplierList',
+    companyAplly: '/diy/large/material/supplier/applicationForCooperation',
+    companyPhoneVerify: '/diy/large/material/supplier/checkMaterialSupplierPhone',
+    shortCodeVerify: '/diy/large/material/supplier/checkMaterialSupplierNumber',
+    codeRepeatVerify: '/diy/large/material/supplier/checkMaterialSupplierCode',
+    submitMaterDetial: '/diy/large/material/detail/submitReview',
+    createCompanyMateriail: '/diy/large/material/supplier/createMaterialSupplier',
+    editMaterialList: '/diy/large/material/detail/queryById',
+    materialSupplierListBySelect: '/diy/large/material/supplier/materialSupplierListBySelect',
+    materialSupplierListByDefault: '/diy/large/material/detail/setDefaultImage',
+    checkMaterialRepeat: '/diy/large/material/detail/compareData',
+    downloadExcel:'/diy/large/material/uploadFile',
+    deletMarterial:'/diy/large/material/detail/delete',
+    printMaterial:'/diy/large/material/detail/getQRCode'
+
+}

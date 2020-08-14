@@ -5,10 +5,6 @@
   <div class="content">
     <div class="detail-list">
       <div class="detail-list-head">
-        <!-- <div class="head-bar">
-                    <a href="javascript:void(0)" [ngClass]="{active:auditState === 1}" (click)="selectAudit(1)">待审核</a>
-                    <a href="javascript:void(0)"[ngClass]="{active:auditState === 0}" (click)="selectAudit(0)">全部申请</a>
-                </div> -->
         <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
         <div class="search">
           <input nz-input [(ngModel)]="searchType" (keyup)="($event.which === 13) ? changeData(true) : 0"

@@ -25,7 +25,7 @@
                             formControlName="customerHouseAddress" name="customerHouseAddress" autocomplete="off" maxlength="16"
                             [(ngModel)]="customerHouseAddress"/>
                             <input nz-input type="text" class="text" *ngIf="type === '4'" placeholder="请输入订单编号"
-                            formControlName="quoteNo" name="quoteNo" autocomplete="off" maxlength="16"
+                            formControlName="quoteNo" name="quoteNo" autocomplete="off" maxlength="32"
                             [(ngModel)]="quoteNo"/>       
                             <button nz-button nzType="primary" type="submit" class="" [disabled]="!searchForm.valid"
                                     (click)="searchData()">查询
