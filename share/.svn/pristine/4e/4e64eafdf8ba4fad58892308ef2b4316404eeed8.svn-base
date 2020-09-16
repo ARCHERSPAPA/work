@@ -1,0 +1,204 @@
+<template>
+  <div class="dynamic" ref="count">
+    <div class="dynamic-head">
+      <h3>项目动态</h3>
+    </div>
+    <div class="content" v-if="dynamics && dynamics.length > 0">
+      <el-timeline style="padding:0">
+        <el-timeline-item v-for="(item,index) in dynamics" :key="index">
+          <div class="content-head">
+            <span>{{item.stageName}}</span>
+            <span>
+              {{item.userName}}
+              <span>({{item.userRoleName}})</span>
+              <span>{{item.createDate | formatDate}}</span>
+            </span>
+          </div>
+          <div class="content-detail">{{item.content}}</div>
+          <ul class="content-image" v-if="item.imgList">
+            <li>
+              <viewer class="large-img">
+                <div v-for="(img,index) in item.imgList" :key="index" style="display:inline-block">
+                  <img :src="img.imgUrl" alt="加载失败"  />
+                </div>
+              </viewer>
+              <div class="img-count" v-if="item.imgList && item.imgList.length > 0 && ((item.imgList.length+1) * 48) >= (getWidth - 16)">
+                {{item.imgList.length}}
+                <span>></span>
+              </div>
+            </li>
+          </ul>
+
+          <div class="address-Name" v-if="item.addressName">
+            <span class="address-icon"></span>
+            {{item.addressName}}
+          </div>
+          <div v-if="item.coments" class="coments-warp">
+            <div class="coments" v-for="(coment,index) in item.coments" :key="index">
+              <div>
+                <p style="font-size:14px;">
+                  <span>{{coment.userName}}</span>
+                  <span v-if="coment.userRoleName">({{coment.userRoleName}})</span>
+                  <span v-if="coment.replyUserName">回复({{coment.replyUserName}})</span>
+                </p>
+                <span class="date">{{coment.createDate | formatDate}}</span>
+              </div>
+              <div class="coment-content">{{coment.comment}}</div>
+            </div>
+          </div>
+        </el-timeline-item>
+      </el-timeline>
+    </div>
+    <div
+      v-if="dynamics && dynamics.length == 0"
+      style=" text-align: center;margin-bottom: 24px"
+    >暂无数据</div>
+  </div>
+</template>
+<style lang="less" scoped>
+h3 {
+  text-align: left;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 28px;
+
+}
+.date {
+  color: rgba(180, 180, 180, 1);
+  font-size: 12px;
+}
+.dynamic {
+  .coment-content{
+    margin-top: 8px;
+    color: #4E4E4E;
+  }
+  .coments-warp {
+    margin: 16px 16px 0 16px;
+  }
+  margin: 16px;
+  .coments {
+    p{
+      color: rgba(0, 0, 0, 1);
+      font-weight: 600
+    }
+    > div {
+      display: flex;
+      margin-top: 4px;
+      justify-content: space-between;
+    }
+  }
+  .content-head {
+    > span {
+      color: rgba(7, 0, 2, 1);
+      font-size: 12px;
+
+      > span {
+        color: rgba(180, 180, 180, 1);
+      }
+    }
+
+    > span:first-child {
+      color: rgba(22, 165, 175, 1);
+      font-size: 14px;
+      max-width: 10em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .content-detail {
+    text-align: left;
+    margin-top: 16px;
+  }
+
+  .address-Name {
+    font-size: 12px;
+    color: #b2b2b2;
+    margin-top: 14px;
+
+    .address-icon {
+      background: url("../assets/address.png");
+      background-size: cover;
+      width: 14px;
+      height: 16px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+
+  .content-image {
+    padding: 0;
+
+    li {
+      overflow: hidden;
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-top: 16px;
+      width: 100%;
+      text-align: left;
+      .large-img {
+        position: relative;
+        img {
+          width: 80px;
+          height: 80px;
+          margin-right: 4px;
+        }
+      }
+
+      .img-count {
+        span {
+          font-size: 16px;
+          margin-left: 4px;
+          /*height: 19px;*/
+        }
+
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 48px;
+        height: 48px;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 1);
+        opacity: 0.4;
+        position: absolute;
+        right: 0;
+        bottom: 52px;
+      }
+
+    }
+  }
+}
+</style>
+<script>
+import { Loading } from "element-ui";
+export default {
+  name: "Dynamic",
+  props: {
+    dynamics: {
+      type: Array,
+      default: () => []
+    }
+  },
+  created() {
+  },
+  data() {
+    return {
+      loading: true
+    };
+  },
+
+  methods: {},
+  mounted() {
+  },
+  computed: {
+    getWidth() {
+    console.log(this)
+      return this.$refs["count"].clientWidth;
+    }
+  }
+};
+</script>

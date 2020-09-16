@@ -1,0 +1,403 @@
+<template>
+  <div class="Casus" :style="{height:(screenHeight?'100%':'auto')}">
+    <div class="Casus-head" v-if="quoteList">
+      <div style="  margin: 0 14px 14px 14px;">
+        <div class="Casus-name">{{quoteList.customerHouseAddress}}</div>
+        <div class="Casus-detail">
+          <span class="Casus-room">
+            <span>{{quoteList.customerHouseType}}</span>
+            {{quoteList.customerHouseArea}}m
+            <sup>2</sup>
+          </span>
+          <span v-if="quoteList.finalPrice">￥{{quoteList.finalPrice | formatNum}}</span>
+        </div>
+        <div class="Casus-company">
+          <span>企</span>
+          {{quoteList.companyName}}
+        </div>
+      </div>
+    </div>
+    <div class="product-content" v-if="productList.evaToCompanyHeadImg">
+      <div class="product-title">业主评价</div>
+      <div v-if="productList.createTime ">
+        <div class="product-detail">
+          <div class="product-head">
+            <div>
+              <img :src="productList.evaToCompanyHeadImg" />
+              <span class="product-name">{{productList.evaNickName}}</span>
+              <span class="goodComment">
+                <span
+                  class="product-icon"
+                  :class="{'icon-good':productList.evaLevel === 1,'icon-bad':productList.evaLevel !== 1}"
+                ></span>
+                {{commentName()}}
+              </span>
+            </div>
+            <div class="product-date">{{productList.createTime | formatDate}}</div>
+          </div>
+          <div class="comment">
+            <div>
+              <span>施工质量</span>
+              <el-rate v-model="score.qualityScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span>设计风格</span>
+              <el-rate v-model="score.designScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span>团队配合</span>
+              <el-rate v-model="score.teamScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span>施工工期</span>
+              <el-rate v-model="score.proTimeScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span style="margin-right: 2px;">设计师 &nbsp;&nbsp;</span>
+              <el-rate v-model="score.designerScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span style="margin-right: 2em;">工长</span>
+              <el-rate v-model="score.foremanScore" disabled class="comment-icon"></el-rate>
+            </div>
+            <div>
+              <span style="margin-right: 2em;">监理</span>
+              <el-rate v-model="score.supervisorScore" disabled class="comment-icon"></el-rate>
+            </div>
+          </div>
+        </div>
+        <div class="remark">{{productList.content}}</div>
+        <div class="product-img">
+          <viewer class="large-img" v-if="productList.imgUrls" :images="productList.imgUrls">
+            <img :src="img.imgUrl" v-for="(img,index) in  productList.imgUrls" :key="index" />
+
+            <!--{{img}}-->
+          </viewer>
+          <p style="padding-left: 8px;font-size: 14px">商家回复: {{productList.sellerReply}}</p>
+        </div>
+        <div class="addComments" v-if="productList.addContent">
+          <div class="addComments-head">
+            <span>[追加评论]</span>
+            <!--<span class="addComments-date">{{productList.addEvaTime | formatDate}}</span>-->
+          </div>
+        </div>
+        <div class="addComments-content">{{productList.addContent}}</div>
+      </div>
+    </div>
+    <!-- <div v-if="!productList.createTime" style=" text-align: center;margin-bottom: 24px">暂无数据</div> -->
+    <div style="border-bottom: 8px solid rgba(224, 232, 235, 1);"></div>
+    <Dynamic :dynamics="dynamics"></Dynamic>
+    <div class="download" v-if="showDownload">
+      <div class="makeba-icon"></div>
+      <div class="download-btn">
+        <el-button type="warning" @click="TodownLoad()">打开</el-button>
+        <i class="el-icon-close" @click="close()"></i>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import vue from "vue";
+import Dynamic from "@/components/Dynamic";
+import request from "./../../units/request";
+import { Loading } from "element-ui";
+
+export default {
+  name: "Casus",
+  components: {
+    Dynamic
+  },
+  data() {
+    return {
+      productList: [],
+      quoteList: [],
+      score: [],
+      dynamics: [],
+      loading: null,
+      showDownload: true,
+      screenHeight: false
+    };
+  },
+  methods: {
+    TodownLoad() {
+      window.open(
+        "https://a.app.qq.com/o/simple.jsp?pkgname=com.mar.ui",
+        "_blank"
+      );
+    },
+    getData(data) {
+      if (data && data["quoteBase"]) {
+        this.quoteList = data["quoteBase"];
+      }
+      if (data && data["evaluate"]) {
+        this.productList = data["evaluate"];
+      }
+      if (data && data["score"]) {
+        this.score = data["score"];
+      }
+
+      if (data && data["dynamic"]) {
+        this.dynamics = data["dynamic"];
+        if (this.dynamics.length <= 2) {
+          this.screenHeight = true;
+        }
+      }
+    },
+    close() {
+      this.showDownload = false;
+    },
+    commentName() {
+      switch (this.productList.evaLevel) {
+        case -1:
+          return "差评";
+        case 0:
+          return "中评";
+        case 1:
+          return "好评";
+        default:
+          return "未知";
+      }
+    },
+    openLoading() {
+      return this.$loading({
+        lock: true,
+        text: "拼命加载中",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
+    }
+  },
+
+  created() {
+    this.loading = this.openLoading();
+    request
+      .doGet({
+        url: "/diy/large/company/quotes/share",
+        data: { id: this.$route.query.id }
+      })
+      .then(res => {
+        if (this.loading) {
+          this.loading.close();
+        }
+        if (res && res.status == 200) {
+          let dataSource = res.data;
+          if (dataSource && dataSource["data"]) {
+            this.getData(dataSource["data"]);
+          } else {
+            this.$message(dataSource.msg || "数据异常");
+          }
+        } else {
+          this.$message(res.msg || "请求数据错误");
+        }
+      })
+      .catch(err => {
+        this.$message(err || "接口异常");
+      });
+  }
+};
+</script>
+<style lang="less" scoped>
+.el-button--warning {
+  background-color: rgb(211, 84, 0) !important;
+}
+.product-name {
+  display: inline-block;
+  max-width: 7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.Casus {
+  background: url("./makeba.png");
+  background-attachment: fixed;
+  .download {
+    display: flex;
+    border-top: 1px solid #dcdcdc;
+    justify-content: space-between;
+    width: 100%;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 10;
+    .download-btn {
+      margin: 26px 9px 0 0;
+      button {
+        margin-right: 24px;
+        a {
+          text-decoration: none;
+          color: white;
+        }
+      }
+      i {
+        font-size: 48px;
+        vertical-align: middle;
+        cursor: pointer;
+      }
+    }
+    .makeba-icon {
+      background: url("./../../assets/dn-logo.png") no-repeat center;
+      display: inline-block;
+      width: 259px;
+      height: 100px;
+    }
+  }
+  .addComments-content {
+    font-size: 14px;
+    margin-top: 16px;
+  }
+
+  .addComments-head {
+    color: rgba(22, 165, 175, 1);
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+
+    .addComments-date {
+      font-size: 12px;
+      color: #b2b2b2;
+    }
+  }
+
+  .product-img {
+    padding-bottom: 24px;
+    border-bottom: 0.5px solid #e5e5e5;
+
+    .large-img {
+      overflow: hidden;
+      overflow-x: scroll;
+      white-space: nowrap;
+      margin: 16px 0;
+      width: 100%;
+      text-align: left;
+
+      img {
+        width: 80px;
+        height: 80px;
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .remark {
+    font-size: 14px;
+  }
+
+  .comment {
+    > div > span {
+      font-size: 10px;
+    }
+
+    > div {
+      display: inline-block;
+      width: 49%;
+    }
+    margin: 20px 0;
+    .comment-icon {
+      display: inline-block;
+      width: 65%;
+      vertical-align: middle;
+    }
+  }
+
+  .goodComment {
+    color: #ff9a56;
+    line-height: 24px;
+    vertical-align: super;
+    .product-icon {
+      background-size: cover;
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin: 0 4px;
+      line-height: 24px;
+      vertical-align: middle;
+      &.icon-good {
+        background-image: url("./../../assets/good.png");
+      }
+
+      &.icon-bad {
+        background-image: url("./../../assets/bad.png");
+      }
+    }
+  }
+
+  .product-content {
+    margin: 2%;
+    .product-detail {
+      .product-head {
+        img {
+          margin-right: 8px;
+        }
+
+        .product-date {
+          font-size: 12px;
+          color: #b2b2b2;
+          padding-top: 5px;
+        }
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+
+        img {
+          border-radius: 100%;
+          width: 24px;
+          height: 24px;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+
+  h3 {
+    text-align: center;
+    color: rgba(255, 255, 255, 1);
+    font-size: 16px;
+    padding-top: 14px;
+    font-weight: 100;
+    margin-bottom: 26px;
+  }
+
+  .Casus-detail {
+    display: flex;
+    margin: 8px 0px 16px 0px;
+    justify-content: space-between;
+    color: rgba(22, 165, 175, 1);
+
+    .Casus-room {
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+
+  .Casus-head {
+    background: rgba(35, 36, 40, 1);
+    border-bottom: 8px solid rgba(224, 232, 235, 1);
+
+    .Casus-name {
+      color: aliceblue;
+      font-size: 24px;
+    }
+    .Casus-company {
+      color: rgba(22, 165, 175, 1);
+      > span {
+        background: rgba(22, 165, 175, 1);
+        color: rgba(255, 255, 255, 1);
+        margin-right: 8px;
+      }
+    }
+  }
+}
+@media screen and (max-width: 500px) {
+  .download-btn {
+    margin: 26px 9px 0 0 !important;
+    button {
+      margin-right: 16px !important;
+    }
+  }
+  .makeba-icon {
+    width: 160px !important;
+    margin-left: 8px;
+    background-size: 160px !important;
+  }
+}
+</style>
