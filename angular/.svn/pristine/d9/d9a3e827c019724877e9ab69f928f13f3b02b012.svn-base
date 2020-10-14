@@ -1,0 +1,19 @@
+<div class="settle">
+    <div class="head">
+        <rev-title title="详情"></rev-title>
+        <rev-settle-detail-data  ></rev-settle-detail-data>
+        <div class="split-line">
+        </div>
+    </div>
+    <div class="content">
+        <nz-tabset [nzSelectedIndex]="index">
+            <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url,tab.params)"></nz-tab>
+        </nz-tabset>
+        <div class="data">
+            <nz-skeleton [nzLoading]="loading"></nz-skeleton>
+            <div [hidden]="loading">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+import {Component, OnInit} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+
+@Component({
+    selector: 'rev-item-basic-customize',
+    templateUrl: './item-basic-customize.component.html',
+    styleUrls: ['./item-basic-customize.component.scss']
+})
+export class ItemBasicCustomizeComponent implements OnInit {
+
+    public baseForm:FormGroup;
+
+    formatterPercent = (value: number) => { if (value) { return `${value} %` } };
+    parserPercent = (value: string) => value.replace(' %', '');
+
+    constructor(public modal: NgbActiveModal,
+                private fb:FormBuilder) {
+    }
+
+    ngOnInit() {
+        this.baseForm = this.fb.group({
+            Units: ['', [
+                Validators.maxLength(10),
+            ]],
+            univalence: ['', [
+                Validators.maxLength(10),
+            ]],
+            remark: ['', [
+                Validators.maxLength(100),
+            ]],
+            name: ['', [
+                Validators.required,
+                Validators.maxLength(30),
+            ]],
+            brand: ['', [
+                Validators.maxLength(10),
+            ]],
+            spec: ['', [
+                Validators.maxLength(30),
+            ]],
+            model: ['', [
+                Validators.maxLength(30),
+            ]],
+            wastage: ['', [
+                Validators.maxLength(2),
+            ]],
+            woodworking: ['', [
+                Validators.maxLength(10),
+            ]],
+            plasterer: ['', [
+                Validators.maxLength(10),
+            ]],
+            lacquering: ['', [
+                Validators.maxLength(10),
+            ]],
+            hydroelectric: ['', [
+                Validators.maxLength(10),
+            ]],
+            sellprice: ['', [
+                Validators.maxLength(10),
+            ]],
+        });
+    }
+
+
+    cancelModal() {
+        this.modal.dismiss();
+    }
+
+    confirmModal(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.modal.close(null);
+    }
+
+}

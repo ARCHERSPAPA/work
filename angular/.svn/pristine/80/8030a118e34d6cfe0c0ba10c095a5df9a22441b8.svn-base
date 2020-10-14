@@ -1,0 +1,27 @@
+@charset "utf-8";
+@import "./../../../../assets/scss/mixin";
+
+.btns {
+    margin: 24px -24px -11px -24px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+        margin-right: 24px;
+    }
+    button:first-child {
+        margin-right: 8px;
+    }
+}
+.textarea{
+    position: relative;
+    .count{
+      position: absolute;
+      right: 5px;
+      bottom: -20px;
+      font-size: 12px;
+      > span{
+         color: #F92650;
+      }
+    }
+}

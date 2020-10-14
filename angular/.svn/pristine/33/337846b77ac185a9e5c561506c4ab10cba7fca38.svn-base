@@ -1,0 +1,198 @@
+import { Component, OnInit } from '@angular/core';
+import { btoa } from '../../../../model/methods';
+import { Default } from './../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { Router, ActivatedRoute } from '@angular/router';
+import { getMaterialState } from '../../../../model/methods';
+@Component({
+  selector: 'rev-settle-material-order',
+  templateUrl: './settle-material-order.component.html',
+  styleUrls: ['./settle-material-order.component.scss']
+})
+export class SettleMaterialOrderComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+  //查询相关
+  public query;
+  public state;
+  public querys;
+  public companyName;
+  public companyPhone;
+  public serchType = 1;
+  public queryType = [{
+    key: 1,
+    text: '楼盘名字'
+  },
+  {
+    key: 2,
+    text: '客户'
+  },
+  {
+    key: 3,
+    text: '工长'
+  }, {
+    key: 4,
+    text: '材料订单编号'
+  }];
+  public radioSwitch = [
+    {
+      key: 1,
+      text: '待审核'
+    },
+    {
+      key: 2,
+      text: '已审核'
+    }
+  ];
+  public pageType = 1; //切换的tab待审核，已审核
+  public defaultPage = {};//默认tab
+  public materialList;
+  public componeyStatus;
+  public auditState;
+  public title;
+  public companyId;//材料商ID
+  public selectCompany = '';
+  constructor(
+    private req: RequestService,
+    private router: Router,
+    private warn: WarningService,
+    private activatedRoute: ActivatedRoute,
+  ) {
+  }
+
+  ngOnInit() {
+    this.querys = 1;
+    this.title = '材料订单'
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['pageType']) {
+        this.pageType = params['pageType'];
+      }
+    });
+    if (this.pageType == 1) {
+      this.defaultPage = this.radioSwitch[0]
+    } else if (this.pageType == 2) {
+      this.defaultPage = this.radioSwitch[1]
+    }
+
+    this.getMaterialSupplierList();
+    this.needAudit().then(() => {
+      this.changePage();
+    });
+  }
+  // 状态
+  getState(state: number) {
+    return getMaterialState(state);
+  }
+
+  //切换搜索框条件
+  swichType(e) {
+    this.serchType = e;
+    this.query = '';
+  }
+  swichCompany(e) {
+    this.companyId = e;
+    this.query = '';
+    this.changePage();
+  }
+  btoa(id: string) {
+    return btoa(id);
+  }
+  getMaterialSupplierList() {
+    this.req.doPost({
+      url: 'materialSupplierListBySelect',
+      success: (res => {
+        if (res && res.code === 200) {
+          this.componeyStatus = res.data;
+          this.componeyStatus.unshift({ id: '', companyName: '全部材料商' })
+        } else {
+          this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      })
+    });
+  }
+  create(id) {
+    this.req.doPost({
+      url: 'companyAplly',
+      data: {
+        materialId: id
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.changePage();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  //切换页面radio
+  handleSwitch(e) {
+    this.pageType = e;
+    this.pageNo = Default.PAGE.PAGE_NO;
+    this.query = "";
+    this.changePage();
+    this.router.navigate(['./'], { queryParams: { pageType: this.pageType }, relativeTo: this.activatedRoute });
+  }
+  //审核
+  needAudit(): Promise<any> {
+    return new Promise((reslove, rej) => {
+      this.req.doPost({
+        url: 'orderMaterialAudit',
+        success: res => {
+          if (res && res.code == 200) {
+            this.auditState = res.data.audit;
+            reslove()
+          } else {
+            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    })
+  }
+
+  changePage(e = 0) {
+    let param = {};
+    if (e) {
+      this.pageNo = Default.PAGE.PAGE_NO;
+      this.pageSize = Default.PAGE.PAGE_SIZE;
+    }
+    if (this.serchType == 1) {
+      param['name'] = this.query;
+    } else if (this.serchType == 2) {
+      param['customerName'] = this.query;
+    }
+    else if (this.serchType == 3) {
+      param['memberName'] = this.query;
+    }
+    else if (this.serchType == 4) {
+      param['materialOrderNo'] = this.query;
+    }
+    if (this.auditState == 1) {
+      param['type'] = this.pageType;
+    } else {
+      param['type'] = 3;
+    }
+    if (this.companyId) {
+      param['materialId'] = this.companyId;
+    }
+    param['page'] = this.pageNo;
+    this.req.doPost({
+      url: 'orderMaterialList',
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.total = res.data.total;
+          this.materialList = res.data.list;
+        } else {
+          this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+}
+

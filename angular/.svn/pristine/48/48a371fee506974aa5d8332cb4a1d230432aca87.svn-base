@@ -1,0 +1,14 @@
+<nz-timeline class="order-progress">
+	<nz-timeline-item *ngFor="let node of nodeList" [nzColor]="showColor(node.state,node.type)">
+		<p class="title">
+			<span *ngIf="node.title">{{node.title}}</span>
+			<span class="time" *ngIf="node.nodeTime">{{node.nodeTime | date:'yyyy-MM-dd HH:mm'}}</span>
+		</p>
+		<p class="imgs" *ngIf="node.imgUrls && node.imgUrls.length > 0">
+			<img *ngFor="let img of node.imgUrls" [src]="img" alt="" (click)="openBigImg(img)">
+		</p>
+		<p class="order" *ngIf="node.remark">{{node.remark}}</p>
+	</nz-timeline-item>
+</nz-timeline>
+  <!-- 查看大图 -->
+<rev-imgview [album]="imgsArr" [index]="index" *ngIf="imgsArr.length>0"></rev-imgview>

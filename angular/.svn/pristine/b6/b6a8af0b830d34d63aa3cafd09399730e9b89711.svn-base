@@ -1,0 +1,56 @@
+<div class="rev">
+    <nz-layout>
+        <nz-header>
+            <div class="logo"></div>
+            <div class="bread">
+                <nz-breadcrumb [nzAutoGenerate]="true"></nz-breadcrumb>
+            </div>
+            <div class="user">
+                <nz-dropdown>
+                    <a nz-dropdown [title]="name" class="user-name">{{name?name:'--'}}<span class="user-icon"><i nz-icon
+                                type="down"></i></span></a>
+                    <ul nz-menu nzSelectable>
+                        <li nz-menu-item>
+                            <a class="user-link mobile" routerLinkActive="active"
+                                [routerLink]="'/rev/account/base'">修改手机号</a>
+                        </li>
+                        <li nz-menu-item>
+                            <a class="user-link password" routerLinkActive="active"
+                                [routerLink]="'/rev/account/pwd'">修改密码</a>
+                        </li>
+                        <li nz-menu-item>
+                            <a class="user-link exit" (click)="exit()">退出</a>
+                        </li>
+                    </ul>
+                </nz-dropdown>
+            </div>
+        </nz-header>
+        <nz-layout>
+            <nz-sider [nzWidth]="200">
+                <ul nz-menu [nzMode]="'inline'" nzTheme='dark'>
+                    <li nz-submenu *ngFor="let menu of menus;let i = index" [(nzOpen)]="menu.sub"
+                        (nzOpenChange)="openHandler(i)" [hidden]="menu.show == '0'">
+                        <span [title]="menu.catalogName">
+                            <i nz-icon style="font-size:16px;margin-top:-2px" [iconfont]="getMenuIcon(menu.name)"></i>
+                            {{menu.catalogName}}
+                        </span>
+                        <ul *ngIf="menu.catalogs">
+                            <li>
+                                <a routerLinkActive="active" nz-menu-item *ngFor="let list of menu.catalogs"
+                                    [routerLink]="list.go" [nzSelected]='list.isSelect'
+                                    [hidden]="list.show == '0'">{{list.catalogName}}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nz-sider>
+            <nz-content>
+                <div style="min-width:1400px;background-color: #FFF;border-radius: 4px;
+                padding:24px;min-height: calc(100vh - 70px);">
+                    <router-outlet></router-outlet>
+                </div>
+                <rev-copy-right [bg]="'#F0F2F5'"></rev-copy-right>
+            </nz-content>
+        </nz-layout>
+    </nz-layout>
+</div>

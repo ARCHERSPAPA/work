@@ -1,0 +1,47 @@
+import { Component, OnInit } from '@angular/core';
+import { btoa } from '../../../../model/methods';
+@Component({
+  selector: 'rev-supplier-material-list',
+  templateUrl: './supplier-material-list.component.html',
+  styleUrls: ['./supplier-material-list.component.scss']
+})
+export class SupplierMaterialListComponent implements OnInit {
+  public radioSwitch = [
+    {
+      key: 2,
+      text: '未添加'
+    },
+    {
+      key: 3,
+      text: '审核中'
+    },
+    {
+      key: 4,
+      text: '合作中'
+    },
+    {
+      key: 5,
+      text: '未通过'
+    },
+  ];
+  public pageType=2;
+  public materialList = [{ univalent: 123 }];
+
+  constructor() { }
+
+  ngOnInit() {
+
+  }
+  btoa(id: string) {
+    return btoa(id);
+  }
+  addMaterial() {
+
+  }
+  create(){
+
+  }
+  handleSwitch(e) {
+   this.pageType=e;
+  }
+}

@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-master-sale',
+  templateUrl: './master-sale.component.html',
+  styleUrls: ['./master-sale.component.scss']
+})
+export class MasterSaleComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

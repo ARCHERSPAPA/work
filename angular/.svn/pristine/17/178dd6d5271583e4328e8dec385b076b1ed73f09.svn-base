@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-new-makings',
+  templateUrl: './new-makings.component.html',
+  styleUrls: ['./new-makings.component.scss']
+})
+export class NewMakingsComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

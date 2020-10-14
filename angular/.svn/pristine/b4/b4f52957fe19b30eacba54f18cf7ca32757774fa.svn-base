@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-view-materials',
+  templateUrl: './view-materials.component.html',
+  styleUrls: ['./view-materials.component.scss']
+})
+export class ViewMaterialsComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

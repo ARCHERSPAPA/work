@@ -1,0 +1,21 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {CostRoutingModule} from "./cost-routing.module";
+import {TemplateModule} from "../template/template.module";
+import {CalculateModule} from "../calculate/calculate.module";
+
+
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        CalculateModule,
+        TemplateModule,
+        CostRoutingModule
+    ],
+    declarations: [
+    ]
+})
+export class CostModule {
+}

@@ -1,0 +1,125 @@
+<div class="supplier-materialList">
+  <rev-title [title]="title" [isNewPage]='false' [buttons]="buttons" [show]="showBtn" (handleName)="handleName($event)">
+  </rev-title>
+  <input type='file' #uploadFile accept=".xlsx, .xls" id="import" style="visibility: hidden;height:0;" ngModel 
+    (change)="handleFileChange($event)">
+  <div class="supplier-materialList-head">
+    <radio-switch [radioSwitch]='radioSwitch' [defaultRadioSwitch]='defaultPage'(handleSwitch)="handleSwitch($event)"></radio-switch>
+    <select-brand (handleCategory)="handleCategory($event)" (handleBrand)="handleBrand($event)"
+    (handleInput)="changeIpt($event)"
+      (handleSearch)="handleSearch($event)"></select-brand>
+  </div>
+
+<router-outlet></router-outlet>
+  <div class="supplier-materialList-list">
+    <div style="margin-bottom: 16px;">
+      <button nz-button [nzType]="'primary'" [disabled]="!checkSubmit()" 
+      nz-popconfirm nzTitle="确定申请该材料供货吗？"
+      nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="apply(false)"
+        *ngIf='pageType ==0'>
+        提交审核
+        <!-- {{pageType==0?'提交审核':'批量撤回'}} -->
+      </button>
+      <button nz-button [nzType]="'primary'" [disabled]="!checkSubmit()" 
+      nz-popconfirm nzTitle="确定撤回该材料审核申请吗？"
+      nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="apply(false)"
+        *ngIf='pageType ==1'>
+        批量撤回
+        <!-- {{pageType==0?'提交审核':'批量撤回'}} -->
+      </button>
+      <span style="margin-left: 8px;" *ngIf="checkedNumber">已选 {{checkedNumber}} 项</span>
+    </div>
+    <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false" [nzScroll]="{ x:'130%' }" [(nzPageIndex)]="pageNo"
+      [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changeData()' nzSize="middle"
+      [nzShowPagination]="true" nzSize="middle">
+      <thead nz-thead>
+        <tr>
+          <th nzLeft="0px" nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+            (nzCheckedChange)="checkAll($event)" *ngIf='pageType==0 || pageType==1'></th>
+          <th nz-th><span>SPU编号</span></th>
+          <th nz-th><span>图片</span></th>
+          <th nz-th><span>品牌</span></th>
+          <th nz-th><span>类别</span></th>
+          <th nz-th><span>名称</span></th>
+          <th nz-th><span>SKU编号</span></th>
+          <th nz-th><span>规格</span></th>
+          <th nz-th><span>型号</span></th>
+          <th nz-th><span>材质</span></th>
+          <th nz-th><span>颜色</span></th>
+          <th nz-th><span>产地</span></th>
+          <th nz-th><span>单位</span></th>
+          <th nz-th><span>市场价</span></th>
+          <th nz-th><span>供货价</span></th>
+          <th nz-th><span>销售价</span></th>
+          <th nz-th nzRight="0px"><span>操作</span></th>
+        </tr>
+      </thead>
+      <tbody nz-tbody style="font-size: 12px">
+        <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+          <td nzShowCheckbox nzLeft="0px" [(nzChecked)]="material.checked" (nzCheckedChange)="refreshStatus()" *ngIf='pageType==0 || pageType==1'></td>
+          <ng-container *ngIf="material.rows > 1">
+
+
+            <td [rowSpan]="material.rows" [title]="material.spu">{{material.spu?material.spu:'--'}}</td>
+            <td nz-td [rowSpan]="material.rows">
+              <a href="javascript:void(0)" class="work_a"  (click)='openLarge(material.defaultImage)'
+              *ngIf="material.defaultImage" >[图片]</a>
+              <span *ngIf="!material.defaultImage">
+  --
+              </span>
+            </td>
+            <td nz-td [rowSpan]="material.rows">{{material.brand?material.brand:'--'}}</td>
+            <td nz-td [rowSpan]="material.rows">{{material.category?material.category:'--'}}</td>
+            <td nz-td [rowSpan]="material.rows">{{material.name?material.name:'--'}}</td>
+          </ng-container>
+          <ng-container *ngIf="material.rows === 1">
+            <td [title]="material.spu">{{material.spu?material.spu:'--'}}</td>
+            <td nz-td >
+              <a href="javascript:void(0)" class="work_a"  (click)='openLarge(material.defaultImage)'
+              *ngIf="material.defaultImage" >[图片]</a>
+              <span *ngIf="!material.defaultImage">
+  --
+              </span>
+            </td>
+            <td nz-td>{{material.brand?material.brand:'--'}}</td>
+            <td nz-td >{{material.category?material.category:'--'}}</td>
+            <td nz-td>{{material.name?material.name:'--'}}</td>
+          </ng-container>
+          <!-- <td nz-td [title]="material.spu">
+                  {{material.spu?material.spu:'--'}}
+              </td> -->
+
+
+          <td nz-td [title]="material.sku">{{material.sku?material.sku:'--'}}</td>
+          <td nz-td>{{material.spec?material.spec:'--'}}</td>
+          <td nz-td>{{material.model?material.model:'--'}}</td>
+          <td nz-td>{{material.material?material.material:'--'}}</td>
+          <td nz-td>{{material.color?material.color:'--'}}</td>
+          <td nz-td>{{material.origin?material.origin:'--'}}</td>
+          <td nz-td>{{material.unit?material.unit:'--'}}</td>
+          <td nz-td>{{material.marketPrice?material.marketPrice:'--'}}</td>
+          <td nz-td>{{material.supplyPrice?material.supplyPrice:'--'}}</td>
+          <td nz-td>{{material.sellingPrice?material.sellingPrice:'--'}}</td>
+          <!-- <td nz-td>{{material.category?material.category:'--'}}</td> -->
+          <td nz-td nzRight="0px">
+            <a href="javascript:void(0)" class="work_a" *ngIf='pageType==0' nz-popconfirm nzTitle="确定申请该材料供货吗？"
+              nzOkText="审核" nzCancelText="取消" (nzOnConfirm)="apply(material.id)">申请审核</a>
+            <a href="javascript:void(0)" class="work_a" *ngIf='pageType==0' [routerLink]="['./../edit']"
+              [queryParams]="{id:btoa(material.id),supplierId:btoa(this.id),spu:btoa(material.spu),type:pageType}">编辑</a>
+            <a href="javascript:void(0)" class="work_a" *ngIf='pageType==1' nz-popconfirm nzTitle="确定撤回该材料审核申请吗？"
+              nzOkText="撤回" nzCancelText="取消" (nzOnConfirm)="apply(material.id)">撤回</a>
+            <a [routerLink]="['./../edit']" [queryParams]="{id:btoa(material.id),supplierId:btoa(this.id),spu:btoa(material.spu),type:pageType}" *ngIf='pageType==2'>
+              修改
+            </a>
+            <a href="javascript:void(0)" class="work_a" *ngIf='pageType==3' nz-popconfirm nzTitle="确定申请该材料供货吗？"
+              nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="apply(material.id)">申请审核</a>
+            <a href="javascript:void(0)" class="work_a" *ngIf='pageType==3' [routerLink]="['./../edit']"
+              [queryParams]="{id:btoa(material.id),supplierId:btoa(this.id),spu:btoa(material.spu),type:pageType}">编辑</a>
+          </td>
+
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+<rev-imgview [album]="_albums" [index]="index" *ngIf="_albums.length>0"></rev-imgview>

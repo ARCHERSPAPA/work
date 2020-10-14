@@ -1,0 +1,48 @@
+@charset "utf-8";
+.personnel {
+  width: 100%;
+  overflow: hidden;
+  .person-head {
+    width: 100%;
+    background: #fff;
+  }
+  .person-content {
+    padding-top: 24px;
+  }
+}
+
+/****分区导航****/
+.list-group-rev {
+  width: 100%;
+  margin-top: 24px;
+  overflow: hidden;
+  font-size: 14px;
+  .list-items {
+    width: 88%;
+    float: left;
+    tr th, tr td {
+      max-width: 6vw;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      a {
+        color: #007bff;
+      }
+    }
+  }
+  .list-quick {
+    width: 10%;
+    float: right;
+    &-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      background: #f2f2f2;
+      border: 1px solid #dedede;
+      padding: 4px;
+      margin-bottom: 10px;
+    }
+
+  }
+}
+

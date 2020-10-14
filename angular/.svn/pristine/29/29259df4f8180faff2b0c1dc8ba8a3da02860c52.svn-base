@@ -1,0 +1,91 @@
+import { Component, OnInit } from '@angular/core';
+import { WarningService } from '../../../service/warning.service';
+import { Messages } from '../../../model/msg';
+import { RequestService } from '../../../service/request.service';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'rev-settle-set',
+  templateUrl: './settle-set.component.html',
+  styleUrls: ['./settle-set.component.scss']
+})
+export class SettleSetComponent implements OnInit {
+	public title: string;
+
+	//用于页面点击时触发，防止进入页面切换时自动执行
+    public costLock = false;
+	
+    public modifyForm: FormGroup;
+    public id:string;
+	public costSet = '';
+	public percentage = '';
+	formatterPercent = (value: number) => `${value} %`;
+	parserPercent = (value: string) => value.replace(' %', '');
+
+
+
+	formatterDay = (value: number) => `${value} 天`;
+    parserDay = (value: string) => value.replace(' 天', '');
+
+    constructor(private req: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder) { }
+
+    ngOnInit() {
+		this.title = "结算设置";
+		this.modifyForm = this.fb.group({
+			costSet: [this.costSet, [
+                Validators.required,
+            ]],
+            percentage: [this.percentage, [
+                Validators.required
+            ]]
+        });
+        this.loadArriveList();
+    }
+    
+    loadArriveList(){
+        this.req.doPost({
+            url: 'arriveList',
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.costSet = res.data.arrive;
+                    this.percentage = res.data.ratio;
+                    this.id = res.data.id;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+	
+	// /**
+     // * 点击页面时触发开启页面的响应
+     // */
+    // setOpen() {
+     //    this.costLock = true;
+	// }
+	
+	submit(){
+        if(this.modifyForm.valid){
+            let values = this.modifyForm.value;
+            let params = {
+                arrive: values.costSet,
+                ratio: values.percentage,
+                id: this.id
+            };
+            this.req.doPost({
+                url: 'updateArrive',
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+}

@@ -1,0 +1,194 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Messages } from '../../../../model/msg';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+@Component({
+  selector: 'rev-supplier-material-edit',
+  templateUrl: './supplier-material-edit.component.html',
+  styleUrls: ['./supplier-material-edit.component.scss']
+})
+export class SupplierMaterialEditComponent implements OnInit {
+  public materialForm;
+  public materialBaseForm;
+  public brandType;
+  public modalList = [{
+    sku: 123, univalent: 123, edit: true, name: '', brand: '', place: '', fileName: '', Units: '', marketPrice: '', supplyPrice: '', spec:'',sellingPrice:''
+  }]
+  public materialSaleList;
+  public brand;
+  public name;
+  public model;
+  public materialType;
+  public currentIndex = 0;
+  public preLIst;
+  public _albums = [];
+  public index = 0;
+  public isEdit=false;
+  public newMaterial: boolean = false;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['newMaterial']) {
+        this.newMaterial = params['newMaterial'];
+      }
+    });
+    this.materialSaleList = this.modalList;
+    this,this.materialForm=this.fb.group({
+
+    });
+    this.materialBaseForm = this.fb.group({
+      brand: [this.brand, [
+        Validators.required,
+      ]],
+      name: [this.name, [
+        Validators.required,
+        Validators.maxLength(30),
+      ]],
+      model: [this.model, [
+        Validators.maxLength(30),
+      ]],
+      materialType: [this.materialType, [
+        Validators.required,
+      ]],
+    });
+    this.receiveForm(this.materialSaleList[0], 0)
+  }
+  MaterialSubmit() {
+    console.log(this.materialBaseForm)
+    // this.req.doPost({
+    //   url:"createMaterialSave",
+    //   data:{
+
+    //   },
+    //   success:res=>{
+    //     console.log(res)
+    //   }
+    // })
+    
+  }
+  checkMaterial() {
+
+  }
+  uploadImg(i) {
+    let that = this
+    console.log(this.materialForm)
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = '新增证书';
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.componentInstance.hasCut = false;
+    modalRef.result.then((result) => {
+      that.materialSaleList[i].fileName = result.fileName.substr(0, 6) + '...';
+      that.materialSaleList[i].img = result.image;
+      console.log(result)
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+
+  receiveForm(material: any, index) {
+    this.materialForm.addControl('spec' + index, new FormControl(material.spec, [Validators.maxLength(30)]));
+    this.materialForm.addControl('brand' + index, new FormControl(material.brand, [Validators.maxLength(30)]));
+    this.materialForm.addControl('name' + index, new FormControl(material.name, [Validators.maxLength(30)]));
+    this.materialForm.addControl('place' + index, new FormControl(material.place, [Validators.maxLength(30)]));
+    this.materialForm.addControl('fileName' + index, new FormControl(material.fileName, []));
+    this.materialForm.addControl('Units' + index, new FormControl(material.Units, [Validators.maxLength(30), Validators.required,]));
+    this.materialForm.addControl('marketPrice' + index, new FormControl(material.marketPrice, [Validators.maxLength(10)]));
+    this.materialForm.addControl('supplyPrice' + index, new FormControl(material.supplyPrice, [Validators.maxLength(10), Validators.required]));
+    this.materialForm.addControl('sellingPrice' + index, new FormControl(material.sellingPrice, [Validators.maxLength(10), Validators.required]));
+
+  }
+  handleCancel() {
+    history.back()
+  }
+  save(i) {
+    console.log(this.materialForm)
+    if (!this.materialSaleList[i]['Units'] || this.materialSaleList[i]['Units'].length > 10) {
+      this.warn.onWarn('请确认单位为1~30位的字符')
+      return
+    }
+    if (!this.materialSaleList[i]['supplyPrice'] || this.materialSaleList[i]['supplyPrice'].length > 10) {
+      this.warn.onWarn('请确认供货价为1~10位的数字')
+      return
+    }
+    this.isEdit=true;
+    this.materialSaleList[i]['edit'] = false;
+  }
+  copy(item, i) {
+    if(this.materialSaleList.length>=20){
+      this.warn.onWarn('最多可添加20行')
+      return
+    }
+    this.currentIndex += 1
+    let arr = this.resData(item);
+    arr['default'] = false;
+    arr['sku'] = '';
+    this.materialSaleList.push(arr);
+    this.receiveForm(item, this.currentIndex)
+  }
+  edit(i) {
+    console.log(i)
+    this.materialSaleList[i]['edit'] = true;
+    this.preLIst = this.resData(this.materialSaleList[i]);
+    console.log(this.preLIst)
+  }
+  setDefault(i) {
+    console.log(i)
+    this.materialSaleList.forEach(v => {
+      v['default'] = false;
+    });
+    this.materialSaleList[i]['default'] = true;
+  }
+  resData(data) {
+    let arr;
+    arr = JSON.stringify(data)
+    return JSON.parse(arr)
+  }
+  del(i) {
+    console.log()
+    this.materialSaleList.splice(i, 1)
+    this.currentIndex -= 1
+  }
+  cancel(i) {
+
+    if (!this.materialSaleList[i]['Units'] || this.materialSaleList[i]['Units'].length > 10) {
+      this.warn.onWarn('请确认单位为1~30位的字符')
+      return
+    }
+    if (!this.materialSaleList[i]['supplyPrice'] || this.materialSaleList[i]['supplyPrice'].length > 10) {
+      this.warn.onWarn('请确认供货价为1~10位的数字')
+      return
+    }
+      this.materialSaleList[i] = this.preLIst;
+    console.log(!this.isEdit,this.materialSaleList.length)
+    this.materialSaleList[i]['edit'] = false;
+  }
+  ngDoCheck() {
+    // console.log(this.preLIst)
+  }
+  delImg(i) {
+    this.materialSaleList[i]['fileName'] = '';
+    this.materialSaleList[i]['default'] = false;
+  }
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+
+  }
+}

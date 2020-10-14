@@ -1,0 +1,70 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.master-sale-add{
+    .sale-head{
+        position: relative;
+        .head-fix{
+            position: absolute;
+            right: 0;
+            top: 20px;
+            font-size: 14px;
+        }
+    }
+    .temp-dtl{
+        position: relative;
+        div{
+            width: 100%;
+            @include compatibility(word-break, break-word);
+            @include ellipsis();
+        }
+      }
+    .clearance{
+        height:8px;
+        background:rgba(240,242,245,1);
+        margin: 24px -24px;
+    }
+    .table-head{
+        width: 100%;
+        height: 32px;
+        .operate{
+            span{
+                font-size:14px;
+                color:rgba(0,0,0,0.65);
+                margin-left: 8px;
+            }
+        }
+    }
+    tr td {
+        max-width: 120px;
+        vertical-align: middle;
+		@include compatibility(word-break, break-word);
+        @include ellipsis();
+    }
+    .del{
+        color: rgba(0, 0, 0, 0.4);
+    }
+}
+.btns {
+    margin: 24px -24px -11px -24px;
+    text-align: right;
+    border-top: 1px solid #dedede;
+    padding-top: 10px;
+    button{
+        margin-right: 24px;
+    }
+    button:first-child {
+        margin-right: 8px;
+    }
+}
+.textarea{
+    position: relative;
+    .count{
+      position: absolute;
+      right: 5px;
+      bottom: -20px;
+      font-size: 12px;
+      > span{
+         color: #F92650;
+      }
+    }
+}

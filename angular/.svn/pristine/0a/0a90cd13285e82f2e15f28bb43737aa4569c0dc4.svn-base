@@ -1,0 +1,814 @@
+<div class="detail-price pb-20">
+  <!-----series table start --->
+  <nz-table #nestedTable [nzData]="data" [nzFrontPagination]="false" [nzShowPagination]="false" [nzLoading]="loading"
+            [nzTitle]="header">
+    <thead>
+    <tr>
+      <th nzShowExpand></th>
+      <th colspan="3" style="width:30%">名称</th>
+      <th colspan="3" style="width:30%">备注</th>
+      <th colspan="2" style="width:20%">小计</th>
+      <th colspan="3" style="width:15%" *ngIf="showBtnByState()">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <ng-template ngFor let-data [ngForOf]="nestedTable.data">
+      <!---装修类型start--->
+      <tr *ngIf="data.type === 1">
+        <td nzShowExpand [(nzExpand)]="data.expand"></td>
+        <td colspan="3" style="width:30%">{{data.name}}<span *ngIf="data.versionId" class="ml-8"
+                                                             [nzTitle]="getCompiledId(data.versionId)" nzPlacement="topLeft"
+                                                             nz-tooltip>{{getCompiledId(data.versionId)}}</span>
+          <a *ngIf="data.offerExplain" class="ml-10" target="_blank" href="javascript:void(0)"
+             [routerLink]="['/view/explain']" [queryParams]="{cid:btoa(cid)}">
+            <i nz-icon type='exclamation-circle' title="查看说明"></i></a></td>
+        <td colspan="3" style="width:30%" [nzTitle]="data && data.remark?data.remark:'暂无备注信息'"
+            nzPlacement="topLeft" nz-tooltip><span>备注：{{data && data.remark?data.remark:'--'}}</span>
+        </td>
+        <td colspan="2" style="width:20%">
+                        <span [ngSwitch]="data.versionType">
+                            <span *ngSwitchCase="2">小计：{{getMainColumn(data.infoMaps,'univalent') |number:'1.2'}}</span>
+                            <span *ngSwitchDefault>小计：{{(data.smallTotal?data.smallTotal:0)|number:'1.2'}}</span>
+                        </span>
+        </td>
+        <td colspan="3" style="width:15%" *ngIf="showBtnByState()">
+                        <span class="fix">
+                            <a href="javascript:void(0)" (click)="selectVersion(1,false)" *ngIf="!data.versionId">选择</a>
+                            <a href="javascript:void(0)" (click)="selectVersion(1,true,data.versionId,data.versionType)"
+                               *ngIf="data.versionId">修改</a>
+                            <a href="javascript:void(0)" *ngIf="data.versionType === 2"
+                               (click)="addBranchItem(data)">添加大项</a>
+                        </span>
+        </td>
+      </tr>
+      <tr *ngIf="data.type === 1 && data.infoMaps" [nzExpand]="data.expand">
+        <td style="padding:0"></td>
+        <td colspan="11" style="width:95%;padding:0">
+          <nz-table #middleTable [nzData]="data.infoMaps" nzSize="middle" [nzFrontPagination]="false"
+                    [nzShowPagination]="false">
+    <tbody>
+    <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+      <tr>
+        <td nzShowExpand [(nzExpand)]="mid.expand" style="width:5%;padding:0;"></td>
+        <td colspan="5" [title]="mid.name?mid.name:''" style="width:50%;">{{mid.name?mid.name:''}}</td>
+        <td colspan="3" style="width:30%;" *ngIf="data.versionType === 2">小计：{{getTotal(mid.infos,'univalent')
+          |number:'1.2'}}
+        </td>
+        <td colspan="3" width="30%" *ngIf="data.versionType !== 2"></td>
+        <td colspan="2" style="width:15%;" *ngIf="showBtnByState()">
+                        <span class="fix">
+                            <a href="javascript:void(0)" (click)="modifyBranchItem($event,mid)"
+                               *ngIf="data.versionType === 2">修改</a>
+                            <a href="javascript:void(0)" *ngIf="data.versionType === 2" nz-popconfirm
+                               nzTitle="删除大项其子项也将全部删除?" nzOkText="确定" nzCancelText="取消"
+                               (nzOnConfirm)="delModifyBranch(mid.infoBranchId)">删除</a>
+                            <a href="javascript:void(0)" (click)="addItem(data,mid)"
+                               *ngIf="data.versionType === 2">添加</a>
+                            <a href="javascript:void(0)" (click)="copyItem($event,mid.infoBranchId,2)"
+                               *ngIf="data.versionType === 2">复制</a>
+                        </span>
+        </td>
+      </tr>
+      <tr [nzExpand]="mid.expand">
+        <td style="width:5%;padding:0;"></td>
+        <td colspan="10" style="width:95%;padding:0;">
+          <nz-table #sinTable [nzData]="mid['infos']" nzSize="small" [nzBordered]="false"
+                    [nzFrontPagination]="false" [nzShowPagination]="false">
+    <thead>
+    <tr>
+      <th width="10%">名称</th>
+      <th width="10%">类别</th>
+      <th width="10%">规格</th>
+      <th width="5%">单位</th>
+      <th width="10%">单价</th>
+      <th width="10%">数量</th>
+      <th width="10%">合计</th>
+      <th width="10%">说明</th>
+      <th width="10%">备注</th>
+      <th width="10%" *ngIf="showBtnByState()">操作</th>
+    </tr>
+    </thead>
+    <tbody *ngIf="showBtnByState() && data.versionType === 2" [dragula]="'dragInfo'+i"
+           [(dragulaModel)]="sinTable.data">
+    <tr *ngFor="let sin of sinTable.data;let t = index">
+      <td [title]="sin.name?sin.name:''">{{sin.name?sin.name:'--'}}</td>
+      <td [title]="sin.category?sin.category:''">{{sin.category?sin.category:'--'}}</td>
+      <td [title]="sin.specifications?sin.specifications:''">{{sin.specifications?sin.specifications:'--'}}
+      </td>
+      <td [title]="sin.unit?sin.unit:0">{{sin.unit?sin.unit:'--'}}</td>
+      <td [title]="sin.univalent?sin.univalent:0">{{(sin.univalent?sin.univalent:0)|number:'1.2'}}</td>
+      <td [title]="sin.num?sin.num:0">
+        <input nz-input [disabled]="!showBtnByState()"
+               value="{{sin.formula?(sin.formula+'='+sin.num):sin.num}}" revInputDecimal [infoId]="sin.id"
+               [id]="cid" role="1" tabindex="{{data.type*1000+(i+1)*100+t}}" [formula]="sin.formula"
+               [num]="sin.num" (changeValue)="changeValue($event,sin)" />
+      </td>
+      <td [title]="converseToDecimal(sin.univalent,sin.num)">
+        {{converseToDecimal(sin.univalent,sin.num)|number:'1.2'}}
+      </td>
+      <td [nzTitle]="sin.offerExplain?sin.offerExplain:'暂无说明信息'" nzPlacement="topLeft" nz-tooltip>
+        <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+      <td [nzTitle]="sin.remark?sin.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+        {{sin.remark?sin.remark:'--'}}
+      </td>
+      <td *ngIf="showBtnByState()">
+                    <span class="fix">
+                        <a href="javascript:void(0)" class="drag" title="可拖动">
+                            <i nz-icon type="unordered-list"></i></a>
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText="确定" nzCancelText="取消"
+                           (nzOnConfirm)="delItem(sin.id)">删除</a>
+                        <a href="javascript:void(0)" (click)="remarkItem(sin,sin['infos'])">备注</a>
+                        <a href="javascript:void(0)" (click)="copyItem($event,sin.id,1)">复制</a>
+                    </span>
+        <span class="fix" *ngIf="showAddOrDelByState()">
+                        <a href="javascript:void(0)" (click)="changeModify(sin,0,$event)">减少</a>
+                        <a href="javascript:void(0)" (click)="changeModify(sin,1,$event)">增加</a>
+                    </span>
+      </td>
+    </tr>
+    </tbody>
+    <tbody *ngIf="!(showBtnByState() && data.versionType === 2)">
+    <tr *ngFor="let sin of sinTable.data;let t = index">
+      <td [title]="sin.name?sin.name:''">{{sin.name?sin.name:'--'}}</td>
+      <td [title]="sin.category?sin.category:''">{{sin.category?sin.category:'--'}}</td>
+      <td [title]="sin.specifications?sin.specifications:''">{{sin.specifications?sin.specifications:'--'}}
+      </td>
+      <td [title]="sin.unit?sin.unit:0">{{sin.unit?sin.unit:'--'}}</td>
+      <td [title]="sin.univalent?sin.univalent:0">{{(sin.univalent?sin.univalent:0)|number:'1.2'}}</td>
+      <td [title]="sin.num?sin.num:0" nzWidth="80px">
+        <input nz-input value="{{sin.formula?(sin.formula+'='+sin.num):sin.num}}" disabled="true" />
+      </td>
+      <td [title]="converseToDecimal(sin.univalent,sin.num)">
+        {{converseToDecimal(sin.univalent,sin.num)|number:'1.2'}}
+      </td>
+      <td [nzTitle]="sin.offerExplain?sin.offerExplain:'暂无说明信息'" nzPlacement="topLeft" nz-tooltip>
+        <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+      <td [nzTitle]="sin.remark?sin.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+        {{sin.remark?sin.remark:'--'}}
+      </td>
+      <td *ngIf="showBtnByState() || showAddOrDelByState()">
+                    <span class="fix" *ngIf="showBtnByState()">
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText="确定" nzCancelText="取消"
+                           (nzOnConfirm)="delItem(sin.id)">删除</a>
+                        <a href="javascript:void(0)" (click)="remarkItem(sin,sin['infos'])">备注</a>
+                    </span>
+        <span class="fix" *ngIf="showAddOrDelByState()">
+                        <a href="javascript:void(0)" (click)="changeModify(sin,0,$event)">减少</a>
+                        <a href="javascript:void(0)" (click)="changeModify(sin,1,$event)">增加</a>
+                    </span>
+      </td>
+    </tr>
+    </tbody>
+  </nz-table>
+  </td>
+  </tr>
+  </ng-template>
+  </tbody>
+  </nz-table>
+  </td>
+  </tr>
+
+
+  <tr *ngIf="showSubByType1(data.type)">
+    <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
+    <td colspan="6" width="60%">{{data.name}}</td>
+    <td colspan="2" width="20%">
+      <span>小计：{{getMainColumn(data.infoMaps,'univalent') |number:'1.2'}}</span>
+    </td>
+    <td colspan="6" width="15%">
+            <span class="fix">
+                <a href="javascript:void(0)" (click)="openBranchItem()" *ngIf="showBtnByState()">添加项目</a>
+                <!--<a href="javascript:void(0)" (click)="addItemCart(data,aid)" *ngIf="showAddOrDelByState()">添加</a>-->
+            </span>
+    </td>
+  </tr>
+  <tr *ngIf="showSubByType1(data.type) && data.infoMaps" [nzExpand]="data.expand">
+    <td style="width:5%;padding:0;"></td>
+    <td colspan="14" style="width:95%;padding:0;">
+      <nz-table #middleTable [nzData]="data.infoMaps" nzSize="middle" [nzFrontPagination]="false"
+                [nzShowPagination]="false">
+        <tbody>
+        <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+          <tr>
+            <td nzShowExpand [(nzExpand)]="mid.expand" width="5%"></td>
+            <td colspan="5" [title]="mid.name?mid.name:''" width="50%">{{mid.name?mid.name:''}}</td>
+            <td colspan="3" width="30%">小计：{{getTotal(mid.infos,'univalent') |number:'1.2'}}</td>
+            <td colspan="2" width="15%" *ngIf="showBtnByState()">
+                                <span class="fix">
+                                    <a href="javascript:void(0)" (click)="modifyBranchItem($event,mid)">修改</a>
+                                    <a href="javascript:void(0)" nz-popconfirm nzTitle="删除大项其子项也将全部删除?" nzOkText="确定"
+                                       nzCancelText="取消" (nzOnConfirm)="delModifyBranch(mid.infoBranchId)">删除</a>
+                                    <a href="javascript:void(0)" (click)="addItem(data,mid)">添加</a>
+                                    <a href="javascript:void(0)" (click)="copyItem($event,mid.infoBranchId,2)">复制</a>
+                                </span>
+            </td>
+          </tr>
+          <tr [nzExpand]="mid.expand">
+            <td width="5%"></td>
+            <td colspan="14" width="95%">
+              <nz-table #sinTable [nzData]="mid['infos']" nzSize="small" [nzBordered]="false"
+                        [nzFrontPagination]="true" [nzShowPagination]="true" [nzPageSize]="pageSize">
+        <thead>
+        <tr>
+          <th>名称</th>
+          <th>类型</th>
+          <th>品牌</th>
+          <th>规格</th>
+          <th>型号</th>
+          <th *ngIf="data.type !== 3">材质</th>
+          <th *ngIf="data.type !== 3" width="10%">颜色</th>
+          <th>单位</th>
+          <th>单价</th>
+          <th width="10%">数量</th>
+          <th>合计</th>
+          <th>说明</th>
+          <th>备注</th>
+          <th width="10%" *ngIf="showBtnByState() || showAddOrDelByState()">操作</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="showBtnByState()" [dragula]="'dragInfo'+i" [(dragulaModel)]="sinTable.data">
+        <tr *ngFor="let inner of sinTable.data;let t = index">
+          <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+          <td [title]="inner.category?inner.category:''">
+            {{inner.category?inner.category:'--'}}
+          </td>
+          <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}
+          </td>
+          <td [title]="inner.specifications?inner.specifications:''">
+            {{inner.specifications?inner.specifications:'--'}}
+          </td>
+          <td [title]="inner.model?inner.model:''">{{inner.model?inner.model:'--'}}
+          </td>
+          <td [title]="inner.material?inner.material:''" *ngIf="data.type !== 3">
+            {{inner.material?inner.material:'--'}}
+          </td>
+          <td *ngIf="data.type !== 3 && inner.colours && inner.colours.length > 0"
+              [title]="renderColors(inner.colours)[0]" width="10%">
+            <nz-select style="width: 100%;" nzSize="'small'"
+                       [(ngModel)]="renderColors(inner.colours)[0]"
+                       (ngModelChange)="selectColorChange($event,inner)">
+              <nz-option *ngFor="let color of renderColors(inner.colours)" [nzLabel]="color"
+                         [nzValue]="color" [title]="color">
+              </nz-option>
+            </nz-select>
+          </td>
+          <td *ngIf="data.type !== 3 && (!inner.colours || inner.colours.length === 0)" width="10%">--
+          </td>
+          <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+          <td [title]="inner.univalent?inner.univalent:0">
+            {{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+          </td>
+          <td [title]="inner.num?inner.num:0">
+            <input nz-input [num]="inner.num" [formula]="inner.formula" revInputDecimal
+                   [infoId]="inner.id" [id]="cid" role="1" tabindex="{{data.type*1000+(i+1)*100+t}}"
+                   (changeValue)="changeValue($event,inner)"
+                   value="{{inner.formula?(inner.formula+'='+inner.num):inner.num}}" />
+          </td>
+          <td [title]="converseToDecimal(inner.univalent,inner.num)">
+            {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+          </td>
+          <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'" nzPlacement="topLeft" nz-tooltip>
+            <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+          <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+            {{inner.remark?inner.remark:'--'}}
+          </td>
+          <td>
+                            <span class="fix">
+                                <a href="javascript:void(0)" class="drag" title="可拖动"><i nz-icon
+                                                                                         type="unordered-list"></i></a>
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText="确定"
+                                   nzCancelText="取消" (nzOnConfirm)="delItem(inner.id)">删除</a>
+                                <a href="javascript:void(0)" (click)="remarkItem(inner,data['infos'])">备注</a>
+                                <a href="javascript:void(0)" (click)="copyItem($event,inner.id,1)">复制</a>
+                            </span>
+          </td>
+        </tr>
+        </tbody>
+        <tbody *ngIf="!showBtnByState()">
+        <tr *ngFor="let inner of sinTable.data;let i = index">
+          <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+          <td [title]="inner.category?inner.category:''">
+            {{inner.category?inner.category:'--'}}
+          </td>
+          <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}
+          </td>
+          <td [title]="inner.specifications?inner.specifications:''">
+            {{inner.specifications?inner.specifications:'规格'}}
+          </td>
+          <td [title]="inner.model?inner.model:''">{{inner.model?inner.model:'型号'}}</td>
+          <!----v2.2.4取消显示材质、颜色信息---->
+          <td [title]="inner.material?inner.material:''" *ngIf="data.type !== 3">{{inner.material?inner.material:'材质'}}</td>
+          <td *ngIf="data.type !== 3 && inner.colours && inner.colours.length > 0" [title]="renderColors(inner.colours)[0]">
+            {{renderColors(inner.colours)[0]}}
+          </td>
+          <td *ngIf="(!inner.colours || inner.colours.length === 0) && data.type !== 3">--</td>
+          <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'单位'}}</td>
+          <td [title]="inner.univalent?inner.univalent:0">
+            {{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+          </td>
+          <td [title]="inner.num?inner.num:0">
+            <input nz-input value="{{inner.formula?(inner.formula+'='+inner.num):inner.num}}"
+                   disabled />
+          </td>
+          <td [title]="converseToDecimal(inner.univalent,inner.num)">
+            {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+          </td>
+          <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'" nzPlacement="topLeft" nz-tooltip>
+            <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+          <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+            {{inner.remark?inner.remark:'--'}}
+          </td>
+          <td *ngIf="showAddOrDelByState()">
+                            <span class="fix">
+                                <a href="javascript:void(0)" (click)="changeModify(inner,0,$event)">减少</a>
+                                <a href="javascript:void(0)" (click)="changeModify(inner,1,$event)">增加</a>
+                            </span>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </td>
+  </tr>
+  </ng-template>
+  </tbody>
+  </nz-table>
+  </td>
+  </tr>
+
+
+  <!---其它项目--->
+  <tr *ngIf="showSubByType2(data.type)">
+    <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
+    <td colspan="6" width="60%">{{data.name}}</td>
+    <td colspan="2" width="20%">小计：{{getOtherTotal(data.infoMaps,'totalPrice') |number:'1.2'}}</td>
+    <td colspan="6" width="35%">
+            <span class="fix">
+                <a href="javascript:void(0)" (click)="addBranchItem(data)" *ngIf="showBtnByState()">添加大项</a>
+                <a href="javascript:void(0)" (click)="addItemCart(data,aid)" *ngIf="showAddOrDelByState()">添加</a>
+            </span>
+    </td>
+  </tr>
+  <tr *ngIf="showSubByType2(data.type) && data.infoMaps" [nzExpand]="data.expand">
+    <td style="width:5%;padding:0;"></td>
+    <td colspan="14" style="width:95%;padding:0;">
+      <nz-table #middleTable [nzData]="data.infoMaps" [nzFrontPagination]="false" [nzShowPagination]="false">
+        <tbody>
+        <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+          <tr>
+            <td nzShowExpand [(nzExpand)]="mid.expand" width="5%"></td>
+            <td colspan="4" [title]="mid.name?mid.name:''" width="50%">{{mid.name?mid.name:''}}</td>
+            <td colspan="2" width="30%">小计：{{getDiscountTotal(mid.infos,'totalPrice') |number:'1.2'}}
+            </td>
+            <td colspan="2" width="15%">
+                                <span *ngIf="showBtnByState()" class="fix">
+                                    <a href="javascript:void(0)" (click)="modifyBranchItem($event,mid)">修改</a>
+                                    <a href="javascript:void(0)" nz-popconfirm nzTitle="删除大项其子项也将全部删除?" nzOkText="确定"
+                                       nzCancelText="取消" (nzOnConfirm)="delModifyBranch(mid.infoBranchId)">删除</a>
+                                    <a href="javascript:void(0)" (click)="addOther(data,mid)">添加</a>
+                                    <a href="javascript:void(0)" (click)="copyItem($event,mid.infoBranchId,2)">复制</a>
+                                </span>
+            </td>
+          </tr>
+          <tr [nzExpand]="mid.expand">
+            <td width="5%"></td>
+            <td colspan="8" width="95%">
+              <nz-table #innerTable [nzData]="mid['infos']" [nzBordered]="false"
+                        [nzFrontPagination]="false" [nzShowPagination]="false">
+        <thead>
+        <tr>
+          <th>名称</th>
+          <th>单位</th>
+          <th>单价</th>
+          <th nzWidth="80px">数量</th>
+          <th>应收</th>
+          <th>实收</th>
+          <th>备注</th>
+          <th *ngIf="showBtnByState() || showAddOrDelByState()">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let inner of innerTable.data;let i = index">
+          <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+          <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+          <td [title]="inner.univalent?inner.univalent:0">
+            {{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+          </td>
+          <td [title]="inner.num?inner.num:0">
+            {{(inner.num?inner.num:0)|number:'1.2'}}
+          </td>
+          <td [title]="converseToDecimal(inner.univalent,inner.num)">
+            {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+          </td>
+          <td [title]="inner.totalPrice?inner.totalPrice:0">
+            {{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}
+          </td>
+          <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+            {{inner.offerExplain?inner.offerExplain:'--'}}
+          </td>
+          <td *ngIf="showBtnByState() || showAddOrDelByState()">
+                            <span class="fix" *ngIf="showBtnByState()">
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText="确定"
+                                   nzCancelText="取消" (nzOnConfirm)="delItem(inner.id)">删除</a>
+                                <a href="javascript:void(0)" (click)="editItem(data.type,inner)">修改</a>
+                                <a href="javascript:void(0)" (click)="copyItem($event,inner.id,1)">复制</a>
+                            </span>
+            <span class="fix" *ngIf="showAddOrDelByState()">
+                                <a href="javascript:void(0)" (click)="changeModify(inner,0,$event)">减少</a>
+                                <a href="javascript:void(0)" (click)="changeModify(inner,1,$event)">增加</a>
+                            </span>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </td>
+  </tr>
+  </ng-template>
+  </tbody>
+  </nz-table>
+  </td>
+  </tr>
+
+  <!---工程管理费--->
+  <tr *ngIf="showSubByType3(data.type)">
+    <td></td>
+    <td colspan="3">{{data.name}}</td>
+    <td colspan="4">应收：{{ (data.infos && data.infos[0]['univalent']?data.infos[0]['univalent']:0)
+      |number:'1.2'}}x{{data.infos && data.infos[0]['num']?data.infos[0]['num']:ratio}}
+    </td>
+    <td>实收：<input nz-input [(ngModel)]="data.infos[0].totalPrice" [disabled]="!showBtnByState()" style="width: 80%;"
+                  [num]="data.infos[0].totalPrice" revInputDecimal [id]="cid" role="5" />
+    </td>
+    <td colspan="3" *ngIf="showBtnByState()">
+            <span class="fix">
+                <a href="javascript:void(0)"
+                   (click)="editEngineer(data.infos && data.infos[0]['num']?data.infos[0]['num']:ratio)">修改</a>
+            </span>
+    </td>
+  </tr>
+
+  <!----设计费--->
+  <tr *ngIf="showSubByType4(data.type)">
+    <td nzShowExpand [(nzExpand)]="data.expand"></td>
+    <td colspan="7">{{data.name}}</td>
+    <td colspan="4">小计：{{getDesignTotal(data.infos,'totalPrice')|number:'1.2'}}</td>
+  </tr>
+  <tr *ngIf="showSubByType4(data.type)" [nzExpand]="data.expand">
+    <td style="padding:0;"></td>
+    <td colspan="11" style="padding:0;">
+      <nz-table #innerTable [nzData]="data['infos']" [nzFrontPagination]="false" [nzShowPagination]="false">
+        <thead>
+        <tr>
+          <th>名称</th>
+          <th>单价</th>
+          <th>面积</th>
+          <th>应收</th>
+          <th>实收</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let inner of innerTable.data;let i = index">
+          <td *ngIf="showBtnByState()" [title]="inner.name?inner.name:''"
+              (click)="choiceDesign(inner.id)">
+            <label nz-radio
+                   [(ngModel)]="inner.id === selectDesignId">{{inner.name?inner.name:'--'}}</label>
+          </td>
+          <td *ngIf="!showBtnByState()" [title]="inner.name?inner.name:''">
+            <label nz-radio [ngModel]="inner.yn"
+                   [disabled]="true">{{inner.name?inner.name+'123':'--'}}</label>
+          </td>
+          <td [title]="inner.univalent?inner.univalent:0">{{inner.univalent?inner.univalent:'--'}}</td>
+          <td [title]="inner.num?inner.num:0">{{(inner.num?inner.num:0)|number:'1.2'}}</td>
+          <td [title]="inner.discountPrice">
+            {{inner.discountPrice?(inner.discountPrice |number:'1.2'):'--'}}
+          </td>
+          <td *ngIf="showBtnByState()" [title]="inner.totalPrice?inner.totalPrice:0">
+            <input nz-input [disabled]="inner.id != selectDesignId" [num]="inner.totalPrice"
+                   [(ngModel)]="inner.totalPrice" revInputDecimal role="6" [id]="cid" [choiceId]="inner.id"
+                   placeholder="实收金额" />
+          </td>
+          <td *ngIf="!showBtnByState()" [title]="inner.totalPrice?inner.totalPrice:0">
+            {{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+
+    </td>
+  </tr>
+  </ng-template>
+  </tbody>
+  </nz-table>
+  <!---备注--->
+  <div nz-row class="mt-20">
+    <div nz-col nzSpan="15">
+      <label nz-col nzSpan="2" class="text">备注：</label>
+      <div nz-col nzSpan="22" class="textarea" [ngStyle]="remarkStyle()">
+        <!--[ngStyle]="remarkStyle()"-->
+        <textarea nz-input placeholder="请输入备注信息" [(ngModel)]="remarks" maxlength="5000" style="height: 100%;"
+                  [disabled]="!showBtnByState()" (blur)="modifyNotes('remark',remarks)"></textarea>
+        <span class="count" *ngIf="remarks && remarks.length"
+              style="bottom:0;right:0"><span>{{remarks.length}}</span>/5000</span>
+      </div>
+    </div>
+    <div nz-col nzSpan="8">
+      <div nz-row nzType="flex" nzJustify="left" nzAlign="top" class="img-list">
+        <div nz-col class="remark-img ml-8" *ngFor="let img of remarkImgs;let i = index"
+             [ngStyle]="showRemarkImgBg(img)" (click)="openLarge(remarkImgs,i)"
+             [ngClass]="{'mb-8': remarkImgs.length > 4 && i < 5}">
+                    <span class="close" *ngIf="showBtnByState()" (click)="removeRemarkImg($event,i)">
+                        <i nz-icon type="delete"></i>
+                    </span>
+        </div>
+        <div nz-col class="remark-img ml-8" *ngIf="showBtnByState() && remarkImgs && remarkImgs.length < 10">
+          <div (click)="uploadRemark($event)">
+            <rev-uploader-new [content]="'上传'" [width]="72" [height]="72"></rev-uploader-new>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div nz-col nzSpan="1" class="text-right" *ngIf="state !== 6">
+            <span class="fix" style="font-size: 14px;"><a href="javascript:void(0)" (click)="exportImages(remarkImgs)"
+                                                          *ngIf="remarkImgs && remarkImgs.length > 0">导出图片</a></span>
+    </div>
+  </div>
+
+  <!---功能键监控区--->
+  <div nz-row class="mt-20">
+    <div nz-col nzSpan="10" nzOffset="14">
+      <div nz-col nzSpan="24" class="text-right mt-20">
+        <span class="text">总计：{{ totalPrice |number:'1.2'}}</span>
+        <span class="text ml-20">优惠：{{preferentialPrice|number:'1.2'}}</span>
+        <!-- <span class="text ml-20" *ngIf="showFinalPriceBtn()">实付：<input nz-input [(ngModel)]="finalPrice" role="8" revInputDecimal [id]="cid" style="width: 100px" [num]="finalPrice" /></span>
+        <span class="text ml-20" *ngIf="!showFinalPriceBtn()">实付：{{finalPrice|number:'1.2'}}</span> -->
+        <span class="text ml-20">实付：{{finalPrice|number:'1.2'}}</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!---增减项显示--->
+  <div *ngIf="showRegular()">
+    <rev-regulation [cid]="cid" [aid]="aid" [details]="pauseList" (regularsEmitter)="regularListener($event)"
+                    [finalPrice]="finalPrice"></rev-regulation>
+  </div>
+
+  <!---功能键监控区--->
+  <div nz-row class="mt-20">
+    <!--<div nz-col nzSpan="10" nzOffset="14">-->
+    <!--<div nz-col nzSpan="24" class="text-right mt-20">-->
+    <!--<span class="text">总计：{{ totalPrice |number:'1.2'}}</span>-->
+    <!--&lt;!&ndash;<span class="text ml-20" *ngIf="showBtnByState()">优惠：<input nz-input [(ngModel)]="preferentialPrice"&ndash;&gt;-->
+    <!--&lt;!&ndash;role="7" revInputDecimal [id]="cid"&ndash;&gt;-->
+    <!--&lt;!&ndash;style="width: 100px"/></span>&ndash;&gt;-->
+    <!--<span class="text ml-20">优惠：{{preferentialPrice|number:'1.2'}}</span>-->
+    <!--<span class="text ml-20" *ngIf="showFinalPriceBtn()">实付：<input nz-input [(ngModel)]="finalPrice"-->
+    <!--role="8" revInputDecimal [id]="cid"-->
+    <!--style="width: 100px" [num]="finalPrice"/></span>-->
+    <!--<span class="text ml-20" *ngIf="!showFinalPriceBtn()">实付：{{finalPrice|number:'1.2'}}</span>-->
+    <!--</div>-->
+    <!--</div>-->
+    <nz-affix nzOffsetBottom="80">
+      <div nz-col nzSpan="10" nzOffset="14">
+        <div nz-row class="btn-fix">
+          <div nz-col class="text-right">
+            <button nz-button nzType="default" (click)="exportSheet(cid)">导出预算表</button>
+
+            <a class="ant-btn ant-btn-primary ml-20" href="javascript:void(0)" target="_blank"
+               [routerLink]="['/view/quote']" [queryParams]="{cid:btoa(cid),aid:btoa(aid)}">预览</a>
+            <!-- (baseQuote.state ===16?'修改' -->
+            <button nz-button nzType="primary" (click)="submit($event)" class="ml-20"
+                    *ngIf="showSubmitByState()"> {{baseQuote.state === 1?'修改':'保存'}}
+            </button>
+
+            <button nz-button nzType="primary" nz-popconfirm nzTitle="修改预算需客户重新确认" nzOkText="修改"
+                    nzCancelText="取消" (nzOnConfirm)="confirmSubmitToModify()"
+                    *ngIf="showBtnByStateToAudit()"
+                    class="ml-20">修改
+            </button>
+            <button nz-button nzType="primary" nz-popconfirm nzTitle="预算提交后，客户将可查看" nzOkText="提交"
+                    nzCancelText="取消" (nzOnConfirm)="confirmSubmitToCustomer()"
+                    *ngIf="showBtnByStateToCustomer()"
+                    class="ml-20">{{baseQuote.confirmState === 0?'提交到客户':'修改并提交'}}
+            </button>
+
+            <button nz-button nzType="primary" nz-popconfirm nzTitle="提交后项目人员才能收到派单请求?" nzOkText="提交" nzCancelText="取消" (nzOnConfirm)="submitToTransmit()" *ngIf="showBtnByStateToTransmit()" class="ml-20" >提交派单
+            </button>
+            <!-- nz-popconfirm [nzTitle]="showAddOrDelTitle"
+                    (nzOnConfirm)="addAudit()" nzPlacement="top" -->
+            <button nz-button nzType="primary" class="ml-10" nz-popconfirm
+                    nzTitle="确认提交?" nzOkText="确认" nzCancelText="取消" (nzOnConfirm)="addAudit()"
+                    *ngIf="pauseList && pauseList.pause && disableByState()">提交
+            </button>
+            <button nz-button nzType="primary" class="ml-20" nz-popconfirm nzTitle="提交成本审核后，将无法进行增减项?"
+                    nzOkText="提交" nzCancelText="取消" (nzOnConfirm)="submitToCostaudit()"
+                    *ngIf="showBtnByStateToAudit()">提交成本审核
+            </button>
+            <!-- <button nz-popconfirm [nzTitle]="showAddOrDelTitle"
+            (nzOnConfirm)="submitItem()" nzPlacement="top"
+            nz-button nzType="primary" class="ml-10"
+            *ngIf="pauseList && pauseList.pause && disableByState(pauseList.pause.state) && pauseList.pause.type===1">提交 -->
+            <!-- </button> -->
+            <!--<button nz-popconfirm nzTitle="减项需提交至公司等待确认?"-->
+            <!--(nzOnConfirm)="submitItem($event)" nzPlacement="top"-->
+            <!--nz-button nzType="primary" class="ml-10"-->
+            <!--[hidden]="showTipByPrice(pauseList.pause.applyActualPrice,pauseList.ratio)"-->
+            <!--*ngIf="pauseList && pauseList.pause && disableByState(pauseList.pause.state) ">提交-->
+            <!--</button>-->
+
+          </div>
+        </div>
+      </div>
+    </nz-affix>
+
+  </div>
+
+
+</div>
+
+<ng-template #header>
+  <div class="price-header">
+    <!--<div style="width:35%">名称</div>-->
+    <!--<div style="width:30%">备注</div>-->
+    <!--<div style="width:20%">小计</div>-->
+    <!--<div style="width:15%">操作</div>-->
+    <div style="width:100%">
+      <span>预算状态：{{showBudgetByState()}}</span>
+      <span *ngIf="showBudgetTime()">
+                <ng-container *ngIf="showBudgetByState() == '已确认';else elseTemplate">
+                    {{baseQuote.roleName?'（'+ baseQuote.roleName + '确认时间' + (baseQuote.loggerTime | date:'yyyy-MM-dd HH:mm') + '）':''}}
+                </ng-container>
+                <ng-template #elseTemplate>
+                    {{baseQuote.roleName?'（'+ baseQuote.roleName + '修改时间' + (baseQuote.loggerTime | date:'yyyy-MM-dd HH:mm') + '）':''}}
+                </ng-template>
+            </span>
+    </div>
+  </div>
+</ng-template>
+
+<!----修改数量---->
+<nz-modal [(nzVisible)]="isModify" [nzTitle]="modifyTitle" nzOkText="确定" nzCancelText="取消" (nzOnCancel)="modifyCancel()"
+          (nzOnOk)="modifyOk()">
+  <div class="modify">
+    <form nz-form [formGroup]="modifyForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5" nzFor="num">修改数量</nz-form-label>
+        <nz-form-control [nzSpan]="16">
+          <input type="hidden" name="id" formControlName="id" [(ngModel)]="currentId" />
+          <input nz-input type="text" placeholder="请输入具体数量，最多保留两位小数" autocomplete="off"
+                 [(ngModel)]="currentNumber" formControlName="num" name="num" maxlength="16" />
+          <nz-form-explain *ngIf="modifyForm.get('num').dirty && modifyForm.get('num').errors">
+            <ng-container *ngIf="modifyForm.get('num').hasError('required')">
+              必填选项
+            </ng-container>
+            <ng-container *ngIf="modifyForm.get('num').hasError('price')">
+              输入格式错误
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>
+
+<!---增减项目--->
+<nz-modal [(nzVisible)]="changeVisible" [nzTitle]="changeTitle" nzOkText="确定" nzCancelText="取消"
+          (nzOnCancel)="changeModifyCancel()" (nzOnOk)="changeModifyOk()">
+  <div class="modify" *ngIf="changeItem">
+    <form [formGroup]="changeForm" nz-form>
+      <nz-form-item *ngIf="changeItem.name">
+        <nz-form-label [nzSpan]="7">名称</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.name">
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngIf="changeItem.category">
+        <nz-form-label [nzSpan]="7">类型</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.category">
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngIf="changeItem.brand">
+        <nz-form-label [nzSpan]="7">品牌</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.brand">
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngIf="changeItem.specifications">
+        <nz-form-label [nzSpan]="7">规格</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.specifications">
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngIf="changeItem.model">
+        <nz-form-label [nzSpan]="7">型号</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.model">
+        </nz-form-control>
+      </nz-form-item>
+      <!-----v2.1.9增加材质和颜色---->
+      <nz-form-item *ngIf="changeItem.material">
+        <nz-form-label [nzSpan]="7">材质</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input disabled [value]="changeItem.material">
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngIf="changeItem.colours">
+        <nz-form-label [nzSpan]="7">颜色</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <nz-select style="width: 100%;" nzSize="'small'" [ngModel]="renderColors(changeItem.colours)[0]"
+                     nzDisabled [ngModelOptions]="{standalone: true}">
+            <nz-option *ngFor="let color of renderColors(changeItem.colours)" [nzLabel]="color"
+                       [nzValue]="color" [title]="color">
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7">数量</nz-form-label>
+        <nz-form-control [nzSpan]="12">
+          <input nz-input [(ngModel)]="changeNumber" formControlName="changeNumber" name="changeNumber"
+                 maxlength="32" placeholder="请输入数量" />
+          <nz-form-explain
+                  *ngIf="changeForm.get('changeNumber').dirty && changeForm.get('changeNumber').errors">
+            <ng-container *ngIf="changeForm.get('changeNumber').hasError('required')">
+              必填选项
+            </ng-container>
+            <ng-container *ngIf="changeForm.get('changeNumber').hasError('decimal')">
+              输入格式错误
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+        <div nzSpan="2" nzOffset="1" style="line-height: 40px;">
+          <a href="javascript:void(0)" (click)="changeModifyAll()" *ngIf="changeType !== 1">全部</a></div>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>
+
+<!---添加大项--->
+<nz-modal [(nzVisible)]="branchVisible" [nzTitle]="branchTitle" nzOkText="确定" nzCancelText="取消" [nzFooter]="footerTemp"
+          (nzOnCancel)="branchCancel()">
+  <div class="modify">
+    <form nz-form [formGroup]="branchForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">项目名称</nz-form-label>
+        <nz-form-control [nzSpan]="16">
+          <input nz-input [(ngModel)]="branchInfo" formControlName="branchInfo" name="branchInfo"
+                 maxlength="30" placeholder="请输入项目名称" autocomplete="off" />
+          <nz-form-explain *ngIf="branchForm.get('branchInfo').dirty  && branchForm.get('branchInfo').errors">
+            <ng-container *ngIf="branchForm.get('branchInfo').hasError('required')">
+              必填选项
+            </ng-container>
+            <ng-container *ngIf="branchForm.get('branchInfo').hasError('minlength')">
+              至少输入1个字符
+            </ng-container>
+            <ng-container *ngIf="branchForm.get('branchInfo').hasError('maxlength')">
+              至多输入30个字符
+            </ng-container>
+            <ng-container *ngIf="branchForm.get('branchInfo').hasError('account')">
+              输入格式错误
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>
+<ng-template #footerTemp>
+  <div class="btns">
+    <button nz-button nzType="default" (click)="branchCancel()">取消</button>
+    <button nz-button nzType="primary" [disabled]="!branchForm.valid" (click)="branchOk()" *ngIf="!branchEdit">确定
+    </button>
+    <button nz-button nzType="primary" [disabled]="!branchForm.valid" (click)="modifyBranchOk()"
+            *ngIf="branchEdit">修改
+    </button>
+  </div>
+</ng-template>
+
+
+<!---添加备注--->
+<nz-modal [(nzVisible)]="isRemark" nzTitle="备注" nzOkText="确定" nzCancelText="取消" (nzOnCancel)="remarkCancel()"
+          (nzOnOk)="remarkOk()">
+  <div class="modify">
+    <form nz-form [formGroup]="remarkForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="5">备注</nz-form-label>
+        <nz-form-control [nzSpan]="16" class="textarea">
+          <input type="hidden" name="id" formControlName="remarkId" [(ngModel)]="remarkId" />
+          <textarea nz-input type="text" placeholder="请输入备注信息" autocomplete="off" rows="5"
+                    [(ngModel)]="remarkString" formControlName="remarkString" name="remarkString"
+                    maxlength="500"></textarea>
+          <span *ngIf="remarkString && remarkString.length > 0"
+                class="count"><span>{{remarkString.length}}</span>/500</span>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>
+<rev-imgview [album]="_albums" [index]="imgIndex" *ngIf="_albums.length>0"></rev-imgview>
+<!---放大图片--->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" (nzOnCancel)="handleCancel()" [nzFooter]="null" nzWidth="1000">
+  <div class="large-img" *ngIf="largeImg">
+    <img [src]="largeImg" />
+  </div>
+</nz-modal>

@@ -1,0 +1,488 @@
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {MasterComboService} from "../../master-combo-detail/master-combo.service";
+import {WarningService} from "../../../../service/warning.service";
+import {MasterService} from "../../master.service";
+import {Default} from "../../../../model/constant";
+import {MasterPackService} from "../master-pack.service";
+import {getComboNames, getCompanyNameById} from "../../../../model/methods";
+import {Router, ActivatedRoute} from '@angular/router';
+import {Messages} from '../../../../model/msg';
+
+@Component({
+    selector: 'rev-master-pack',
+    templateUrl: './master-pack.component.html',
+    styleUrls: ['./../../master-promotion-detail/master-promotion-detail.component.scss','./master-pack.component.scss'],
+    providers:[MasterComboService,MasterService,MasterPackService]
+})
+export class MasterPackComponent implements OnInit {
+    //当前标题
+    public title: string;
+    //右侧操作按钮
+    public buttons: Array<any>;
+    //tabs 切换按钮
+    public radioSwitch:Array<any>;
+    //套系的所有数据
+    public combos:any;
+    //所有合作中的公司或者合作商
+    public companys: any;
+    //拉取数据时的所有套餐数据信息
+    public packs:any;
+
+    //新建或者编辑套餐时的弹出框
+    public isVisible: boolean = false;
+    //新建或者编辑时的表单
+    public validateForm:FormGroup;
+    //弹出框的标题
+    public packTitle:string;
+    //异步提交时
+    public isOkLoading: boolean = false;
+    //套餐名称
+    public packName:string;
+    //材料商简称
+    public packSupplyId:number;
+    //套餐适用套系
+    public packCombos:Array<any> = []
+    //单位
+    public packUnit:string;
+    //销售价
+    public packSalePrice:number = 0;
+    //供货价
+    public packSupplyPrice:number = 0;
+    //备注
+    public packRemark:string;
+
+    //选中当前的数据
+    public selectItems:Array<any> = [];
+    //tab 切换时的key值
+    public type:number = 0;
+    //全选
+    public allChecked:boolean = false;
+    //全选时的中间状态
+    public indeterminate:boolean = false;
+    //查询时的套系对象数组
+    public comboIds:Array<any>;
+    //查询时的供应商信息
+    public supplier:any;
+    //查询时的套餐名称
+    public name:string;
+
+    //分页查询
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+
+
+
+    constructor(private fb:FormBuilder,
+                private masterCombo:MasterComboService,
+                private master:MasterService,
+                private warn:WarningService,
+                private masterPack:MasterPackService,
+                private router:Router,
+                private activatedRoute:ActivatedRoute) {
+    }
+
+    ngOnInit() {
+
+        this.title = "套餐管理";
+
+        this.buttons = [
+            {
+                name: "创建套餐"
+            }
+        ];
+
+        this.radioSwitch = [
+            {
+                key: 0,
+                text: "已创建"
+            },
+            {
+                key: 1,
+                text: "审核中"
+            },
+            {
+                key: 2,
+                text: "已通过"
+            },
+            {
+                key: 3,
+                text: "未通过"
+            }
+        ]
+
+        this.validateForm = this.fb.group({
+            packName:[this.packName,[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30),
+            ]],
+            packSupplyId:[this.packSupplyId,[
+               Validators.required
+            ]],
+            packCombos:[this.packCombos,[]],
+            packUnit:[this.packUnit,[
+                Validators.maxLength(10)
+            ]],
+            packSalePrice:[this.packSalePrice,[
+                Validators.min(0)
+            ]],
+            packSupplyPrice:[this.packSupplyPrice,[
+                Validators.min(0)
+            ]],
+            packRemark:[this.packRemark,[
+                Validators.maxLength(300)
+            ]]
+        });
+
+        //拉取套系数据结果
+        this.getCombos();
+
+        //拉取合作商
+        this.getCompanys();
+
+        //拉取数据
+        this.changeData();
+    }
+
+
+    handleName(name: string) {
+        if(this.buttons[0].name === name){
+            this.isVisible = true;
+            this.packTitle = "新建套餐";
+        }
+    }
+
+
+    //拉取套系的所有数据
+    getCombos(){
+        this.masterCombo.getCombos().then(data =>{
+            this.combos = data;
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+    getCompanys(){
+        this.master.getCompanys().then(data =>{
+            this.companys = data;
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+
+    modelComboChange(combos:any){
+        this.comboIds = combos;
+        this.resetData();
+    }
+
+    modelCompanyChange(company:any){
+        this.supplier = company;
+        this.resetData();
+    }
+
+    handleSwitch(tab:number){
+        this.type = tab;
+        this.resetData();
+    }
+
+    searchData(){
+        this.resetData();
+    }
+
+    changeData(){
+        const params = {
+            pageNum: this.pageNo,
+            pageSize: this.pageSize,
+            status: this.type
+        };
+
+        if(this.comboIds && this.comboIds.length > 0){
+            params["comboIds"] = this.master.getComboIds(this.comboIds);
+        }
+
+        if(this.supplier && this.supplier){
+            params["supplierId"] = this.supplier.id;
+        }
+
+        if(this.name && this.name.trim()){
+            params["name"] = this.name;
+        }
+
+        this.masterPack.getPackList(params).then(data =>{
+            this.packs = data && data.list?data.list:[];
+            this.total = data && data.total?data.total:Default.PAGE.PAGE_TOTAL;
+            // this.refreshStatus();
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 提交审核
+     * @param ids
+     */
+    submitPacks(...ids){
+        this.masterPack.submitPacks(ids).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.resetData();
+            this.refreshStatus();
+        }).catch(err =>{
+            if(err === Messages.PACK_EMPTY_ITEM){
+                this.warn.onModalInfo({
+                    title:"温馨提示",
+                    content: err,
+                    ok:() =>{
+                        this.refreshStatus();
+                    }
+                })
+            }else{
+                this.warn.onMsgError(err);
+            }
+
+        })
+    }
+    //单个提交
+    submitItem(id:number){
+        this.submitPacks(id);
+    }
+    //批量提交
+    submitItems(){
+        let ids = this.getIdsBySelected();
+        this.submitPacks(...ids);
+    }
+
+    /**
+     * 删除套餐
+     * @param ids
+     */
+    deletePacks(...ids){
+        this.masterPack.deletePacks(ids).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.resetData();
+            this.refreshStatus();
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+    //单个删除
+    deleteItem(id:number){
+        this.deletePacks(id);
+    }
+    //批量删除
+    deleteItems(){
+        let ids = this.getIdsBySelected();
+        this.deletePacks(...ids);
+    }
+
+    /**
+     * 撤回套餐
+     * @param ids
+     */
+    recallPacks(...ids){
+        this.masterPack.recallPacks(ids).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.resetData();
+            this.refreshStatus();
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+    //单个撤回
+    recallItem(id:number){
+        this.recallPacks(id);
+    }
+    //批量撤回
+    recallItems(){
+        let ids = this.getIdsBySelected();
+        this.recallPacks(...ids);
+    }
+
+    /**
+     * 上下架套餐
+     * @param {number} shelf 0：下架或未上架，1：上架
+     * @param ids
+     */
+    shelfPacks(shelf:number,...ids){
+        this.masterPack.shelfPacks(ids,shelf).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.refreshStatus();
+            this.resetData();
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+    //单个上下架
+    shelfItem(id:number,shelf:number){
+        this.shelfPacks(shelf,id);
+    }
+    //批量上下架
+    shelfItems(shelf:number){
+        let ids = this.getIdsBySelected();
+        this.shelfPacks(shelf,...ids);
+    }
+
+
+
+    /**
+     * 根据类型的不同展示其功能操作
+     * @param args
+     * @returns {boolean}
+     */
+    getStateIsTrue(...args){
+        if(args && args.length > 0){
+            for(let key of args){
+                if(this.type === key) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 全选
+     * @param {boolean} bool
+     */
+    checkAll(bool:boolean){
+        this.allChecked = bool;
+        this.packs.forEach(p =>{
+            p.checked = this.allChecked;
+        })
+        this.refreshStatus();
+    }
+
+    /**
+     * 单选时的各自状态变化
+     */
+    refreshStatus(){
+        const allCheck = this.packs.every(p => p.checked === true);
+        const allUnCheck = this.packs.every(p => !p.checked);
+
+        this.allChecked = allCheck;
+        this.indeterminate = (!allCheck) && (!allUnCheck);
+
+        this.selectItems = this.packs.filter(p => p.checked);
+    }
+
+    //提交表单
+    handleOk(){
+        this.isOkLoading =  true;
+        if(this.validateForm.valid){
+            const params = {
+                name: this.packName,
+                supplierId: this.packSupplyId
+            };
+            if(this.packCombos && this.packCombos.length > 0){
+                params["comboIds"] = this.masterCombo.getComboIds(this.packCombos);
+            }
+            if(this.packUnit && this.packUnit.length > 0){
+                params["unit"] = this.packUnit.trim();
+            }
+            //供货价
+            params["supplyPrice"] = this.packSupplyPrice?this.packSupplyPrice:0,
+            //销售价
+            params["sellingPrice"] = this.packSalePrice?this.packSalePrice:0;
+            if(this.packRemark && this.packRemark.length > 0){
+                params["remark"] = this.packRemark;
+            }
+
+            this.masterPack.savePack(params).then(msg =>{
+                this.warn.onMsgSuccess(msg);
+                this.handleCancel();
+                this.resetData();
+            }).catch(err =>{
+                this.handleCancel();
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+    //取消提交
+    handleCancel(){
+        this.isVisible = false;
+        this.isOkLoading = false;
+        this.validateForm.reset();
+    }
+
+    //提示框取消
+    cancel(){
+        console.log("close confirm is true");
+    }
+
+    //拉取数据重置
+    resetData(){
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.indeterminate = false;
+        this.allChecked = false;
+        this.selectItems = [];
+        this.changeData();
+    }
+
+    /**
+     * 根据相应的combos获取相应的名称
+     * @param combos
+     * @returns {any}
+     */
+    getComboNames(combos:any){
+        return getComboNames(combos,"、");
+    }
+
+    /**
+     * 根据供应商id获取供应商简称
+     * @param {number} cid
+     * @returns {any}
+     */
+    getCompanyName(cid:number){
+        return getCompanyNameById(cid,this.companys);
+    }
+
+    /**
+     * 根据状态显示对应的状态名称
+     * @param {number} status
+     * @returns {any}
+     */
+    getState(status:number){
+        switch(status){
+            case 0: return "已下架";
+            case 1: return "已上架";
+            default: return "已下架";
+        }
+    }
+
+    /**
+     * 获取ids
+     * @returns {any[]}
+     */
+    getIdsBySelected(){
+        let ids = [];
+        if(this.selectItems && this.selectItems.length > 0){
+            this.selectItems.forEach(item =>{
+                ids.push(item.id);
+            })
+        }
+        return ids;
+    }
+
+    /**
+     * 根据上下架来显示提示信息
+     * @param {number} shelf
+     * @returns {string}
+     */
+    getShelfTitle(shelf:number){
+        return shelf?'确定下架该套餐吗':'确定上架该套餐吗'
+    }
+
+    /**
+     * 到详情去或者编辑去
+     * @param p
+     */
+    toDetail(pack:any){
+        this.router.navigate(['../detail'],{
+            queryParams:{pack: JSON.stringify(pack)},
+            relativeTo: this.activatedRoute,
+            skipLocationChange: true
+        })
+    }
+
+}

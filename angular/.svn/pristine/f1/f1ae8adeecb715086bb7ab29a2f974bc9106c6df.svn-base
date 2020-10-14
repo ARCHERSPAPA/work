@@ -1,0 +1,208 @@
+import { Component, OnInit } from '@angular/core';
+import { Default } from './../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { SettleService } from '../../../../service/settle.service';
+import { atob } from '../../../../model/methods';
+import { SettleMaterialWageService } from '../../settle-material/settle-material-wage/settle-material-wage.service'
+@Component({
+  selector: 'rev-settle-detail-order',
+  templateUrl: './settle-detail-order.component.html',
+  styleUrls: ['./settle-detail-order.component.scss']
+})
+export class SettleDetailOrderComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+  //弹窗
+  public wageForm;
+  public auditVisible;
+  public isVisible;
+  public account;
+  public accountStatus;
+  public auditForm;
+  public msg;
+  public orderId;
+  public materialId;
+  public state; //审核状态
+  public type;//1为材料订单点进来的详情，2为结算列表
+  public materialList;
+  constructor(private req: RequestService,
+    private warn: WarningService,
+    private SettleMaterialWageService: SettleMaterialWageService,
+    private settle: SettleService,
+    private fb: FormBuilder,
+    private activatedRoute: ActivatedRoute) { }
+
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['type']) {
+        this.type = params['type'];
+
+        this.materialId=atob(params['materialId']);
+        this.orderId = atob(params['id']);
+        console.log(this.materialId)
+      }
+    });
+    this.changePage();
+    this.wageForm = this.fb.group({
+      account: ['', [
+        Validators.required,
+        Validators.maxLength(30)
+      ]]
+    });
+    this.auditForm = this.fb.group({
+      msg: ['', [
+        Validators.maxLength(300)
+      ]]
+    });
+
+  }
+  ngDoCheck() {
+    if (!this.state && this.settle.getOrderData()) {
+      this.state = this.settle.getOrderData().quote.state;
+    }
+  }
+  //拉去列表
+  changePage() {
+    this.req.doPost({
+      url: 'orderMaterialDetail', data: {
+        orderId: this.orderId
+      },
+      success: res => {
+        if (res && res.code === 200) {
+          if (res.data.unExist && res.data.unExist.length > 0) {
+            res.data.unExist.forEach(v => {
+              v['rows'] = 0;
+              v['rowName'] = '不在成本核算内的材料';
+            });
+            res.data.unExist[0]['rows'] = res.data.unExist.length;
+          }
+          if (res.data.exist && res.data.exist.length > 0) {
+            res.data.exist.forEach(v => {
+              v['rows'] = 0;
+              v['rowName'] = '在成本核算内的材料';
+            });
+            res.data.exist[0]['rows'] = res.data.exist.length;
+          }
+          this.materialList = res.data.exist.concat(res.data.unExist)
+        } else {
+          this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  // 展示结算弹窗
+  showModal() {
+    this.wageForm.reset();
+    this.isVisible = true;
+    let params = {};
+    params["materialId"] = this.materialId;
+    this.loadAccountList(params);
+  }
+
+  handleCancel() {
+    this.isVisible = false;
+    this.auditVisible = false;
+  }
+  //判断是否显示红色
+  checkShowRed(material) {
+    if ((material.passNum ? material.passNum : 0 + material.costNum ? material.costNum : 0) >= material.count ? material.count : 0) {
+      return 'red';
+    } else {
+      return 'inherit';
+    }
+  }
+  // 结算弹窗
+  handleOk(type) {
+    const that = this;
+    const params = that.wageForm.value;
+    params.state = type;
+    if (this.orderId) {
+      params.orderIds = [this.orderId];
+    }
+    if (this.msg) {
+      params["remark"] = this.msg;
+    }
+    params.accountId = this.account;
+    this.SettleMaterialWageService.operateSettle(params).then(data => {
+      that.changePage();
+      this.refreshHead();
+      that.warn.onMsgSuccess(data || Messages.SUCCESS.DATA);
+        that.handleCancel();
+    }).catch(err => {
+      this.warn.onMsgError(err);
+    })
+  }
+
+  // 展示不通过弹窗
+  showAudit(type) {
+    this.auditForm.reset();
+    this.auditVisible = true;
+  }
+  //结算取消
+  auditCancel() {
+    this.auditVisible = false;
+    this.auditForm.reset();
+    this.msg = '';
+  }
+
+  //刷新head
+  refreshHead() {
+    this.settle.loadMaterialHead(this.orderId).then(res => {
+      this.settle.setOrderData(res);
+      this.state = this.settle.getOrderData().quote.state;
+    }).catch(err => {
+      this.warn.onError(err);
+    });
+  }
+  //获取公司账号
+  loadAccountList(params) {
+    this.SettleMaterialWageService.getAccountList(params).then(data => {
+      this.accountStatus = data;
+    }).catch(err => {
+      this.warn.onMsgError(err);
+    })
+  }
+  checkpass() {
+    if (this.type == 1) {
+      this.pass(0)
+    } else {
+      let params = {};
+      params["materialId"] = this.orderId;
+      this.loadAccountList(params);
+      this.handleOk(0)
+    }
+  }
+  //通过不通过
+  pass(state) {
+    let param = {
+      orderId: this.orderId,
+      state: state
+    };
+    if (this.msg) {
+      param['remark'] = this.msg;
+    }
+    this.req.doPost({
+      url: 'orderMateriallDetailAudit',
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.refreshHead();
+          if (state == 0) {
+            this.auditVisible = false;
+          }
+        } else {
+          this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  ngOnDestroy() {
+    this.settle.setOrderData('')
+  }
+}

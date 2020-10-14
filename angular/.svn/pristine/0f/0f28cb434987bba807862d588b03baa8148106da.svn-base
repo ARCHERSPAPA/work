@@ -1,0 +1,4 @@
+<p>
+  材料商管理列表
+</p>
+<a [routerLink]="'/rev/supplier/material/detail'">详情</a>

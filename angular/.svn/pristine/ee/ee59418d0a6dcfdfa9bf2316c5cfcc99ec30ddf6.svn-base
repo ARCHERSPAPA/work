@@ -1,0 +1,479 @@
+import { Component, OnInit } from '@angular/core';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ItemBasicComponent} from "../../../../plugins/item-basic/item-basic.component";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import * as DataSet from '@antv/data-set';
+import {fadeAnimate} from "../../../../animation/transform.component";
+
+
+@Component({
+  selector: 'rev-cost-detail-account',
+  templateUrl: './cost-detail-account.component.html',
+  styleUrls: ['./../cost-detail.component.scss','./cost-detail-account.component.scss'],
+  animations:[fadeAnimate]
+})
+export class CostDetailAccountComponent implements OnInit {
+
+    //渲染数据时
+    public listOfData:any;
+    //设计费数据
+    public designData:any;
+
+    //存储数据
+    public storeData:any;
+
+    public pageSize: number = 5;
+
+    public infoNames = ["套餐", "主材", "个性化项目", "设计费","增减项目"];
+    public infoBranceNames = ["主卧", "客卧", "卫生间", "餐厅","其它"];
+
+
+    public sumTotal:number = 0;
+
+    nameFilterFn = (list: string[], item: any) =>{
+
+    }
+
+
+    filterName = [
+        {text: '套餐', value: '套餐'},
+        {text: '主材', value: '主材'},
+        {text: '个性化项目', value: '个性化项目'},
+        {text: '设计费', value: '设计费'},
+        {text: '增减项目', value: '增减项目'},
+    ];
+
+    config = {
+        row: 4,
+        col: 2,
+        item: 100
+    }
+
+    //创建或者修改大类（大项）
+    public modify:boolean = false;
+    public isVisible:boolean = false;
+    public editIndex: number;
+    public editId:any;
+
+    //类名
+    public branchInfo:string;
+    public branchForm:FormGroup;
+
+
+    //图形渲染
+    public data: any;
+    public tooltip: any;
+    public color: any;
+    public itemTpl: any;
+
+    //数据(毛利：profit,总成本：finalCost,材料成本：materialCost,人工成本：laborCost,)
+    public profit:number = 0;
+    public finalCost:number = 0;
+    public materialCost:number = 0;
+    public laborCost:number = 0;
+    //人工具体细项成本(木工：carpentryCost,泥工：tilerCost,漆工：painterCost,水电工：plumberCost)
+    public carpentryCost:number = 0;
+    public tilerCost:number = 0;
+    public painterCost:number = 0;
+    public plumberCost:number = 0;
+    //特效动画
+    public switch:boolean = false;
+
+
+    constructor(private modalService:NgbModal,
+                private fb:FormBuilder) { }
+
+    ngOnInit(): void {
+        let infos;
+        if(!sessionStorage.getItem("infos")){
+            infos = this.createInfo(this.config.row);
+            sessionStorage.setItem("infos",JSON.stringify(infos));
+        }else{
+            infos = JSON.parse(sessionStorage.getItem("infos"));
+        }
+
+        // this.listOfData = infos;
+        // console.log(infos);
+
+        this.storeData = this.computedData(infos);
+        this.listOfData = this.storeData;
+        this.designData = [
+            {
+                name:"设计费场面",
+                price:99.82,
+                area: 98.12,
+                actualPrice: 102584.25,
+                finalPrice: 89200.10,
+                costPrice: 990123.25,
+                ratio: 30
+            }
+        ];
+
+        this.branchForm = this.fb.group({
+            branchInfo:[this.branchInfo,[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30),
+                UserValidate.ValidateAccount
+            ]]
+        });
+
+        this.renderChart(10000,5000);
+
+    }
+
+    filterChange(e){
+        if(e){
+            this.listOfData = this.storeData.filter(s => s.name === e);
+        }else{
+            this.listOfData = this.storeData;
+        }
+
+        console.log(this.listOfData);
+    }
+
+
+    computedData(data){
+        if(data && data.length > 0){
+            for(let i = 0; i < data.length; i++){
+                let itemNum = 0,start = 0,end = 0;
+                for(let j = 0; j < data[i].infoMaps.length; j++){
+                    start = (data[i].infoMaps[j].pageNo - 1) * this.pageSize;
+                    end = (data[i].infoMaps[j].pageNo) * this.pageSize;
+                    itemNum += data[i].infoMaps[j].infos.slice(start,end).length + 2;
+                    data[i].infoMaps[j]["cols"] = data[i].infoMaps[j].infos.length > 0?data[i].infoMaps[j].infos.slice(start,end).length:1;
+                }
+                data[i]["rows"] = itemNum + 2;
+            }
+        }
+        return data;
+    }
+
+
+    computedTotal(branch:any,type:string){
+        switch(type){
+            case "material":
+                return this.getTotalByType(branch,"materialNum","materialPrice");
+            case "carpentry":
+                return this.getTotalByType(branch,"carpentryNum","carpentryPrice");
+            case "tiler":
+                return this.getTotalByType(branch,"tilerNum","tilerPrice");
+            case "painting":
+                return this.getTotalByType(branch,"paintingNum","paintingPrice");
+            case "plumber":
+                return this.getTotalByType(branch,"plumberNum","plumberPrice");
+        }
+    }
+
+    //计算总金额
+    computedSumTotal(){
+
+    }
+
+    getTotalByType(infos,num,price){
+        let total = 0;
+        if(infos && infos.length > 0){
+            total = infos.reduce((total,info) =>{
+                return total + (info[""+num+""] * info[""+price+""]);
+            },0)
+        }
+        return total;
+    }
+
+
+    /**
+     * 生成类型
+     * @param num
+     * @returns {any[]}
+     */
+    createInfo(num){
+        let data = [];
+        for(let i = 0; i < num; i++){
+            data.push({
+                type: (i+1),
+                name: this.infoNames[this.randNum(0,this.infoNames.length - 1)],
+                infoMaps: this.createBranch(this.config.col)
+            });
+        }
+        return data;
+    }
+
+    /**
+     * 创建大项
+     * @param num
+     */
+    createBranch(num){
+        let data = [];
+        for(let i = 0; i < num; i++){
+            data.push({
+                name: this.infoBranceNames[this.randNum(0,this.infoBranceNames.length -1)],
+                branchId: (i+1),
+                infos: this.renderItem(this.randNum(this.config.item/2,this.config.item)),
+                pageNo: 1
+            })
+        }
+        return data;
+    }
+
+    /**
+     * 生成细项
+     * @param num
+     * @returns {any[]}
+     */
+    renderItem(num){
+        let data = [];
+        for(let i = 0; i < num; i++){
+            data.push(this.createItem())
+        }
+        return data;
+    }
+
+    /**
+     * 生成细项
+     * @param {number} i
+     * @returns object
+     */
+    createItem(){
+        return {
+            brand: "罗马",
+            id: 167177,
+            infoBranchId: 24038,
+            infoBranchName: this.infoBranceNames[this.randNum(0, 2)],
+            infoId: 2865,
+            infoName: this.infoNames[this.randNum(0, 2)],
+            infoType: 1,
+            material: null,
+            model: null,
+            name: "抛釉磁砖不管理顶替阿斯蒂芬模压 模压 李斐莉雪顶替模压 阿斯蒂芬",
+            num: this.randNum(0, 1000),
+            offerExplain: "主要用于客厅",
+            quoteId: 6285,
+            remark: null,
+            specifications: "500x500",
+            totalPrice: 0,
+            unit: "匹",
+            univalent: "180",
+            materialPrice: this.randNum(1, 1000),
+            materialNum: this.randNum(1, 20),
+            carpentryPrice: this.randNum(100, 500),
+            carpentryNum: this.randNum(100, 240),
+            tilerPrice: this.randNum(1000, 8000),
+            tilerNum: this.randNum(30, 120),
+            paintingPrice: this.randNum(1, 1000),
+            paintingNum: this.randNum(1, 50),
+            plumberPrice: this.randNum(1000, 5000),
+            plumberNum: this.randNum(20, 50),
+            orderNumber: 'IT-'+new Date().getTime()+"-T-"+this.randNum(1,100)
+        }
+    }
+
+    /**
+     * 生成随机函数
+     * @param {number} min
+     * @param {number} max
+     * @returns {any}
+     */
+    randNum(min = 0, max = 10){
+        return Math.floor(Math.random()*(max-min)+min);
+    }
+
+    /**
+     * 打开类名编辑框
+     * @param {number} index
+     */
+    openBranch(index:number,...data){
+        console.log("open branch index is:",index);
+        if(data && data.length > 0){
+            this.modify = true;
+            this.branchInfo = data[0].name;
+            this.editId = data[0].branchId;
+        }
+        this.editIndex = index;
+        this.isVisible = true;
+    }
+
+
+    /***
+     * 添加大项
+     * @param data
+     */
+    addBranch(){
+        const data = this.listOfData[this.editIndex];
+        const branchName = this.branchForm.value["branchInfo"];
+        if(!this.modify){
+            if(data.infoMaps && data.infoMaps.length > 0){
+                data.infoMaps.unshift({
+                    name: branchName,
+                    branchId: data.infoMaps.length + 1,
+                    infos: [],
+                    pageNo: data.pageNo?data.pageNo:1
+                })
+            }else{
+                data.infoMaps = [{
+                    name: branchName,
+                    branchId: 1,
+                    infos: [],
+                    pageNo: data.pageNo?data.pageNo:1
+                }]
+            }
+        }else{
+            if(data.infoMaps && data.infoMaps.length > 0){
+                let findData = data.infoMaps.find(d => d.branchId === this.editId);
+                if(findData && findData.name){
+                    findData.name = branchName;
+                }
+            }
+        }
+        //关闭弹出框
+        this.handleCancel();
+        //重新渲染生成后的表格清单
+        this.computedData(this.listOfData);
+    }
+
+    handleCancel(){
+        console.info("handle cancel");
+        this.isVisible = false;
+        this.modify = false;
+        this.editId = null;
+        this.editIndex = null;
+        this.branchInfo = null;
+        this.branchForm.reset();
+    }
+
+    handleOk(){
+        console.log("handle ok is here");
+        this.addBranch();
+    }
+
+    /**
+     * 添加细项
+     * @param branch
+     */
+    addItem(branch){
+        branch.infos.unshift(this.createItem());
+        this.computedData(this.listOfData);
+    }
+
+    /**
+     * 删除细项
+     * @param branch
+     * @param {number} index
+     */
+    removeItem(branch,index:number){
+        branch.infos.splice(index,1);
+        this.computedData(this.listOfData);
+    }
+
+
+    pageChange(e:any,branch:any){
+        branch["pageNo"] = e;
+        this.computedData(this.listOfData);
+    }
+
+    /**
+     * 计算显示的所有细项
+     * @param branch
+     * @returns {any}
+     */
+    computedBranchInfos(branch){
+        return branch.infos.slice((branch.pageNo - 1) * this.pageSize, branch.pageNo*this.pageSize);
+    }
+
+
+    /**
+     * 合并前面不同类别的总数
+     * @param index
+     * @returns {number}
+     */
+    getInfoMapsLen(index){
+        let total = 0;
+        if(index > 0 && this.listOfData && this.listOfData.length > 0){
+            let data = this.listOfData.filter((d,i) => i < index);
+            if(data && data.length > 0){
+                for(let i = 0; i < data.length; i++){
+                    for(let j = 0; j < data[i].infoMaps.length; j++){
+                        total += data[i].infoMaps[j].infos.length;
+                    }
+                }
+            }
+        }
+        return total;
+    }
+
+    /**
+     * 确定删除大项
+     * @param branch
+     */
+    confirmDeleteBranch(branch:any,it,ib){
+      this.listOfData[it]
+    }
+
+    /**
+     * 确定删除细项
+     * @param item
+     */
+    confirmDeleteItem(item:any){
+      console.log(item);
+    }
+
+    cancel(){
+      console.log("统一处理二次弹出框")
+    }
+
+
+
+    openItem(type:number = 1,...data){
+        const modal =  this.modalService.open(ItemBasicComponent,
+            {
+                centered: true,
+                keyboard: true,
+                size:"lg"
+            });
+        modal.componentInstance.type = type;
+        modal.result.then(res =>{
+            console.log(res);
+        },(rea) =>{
+            console.log(rea);
+        })
+
+    }
+
+
+
+    renderChart(total, cost) {
+
+        const sourceData = [
+            { type: '成本', count: cost ? cost : 0 },
+            { type: '毛利', count: total - (cost ? cost : 0) }
+        ];
+
+
+        const dv = new DataSet.View().source(sourceData);
+        dv.transform({
+            type: 'percent',
+            field: 'count',
+            dimension: 'type',
+            as: 'percent'
+        });
+
+        const data = dv.rows;
+        this.data = data;
+
+        this.tooltip = ['type*count', (type, count) => {
+            return {
+                name: type,
+                value: count
+            };
+
+        }];
+        this.color = ['type', ['#69C0FF', '#1890FF']];
+
+        this.itemTpl = '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>';
+    }
+
+    toggle(){
+        this.switch = this.switch?false:true;
+    }
+
+}

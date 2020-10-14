@@ -1,0 +1,138 @@
+<div class="settle-head">
+  <div class="settle-head-title">
+    <span>{{quote && quote.houseAddress?quote.houseAddress:'--'}}</span>
+    <nz-tag [nzColor]=" getColor()">{{stateName}}</nz-tag>
+  </div>
+  <div class="settle-head-body">
+    <div class="settle-head-info">
+      <ul>
+        <li>工长：<span>{{quote && quote.workerName?quote.workerName:'--'}}</span><span class="grey"
+            *ngIf='quote && quote.workerName'>（{{quote.workerPhone?quote.workerPhone:'--'}}）</span>
+        </li>
+        <li>项目编号：<span class="grey">{{quote && quote.quoteNo?quote.quoteNo:'--'}}</span> </li>
+      </ul>
+      <h5 class="grey">
+        材料订单明细
+      </h5>
+      <ul>
+        <li>材料商：<span>{{quote && quote.abbreviation?quote.abbreviation:'--'}}</span> </li>
+        <li>材料订单编号：<span class="grey">{{quote && quote.materialOrderNo?quote.materialOrderNo:'--'}}</span>
+        </li>
+        <li>提交时间：<span class="grey">{{quote && quote.createTime?(quote.createTime|date:'yy-MM-dd HH:mm'):'--'}}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="settle-head-detail">
+      <!-- 
+金额使用情况 -->
+      <div class="detail-price">
+        <div class="price-total">
+          <div>
+            {{ renderPrice(price.totalPrice )?(price.totalPrice | number:'1.2'):'0'}}
+          </div>
+          <span class="grey">
+            项目总额
+          </span>
+        </div>
+        <div class="price">
+          <div>
+            合同金额：{{renderPrice(price.agreementPrice )?(price.agreementPrice | number:'1.2'):'0'}}
+          </div>
+          <span>
+            进场前增减项金额：{{renderPrice(price.beforePrice )?(price.beforePrice | number:'1.2'):'0'}}
+          </span>
+        </div>
+        <div class="price">
+          <div>
+            材料成本金额：{{renderPrice(price.materialPrice )?(price.materialPrice | number:'1.2'):'0'}}
+          </div>
+          <span>
+            进场后增减项金额：{{renderPrice(price.afterPrice )?(price.afterPrice | number:'1.2'):'0'}}
+          </span>
+        </div>
+      </div>
+
+      <!-- 进度条 -->
+      <div class="progress-label">
+      </div>
+      <div class="progress top16">
+        <div class="progress-first" [ngStyle]="{'width':getWidth()+'%'}">
+        </div>
+        <div class="progress-last" [ngStyle]="{'width': (100)+'%'}">
+        </div>
+      </div>
+
+      <!-- 收款情况 -->
+      <div class="top8 progress-info">
+        <div>
+          <span class="circle" style=" background: #1890FF;"></span>
+          <span *ngIf='pay && pay.payType'>已收金额到（到{{pay.payType}}）</span>
+          <span *ngIf='pay ||!pay["payType"]'>
+            已收金额：
+          </span>
+          <span style=" color:#69C0FF ;">
+            ：{{renderPrice(pay.receivePrice)?(pay.receivePrice | number:'1.2'):'0'}}
+          </span>
+          <span class="grey" *ngIf='pay && pay.payType && price.totalPrice'>({{getWidth()+'%'}})</span>,
+          材料可用：
+          <span>
+            {{pay && pay.ratio?(pay.ratio+'%'):'0%'}}
+          </span>
+          <span *ngIf='pay && pay.ratio'>
+            （金额：{{renderPrice(pay.materialPrice )?(pay.materialPrice | number:'1.2'):'0'}}）
+          </span>
+        </div>
+        <div>
+          <span class="circle" style=" background: #69C0FF;"></span>
+          剩余应收：{{renderPrice(pay.applyPrice ) ?(pay.applyPrice | number:'1.2'):'0'}}
+        </div>
+      </div>
+
+
+      <!-- 材料使用情况 -->
+      <ul class="info-price" *ngIf='pay'>
+        <li>
+          <span class="font20 width160 "
+            [ngStyle]="{'color':checkShowRed()}">{{renderPrice(pay.totalPrice )?(pay.totalPrice | number:'1.2'):'0'}}</span>
+          <span>已下单（审核通过且不含本单）材料金额：{{renderPrice(pay.orderPrice )?(pay.orderPrice | number:'1.2'):'0'}}
+            <span *ngIf='pay  && pay.receivePrice'>
+              （占已收金额 {{pay.materialRatio?(pay.materialRatio+'%'):'0%'}}）
+            </span>
+            <span *ngIf='!pay.receivePrice' class="grey">
+              （尚未收款）
+            </span>
+          </span>
+        </li>
+        <li>
+          <span class="width160 grey">本单材料金额</span>
+          <span>已下单材料金额加本单材料金额： <span
+              [ngStyle]="{'color':checkShowRed()}">{{renderPrice(pay.allPrice )?(pay.allPrice | number:'1.2'):'0'}}
+              <span *ngIf='pay && pay.allPrice && pay.receivePrice' [ngStyle]="{'color':checkShowRed()}">
+                （占已收金额 {{pay.allPriceRatio?(pay.allPriceRatio+'%'):'0%'}}）
+              </span>
+              <span *ngIf='!pay.receivePrice' class="grey">
+                （尚未收款）
+              </span>
+            </span>
+          </span>
+        </li>
+        <li>
+          <span class="width160 grey"*ngIf='pay  && pay.receivePrice' > 占已收金额 {{pay && pay.receivePriceRatio?(pay.receivePriceRatio+'%'):'0%'}}
+          </span>
+          <span *ngIf='!pay.receivePrice' class=" width160 grey">
+            尚未收款
+          </span>
+          <span>剩余可用材料金额（不含本单）：<span>
+              {{renderPrice(pay.applyOrderPrice)?(pay.applyOrderPrice | number:'1.2'):'0'}}
+              <span *ngIf='pay  && pay.receivePrice' class="grey">
+                （占已收金额 {{pay.applyOrderPriceRatio?(pay.applyOrderPriceRatio+'%'):'0%'}}）
+              </span>
+              <span *ngIf='!pay.receivePrice' class="grey">
+                （尚未收款）
+              </span>
+            </span></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

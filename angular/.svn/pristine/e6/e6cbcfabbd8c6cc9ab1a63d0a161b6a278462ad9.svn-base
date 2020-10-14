@@ -1,0 +1,32 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {getMaterialType} from "../../../../model/methods";
+
+@Component({
+    selector: 'rev-supplier-material-detail',
+    templateUrl: './supplier-material-detail.component.html',
+    styleUrls: ['./supplier-material-detail.component.scss']
+})
+export class SupplierMaterialDetailComponent implements OnInit {
+
+    public bread: string;
+
+    constructor(private activatedRoute: ActivatedRoute) {
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            this.bread = getMaterialType(Number(params["materialType"]));
+            console.log("init here is\t",this.bread);
+        })
+    }
+
+    ngAfterViewChecked() {
+        this.activatedRoute.snapshot.data["breadcrumb"] = this.bread;
+        console.log("view checked is \t",this.bread);
+    }
+
+
+
+
+}

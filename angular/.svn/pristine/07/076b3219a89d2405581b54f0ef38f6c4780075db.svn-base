@@ -1,0 +1,198 @@
+import { Component, OnInit } from '@angular/core';
+import { atob } from '../../../../model/methods';
+import { Router, ActivatedRoute } from '@angular/router';
+import { auditStatus, Default } from './../../../../model/constant';
+import {HttpHeaders, HttpParams, HttpClient} from '@angular/common/http';
+import {ApiService} from '../../../../service/api.service';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+@Component({
+  selector: 'rev-supplier-material-info',
+  templateUrl: './supplier-material-info.component.html',
+  styleUrls: ['./supplier-material-info.component.scss']
+})
+export class SupplierMaterialInfoComponent implements OnInit {
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private httpClient: HttpClient,
+    private apiService: ApiService,
+    private req: RequestService,
+    private warn: WarningService,
+  ) { }
+
+
+  public title: string = '材料';
+  public buttons: Array<any>;
+  public showBtn = true;
+  public showTitle = true;
+  public pageType = 2;
+  public brand;
+  public checkedNumber;
+  public type;
+  public materialType;
+  public httpOptions = {
+    withCredentials: true
+};
+  public isAllDisplayDataChecked: boolean;
+
+  public indeterminate = false;
+  public radioSwitch = [
+    {
+      key: 2,
+      text: '已创建'
+    },
+    {
+      key: 3,
+      text: '审核中'
+    },
+    {
+      key: 4,
+      text: '已通过'
+    },
+    {
+      key: 5,
+      text: '未通过'
+    },
+  ];
+  public materialList = [{ spu: "123", univalent: 123, checked: false },{ spu: "123", univalent: 123, checked: false },{ spu: "1235", univalent: 123, checked: false },{ spu:  "123", univalent: 123, checked: false }, { spu:  "123", univalent: 123, checked: false }, { spu:  "1235", univalent: 123, checked: false }];
+  ngOnInit() {
+    this.materialType = auditStatus;
+    this.buttons = [{
+      name: '模板下载',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '创建材料',
+    }];
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['name']) {
+        this.title = atob(params['name']);
+      }
+    });
+    this.materialList.forEach((v, i) => {
+      this.getNums(i);
+    })
+    this.materialList=this.materialList.reverse();
+  }
+
+  btoa(id: string) {
+    return btoa(id);
+  }
+  submit() {
+
+  }
+  handleFileChange(e) {
+    const that = this;
+    const files = e.target.files;
+    const file = files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('versionType', '1');
+
+    this.httpClient.post(this.apiService.getUrl('upExl'), formData, this.httpOptions)
+        .subscribe(
+            (res: any) => {
+                console.log(res)
+                if (res.code === 200) {
+                    that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    // that.loadData();
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            },
+            error => {
+                that.warn.onWarn('请求失败');
+            }
+        );
+    // this.uploadFile.nativeElement.value = '';
+}
+  addMaterial() {
+
+  }
+  checkSubmit(){
+    return this.materialList.some(v=>{
+      return v['checked']
+    })
+  }
+  handleName(e) {
+    switch (e) {
+      case '创建材料': this.router.navigate(['../edit'], { queryParams: { newMaterial: true }, relativeTo: this.activatedRoute });
+        break;
+        case '新建导入':   document.getElementById('import').click();
+        break;
+      default:
+        break;
+    }
+    console.log(e)
+  }
+  handleSwitch(e) {
+    this.pageType = e;
+  }
+  apply() {
+
+  }
+
+  getNums(index) {
+    let current = this.materialList[index];
+    let next = this.materialList[index + 1];
+    if (next) {
+      if (current.spu === next.spu) {
+        if (current["rows"]) {
+          current["rows"] = current["rows"] + 1;
+        } else {
+          current["rows"] = 2;
+        }
+        next["rows"] = current["rows"];
+        current["rows"] = 0;
+      } else {
+        if (!current["rows"]) {
+          current["rows"] = 1;
+        }
+        if (!next["rows"]) {
+          next["rows"] = 1;
+        }
+      }
+    }
+  }
+  getNum() {
+    this.checkedNumber = 0;
+    this.materialList.forEach(v => {
+      if (v['checked']) {
+        this.checkedNumber += 1
+      }
+    })
+  }
+  refreshStatus() {
+
+    const allChecked = this.materialList.every(value => value.checked === true);
+    const allUnChecked = this.materialList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+    this.getNum()
+  }
+  checkAll(event) {
+    if (event) {
+      this.materialList.filter((item, i) => {
+        item['checked'] = true;
+      });
+    } else {
+      this.materialList.filter(item => {
+        item['checked'] = false;
+      });
+    }
+    this.indeterminate = false;
+    this.getNum()
+  }
+  changeData() {
+
+  }
+}

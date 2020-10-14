@@ -1,0 +1,146 @@
+import { Component, OnInit } from '@angular/core';
+import { Messages } from '../../../../model/msg';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+
+import { WarningService } from '../../../../service/warning.service';
+import { Default } from '../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import { setStyleBg } from 'src/app/model/methods';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+@Component({
+  selector: 'rev-supplier-material-add',
+  templateUrl: './supplier-material-add.component.html',
+  styleUrls: ['./supplier-material-add.component.scss']
+})
+export class SupplierMaterialAddComponent implements OnInit {
+  public materialForm;
+  public SocialCreditCode: number;
+  public phone: number;
+  public companyName: string;
+  public companyShortName: string;
+  public juridicalPerson;
+  public juridicalCode;
+  public license;
+  public codeFace;
+  public codeBackFace;
+  public cooperationAgreement;
+  public _albums = [];
+  public index = 0;
+
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+  ) { }
+
+  ngOnInit() {
+    this.materialForm = this.fb.group({
+      SocialCreditCode: [this.SocialCreditCode, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+      phone: [this.phone, [
+        Validators.required,
+        Validators.maxLength(11),
+        UserValidate.ValidatePhone
+      ]],
+      companyName: [this.companyName, [
+        Validators.required,
+        Validators.maxLength(30),
+      ]],
+      companyShortName: [this.companyShortName, [
+        Validators.required,
+        Validators.maxLength(10),
+      ]],
+      juridicalPerson: [this.juridicalPerson, [
+        Validators.required,
+        Validators.maxLength(10),
+        Validators.minLength(2),
+      ]],
+      juridicalCode: [this.juridicalCode, [
+        Validators.required,
+        Validators.minLength(15),
+        Validators.maxLength(18),
+        UserValidate.ValidateIdCard
+      ]],
+    });
+  }
+  addVerify(type) {
+    let name
+    switch (type) {
+      case 1: name='上传身份证正面'
+        break;
+      case 2: name='上传身份证背面'
+        break;
+      case 3: name='上传营业执照'
+        break;
+      case 4: name='上传合作协议'
+        break;
+      default:
+        break;
+    }
+    console.log(this.materialForm)
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = name;
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.result.then((result) => {
+      switch (type) {
+        case 1: this.codeFace = result.image;
+          break;
+        case 2: this.codeBackFace = result.image;
+          break;
+        case 3: this.license = result.image;
+          break;
+        case 4: this.cooperationAgreement = result.image;
+          break;
+        default:
+          break;
+      }
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+  checkImg() {
+    if (this.codeFace && this.codeBackFace && this.license && this.cooperationAgreement && this.materialForm.valid) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+    ;
+  }
+  handleOk($event) {
+
+  }
+  delImg(type) {
+    console.log(type)
+    switch (type) {
+      case 1: this.codeFace = ''
+        break;
+      case 2: this.codeBackFace = ''
+        break;
+      case 3: this.license = ''
+        break;
+      case 4: this.cooperationAgreement = ''
+        break;
+      default:
+        break;
+    }
+  }
+  handleCancel() {
+
+  }
+  styleImg(img) {
+    return setStyleBg(img, 96, 96);
+  }
+}

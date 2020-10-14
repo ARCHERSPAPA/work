@@ -1,0 +1,216 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Default } from './../../../../model/constant';
+import { HttpClient } from '@angular/common/http';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../../../service/api.service';
+import { btoa } from '../../../../model/methods';
+@Component({
+  selector: 'rev-temp-lib-list',
+  templateUrl: './temp-lib-list.component.html',
+  styleUrls: ['./temp-lib-list.component.scss']
+})
+export class TempLibListComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+
+  public buttons: Array<any>;
+  public showBtn = true;
+  public title: string;
+  public baseList = [{ companyName: 'qwe', checked: false, remark: 'nisadasd' }];//列表数据
+  public isAllDisplayDataChecked: boolean;
+  public indeterminate = false;
+  public baseType = 0;//已选择的类别
+  public baseTypes;//类别选择的列表
+  public query: string;//搜索绑定
+  public queryType = 1;//搜索类别默认名称
+  public queryList = [{ key: 1, text: '名称' }, { key: 2, text: '品牌' }, { key: 3, text: '规格' }, { key: 4, text: '型号' }];
+  public httpOptions = {
+    withCredentials: true
+  };
+  @ViewChild('uploadFile') uploadFile: any;
+  constructor(
+    private httpClient: HttpClient,
+    private apiService: ApiService,
+    private req: RequestService,
+    private warn: WarningService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    this.title = '基础库管理';
+    this.buttons = [{
+      name: '模板下载',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      type: 'default'
+    }, {
+      name: '创建',
+    }];
+    this.getCategory();
+    this.changePage();
+  }
+  swichQurey() {
+    console.log(this.queryType)
+  }
+  btoa(id: string) {
+    return btoa(id);
+  }
+  getCategory() {
+    this.req.doPost({
+      url: 'baseGetCategory',
+      success: res => {
+        if (res && res.code == 200) {
+          this.baseTypes = res.data;
+          this.baseTypes.unshift({ id: 0, name: '全部数据' })
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+        console.log(res)
+      }
+    })
+  }
+
+  changePage(e = 0) {
+    if (e) {
+      this.pageNo = Default.PAGE.PAGE_NO;
+      this.pageSize = Default.PAGE.PAGE_SIZE;
+    }
+    let param = {
+      pageNum: this.pageNo,
+      pageSize: this.pageSize,
+    }
+    if (this.baseType) {
+      param['categoryId'] = this.baseType;
+    }
+    if (this.queryType === 1) {
+      param['name'] = this.query;
+    } else if (this.queryType === 2) {
+      param['brand'] = this.query;
+    }
+    else if (this.queryType === 3) {
+      param['spec'] = this.query;
+    }
+    else if (this.queryType === 4) {
+      param['model'] = this.query;
+    }
+    this.req.doPost({
+      url: 'baseListPage',
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.baseList = res.data.list;
+          this.baseList.filter(v => {
+            v['checked'] = false;
+          })
+          this.total = res.data.total;
+          this.indeterminate = false;
+          this.isAllDisplayDataChecked = false;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  checkSubmit() {
+    return this.baseList.some(v => {
+      return v['checked'];
+    })
+  }
+
+  del(id) {
+    if (id) {
+      id = [id];
+    } else {
+      id = [];
+      this.baseList.forEach(v => {
+        if (v['checked']) {
+          id.push(v['id'])
+        }
+      })
+    }
+    this.req.doPost({
+      url: 'baseDeleteList',
+      data: {
+        id: id
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.changePage();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  refreshStatus() {
+    const allChecked = this.baseList.every(value => value.checked === true);
+    const allUnChecked = this.baseList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+  }
+  checkAll(event) {
+    if (event) {
+      this.baseList.filter((item) => {
+        item['checked'] = true;
+      });
+    } else {
+      this.baseList.filter(item => {
+        item['checked'] = false;
+      });
+    }
+    this.indeterminate = false;
+  }
+  handleName(e) {
+    switch (e) {
+      case '新建导入':
+        document.getElementById('import').click();
+        break;
+      case '模板下载': const a = document.createElement('a');
+        a.href = '';
+        a.click();
+        break;
+      case '创建': this.router.navigate(['../edit'], { queryParams: {}, relativeTo: this.activatedRoute });
+        break;
+      default:
+        break;
+    }
+  }
+  handleFileChange(e) {
+    const that = this;
+    const files = e.target.files;
+    const file = files[0];
+    const formData = new FormData();
+    console.log(file)
+    formData.append('file', file);
+    formData.append('versionType', '1');
+    // formData.append('supplierId', this.id);
+    // this.httpOptions['params'] = { 'supplierId': this.id + '', 'type': this.materialType + '' }
+    this.httpClient.post(this.apiService.getUrl('baseImportMaterial'), formData, this.httpOptions)
+      .subscribe(
+        (res: any) => {
+          if (res.code === 200) {
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            that.changePage();
+            that.getCategory();
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        },
+        error => {
+          that.warn.onWarn('请求失败');
+        }
+      );
+    this.uploadFile.nativeElement.value = '';
+  }
+  swichType() {
+    this.changePage();
+  }
+}

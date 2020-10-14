@@ -1,0 +1,7 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+tr td {
+    max-width: 120px;
+    @include compatibility(word-break, break-word);
+    @include ellipsis();
+}

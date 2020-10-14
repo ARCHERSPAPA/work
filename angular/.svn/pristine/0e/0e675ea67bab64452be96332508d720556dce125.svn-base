@@ -1,0 +1,47 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+
+import {PublicModule} from '../../public/public.module';
+import { TempBasicComponent } from './temp-basic/temp-basic.component';
+import { TempSuitComponent } from './temp-suit/temp-suit.component';
+import { TempPackComponent } from './temp-pack/temp-pack.component';
+import { TempBasicListComponent } from './temp-basic/temp-basic-list/temp-basic-list.component';
+import { TempBasicEditComponent } from './temp-basic/temp-basic-edit/temp-basic-edit.component';
+import { TempSuitListComponent } from './temp-suit/temp-suit-list/temp-suit-list.component';
+import { TempSuitEditComponent } from './temp-suit/temp-suit-edit/temp-suit-edit.component';
+import { TempPackListComponent } from './temp-pack/temp-pack-list/temp-pack-list.component';
+import { TempPackEditComponent } from './temp-pack/temp-pack-edit/temp-pack-edit.component';
+import { TempLibComponent } from './temp-lib/temp-lib.component';
+import { TempLibListComponent } from './temp-lib/temp-lib-list/temp-lib-list.component';
+import { TempLibEditComponent } from './temp-lib/temp-lib-edit/temp-lib-edit.component';
+import { ItemBasicModule} from '../../plugins/item-basic/item-basic.module';
+import {TempRoutingModule} from "./temp-routing.module";
+import {TitleModule} from "../../public/title.module";
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        PublicModule,
+        TitleModule,
+        TempRoutingModule,
+        ItemBasicModule
+        
+    ],
+    declarations: [
+        TempBasicComponent,
+        TempSuitComponent,
+        TempPackComponent,
+        TempBasicListComponent,
+        TempBasicEditComponent,
+        TempSuitListComponent,
+        TempSuitEditComponent,
+        TempPackListComponent,
+        TempPackEditComponent,
+        TempLibComponent,
+        TempLibListComponent,
+        TempLibEditComponent
+    ]
+})
+export class TempModule {
+}

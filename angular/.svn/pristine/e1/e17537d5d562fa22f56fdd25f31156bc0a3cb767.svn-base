@@ -1,0 +1,256 @@
+import { Component, OnInit,ViewChild } from '@angular/core';
+import {Default} from '../../../../model/constant';
+import { HttpClient } from '@angular/common/http';
+import { ApiService } from '../../../../service/api.service';
+import { RequestService } from '../../../../service/request.service';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {FormBuilder, FormGroup,Validators} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'rev-master-sale-add',
+  templateUrl: './sale-add.component.html',
+  styleUrls: ['./sale-add.component.scss']
+})
+export class MasterSaleAddComponent implements OnInit {
+    public title: string;
+    public id: string;
+    public versionName: string; //版本名称
+    public isVisible = false;
+    //版本编辑表单
+    public editionForm: FormGroup;
+    public editionName: string;
+ 
+    public componeyStatus:Array<any> = []; // 公司选择
+    public brandStatus:Array<any> = []; // 品牌选择
+    public categoryStatus:Array<any> = []; // 类别选择
+    // 查询条件
+    public searchForm: FormGroup;
+    public material = '0';
+    public componey = undefined;
+    public brand = undefined;
+    public category = undefined;
+    public info = undefined;
+
+    public checkedNumber = 0; //选中的数量
+
+	public pageNo = Default.PAGE.PAGE_NO;
+    public pageSize = Default.PAGE.PAGE_SIZE;
+    public total = Default.PAGE.PAGE_TOTAL;
+    public radioSwitch = [
+		{
+			key: 0,
+			text: `已添加（${this.total}）`
+		},
+		{
+			key: 1,
+			text: '未添加'
+		}
+    ];  
+    public state = 0;
+    
+    public materialList:Array<any> = [];
+    public isAllDisplayDataChecked: boolean;
+    public indeterminate = false;
+    
+	public httpOptions = {
+        withCredentials: true
+    };
+	@ViewChild('uploadFile') uploadFile: any;
+    constructor(
+		private httpClient: HttpClient,
+		private apiService: ApiService,
+		private request: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+	) { }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['id']) {
+                this.id = atob(params.id);
+                this.changeData();
+                this.title = '详情';
+            } else {
+                this.title = '创建版本';
+            }
+          });
+        this.searchForm = this.fb.group({
+            info: [this.info, [
+                Validators.maxLength(100)
+            ]]
+        });
+        this.editionForm = this.fb.group({
+            editionName: [this.editionName, [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+    }
+    
+    // 修改版本名
+    showModal(name: string) {
+        this.isVisible = true;
+        this.editionName = name;
+    }
+
+    //修改版本名后提交
+    handleItemOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.editionForm.valid) {
+            const versionName = this.editionForm.value.editionName.trim();
+            this.request.doPost({
+                url: 'mouldUpd',
+                data: {
+                    versionName: versionName
+                },
+                success: (res => {
+                    this.handleItemCancel();
+                    if (res && res.code === 200) {
+                        this.versionName = versionName;
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+
+        }
+    }
+
+    //修改取消
+    handleItemCancel() {
+        this.isVisible = false;
+        this.editionForm.reset();
+    }
+     
+    // 下载
+    upload(){
+        this.request.doPostDown({
+            url: 'downExl',
+            /* data: {
+                id: this.versionId,
+                versionType: '1'
+            }, */
+            success: (res => {
+                const blob = new Blob([res], {type: 'application/vnd.ms-excel'});
+                if (window.navigator.msSaveOrOpenBlob) {
+                    navigator.msSaveBlob(blob);
+                } else {
+                    const elink = document.createElement('a');
+                    elink.download = this.title.replace(/(^\s*)|(\s*$)/g, '') + '.xls';
+                    elink.style.display = 'none';
+                    elink.href = URL.createObjectURL(blob);
+                    document.body.appendChild(elink);
+                    elink.click();
+                    document.body.removeChild(elink);
+                }
+            })
+        });
+    }
+    // 导入
+    import(){
+        document.getElementById('import').click();
+    }	
+
+    handleSwitch(status){
+        this.state = status
+        this.changeData(true);
+    }
+    // 导入
+    // document.getElementById('import').click()
+    handleFileChange(e) {
+        const that = this;
+        const files = e.target.files;
+        const file = files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('versionType', '1');
+
+        this.httpClient.post(this.apiService.getUrl('upExl'), formData, this.httpOptions)
+            .subscribe(
+                (res: any) => {
+                    console.log(res)
+                    if (res.code === 200) {
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // that.loadData();
+                    } else {
+                        that.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                },
+                error => {
+                    that.warn.onWarn('请求失败');
+                }
+            );
+        this.uploadFile.nativeElement.value = '';
+    }
+    // 表格数据
+    changeData(...args) {
+        const that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        const params = {
+            pageNo: this.pageNo,
+            pageSize: this.pageSize,
+        };
+        if (this.info) {
+            params['info'] = this.info;
+        }
+        that.request.doPost({
+            url: 'listEmployee',
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.materialList = res.data.pageSet;
+                    that.isAllDisplayDataChecked = false;
+                    that.indeterminate = false;
+                    that.materialList.filter(v => {
+                        v['checked'] = false;
+                    });
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+	//全选
+	checkAll(event) {
+        if (event) {
+            this.materialList.filter((item, i) => {
+                if (item['state'] === 0) {
+                    item['checked'] = true;
+                }
+            });
+        } else {
+            this.materialList.filter(item => {
+                item['checked'] = false;
+            });
+        }
+        this.indeterminate = false;
+	}
+	
+	//单个选择
+    refreshStatus() {
+        const allChecked = this.materialList.every(value => value.checked === true);
+        const allUnChecked = this.materialList.every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+        this.checkedNumber = this.materialList.filter(value => value.checked).length;
+    }
+    // 删除按钮规则
+    showDel(){
+        if (this.materialList && this.materialList.length > 0) {
+            return this.materialList.every(v => {
+                return v['checked'] == false;
+            });
+        } else {
+            return true
+        }
+    }
+
+}

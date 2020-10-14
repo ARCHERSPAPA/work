@@ -1,0 +1,58 @@
+import { Injectable } from '@angular/core';
+import {RequestService} from "../../../service/request.service";
+import {Messages} from "../../../model/msg";
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CostDetailService {
+
+  constructor(private req:RequestService) { }
+
+    /**
+     * 获取成本数据信息
+     * @param {number} cid
+     * @returns {Promise<any>}
+     */
+    getCostDetail(cid:number):Promise<any>{
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url:"detailCost",
+                data:{id: cid},
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.data);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 锁定预算状态
+     * @param {boolean} lock 是否解除锁定
+     * @param {number} cid 报价id
+     * @returns {Promise<any>}
+     */
+    lockBudget(lock: boolean,cid:number):Promise<any>{
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url: 'lockContract',
+                data: {
+                    quoteId: cid,
+                    lockingBudget: lock?1:0
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+}

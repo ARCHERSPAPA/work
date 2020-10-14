@@ -1,0 +1,68 @@
+<div class="ant-modal-header">
+  <h4 class="ant-modal-title">{{getTitle(type)}}</h4>
+  <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+    <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+  </button>
+</div>
+
+<div nz-row>
+  <div nz-row class="mt-16 mb-16">
+    <div nz-col nzSpan="5" nzOffset="10">
+      <nz-select style="width: 100%;" [(ngModel)]="category" nzAllowClear nzPlaceHolder="请选择类别">
+        <nz-option [nzValue]="cate.value" [nzLabel]="cate.text" *ngFor="let cate of categories"></nz-option>
+      </nz-select>
+    </div>
+    <div nz-col nzSpan="5" nzOffset="1">
+      <input nz-input placeholder="请输入需要查询的内容" [(ngModel)]="info" />
+    </div>
+    <div nz-col nzSpan="2" nzOffset="1">
+      <button  nz-button nzType="primary">查询</button>
+    </div>
+  </div>
+  <div nz-row>
+    <nz-table   [nzData]="dataSet" nzBordered="true"
+                [nzLoading]="loading" nzFrontPagination="true" nzShowPagination="true"
+                #ajaxTable nzSize="small"
+                [nzTotal]="total" [(nzPageIndex)]="pageIndex" [(nzPageSize)]="pageSize"
+                (nzPageIndexChange)="changeData()">
+      <thead>
+        <tr>
+          <th nzWidth="50px">编号</th>
+          <th>类别</th>
+          <th>名称</th>
+          <th>品牌</th>
+          <th>规格</th>
+          <th>型号</th>
+          <th>单位</th>
+          <th>材料单价</th>
+          <th>材料损耗</th>
+          <th>木工</th>
+          <th>泥工</th>
+          <th>漆工</th>
+          <th>水电工</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of ajaxTable.data; let i = index">
+          <td>{{i+1}}</td>
+          <td><span class="td-eclipse-60">{{data.category?data.category:'--'}}</span></td>
+          <td><span class="td-eclipse-100">{{data.name?data.name:'--'}}</span></td>
+          <td><span class="td-eclipse-40">{{data.brand?data.brand:'--'}}</span></td>
+          <td><span class="td-eclipse-40">{{data.specifications?data.specifications:'--'}}</span></td>
+          <td><span>{{data.model?data.model:'--'}}</span></td>
+          <td><span>{{data.unit?data.unit:'--'}}</span></td>
+          <td><span>{{data.materialPrice?data.materialPrice:'--'}}</span></td>
+          <td><span>{{data.materialNum?data.materialNum:'--'}}</span></td>
+          <td><span>{{data.carpentryNum?data.carpentryNum:'--'}}</span></td>
+          <td><span>{{data.tilerNum?data.tilerNum:'--'}}</span></td>
+          <td><span>{{data.paintingNum?data.paintingNum:'--'}}</span></td>
+          <td><span>{{data.plumberNum?data.plumberNum:'--'}}</span></td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<div class="ant-modal-footer">
+  <button type="button" class="ant-btn ant-btn-primary">确定</button>
+</div>

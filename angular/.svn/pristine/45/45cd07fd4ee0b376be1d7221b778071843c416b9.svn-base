@@ -1,0 +1,198 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">自定义项目</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="ant-modal-body">
+    <div nz-row class="mb-12">
+        <form nz-form [formGroup]="baseForm">
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="6" nzRequired>名称</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input [(ngModel)]="name" name="name" formControlName="name" maxlength="30"
+                           placeholder="请输入名称" autocomplete="off"/>
+                    <nz-form-explain *ngIf="baseForm.get('name').dirty && baseForm.get('name').errors">
+                        <ng-container *ngIf="baseForm.get('name').hasError('required')">
+                            名称必填
+                        </ng-container>
+                        <ng-container *ngIf="baseForm.get('name').hasError('maxlength')">
+                            请填写1~30位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="layout">
+                <nz-form-label [nzSpan]="6">品牌</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input [(ngModel)]="brand" name="brand" formControlName="brand" maxlength="10"
+                           placeholder="请输入品牌"/>
+                    <nz-form-explain *ngIf="baseForm.get('brand').dirty && baseForm.get('brand').errors">
+                        <ng-container *ngIf="baseForm.get('brand').hasError('maxlength')">
+                            请填写10位以内的字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nzRequired class="layout">
+                <nz-form-label [nzSpan]="6">规格</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input [(ngModel)]="spec" name="spec" formControlName="spec" maxlength="30"
+                           placeholder="请输入规格"/>
+                    <nz-form-explain *ngIf="baseForm.get('spec').dirty && baseForm.get('spec').errors">
+                        <ng-container *ngIf="baseForm.get('spec').hasError('minlength')">
+                            请填写30位以内的字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">型号</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input [(ngModel)]="model" name="model" formControlName="model" maxlength="30"
+                           placeholder="请输入型号"/>
+                    <nz-form-explain *ngIf="baseForm.get('model').dirty && baseForm.get('model').errors">
+                        <ng-container *ngIf="baseForm.get('model').hasError('minlength')">
+                            请填写30位以内的字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">销售数量</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <nz-input-number nz-input [(ngModel)]="num" name="num" [nzPrecision]='2'
+                                     [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01" formControlName="num"
+                                     nzPlaceHolder="请输入销售数量" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('num').dirty && baseForm.get('num').errors">
+                        <ng-container *ngIf="baseForm.get('num').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">销售单位</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <input nz-input [(ngModel)]="unit" name="unit" formControlName="unit" maxlength="10"
+                           placeholder="材料单位"/>
+                    <nz-form-explain *ngIf="baseForm.get('unit').dirty && baseForm.get('unit').errors">
+                        <ng-container *ngIf="baseForm.get('unit').hasError('maxlength')">
+                            请填写10位以内的字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">材料单价</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <nz-input-number nz-input [(ngModel)]="unitPrice" name="unitPrice" [nzPrecision]='2'
+                                     [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01" formControlName="unitPrice"
+                                     maxlength="10" nzPlaceHolder="请输入销售价" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('unitPrice').dirty && baseForm.get('unitPrice').errors">
+                        <ng-container *ngIf="baseForm.get('unitPrice').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">材料损耗</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+                    <nz-input-number nz-input [(ngModel)]="wastageRate" name="wastageRate" [nzPrecision]='0'
+                                     [nzFormatter]="formatterPercent"
+                                     [nzParser]="parserPercent"
+                                     [nzMax]='99' [nzMin]="0" [nzStep]="1" formControlName="wastageRate"
+                                     nzPlaceHolder="请输入材料损耗" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('wastageRate').dirty && baseForm.get('wastageRate').errors">
+
+                        <ng-container *ngIf="baseForm.get('wastageRate').hasError('maxlength')">
+                            请填写2位以内的整数
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">木工单价</nz-form-label>
+                <nz-form-control [nzSpan]="4">
+                    <nz-input-number nz-input [(ngModel)]="carpenterPrice" name="carpenterPrice" [nzPrecision]='2'
+                                     [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01" formControlName="carpenterPrice"
+                                     maxlength="10" nzPlaceHolder="请输入木工单价" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('carpenterPrice').dirty && baseForm.get('carpenterPrice').errors">
+                        <ng-container *ngIf="baseForm.get('carpenterPrice').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+                <nz-form-label [nzSpan]="4">泥工单价</nz-form-label>
+                <nz-form-control [nzSpan]="4">
+                    <nz-input-number nz-input [(ngModel)]="masonPrice" name="masonPrice" [nzPrecision]='2'
+                                     [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01" formControlName="masonPrice"
+                                     nzPlaceHolder="请输入泥工单价" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('masonPrice').dirty && baseForm.get('masonPrice').errors">
+                        <ng-container *ngIf="baseForm.get('masonPrice').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">漆工单价</nz-form-label>
+                <nz-form-control [nzSpan]="4">
+                    <nz-input-number nz-input [(ngModel)]="japannerPrice" name="japannerPrice" [nzPrecision]='2'
+                                     [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01" formControlName="japannerPrice"
+                                     maxlength="10" nzPlaceHolder="请输入漆工单价" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="baseForm.get('japannerPrice').dirty && baseForm.get('japannerPrice').errors">
+                        <ng-container *ngIf="baseForm.get('japannerPrice').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+                <nz-form-label [nzSpan]="4">水电单价</nz-form-label>
+                <nz-form-control [nzSpan]="4">
+                    <nz-input-number nz-input [(ngModel)]="utilityCharge" name=" utilityCharge"
+                                     [nzPrecision]='2' [nzMax]='9999999' [nzMin]="0" [nzStep]="0.01"
+                                     formControlName="utilityCharge" maxlength="10"
+                                     nzPlaceHolder="请输入水电单价" style="width:100%;">
+                    </nz-input-number>
+                    <nz-form-explain
+                            *ngIf="baseForm.get('utilityCharge').dirty && baseForm.get('utilityCharge').errors">
+                        <ng-container *ngIf="baseForm.get('utilityCharge').hasError('maxlength')">
+                            请填写10位以内的数字
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">说明</nz-form-label>
+                <nz-form-control [nzSpan]="12">
+          <textarea nz-input name="remark" [(ngModel)]="remark" formControlName="remark" maxlength='100' cols="30"
+                    rows="10">
+    </textarea>
+                    <span class="count" *ngIf="remark"><span style="color: red;">{{remark.length}}</span>/100</span>
+                    <nz-form-explain *ngIf="baseForm.get('remark').dirty && baseForm.get('remark').errors">
+                        <ng-container *ngIf="baseForm.get('remark').hasError('maxlength')">
+                            请填写0~100位的字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</div>
+
+<div class="ant-modal-footer">
+    <button nz-button nzType="default" (click)="cancelModal()">取消</button>
+    <button nz-button nzType="primary" [disabled]="false" (click)="confirmModal($event)">确定</button>
+</div>

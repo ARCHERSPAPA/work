@@ -1,0 +1,21 @@
+@import "./../../../../assets/scss/mixin";
+.cost-base{
+    &-list{
+        tr th,tr td{
+            font-size: 14px;
+            max-width:100px;
+            vertical-align: middle;
+            a{
+                padding-right: 4px;
+            }
+            @include ellipsis();
+           }
+    }
+    .serch{
+        text-align: right;
+        input{
+            width: 200px;
+            margin-right: 8px;
+        }
+    }
+}

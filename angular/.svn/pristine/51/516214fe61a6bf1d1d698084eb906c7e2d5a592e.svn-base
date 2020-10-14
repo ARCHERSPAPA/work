@@ -1,0 +1,171 @@
+<div class='supplier-materialAdd'>
+  <form nz-form [formGroup]="materialForm">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">社会信用代码</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="SocialCreditCode" nzSize="large" name="SocialCreditCode"
+        (blur)='check(1,SocialCreditCode)'
+          formControlName="SocialCreditCode" maxlength="18" placeholder="18位社会信用代码" />
+        <nz-form-explain
+          *ngIf="materialForm.get('SocialCreditCode').dirty && materialForm.get('SocialCreditCode').errors">
+          <ng-container *ngIf="materialForm.get('SocialCreditCode').hasError('required')">
+            社会信用必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('SocialCreditCode').hasError('minlength')">
+            请填写18位社会信用代码
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">手机号</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="phone" nzSize="large" name="phone" formControlName="phone" maxlength="11"
+          placeholder="11位手机号" />
+        <nz-form-explain *ngIf="materialForm.get('phone').dirty && materialForm.get('phone').errors">
+          <ng-container *ngIf="materialForm.get('phone').hasError('required')">
+            手机号必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('phone').hasError('maxlength')">
+            请填写11位的手机号
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">公司全称</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="companyName" nzSize="large" name="companyName" formControlName="companyName"
+          maxlength="11" placeholder="请填写" />
+        <nz-form-explain *ngIf="materialForm.get('companyName').dirty && materialForm.get('companyName').errors">
+          <ng-container *ngIf="materialForm.get('companyName').hasError('required')">
+            公司名必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('companyName').hasError('maxlength')">
+            请填写30位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">公司简称</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="companyShortName" nzSize="large" name="companyShortName"
+        (blur)='check(3,companyShortName)'
+          formControlName="companyShortName" maxlength="11" placeholder="请填写" />
+        <nz-form-explain
+          *ngIf="materialForm.get('companyShortName').dirty && materialForm.get('companyShortName').errors">
+          <ng-container *ngIf="materialForm.get('companyShortName').hasError('required')">
+            公司简称必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('companyShortName').hasError('maxlength')">
+            请填写10位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">系统编号</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="serveCode" nzSize="large" name="serveCode"
+        (blur)='check(2,serveCode)'
+          formControlName="serveCode" maxlength="10" placeholder="请填写" />
+        <nz-form-explain
+          *ngIf="materialForm.get('serveCode').dirty && materialForm.get('serveCode').errors">
+          <ng-container *ngIf="materialForm.get('serveCode').hasError('required')">
+            系统编号必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('serveCode').hasError('minlength')">
+            请填写2位以上的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">法人姓名</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="juridicalPerson" nzSize="large" name="juridicalPerson"
+          formControlName="juridicalPerson" maxlength="10" placeholder="请填写" />
+        <nz-form-explain
+          *ngIf="materialForm.get('juridicalPerson').dirty && materialForm.get('juridicalPerson').errors">
+          <ng-container *ngIf="materialForm.get('juridicalPerson').hasError('required')">
+            法人姓名必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('juridicalPerson').hasError('maxlength')">
+            请填写10位以内的字符
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('juridicalPerson').hasError('minlength')">
+            请填写2位以上的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">法人身份证号</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="juridicalCode" nzSize="large" name="juridicalCode" formControlName="juridicalCode"
+          maxlength="18" placeholder="请填写" />
+        <nz-form-explain *ngIf="materialForm.get('juridicalCode').dirty && materialForm.get('juridicalCode').errors">
+          <ng-container *ngIf="materialForm.get('juridicalCode').hasError('required')">
+            法人姓名必填
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('juridicalCode').hasError('maxlength')">
+            请填写18位的身份证号
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('juridicalCode').hasError('minlength')">
+            请填写18位的身份证号
+          </ng-container>
+          <ng-container *ngIf="materialForm.get('juridicalCode').hasError('ValidateIdCard')">
+            身份证号格式不正确
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="layout">
+      <nz-form-label [nzSpan]="6">相关证件</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <ul>
+          <li>
+            <rev-uploader-new *ngIf="!codeFace" [content]='"身份证正面"' [width]='96' [height]='96' class="uploaders" (click)="addVerify(1)">
+            </rev-uploader-new>
+            <p [ngStyle]="styleImg(codeFace)" (click)='openLarge(codeFace)' *ngIf="codeFace">
+              <a class="del" href="javascript:void(0)" (click)="delImg(1)"></a>
+              <span class="showDel"></span>
+            </p>
+   
+          </li>
+          <li>
+            <rev-uploader-new *ngIf="!codeBackFace" [content]='"身份证背面"' [width]='96' [height]='96' class="uploaders" (click)="addVerify(2)">
+            </rev-uploader-new>
+            <p [ngStyle]="styleImg(codeBackFace)"(click)='openLarge(codeBackFace)' *ngIf="codeBackFace">
+              <a class="del" href="javascript:void(0)" (click)="delImg(2)"></a>
+              <span class="showDel"></span>
+            </p>
+          </li>
+          <li>
+            <rev-uploader-new *ngIf="!license" [content]='"营业执照"' [width]='96' [height]='96' class="uploaders" (click)="addVerify(3)">
+            </rev-uploader-new>
+            <p [ngStyle]="styleImg(license)" (click)='openLarge(license)'*ngIf="license">
+              <a class="del" href="javascript:void(0)" (click)="delImg(3)"></a>
+              <span class="showDel"></span>
+            </p>
+          </li>
+          <li>
+            <p [ngStyle]="styleImg(cooperationAgreement)"(click)='openLarge(cooperationAgreement)'style="margin:0;" *ngIf="cooperationAgreement">
+              <a class="del" href="javascript:void(0)" (click)="delImg(4)"></a>
+              <span class="showDel"></span></p>
+            <rev-uploader-new *ngIf="!cooperationAgreement"  [content]='"合作协议"' [width]='96' [height]='96' (click)="addVerify(4)"></rev-uploader-new>
+          </li>
+        </ul>
+      </nz-form-control>
+    </nz-form-item>
+    <div nz-row>
+      <div class="btns">
+          <button nz-button nzType="default" nzSize='large' style='margin-right:250px' (click)="handleCancel()">取消</button>
+          <button nz-button nzType="primary" nzSize='large' style='margin-right:16px'[disabled]="checkImg()" (click)="handleOk($event)">创建并申请合作
+          </button>
+      </div>
+  </div>
+  </form>
+</div>
+<rev-imgview [album]="_albums" [index]="index" *ngIf="_albums.length>0"></rev-imgview>

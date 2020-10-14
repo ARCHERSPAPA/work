@@ -1,0 +1,116 @@
+<div class="offer">
+    <div class="head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true"(handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="content">
+        <div class="offer-list">
+            <div class="list-head">
+                <div class="search-bar">
+                    <form method="post" [formGroup]="searchForm">
+                        <nz-select style="width: 160px;" [(ngModel)]='type' nzAllowClear='false' nzPlaceHolder="按客户姓名查询"
+                                   class="serchs" (ngModelChange)="changeType()" [ngModelOptions]="{standalone: true}">
+                            <nz-option nzValue="1" nzLabel="按客户姓名查询"></nz-option>
+                            <nz-option nzValue="2" nzLabel="按手机号码查询"></nz-option>
+                            <nz-option nzValue="3" nzLabel="按楼盘查询"></nz-option>
+                            <nz-option nzValue="4" nzLabel="按订单编号查询"></nz-option>
+                        </nz-select>
+                        <div class="inp" style="width:57%">
+                            <input nz-input type="text" class="text" *ngIf="type === '1'" placeholder="请输入客户姓名"
+                                   formControlName="name" name="name" autocomplete="off" maxlength="32"
+                                   [(ngModel)]="name"/>
+                            <input nz-input type="text" class="text" *ngIf="type === '2'" placeholder="请输入手机号码"
+                                   formControlName="phone" name="phone" autocomplete="off" maxlength="16"
+                                   [(ngModel)]="phone"/>
+                            <input nz-input type="text" class="text" *ngIf="type === '3'" placeholder="请输入楼盘"
+                            formControlName="customerHouseAddress" name="customerHouseAddress" autocomplete="off" maxlength="16"
+                            [(ngModel)]="customerHouseAddress"/>
+                            <input nz-input type="text" class="text" *ngIf="type === '4'" placeholder="请输入订单编号"
+                            formControlName="quoteNo" name="quoteNo" autocomplete="off" maxlength="32"
+                            [(ngModel)]="quoteNo"/>       
+                            <button nz-button nzType="primary" type="submit" class="" [disabled]="!searchForm.valid"
+                                    (click)="searchData()">查询
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="list-group-rev">
+                <div class="list-items" style="width:85%;">
+                    <nz-table #nzTable [nzData]="offerList" [nzBordered]="true" [nzFrontPagination]="false"
+                              [nzShowPagination]="true" nzSize="middle" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                              [nzTotal]="total" (nzPageIndexChange)="changePage()"  [nzLoading]="loading">
+                        <thead>
+                        <tr>
+                            <th width="5%">客户姓名</th>
+                            <th width="10%">手机号</th>
+                            <th width="5%">地址</th>
+                            <th width="5%">类型</th>
+                            <th width="5%">状态</th>
+                            <th width="10%">创建时期</th>
+                            <th width="5%">创建人</th>
+                            <th width="10%">签单日期</th>
+                            <th width="5%">工长</th>
+                            <th width="5%">监理</th>
+                            <th width="10%">实付</th>
+                            <!--<th>备注</th>-->
+                            <th width="25%">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let data of nzTable.data;let i = index">
+                            <td [title]="data.customerName?data.customerName:''">
+                                {{data.customerName?data.customerName:'--'}}
+                            </td>
+                            <td [title]="data.customerPhone?data.customerPhone:''">
+                                {{data.customerPhone?data.customerPhone:'--'}}
+                            </td>
+                            <td [title]="data.customerHouseAddress?data.customerHouseAddress:''">
+                                {{data.customerHouseAddress?data.customerHouseAddress:'--'}}
+                            </td>
+                            <td [title]="getTypeName(data.type)">{{getTypeName(data.type)}}</td>
+                            <td [title]="getStateName(data.state)">{{getStateName(data.state)}}</td>
+                            <td>{{data.createTime?(data.createTime|date:'MM-dd HH:mm'):'--'}}</td>
+                            <td [title]="data.creatorName?data.creatorName:''">
+                                {{data.creatorName?data.creatorName:'--'}}
+                            </td>
+                            <td>{{data.billTime?(data.billTime|date:'MM-dd HH:mm'):'--'}}</td>
+                            <td [title]="data.foreManName?data.foreManName:''">{{data.foreManName?data.foreManName:'--'}}</td>
+                            <td [title]="data.foreManName?data.foreManName:''">{{data.supervisorName?data.supervisorName:'--'}}</td>
+                            <td [title]="data.finalPrice?data.finalPrice:''" nzstyle="width:120px">
+                                {{data.finalPrice?(data.finalPrice|number:'1.2'):'--'}}
+                            </td>
+                            <!--<td [nzTitle]="data.remark?data.remark:'暂无备注信息'"-->
+                                <!--nzPlacement="topCenter" nz-tooltip>{{data.remark?data.remark:'&#45;&#45;'}}-->
+                            <!--</td>-->
+                            <td>
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="撤回报价后,客户将无法查看该报价和订单?"
+                                   nzOkText="撤回" nzCancelText="取消" (nzOnConfirm)="retreatData(data.id,1)"
+                                   *ngIf="data.retreat === 0">撤回</a>
+                                <a href="javascript:void(0)" (click)="retreatData(data.id,0)"
+                                   *ngIf="data.retreat === 1">恢复</a>
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="关闭订单后将无法恢复，您确定关闭?"
+                                   nzOkText="关闭" nzCancelText="取消" (nzOnConfirm)="closeData(data.id)"
+                                   *ngIf="!(data.state === -2 || data.state === 8)">关闭</a>
+                                <a href="javascript:void(0)" *ngIf="data && data.state === -2"
+                                   nz-popconfirm nzTitle="删除订单后将无法恢复，您确定删除?"
+                                   nzOkText="删除" nzCancelText="取消" (nzOnConfirm)="deleteData(data.id)">删除</a>
+                                <a href="javascript:void(0)" (click)="buildData(data.id)" *ngIf="data.dataVersion === 1">新建</a>
+                                <a href="javascript:void(0)"
+                                   [routerLink]="['./../detail/price',1]"
+                                   [queryParams]="{cid:btoa(data.id)}">详情</a>
+                                <a href="javascript:void(0)" *ngIf="getAddAndDelByStatus(data.state)"
+                                   (click)="addData(data)">增减项</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+                <div class="list-quick">
+                    <div class="list-quick-title">快速查询</div>
+                    <rev-depart-tree [type]="departType" (handleChangeData)="changeDepart($event)" [isModal]=false
+                                     [displayDepartmentId]="departmentId"></rev-depart-tree>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

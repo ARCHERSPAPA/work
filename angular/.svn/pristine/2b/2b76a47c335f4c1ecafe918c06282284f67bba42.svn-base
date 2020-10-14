@@ -1,0 +1,77 @@
+import { Component, OnInit, Input, EventEmitter,  Output  } from '@angular/core';
+import { RequestService } from '../../service/request.service';
+import {WarningService} from '../../service/warning.service';
+import {Messages} from '../../model/msg';
+
+@Component({
+  selector: 'select-brand',
+  templateUrl: './selectBrand.component.html',
+  styleUrls: ['./selectBrand.component.scss']
+})
+export class SelectBrandComponent implements OnInit {
+
+  @Output() handleCategory = new EventEmitter<any>();
+  @Output() handleBrand = new EventEmitter<any>();
+
+
+  public categoryStatus : Array<any> = [];
+  public brandStatus : Array<any> = [];
+  public category = {id:'',categoryName:'全部类别'}; // 类别
+  public compareFn = (o1: any, o2: any) => o1 && o2 ? o1.id === o2.id : o1 === o2; //类别选择框为对象
+  public brand = undefined; // 品牌
+
+  constructor(
+        private request: RequestService,
+        private warn: WarningService,) {}
+
+  ngOnInit() {
+        this.getMarterialcategoryList()
+  }
+
+  //所有的类别
+  getMarterialcategoryList(){
+    this.request.doPost({
+        url: 'getMarterialCategory',
+        success: (res => {
+            if (res && res.code === 200) {
+                this.categoryStatus = res.data
+                this.categoryStatus.unshift({id:'',categoryName:'全部类别'})
+            } else {
+                this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+            }
+        })
+    });
+}
+
+// 拉出品牌
+changeCategory(){
+    this.brand = undefined
+    this.getMarterialBrand()
+    this.handleCategory.emit([this.category,this.brand]);
+}
+
+ //所有的品牌
+ getMarterialBrand(){
+    if(this.category.id){
+        this.request.doPost({
+            url: 'getMarterialBrand',
+            data:{
+                id:this.category.id
+            },
+            success: (res => {
+                if (res && res.code === 200) {
+                    this.brandStatus = res.data
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }else{
+        this.brandStatus = []
+    }
+}
+
+changeBrand() {
+    this.handleBrand.emit(this.brand);
+  }
+}

@@ -1,0 +1,9 @@
+@charset "utf8";
+@import "../../../../../assets/scss/mixin";
+.master-warp{
+  tr td,
+  tr th{
+    max-width: 80px;
+    @include ellipsis;
+  }
+}

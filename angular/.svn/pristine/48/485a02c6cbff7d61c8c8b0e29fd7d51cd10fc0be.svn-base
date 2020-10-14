@@ -1,0 +1,8 @@
+<div class="select-brand">
+    <nz-select style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="类别" [(ngModel)]="category" [compareWith]="compareFn" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeCategory()">
+        <nz-option *ngFor="let category of categoryStatus" [nzValue]="category" [nzLabel]="category.categoryName"></nz-option>
+    </nz-select>
+    <nz-select style="min-width: 120px; max-width: 240px;margin-right: 8px" nzAllowClear="true" nzPlaceHolder="品牌" [(ngModel)]="brand" nzMode="multiple"  [ngModelOptions]="{standalone: true}" (ngModelChange)="changeBrand()" [disabled] = 'brandStatus.length === 0' class="sale-brand">
+        <nz-option *ngFor="let brand of brandStatus" [nzValue]="brand.brandName" [nzLabel]="brand.brandName"></nz-option>
+    </nz-select>
+</div>

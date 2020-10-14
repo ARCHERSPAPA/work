@@ -1,0 +1,22 @@
+@charset "utf-8";
+.master-warp{
+  .select-combos{
+    min-width: 120px;
+    max-width: 240px;
+    margin-right: 8px;
+    ::ng-deep .ant-select-selection--multiple{
+      max-height: 32px;
+      .ant-select-selection__rendered{
+        max-height: 32px;
+      }
+    }
+    ::ng-deep ul{
+      white-space:nowrap;
+      overflow: auto;
+      li{
+        display:inline-block;
+        float: none
+      }
+    }
+  }
+}

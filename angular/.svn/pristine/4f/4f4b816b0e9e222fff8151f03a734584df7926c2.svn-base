@@ -1,0 +1,457 @@
+import {Component, OnInit, Input} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import * as UserValidate from '../../validate/user-validate';
+import {RequestService} from '../../service/request.service';
+import {WarningService} from '../../service/warning.service';
+import {Messages} from '../../model/msg';
+import {ConfigService} from '../../service/config.service';
+import {NgZorroAntdModule} from 'ng-zorro-antd';
+import {getVersionType, toInteger} from '../../model/methods';
+import {ItemCartComponent} from '../item-cart/item-cart.component';
+
+@Component({
+    selector: 'rev-item',
+    templateUrl: './item.component.html',
+    styleUrls: ['./item.component.scss'],
+    providers: [NgZorroAntdModule]
+})
+export class ItemComponent implements OnInit {
+    /**
+     *类型
+     * 2：主材，3：基装(其它项目添加),1:套装、整装和基装，4：其它, 5:材料清单
+     */
+    @Input() type: number;
+
+    @Input() hasEmptyData: boolean;
+
+    //当前版本id
+    @Input() versionId: number;
+
+    //版本类别
+    @Input() versionType: number;
+
+    //当前报价id
+    @Input() id: string;
+
+    //当前大项id
+    @Input() infoId: string;
+
+    @Input() content: any;
+
+    @Input() branchName: string;
+
+    //从报价页面传递过来的增减主项的id
+    @Input() aid: number;
+
+    public itemForm: FormGroup;
+
+    /***
+     * 版本信息
+     */
+    public configBase: any;
+
+    /***
+     * 二级联动效果展示
+     */
+    public selectType: number;
+    public changeOptions: any;
+
+    public selectVersionId: number;
+    /***
+     * 添加其他
+     */
+    public name: string;
+    public univalent: number;
+    public num: number;
+    public unit: string;
+    public discountPrice: string;
+    public offerExplain: string;
+    public isEdit = false;
+
+    // public visible: boolean = false;
+
+
+    constructor(public modal: NgbActiveModal,
+                private fb: FormBuilder,
+                private req: RequestService,
+                private warn: WarningService,
+                private config: ConfigService,
+                private modalService: NgbModal) {
+    }
+
+    ngOnInit() {
+        const that = this;
+        if (that.type === 2 || that.type === 3 || that.type === 5) {
+
+            that.selectType = that.getSelectType();
+            that.itemForm = that.fb.group({
+                versionType: [{
+                    value: that.selectType,
+                    disabled: true
+                }, [
+                    Validators.required
+                ]],
+                versionId: [this.selectVersionId, [
+                    Validators.required
+                ]]
+            });
+        } else if (that.type === 1) {
+
+            /**
+             * 兼容360的兼容模式
+             */
+            if (!this.selectType) {
+                this.selectType = 2;
+                this.changeChildOptions();
+            }
+
+            that.itemForm = that.fb.group({
+                versionType: [that.selectType, [
+                    Validators.required
+                ]],
+                versionId: [that.selectVersionId, [
+                    Validators.required
+                ]]
+            });
+            if (that.versionId && that.versionType) {
+                that.selectType = that.versionType;
+                that.selectVersionId = that.versionId;
+                this.save();
+            }
+
+        } else if (that.getOtherByState(that.type, that.aid)) {
+            if (that.content) {
+                const item = that.content;
+                that.isEdit = true;
+                that.name = item.name;
+                that.num = item.num;
+                that.unit = item.unit;
+                that.univalent = item.univalent;
+                that.discountPrice = item.totalPrice ? item.totalPrice : '0';
+                that.offerExplain = item.offerExplain;
+            }
+            that.itemForm = that.fb.group({
+                name: [that.name, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(100)
+                ]],
+                num: [that.num, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(10),
+                    UserValidate.ValidateNumInt
+                ]],
+                univalent: [that.univalent, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(10),
+                    UserValidate.ValidatePrice
+                ]],
+                unit: [that.unit, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(10)
+                ]],
+                discountPrice: [that.discountPrice, [
+                    Validators.required,
+                    Validators.minLength(1),
+                    Validators.maxLength(10),
+                    UserValidate.ValidateNumInt
+                ]],
+                offerExplain: [that.offerExplain, [
+                    Validators.maxLength(500)
+                ]]
+            });
+        }
+        if (!that.getOtherByState(that.type, that.aid)) {
+            that.config.loadConfig(that.id);
+        }
+
+    }
+
+    ngAfterViewInit() {
+        const that = this;
+        setTimeout(() => {
+            if (!that.getOtherByState(that.type, that.aid) && that.configBase) {
+                if (that.configBase && that.configBase.length > 0) {
+                    for (const tc of that.configBase) {
+                        if (that.selectType) {
+                            if (tc.type == that.selectType) {
+                                that.changeOptions = tc.versions;
+                                if (that.changeOptions && that.changeOptions.length > 0) {
+                                    that.selectVersionId = that.versionId ? that.versionId : that.changeOptions[0].versionId;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }, 1500);
+    }
+
+    ngDoCheck() {
+        if (!this.getOtherByState(this.type, this.aid)) {
+            this.configBase = this.config.getConfigBase();
+        }
+    }
+
+    fillCount() {
+        if (this.itemForm.get('univalent') && this.itemForm.get('num')) {
+            const univalent = this.itemForm.get('univalent').valid ? this.itemForm.get('univalent').value : '';
+            const num = this.itemForm.get('num').valid ? this.itemForm.get('num').value : '';
+            let sum = String((this.changeToInt(univalent, 2) * this.changeToInt(num, 2)) / 10000);
+            sum = sum.lastIndexOf('.') > 0 ? sum.substring(0, sum.lastIndexOf('.') + 3) : sum;
+            this.itemForm.get('discountPrice').setValue(sum);
+        }
+    }
+
+
+    changeToInt(num, curve) {
+        return toInteger(num, curve);
+    }
+
+
+    cancel(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.modal.dismiss();
+    }
+
+    submit(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        if (that.itemForm.valid) {
+            const params = that.itemForm.value;
+            if (this.isEdit) {
+                params['id'] = that.content.id;
+            } else {
+                params['id'] = that.id;
+            }
+            params['num'] = Number(params['num']);
+            params['univalent'] = Number(params['univalent']);
+            params['discountPrice'] = Number(params['discountPrice']);
+            params['infoBranchId'] = that.infoId;
+
+            that.req.doPost({
+                url: that.isEdit ? 'upOtherQuote' : 'addOtherQuote',
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        // console.log(res);
+                        that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.modal.close(JSON.stringify(res.data[0]));
+                    } else {
+                        if (res.data) {
+                            that.warn.onError(res.data);
+                        } else {
+                            that.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    }
+                })
+            });
+        }
+    }
+
+    //添加其它选择提交到增减项目中云
+    modify(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.aid && this.itemForm.valid) {
+            const params = this.itemForm.value;
+            params['totalPrice'] = Number(params['discountPrice']);
+            delete params['discountPrice'];
+            params['id'] = this.aid;
+            params['num'] = Number(params['num']);
+            params['univalent'] = Number(params['univalent']);
+            this.req.doPost({
+                url: 'otherPause',
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.modal.close(res);
+                    } else {
+                        this.modal.dismiss();
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    save() {
+        const that = this;
+        if (that.itemForm.valid) {
+            const params = that.itemForm.value;
+            params['id'] = that.id;
+            params['type'] = that.getType();
+            params['versionType'] = that.selectType;
+            that.selectVersionId = params['versionId'];
+            if (that.type != 1) {
+                that.req.doPost({
+                    url: 'choiceVersion',
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            const item = that.modalService.open(ItemCartComponent, {
+                                centered: true,
+                                keyboard: true,
+                                backdrop: 'static',
+                                size: 'lg'
+                            });
+
+                            item.componentInstance.versionId = that.selectVersionId;
+                            item.componentInstance.type = that.getType();
+                            item.componentInstance.offerId = that.id;
+                            item.componentInstance.infoName = that.branchName;
+                            item.componentInstance.pauseId = that.aid;
+                            // item.componentInstance.title = that.getName();
+                            // console.log(that.selectVersionId);
+
+                            item.result.then(res => {
+                                that.modal.close(JSON.stringify(res));
+                            }, err => {
+                                that.warn.onError(err);
+                                that.modal.dismiss();
+                            });
+                        } else {
+                            that.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            } else {
+                that.modal.close(JSON.stringify(that.itemForm.value));
+            }
+        }
+    }
+
+    changeItem() {
+        const that = this;
+        if (that.itemForm.valid) {
+            const params = that.itemForm.value;
+            params['id'] = that.id;
+            params['type'] = that.getType();
+            params['versionType'] = that.selectType;
+            that.selectVersionId = params['versionId'];
+            if (that.type != 1) {
+
+                const item = that.modalService.open(ItemCartComponent, {
+                    centered: true,
+                    keyboard: true,
+                    backdrop: 'static',
+                    size: 'lg'
+                });
+
+                item.componentInstance.versionId = that.selectVersionId;
+                item.componentInstance.type = that.getType();
+                item.componentInstance.offerId = that.id;
+                item.componentInstance.infoName = that.branchName;
+                item.componentInstance.pauseId = that.aid;
+                // item.componentInstance.title = that.getName();
+
+                item.result.then(res => {
+                    that.modal.close(JSON.stringify(res));
+                }, err => {
+
+                    that.modal.dismiss();
+                });
+            }
+
+
+        } else {
+            that.modal.close(JSON.stringify(that.itemForm.value));
+        }
+    }
+
+
+    /**
+     * 类型选择时调用
+     */
+    store() {
+        const that = this;
+        if (that.itemForm.valid) {
+            that.modal.close(JSON.stringify(that.itemForm.value));
+        }
+    }
+
+    /**
+     * 初始化时调用此项，选择默认第一项
+     */
+    changeChildOptions(...args) {
+        const that = this;
+        if (that.configBase && that.configBase.length > 0) {
+            if (args && args.length > 0) {
+                that.selectType = args[0];
+            }
+            const cps = that.configBase.filter(tc => tc.type === that.selectType);
+            if (cps && cps.length > 0) {
+                console.log(cps);
+                that.changeOptions = cps[0].versions;
+                if (that.changeOptions && that.changeOptions.length > 0) {
+                    that.selectVersionId = that.changeOptions[0].versionId;
+                } else {
+                    that.selectVersionId = null;
+                }
+                console.log(that.changeOptions);
+            }
+        }
+    }
+
+    getTitle(type) {
+        switch (type) {
+            case 4:
+                return '其它项目';
+            case 5:
+                return '选择材料清单';
+            default:
+                return '选择装修类型';
+        }
+    }
+
+    getType() {
+        switch (this.type) {
+            case 2:
+                //主材
+                return 2;
+            case 3:
+                //增加项目
+                return 3;
+            //材料清单
+            case 5:
+                return 5;
+            default:
+                return 1;
+        }
+    }
+
+    getSelectType() {
+        return getVersionType(this.type);
+    }
+
+    visibleHandler(e) {
+        this.type = e.type;
+        this.selectType = this.getSelectType();
+        // this.visible = e.visible;
+        this.selectVersionId = e.versionId;
+        if (this.selectType === 1) {
+            this.modal.dismiss();
+        }
+    }
+
+    successHandler(e) {
+        // console.log(e);
+        if (e) {
+            this.modal.close(e);
+        }
+    }
+
+    getOtherByState(type, aid) {
+        return type === 4 && aid != 'undefined';
+    }
+
+    ngOnDestroy() {
+        this.config.setConfigBase(null);
+    }
+}

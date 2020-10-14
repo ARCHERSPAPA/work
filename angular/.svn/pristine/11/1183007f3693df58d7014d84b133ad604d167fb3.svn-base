@@ -1,0 +1,173 @@
+import {Component, OnInit} from '@angular/core';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+
+@Component({
+    selector: 'rev-master-promotion',
+    templateUrl: './master-promotion.component.html',
+    styleUrls: ['./master-promotion.component.scss']
+})
+export class MasterPromotionComponent implements OnInit {
+
+    //标题
+    public title: string;
+    //tab切换标签
+    public radioSwitch: Array<any>;
+    //head 按钮
+    public buttons: Array<any>;
+    //具体活动
+    public promotions: Array<any>;
+
+    //选择checkbox
+    public allChecked: boolean = false;
+    //中间状态变化
+    public indeterminate: boolean = false;
+    //选中的数据
+    public selectItems: Array<any> = [];
+
+
+    //新建弹出框
+    public isVisible:boolean = false;
+
+    public validateForm: FormGroup;
+    public name:string;
+    public company:string;
+    public startTime: Date;
+    public endTime:Date;
+
+
+    constructor(private fb:FormBuilder) {
+    }
+
+    ngOnInit() {
+        this.title = "活动管理";
+
+        this.buttons = [
+            {
+                name: "创建活动"
+            }
+        ];
+
+        this.radioSwitch = [
+            {
+                key: 1,
+                text: "已创建"
+            },
+            {
+                key: 2,
+                text: "审核中"
+            },
+            {
+                key: 3,
+                text: "已通过"
+            },
+            {
+                key: 4,
+                text: "未通过"
+            },
+        ];
+
+        this.promotions = [
+            {
+                name: "315活动",
+                supplier: "山顶装饰",
+                startTime: new Date().getTime() - 5 * 24 * 60 * 60 * 1000,
+                endTime: new Date().getTime() + 3 * 24 * 60 * 60 * 1000,
+                status: 1,
+                editTime: new Date().getTime(),
+                id: Math.floor(Math.random() * 100 - 1)
+            },
+            {
+                name: "618活动",
+                supplier: "山顶装饰",
+                startTime: new Date().getTime() - 5 * 24 * 60 * 60 * 1000,
+                endTime: new Date().getTime() + 3 * 24 * 60 * 60 * 1000,
+                status: 1,
+                editTime: new Date().getTime(),
+                id: Math.floor(Math.random() * 100 - 1)
+            },
+            {
+                name: "10.1活动",
+                supplier: "山顶装饰",
+                startTime: new Date().getTime() - 5 * 24 * 60 * 60 * 1000,
+                endTime: new Date().getTime() + 3 * 24 * 60 * 60 * 1000,
+                status: 1,
+                editTime: new Date().getTime(),
+                id: Math.floor(Math.random() * 100 - 1)
+            }
+        ];
+
+        this.validateForm = this.fb.group({
+            name:[this.name,[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30)
+            ]],
+            company:[this.company,[
+                Validators.required
+            ]],
+            startTime:[this.startTime,[
+                Validators.required
+            ]],
+            endTime:[this.endTime,[]]
+        });
+
+    }
+
+    //全选
+    checkAll(e) {
+        console.log(e);
+        this.allChecked = e;
+        console.log("this all checked is",this.allChecked);
+        this.promotions.forEach(p =>{
+            p.checked = this.allChecked;
+        })
+        this.refreshStatus();
+    }
+
+    refreshStatus(){
+        const allCheck = this.promotions.every(p => p.checked === true);
+        const allUnCheck = this.promotions.every(p => !p.checked);
+
+        this.allChecked = allCheck;
+        this.indeterminate = (!allCheck) && (!allUnCheck);
+
+        this.selectItems = this.promotions.filter(p => p.checked);
+
+    }
+
+    //切换tab是使用
+    handleSwitch(e) {
+        console.log(e);
+    }
+
+    //处理title的按钮
+    handleName(e) {
+        console.log(e);
+        if(e === this.buttons[0].name){
+            this.createActivity();
+        }
+    }
+
+    //新建活动
+    createActivity(){
+        this.isVisible = true;
+    }
+
+    handleCancel (){
+        this.isVisible = false;
+        this.validateForm.reset();
+    }
+
+    handleOk(){
+        console.log(this.validateForm);
+        this.handleCancel();
+    }
+
+
+    companyChange(e){
+        console.log("变化中的公司选择",e);
+    }
+
+
+
+}

@@ -1,0 +1,85 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+// 模板版本管理部分通用样式
+.temp-warp{
+  tr th,tr td{
+    max-width: 6vw;
+    vertical-align: middle;
+    @include ellipsis
+  }
+}
+.temp-dtl{
+  position: relative;
+  > .dtl-fix{
+    position: absolute;
+    right: 0;
+    top: 10px;
+    font-size: 14px;
+  }
+}
+
+.explain{
+  position: relative;
+  word-break: break-all;
+  > textarea{
+    padding:5px 0 14px 0;
+  }
+  .count{
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    font-size: 14px;
+    > span{
+      color: #F92650;
+    }
+  }
+}
+
+.temp-modal{
+  .textarea{
+    position: relative;
+    .count{
+      position: absolute;
+      right: 5px;
+      bottom: -20px;
+      font-size: 12px;
+      > span{
+         color: #F92650;
+      }
+    }
+  }
+  .circle{
+    font-size: 20px;
+    color: #0A8DDF;
+    &.del{
+      color: #F92650;
+    }
+  }
+}
+
+.temp{
+  .temp-head,.temp-branch{
+    position: relative;
+    .head-fix{
+      position: absolute;
+      right: 0;
+      top: 20px;
+      font-size: 14px;
+    }
+  }
+}
+.btns {
+  margin: 24px -24px -11px -24px;
+  text-align: right;
+  border-top: 1px solid #dedede;
+  padding-top: 10px;
+  button{
+    margin-right: 24px;
+  }
+  button:first-child {
+    margin-right: 8px;
+  }
+}
+.del{
+  color: rgba(0, 0, 0, 0.4);
+}

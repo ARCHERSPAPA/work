@@ -1,0 +1,389 @@
+import {Component, OnInit} from '@angular/core';
+import {FormGroup, FormBuilder,Validators} from '@angular/forms';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+
+@Component({
+    selector: 'rev-master-promotion-materials',
+    templateUrl: './master-promotion-materials.component.html',
+    styleUrls: ['./master-promotion-materials.component.scss']
+})
+export class MasterPromotionMaterialsComponent implements OnInit {
+
+    public title: string;
+
+    public name:string;
+    public status:number;
+    public company:string;
+    public startTime:Date;
+    public endTime:Date;
+
+    //校验活动输入
+    public validateForm:FormGroup;
+    public isVisible:boolean = false;
+
+    //tab切换
+    public radioSwitch: Array<any>;
+    public radio:number = 1;
+
+    //选中项目
+    public selectItems:Array<any> = [];
+    //列表渲染数据
+    public materials:Array<any>;
+
+    public allChecked:boolean = false;
+    public indeterminate: boolean = false;
+
+    constructor(private fb:FormBuilder,
+                private req:RequestService,
+                private warn:WarningService) {}
+
+    ngOnInit() {
+        this.title = "活动材料";
+
+        this.name = "天天向上这个节目还是不错的，可惜时不我与，机不可失";
+
+        this.status = 1;
+        this.company = "新佰利装饰公司";
+        this.startTime = new Date(new Date().getTime());
+        this.endTime = new Date(new Date().getTime() + 15*24*60*60*1000);
+
+
+        this.validateForm = this.fb.group({
+            name:[this.name,[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30)
+            ]],
+            company:[this.company,[
+                Validators.required
+            ]],
+            startTime:[this.startTime,[
+                Validators.required
+            ]],
+            endTime:[this.endTime,[]]
+        })
+
+        this.radioSwitch = [
+            {
+                key: 1,
+                text: "活动材料"
+            },
+            {
+                key: 2,
+                text:"未添加"
+            }
+        ];
+
+
+        this.materials = [
+            {
+                spu: "001245",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马可",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: 1000,
+                move:60.12,
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001245",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马可",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0002",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: 32.1,
+                move:42.12,
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001245",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马可",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0003",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: 40,
+                move:32.58,
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001245",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马可",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0003",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: 56,
+                move:58.10,
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001245",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马可",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9004",
+                sku: "z0004",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001248",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马克巴项目",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001248",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马克巴项目",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001249",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马克巴项目",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001260",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马克巴项目",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            },
+            {
+                spu: "001260",
+                src: "https://tqiniu.madrock.com.cn/rev/project/TEST/227/66ebd2b6-65f9-0d82-bcae-059c1814ecca.jpg",
+                brand: "马克巴项目",
+                category: "地砖",
+                name: "浴室砖",
+                model: "SC9003",
+                sku: "z0001",
+                specifications: "500x300",
+                material: "室心",
+                colors: "红/橙/黄/绿/靓",
+                product: "国产",
+                unit: "平方",
+                price: 59.15,
+                origin: Math.floor(Math.random()* 100 +1).toFixed(2),
+                move: Math.floor(Math.random()* 100 +1).toFixed(2),
+                id: Math.floor(Math.random()*9999+1)
+            }
+        ]
+    }
+
+    //将日期转成时间戳
+    coverNumToDate(time:Date){
+        return new Date(time).getTime();
+    }
+
+    //状态名称
+    getStatusName(status:number){
+        switch(status){
+            case 1: return "进行中";
+            case 2: return "已结束";
+            default: return "未开始";
+        }
+    }
+
+    //编辑活动
+    editPromote(){
+        this.isVisible = true;
+    }
+    handleCancel(){
+        this.isVisible = false;
+    }
+    handleOk(){
+        this.handleCancel();
+    }
+
+
+    handleSwitch(e:any){
+        console.log("handle switch is",e);
+        this.radio = e;
+    }
+
+
+    //全选
+    checkAll(e){
+        this.allChecked = e;
+        this.materials.forEach(m => {
+            m["checked"] = this.allChecked;
+        });
+        this.refreshStatus();
+    }
+
+    //选择某一项
+    refreshStatus(){
+        let allChecked = false,
+            allUnChecked = false;
+
+        if(this.materials && this.materials.length > 0){
+            allChecked = this.materials.every(m => m.checked === true);
+            allUnChecked = this.materials.every(m => !m.checked);
+            this.allChecked = allChecked;
+            this.indeterminate = (!allChecked) && (!allUnChecked);
+            this.selectItems = this.materials.filter(m => m.checked === true);
+        }else{
+            this.allChecked = allUnChecked;
+        }
+        this.radioSwitch[0].text = `活动材料${this.selectItems.length > 0?'（'+this.selectItems.length+'）':''}`;
+    }
+
+    //提交确认
+    confirm(){
+        this.warn.onModalInfo({
+            content:"请将第X，X页内的材料活动价填写完成",
+            ok(){
+                console.log("confirm is ok");
+            }
+        })
+    }
+
+    //单个删除项目
+    deleteItem(id:number){
+
+        const index = this.materials.findIndex(m => m.id === id);
+        if(index > -1){
+            this.materials.splice(index,1);
+        }
+        const selectIndex = this.selectItems.findIndex(s => s.id === id);
+        console.log(selectIndex);
+        if(selectIndex > -1){
+            this.selectItems.splice(selectIndex,1);
+        }
+
+        this.materials = this.materials.concat();
+        this.refreshStatus();
+    }
+
+    //批量删除
+    deleteItems(){
+        this.selectItems.forEach(s =>{
+            let index = this.materials.findIndex(m => m.id === s.id);
+            if(index > -1){
+                this.materials.splice(index,1);
+            }
+        });
+        this.selectItems = [];
+        this.materials = this.materials.concat();
+        this.refreshStatus();
+    }
+
+
+    //添加
+    addItem(id:number){
+        const index = this.materials.findIndex(m => m.id === id);
+        if(index > -1){
+            this.materials.splice(index,1);
+        }
+        const selectIndex = this.selectItems.findIndex(s => s.id === id);
+        if(selectIndex > -1){
+            this.selectItems.splice(selectIndex,1);
+        }
+
+        this.materials = this.materials.concat();
+        this.refreshStatus();
+    }
+
+    //批量添加
+    addItems(){
+        this.selectItems.forEach(s =>{
+            let index = this.materials.findIndex(m => m.id === s.id);
+            if(index > -1){
+                this.materials.splice(index,1);
+            }
+        });
+        this.selectItems = [];
+        this.materials = this.materials.concat();
+        this.refreshStatus();
+    }
+}

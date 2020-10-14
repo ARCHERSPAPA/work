@@ -1,0 +1,335 @@
+import { Component, OnInit,ViewChild } from '@angular/core';
+import {Default} from '../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {FormBuilder, FormGroup,Validators} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import {atob} from '../../../../model/methods';
+
+@Component({
+  selector: 'rev-temp-basic-edit',
+  templateUrl: './temp-basic-edit.component.html',
+  styleUrls: ['./temp-basic-edit.component.scss']
+})
+export class TempBasicEditComponent implements OnInit {
+
+	public title: string;
+	public versionType: string;
+    public id: string; //销售版本id
+    public versionName: string; //版本名称
+    //分类
+    public categoryList: any;
+    public category: string;
+    public projectName: string;
+	 //备注
+	public remark: string;
+	public versionId: string;
+    public detailState:number; // 销售版本state 1代表已上架
+    public radioSwitch = [
+		{
+			key: 1,
+			text: '已添加'
+		},
+		{
+			key: 0,
+			text: '未添加'
+		}
+    ];  
+    public addNum = 0; // 已添加总数
+	public state = 1; // 1已添加 0未添加
+
+   
+	
+	public editForm: FormGroup;
+	public editVisible = false;
+	public editName = '';
+    public editRemark = '';
+
+    public checkedNumber :Array<any> = [] //选中的数据
+
+	public pageNo = Default.PAGE.PAGE_NO;
+    public pageSize = Default.PAGE.PAGE_SIZE;
+    public total = Default.PAGE.PAGE_TOTAL;
+    
+    public materialList:Array<any> = []; // 表格数据
+    public isAllDisplayDataChecked: boolean;
+    public indeterminate = false;
+    
+
+    constructor(
+		private request: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+	) { }
+
+    ngOnInit() {
+		this.title = "基装版本详情";
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['id']) {
+                this.id = atob(params.id);
+                this.versionName = params.versionName;
+				this.detailState = params.detailState;
+				this.versionType = atob(params['versionType']);
+                this.changeData();
+            }
+		});
+		
+		this.editForm = this.fb.group({
+            editName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]],
+            editRemark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+	}
+	
+	/**
+     *title的修改信息
+     */
+    showModal(name, ...args) {
+        this.editVisible = true;
+        this.editName = name;
+        if (args && args.length > 0) {
+            this.editRemark = args[0];
+        }
+	}
+	
+	/**
+     * 修改title时的cancel
+     */
+    handleCancel() {
+        this.editVisible = false;
+        // this.editForm.reset();
+    }
+
+    /**
+     * 修改title的ok
+     */
+    handleOk() {
+        const that = this;
+        if (that.editForm.value) {
+            const params = {
+                id: that.versionId
+            };
+            params['versionName'] = that.editForm.value['editName'].trim();
+            params['remark'] = that.editForm.value['editRemark'].trim();
+            that.request.doPost({
+                url: 'mouldUpd',
+                data: params,
+                success: function (res) {
+                    that.handleCancel();
+                   if (res && res.code == 200) {
+                       that.remark = params['editRemark'];
+                       that.versionName = params['editName'];
+                       that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    //    that.loadMouldInfo(that.versionId);
+                   } else {
+                       that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                   }
+                }
+            });
+        }
+    }
+
+    //获取分类
+    getCategory(id) {
+        const that = this;
+        if (id) {
+            that.request.doPost({
+                url: 'categoryList',
+                data: {
+                    versionId: id
+                },
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        that.categoryList = res.data;
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }
+
+    }
+
+   
+    // 表格数据
+    changeData(...args) {
+        const that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        const params = {
+            versionId:this.id,
+            pageNum: this.pageNo,
+            pageSize: this.pageSize,
+            status:this.state
+        };
+        if(this.category){
+            params['category'] = this.category;
+        }
+        that.request.doPost({
+            url: 'versionQueryMaterial',
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.materialList = res.data.list;
+                    that.total = res.data.total;
+                    if(this.materialList){
+                        if(that.state == 1){
+                            that.addNum = that.total;
+                            if(that.addNum == 0){    
+                                that.radioSwitch[0].text = '已添加'
+                            }else{
+                                that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                            }
+                        }
+                    }
+                    that.isAllDisplayDataChecked = false;
+                    that.indeterminate = false;
+                    that.materialList.filter(v => {
+                        v['checked'] = false;
+                    });
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    // 翻页
+    changePage(){
+        this.checkedNumber = [];
+        this.changeData();
+    }
+
+	//全选
+	checkAll(e) {
+        this.isAllDisplayDataChecked = e;
+        this.materialList.forEach(item =>{
+            item.checked = this.isAllDisplayDataChecked;
+        })
+        this.refreshStatus();
+	}
+	
+	//单个选择
+    refreshStatus() {
+        const allChecked = this.materialList.every(value => value.checked === true);
+        const allUnChecked = this.materialList.every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+        this.checkedNumber = this.materialList.filter(value => value.checked);
+    }
+
+    //批量添加 删除
+    opreateMaterial(str){
+        const that = this;
+        const param = {};
+        let url = '';
+        let detailIds = [];
+        this.checkedNumber.forEach(item=>{
+            if(str == 'add'){
+                if(item.activityId){
+                    detailIds.push({detailId:item.id,activityId:item.activityId})
+                }else{
+                    detailIds.push({detailId:item.id})
+                }
+            }else{
+                detailIds.push({detailId:item.id})
+            }
+        })
+        if(str == 'add'){
+            url = 'versionAddDetail';
+        }else{
+            url = 'versionDelDetail';
+        }
+        param['id'] = this.id;
+        param['materialList'] = detailIds
+        if(this.id){    
+            that.request.doPost({
+                url: url,
+                data: param,
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        if(str == 'add'){
+                            that.warn.onSuccess('添加成功');
+                            that.addNum += Number(that.checkedNumber.length)
+                            that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                        }else{
+                            that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        }
+                        that.checkedNumber = [];
+                        that.changeData(true);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }else{
+            that.warn.onWarn('请先填写版本名称');
+        }
+        
+    }
+
+    // 表格添加 删除
+    handleOperate(str,item){
+        const that = this;
+        const param = {};
+        let url = '';
+        if(str == 'add'){
+            url = 'versionAddDetail';
+            param['id'] = this.id;
+            if(item.activityId){
+                param['materialList'] = [{
+                    detailId:item.id,
+                    activityId:item.activityId
+                }]
+            }else{
+                param['materialList'] = [{
+                    detailId:item.id
+                }]
+            }
+        }else{
+            url = 'versionDelDetail';
+            param['id'] = this.id;
+            param['materialList'] = [{
+                detailId:item.id 
+            }]
+        }
+        if(this.id){
+            that.request.doPost({
+                url: url,
+                data: param,
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        that.changeData();
+                        if(str == 'add'){
+                            that.warn.onSuccess('添加成功');
+                            that.addNum += 1
+                            that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                        }else{
+                            that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        }
+                        that.checkedNumber = [];
+                    } else if(res && res.code == 120){
+                        that.warn.onModalInfo({
+                            title: '提示',
+                            content: res.msg || '该材料已被添加，请勿重复操作',
+                            ok: () => {
+                                console.log('tips');
+                            }
+                        });
+                    }else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }else{
+            that.warn.onWarn('请先填写版本名称');
+        }
+    }
+}

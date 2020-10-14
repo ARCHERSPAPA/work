@@ -1,0 +1,34 @@
+<div class="select-brand">
+    <nz-select *ngIf="showMaterial" style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="请选择材料商" [(ngModel)]="company" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeMaterialSupplier()">	
+        <nz-option *ngFor="let company of componeyStatus" [nzValue]="company.id" [nzLabel]="company.companyName"></nz-option>
+    </nz-select>
+    <nz-select *ngIf="showActivity" style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="全部材料" [(ngModel)]="material" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeActivity()">
+        <nz-option *ngFor="let activity of activityStatus" [nzValue]="activity.id" [nzLabel]="activity.activityName"></nz-option>
+    </nz-select>
+
+    <nz-select *ngIf="showNested" style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="全部套系" [(ngModel)]="nested" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeNested()">
+        <nz-option *ngFor="let nest of nestedStatus" [nzValue]="nest.id" [nzLabel]="nest.comboName"></nz-option>
+    </nz-select>
+
+    <nz-select style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="类别" [(ngModel)]="category" [compareWith]="compareFn" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeCategory()">
+        <nz-option *ngFor="let category of categoryStatus" [nzValue]="category" [nzLabel]="category.categoryName"></nz-option>
+    </nz-select>
+    <nz-select style="min-width: 120px; max-width: 240px;margin-right: 8px" nzAllowClear="true" nzPlaceHolder="品牌" [(ngModel)]="brand" nzMode="multiple"  [ngModelOptions]="{standalone: true}" (ngModelChange)="changeBrand()" [disabled] = 'brandStatus.length === 0' class="sale-brand">
+        <nz-option *ngFor="let brand of brandStatus" [nzValue]="brand.brandName" [nzLabel]="brand.brandName"></nz-option>
+    </nz-select>
+    <nz-input-group nzCompact class="info">
+        <nz-select style="width: 72px;" [(ngModel)]="condition" (ngModelChange)="clearInput()">
+            <nz-option [nzLabel]="'SPU'" [nzValue]="0"></nz-option>
+            <nz-option [nzLabel]="'SKU'" [nzValue]="1"></nz-option>
+            <nz-option [nzLabel]="'名称'" [nzValue]="2"></nz-option>
+            <nz-option [nzLabel]="'规格'" [nzValue]="3"></nz-option>
+            <nz-option [nzLabel]="'型号'" [nzValue]="4"></nz-option>
+        </nz-select>
+        <input style="width: 168px;" nz-input type="text" class="text" placeholder="请输入"  autocomplete="off" [(ngModel)]="spu" *ngIf="condition == 0" (change)="changeIpt()"/>
+        <input style="width: 168px;" nz-input type="text" class="text" placeholder="请输入"  autocomplete="off" [(ngModel)]="sku" *ngIf="condition == 1" (change)="changeIpt()"/>
+        <input style="width: 168px;" nz-input type="text" class="text" placeholder="请输入"  autocomplete="off" [(ngModel)]="name" *ngIf="condition == 2" (change)="changeIpt()"/>
+        <input style="width: 168px;" nz-input type="text" class="text" placeholder="请输入"  autocomplete="off" [(ngModel)]="spec" *ngIf="condition == 3" (change)="changeIpt()"/>
+        <input style="width: 168px;" nz-input type="text" class="text" placeholder="请输入"  autocomplete="off" [(ngModel)]="model" *ngIf="condition == 4" (change)="changeIpt()"/>
+    </nz-input-group>
+    <button nz-button nzType="primary" type="submit" (click)="searchCondition()">查询</button>
+</div>

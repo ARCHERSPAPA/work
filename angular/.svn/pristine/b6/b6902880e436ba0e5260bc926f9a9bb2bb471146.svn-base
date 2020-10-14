@@ -1,0 +1,55 @@
+<div class="cost">
+    <div class="cost-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="cost-content">
+        <form [formGroup]="modifyForm" nz-form>
+            <nz-form-item style="margin: 0;">
+                <div class="cost-detail">账期设置</div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;">
+                    <nz-input-number 
+                        [nzMin]="0" 
+                        [nzMax]="180" 
+                        [nzStep]="1" 
+                        [ngModel]="costSet"
+                        [nzPrecision]="0" 
+                        [nzFormatter]="formatterDay" 
+                        [nzParser]="parserDay"
+                        class="input"
+                        [ngStyle]="{ marginLeft: '16px',width:'320px',marginTop:'24px'}"
+                        formControlName="costSet"
+                        (ngModelChange)="submit()"
+                        name='costSet'>
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="modifyForm.get('costSet').dirty && modifyForm.get('costSet').errors" class="ml-16">
+                        <ng-container *ngIf="modifyForm.get('costSet').hasError('required')">
+                            必填选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item >
+                <div class="cost-detail">可提材料占比</div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;" class="cost-inp">
+                    <nz-input-number
+                        [ngModel]="percentage"
+                        [nzMin]="0"
+                        class="input"
+                        [nzPrecision]='0'
+                        formControlName="percentage"
+                        [nzMax]="100"
+                        [nzStep]="1"
+                        (ngModelChange)="submit()"
+                        [nzFormatter]="formatterPercent"
+                        [nzParser]="parserPercent">
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="modifyForm.get('percentage').dirty && modifyForm.get('percentage').errors" class="ml-16">
+                    <ng-container *ngIf="modifyForm.get('percentage').hasError('required')">
+                        请填写2位以内的整数
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</div>

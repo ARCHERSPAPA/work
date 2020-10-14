@@ -1,0 +1,36 @@
+<div class="viewMasterls">
+  <!--startprint--><!--注意要加上html里star和end的这两个标记--> 
+  <div class="viewMasterls-content" id='print'>
+    <ul>
+      <li *ngFor='let marter of marterialList;let i=index'>
+        <div class="qrcode">
+          <canvas [id]="'canvas'+i" style="width: 100px; height:100px;"></canvas>
+          <p style="width: 230px;">打开项目详情右上角
+            菜单扫码</p>
+        </div>
+        <div class="info">
+          <p style="height:2.2em;" class="singel">编号
+          :  <span>{{marter.sku?marter.sku:'--'}}</span></p>
+          <p style="height: 3.2em;" class="mulit">类别/品牌/名称: {{marter.category}}/{{marter.brand}}/{{marter.name}}</p>
+          <p style="height: 3.2em;" class="mulit">产地/材质/颜色: <span>
+            {{marter.origin?marter.origin:'--'}}/{{marter.material?marter.material:'--'}}/{{marter.color?marter.color:'--'}}
+          </span></p>
+          <p style="height: 2.2em;" class="singel">型号:
+            <span>
+              {{marter.model?marter.model:'--'}}
+            </span></p>
+          <p style="height: 2.2em;"class="singel">规格:
+            <span>
+              {{marter.spec?marter.spec:'--'}}
+            </span></p>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+  <!--endprint--> 
+</div>
+<button nz-button [nzType]="'primary'" (click)='print()'id='printBTN' >
+  打印
+</button>
+

@@ -1,0 +1,199 @@
+<div class="master">
+    <div class="master-head">
+        <rev-title [title]="title"></rev-title>
+        <div nz-row class="master-head-info mt-8">
+            <div nz-row class="mt-16">
+                <span class="head-title">{{name}}</span>
+                <span class="head-status ml-16">
+            <nz-tag [nzColor]="'green'" *ngIf="status === 1">{{getStatusName(status)}}</nz-tag>
+            <nz-tag [nzColor]="'orange'" *ngIf="status === 0">{{getStatusName(status)}}</nz-tag>
+            <nz-tag [nzColor]="'red'" *ngIf="status === 2">{{getStatusName(status)}}</nz-tag>
+        </span>
+                <a class="head-btn" href="javascript:void(0)" (click)="editPromote()">修改</a>
+            </div>
+            <div nz-row class="head-base mt-16">
+                <div nz-col nzSpan="8" class="head-company">参与公司：{{company}}</div>
+                <div nz-col nzSpan="8" *ngIf="startTime">开始时间：{{coverNumToDate(startTime) | date:'yyyy-MM-dd HH:mm'}}
+                </div>
+                <div nz-col nzSpan="8" *ngIf="endTime">结束时间：{{coverNumToDate(endTime) | date:'yyyy-MM-dd HH:mm'}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="master-line mt-24"></div>
+
+    <div class="wrap" style="min-height: 960px;">
+        <div nz-row class="mt-24">
+            <div nz-col nzSpan="8">
+                <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+            </div>
+            <div nz-col nzSpan="12" nzOffset="4">
+                <div nz-col nzSpan="5">
+                    <nz-select style="width: 100%;" [nzPlaceHolder]="'请选择品牌'">
+                        <nz-option nzValue="jack" nzLabel="Jack"></nz-option>
+                    </nz-select>
+                </div>
+                <div nz-col nzSpan="5" nzOffset="1">
+                    <nz-select style="width: 100%;" [nzPlaceHolder]="'请选择类别'">
+                        <nz-option nzValue="jack" nzLabel="Jack"></nz-option>
+                    </nz-select>
+                </div>
+                <div nz-col nzSpan="9" nzOffset="1">
+                    <input nz-input placeholder="请输入SPU/SKU/名称/规格/型号">
+                </div>
+                <div nz-col nzSpan="2" nzOffset="1">
+                    <button nz-button nzType="primary">查询</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-24">
+            <nz-table [nzData]="materials" #materialTable nzSize="middle"
+                      [nzScroll]="{ x:'130%'}">
+                <thead>
+                <tr>
+                    <th nzLeft="0px"></th>
+                    <th>SPU编号</th>
+                    <th>图片</th>
+                    <th>品牌</th>
+                    <th>类别</th>
+                    <th>名称</th>
+                    <th>SKU编号</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>材质</th>
+                    <th>颜色</th>
+                    <th>产地</th>
+                    <th>单位</th>
+                    <th>市场价</th>
+                    <th>供货价</th>
+                    <th>活动价</th>
+                    <th nzRight="0px">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td nzLeft="0px" nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="checkAll($event)"></td>
+                    <td colspan="16">
+                        <button nz-button [disabled]="selectItems.length === 0" (click)="deleteItems()"
+                      *ngIf="radio === 1">删除</button>
+                        <button nz-button [disabled]="selectItems.length === 0" (click)="addItems()"
+                                *ngIf="radio === 2">添加</button>
+                        <span class="ml-8" *ngIf="selectItems.length > 0">已选{{selectItems.length}}项</span>
+                    </td>
+                </tr>
+                <tr *ngFor="let m of materialTable.data;let i = index">
+                    <td nzLeft="0px" nzShowCheckbox [(nzChecked)]="m.checked" (nzCheckedChange)="refreshStatus()"></td>
+                    <td [title]="m.spu"><span>{{m.spu}}</span></td>
+                    <td><span class="master-img"><img [src]="m.image"/></span></td>
+                    <td [title]="m.brand?m.brand:''"><span>{{m.brand?m.brand:'--'}}</span></td>
+                    <td [title]="m.category?m.category:''"><span>{{m.category?m.category:'--'}}</span></td>
+                    <td [title]="m.name?m.name:''"><span>{{m.name?m.name:'--'}}</span></td>
+                    <td [title]="m.sku"><span>{{m.sku}}</span></td>
+                    <td [title]="m.spec?m.spec:''"><span>{{m.spec?m.spec:'--'}}</span></td>
+                    <td [title]="m.model?m.model:''"><span>{{m.model?m.model:'--'}}</span></td>
+                    <td [title]="m.material?m.material:''"><span>{{m.material?m.material:'--'}}</span></td>
+                    <td [title]="m.color?m.color:''"><span>{{m.color?m.color:'--'}}</span></td>
+                    <td [title]="m.origin?m.origin:''"><span>{{m.origin?m.origin:'--'}}</span></td>
+                    <td [title]="m.unit?m.unit:''"><span>{{m.unit?m.unit:'--'}}</span></td>
+                    <td [title]="m.marketPrice?m.marketPrice:''"><span>{{m.marketPrice?(m.marketPrice|number:'1.2'):'--'}}</span></td>
+                    <td [title]="m.supplyPrice?m.supplyPrice:''"><span>{{m.supplyPrice?(m.supplyPrice|number:'1.2'):'--'}}</span></td>
+                    <td [title]="m.sellingPrice?m.sellingPrice:''">
+                        <span>
+                            <!--<nz-form-control [nzValidateStatus]="'error'" [nzSpan]="12">-->
+                             <!--<nz-input-number [(ngModel)]="m.move" [nzStep]="0.01"-->
+                                <!--tabIndex="{{1000+i}}" (ngModelChange)="modelChange($event)"></nz-input-number>-->
+                            <!--</nz-form-control>-->
+                            <input nz-input revInputDecimal [num]="m.sellingPrice" value="{{m.sellingPrice}}"
+                                    [(ngModel)]="m.sellingPrice" tabindex="{{1000+i}}"
+                                    [id]="m.id" role="11" (changeValue)="changeValue($event,m)" />
+                        </span>
+                    </td>
+                    <td nzRight="0px">
+                        <a href="javascript:void(0)"  nz-popconfirm nzTitle="确定删除该材料吗?" nzOkText="删除"
+                           (nzOnConfirm)="deleteItem(m.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft"
+                            *ngIf="radio === 1" tabindex="{{100+i}}">删除</a>
+                        <a href="javascript:void(0)" (click)="addItem(m.id)" *ngIf="radio === 2" tabindex="{{100+i}}">添加</a>
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+
+
+        <nz-affix nzOffsetBottom="0" *ngIf="materials && materials.length > 0 && radio === 1">
+            <div nz-row style="padding:10px 24px 10px 0;background:white;width:calc(100% + 72px);margin-left:-48px;text-align:right;">
+                <button nz-button [nzType]="'primary'" nz-popconfirm nzTitle="确认提交该活动吗?" nzOkText="提交"
+                        (nzOnConfirm)="confirm()" (nzOnCancel)="cancel()" nzPlacement="topLeft">
+                    <span>提交审核</span>
+                </button>
+            </div>
+        </nz-affix>
+
+
+    </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisible" nzTitle="修改活动"
+          (nzOnCancel)="handleCancel()" [nzFooter]="footer">
+    <form nz-form [formGroup]="validateForm">
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">活动名称</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <input nz-input formControlName="name" id="name" placeholder="请输入活动名称" maxlength="30"/>
+                <nz-form-explain *ngIf="validateForm.get('name').dirty && validateForm.get('name').errors">
+                    <ng-container *ngIf="validateForm.get('name').hasError('required')">
+                        项目必填
+                    </ng-container>
+                    <ng-container *ngIf="validateForm.get('name').hasError('minlength')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="validateForm.get('name').hasError('maxlength')">
+                        至多输入30位字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="materialId">参与公司</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <nz-select id="materialId" formControlName="materialId" nzPlaceHolder="请选择参与公司"
+                           (ngModelChange)="companyChange($event)" [ngModel]="materialId">
+                    <nz-option [nzValue]="c.id" [nzLabel]="c.companyName" *ngFor="let c of companyes"></nz-option>
+                </nz-select>
+                <nz-form-explain *ngIf="validateForm.get('materialId').dirty && validateForm.get('materialId').errors">
+                    <ng-container *ngIf="validateForm.get('materialId').hasError('required')">
+                        项目必填
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="startTime">开始时间</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <nz-date-picker nzShowTime formControlName="startTime" nzShowToday="false"
+                                [nzStyle]="{'width':'167%'}" [ngModel]="startTime"
+                                [nzFormat]="'yyyy-MM-dd HH:mm'"></nz-date-picker>
+                <nz-form-explain *ngIf="validateForm.get('startTime').dirty && validateForm.get('startTime').errors">
+                    <ng-container *ngIf="validateForm.get('startTime').hasError('required')">
+                        项目必填
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="endTime">结束时间</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <nz-date-picker nzShowTime formControlName="endTime" nzShowToday="false"
+                                [nzStyle]="{'width':'167%'}" [ngModel]="endTime"
+                                [nzFormat]="'yyyy-MM-dd HH:mm'"></nz-date-picker>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</nz-modal>
+<ng-template #footer>
+    <div nz-row>
+        <button nz-button nzType="default" (click)="handleCancel()">取消</button>
+        <button nz-button nzType="primary" [disabled]="!validateForm.valid" (click)="handleOk()">确定</button>
+    </div>
+</ng-template>

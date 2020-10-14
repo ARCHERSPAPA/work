@@ -1,0 +1,40 @@
+.createMaterial {
+    font-size: 14px;
+    &-base {
+        input {
+            width: 320px;
+        }
+    }
+    &-base-title {
+        padding: 24px 0 16px 0;
+        font-size: 16px;
+        font-family: PingFangSC;
+        font-weight: 500;
+        line-height: 24px;
+        color: rgba(0, 0, 0, 0.85);
+    }
+    &-list {
+        tr th,
+        tr td {
+            vertical-align: middle;
+            font-size: 14px;
+            max-width: 64px;
+            a {
+                padding-right: 4px;
+            }
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .upload {
+            position: absolute;
+            top: 4px;
+            right: 12px;
+            cursor: pointer;
+        }
+    }
+    .btns {
+        margin-top: 48px;
+        text-align: right;
+    }
+}

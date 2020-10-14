@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-temp-pack-list',
+  templateUrl: './temp-pack-list.component.html',
+  styleUrls: ['./temp-pack-list.component.scss']
+})
+export class TempPackListComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

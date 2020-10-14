@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-settle-detail-schedule',
+  templateUrl: './settle-detail-schedule.component.html',
+  styleUrls: ['./settle-detail-schedule.component.scss']
+})
+export class SettleDetailScheduleComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

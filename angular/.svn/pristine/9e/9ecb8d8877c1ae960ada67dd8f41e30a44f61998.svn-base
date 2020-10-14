@@ -1,0 +1,79 @@
+import {Component, OnInit} from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {Default} from "../../../../model/constant";
+import {Messages} from "../../../../model/msg";
+
+@Component({
+    selector: 'rev-master-material',
+    templateUrl: './master-material.component.html',
+    styleUrls: ['./master-material.component.scss']
+})
+export class MasterMaterialComponent implements OnInit {
+
+
+    public title: string;
+    public radioSwitch: Array<any> = [];
+
+    //查询参数
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+    //存储数据
+    public materials:any;
+
+
+    public state:number = 0;
+
+    constructor(private req:RequestService,
+                private warn:WarningService) {
+    }
+
+    ngOnInit() {
+        this.title = "材料列表";
+
+        this.radioSwitch = [
+            {
+                key: 0,
+                text: "未上架"
+            },
+            {
+                key: 1,
+                text: "已上架"
+            }
+        ];
+
+        this.changeData();
+
+
+    }
+
+
+    //tab 切换
+    handleSwitch(e:number){
+        this.state = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    changeData(){
+        let params = {
+            state: this.state,
+            page:  this.pageNo
+        }
+
+        this.req.doPost({
+            url:"masterDetails",
+            data: params,
+            success:(res =>{
+                if(res && res.code == 200){
+
+                }else{
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+    }
+
+}

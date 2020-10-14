@@ -1,0 +1,230 @@
+import {Component, OnInit, Input, Output} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {Default} from "../../model/constant";
+import {ItemBasicService} from "./item-basic.service";
+import {WarningService} from "../../service/warning.service";
+
+@Component({
+    selector: 'rev-item-basic',
+    templateUrl: './item-basic.component.html',
+    styleUrls: ['./item-basic.component.scss']
+})
+export class ItemBasicComponent implements OnInit {
+
+    //分类判断显示的标题 1:项目，2：主材，3：辅材，4：软材
+    @Input() type:number;
+
+
+    //所有类别总和
+    public categories: Array<any> = [];
+    //选中的类别
+    public category: any = {id:'',categoryName:'全部类别'};
+
+    //表格中的数据
+    public dataSet:Array<any> = [];
+
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+    //列表渲染时的加载过程中
+    public loading:boolean = false;
+
+    //表格中选中框
+    public allChecked: boolean = false;
+    public indeterminate: boolean = false;
+    //单选还是多选 false:单选；true:多选
+    public checkbox:boolean = false;
+
+    public radioValue:string;
+
+    //选中的数据信息集合
+    public selectItems:Array<any> = [];
+
+
+    constructor(public modal: NgbActiveModal,
+                private itemBasicService:ItemBasicService,
+                private warn:WarningService) {
+    }
+
+    ngOnInit() {
+
+        // this.categories = [
+        //     {text: "类别", value: ''},
+        //     {text: "品牌", value: '12'},
+        //     {text: "品牌2", value: '14'},
+        //     {text: "品牌3", value: '16'},
+        //     {text: "品牌4", value: '15'},
+        //     {text: "品牌5", value: '18'}
+        // ];
+        
+        // this.dataSet = this.renderData(100);
+
+        this.loadCategory();
+
+        this.changeData();
+    }
+
+    //配制默认时选中
+    public compareFn = (o1: any, o2: any) => o1 && o2 ? o1.id === o2.id : o1 === o2; //类别选择框为对象
+
+    /**
+     * 加载根据不同类别加载类型数据
+     */
+    loadCategory(){
+        this.itemBasicService.getCategory(1).then(data =>{
+            if(data && data.length > 0) {
+                this.categories = data;
+                this.categories.unshift({id:'',categoryName:'全部类别'})
+            }
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        });
+    }
+
+
+    modelChangeCategory(cate:any){
+        this.category = cate;
+    }
+
+    /**
+     * 根据不同类别显示不一样的标题
+     * @param {number} type
+     * @returns {string}
+     */
+    getTitle(type: number) {
+        switch (type) {
+            case 1:
+                return "项目";
+            case 2:
+                return "主材";
+            case 3:
+                return "辅材";
+            case 4:
+                return "软材";
+            default:
+                return "其它";
+        }
+    }
+
+
+    checkAll(e: any) {
+        console.log(e);
+    }
+
+
+
+
+    renderData(num){
+        let d = [];
+        for(let i = 0; i < num; i++){
+            d.push(this.createItem())
+        }
+        return d;
+    }
+
+    /**
+     * 模拟生成细项
+     * @param {number} i
+     * @returns object
+     */
+    createItem(){
+        return {
+            brand: "罗马",
+            id: 167177,
+            infoBranchId: 24038,
+            infoId: 2865,
+            infoType: 1,
+            material: null,
+            model: null,
+            name: "抛釉磁砖不管理顶替阿斯蒂芬模压 模压 李斐莉雪顶替模压 阿斯蒂芬",
+            num: this.randNum(0, 1000),
+            offerExplain: "主要用于客厅",
+            quoteId: 6285,
+            remark: null,
+            specifications: "500x500",
+            totalPrice: 0,
+            unit: "匹",
+            univalent: "180",
+            materialPrice: this.randNum(1, 1000),
+            materialNum: this.randNum(1, 20),
+            carpentryPrice: this.randNum(100, 500),
+            carpentryNum: this.randNum(100, 240),
+            tilerPrice: this.randNum(1000, 8000),
+            tilerNum: this.randNum(30, 120),
+            paintingPrice: this.randNum(1, 1000),
+            paintingNum: this.randNum(1, 50),
+            plumberPrice: this.randNum(1000, 5000),
+            plumberNum: this.randNum(20, 50),
+            orderNumber: 'IT-'+new Date().getTime()+"-T-"+this.randNum(1,100)
+        }
+    }
+
+    /**
+     * 生成随机函数
+     * @param {number} min
+     * @param {number} max
+     * @returns {any}
+     */
+    randNum(min = 0, max = 10){
+        return Math.floor(Math.random()*(max-min)+min);
+    }
+
+    changeData(){
+        const params = {
+            pageSize: this.pageSize,
+            pageNum: this.pageNo
+        }
+        if(this.category && this.category.id){
+            params["categoryId"] = this.category.id;
+        }
+        console.log("start in here");
+        if(this.type === 1){
+            this.loadBasicList(params);
+            console.log(params);
+
+        }else if(this.type === 2){
+
+        }else{
+
+        }
+    }
+
+    loadBasicList(params:any){
+        this.loading = true;
+        if(this.loading){
+            this.itemBasicService.getBasicList(params).then(data =>{
+                this.loading = false;
+                this.dataSet = data.list;
+                this.total = data.total;
+            }).catch(err =>{
+                this.loading = false;
+                this.warn.onMsgError(err);
+            })
+        }
+
+    }
+
+
+    refreshStatus(){
+
+    }
+
+    /**
+     * 单选时
+     * @param e
+     */
+    modelChange(e){
+        console.log(e);
+    }
+
+
+    addItem(e:any,data){
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectItems.push(data);
+    }
+
+    removeItem($event,id){
+
+    }
+}

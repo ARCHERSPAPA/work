@@ -1,0 +1,75 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+
+import {PublicModule} from '../../public/public.module';
+import {TemplateRoutingModule} from './template-routing.module';
+import {TempBaseComponent} from './temp-base/temp-base.component';
+import {TempMealComponent} from './temp-meal/temp-meal.component';
+import {TempMealListComponent} from './temp-meal/temp-meal-list/temp-meal-list.component';
+import {TempMealEditComponent} from './temp-meal/temp-meal-edit/temp-meal-edit.component';
+import {TempDtlComponent} from './temp-dtl/temp-dtl.component';
+import {TempBaseListComponent} from './temp-base/temp-base-list/temp-base-list.component';
+import { TempMealBaseComponent } from './temp-meal-base/temp-meal-base.component';
+import { TempMealBaseListComponent } from './temp-meal-base/temp-meal-base-list/temp-meal-base-list.component';
+import { TempWholeComponent } from './temp-whole/temp-whole.component';
+import { TempWholeListComponent } from './temp-whole/temp-whole-list/temp-whole-list.component';
+import { TempWholeEditComponent } from './temp-whole/temp-whole-edit/temp-whole-edit.component';
+import { TempWholeBaseComponent } from './temp-whole-base/temp-whole-base.component';
+import { TempWholeBaseListComponent } from './temp-whole-base/temp-whole-base-list/temp-whole-base-list.component';
+import {TempSourceAddComponent} from './temp-source-add/temp-source-add.component';
+import {TitleModule} from "../../public/title.module";
+import { TempBasicComponent } from './temp-basic/temp-basic.component';
+import { TempSuitComponent } from './temp-suit/temp-suit.component';
+import { TempPackComponent } from './temp-pack/temp-pack.component';
+import { TempBasicListComponent } from './temp-basic/temp-basic-list/temp-basic-list.component';
+import { TempBasicEditComponent } from './temp-basic/temp-basic-edit/temp-basic-edit.component';
+import { TempSuitListComponent } from './temp-suit/temp-suit-list/temp-suit-list.component';
+import { TempSuitEditComponent } from './temp-suit/temp-suit-edit/temp-suit-edit.component';
+import { TempPackListComponent } from './temp-pack/temp-pack-list/temp-pack-list.component';
+import { TempPackEditComponent } from './temp-pack/temp-pack-edit/temp-pack-edit.component';
+import { TempLibComponent } from './temp-lib/temp-lib.component';
+import { TempLibListComponent } from './temp-lib/temp-lib-list/temp-lib-list.component';
+import { TempLibEditComponent } from './temp-lib/temp-lib-edit/temp-lib-edit.component';
+import { ItemBasicModule} from '../../plugins/item-basic/item-basic.module';
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        PublicModule,
+        TitleModule,
+        TemplateRoutingModule,
+        ItemBasicModule
+        
+    ],
+    declarations: [
+        TempBaseComponent,
+        TempMealComponent,
+        TempMealListComponent,
+        TempMealEditComponent,
+        TempDtlComponent,
+        TempBaseListComponent,
+        TempSourceAddComponent,
+        TempMealBaseComponent,
+        TempMealBaseListComponent,
+        TempWholeComponent,
+        TempWholeListComponent,
+        TempWholeEditComponent,
+        TempWholeBaseComponent,
+        TempWholeBaseListComponent,
+        TempBasicComponent,
+        TempSuitComponent,
+        TempPackComponent,
+        TempBasicListComponent,
+        TempBasicEditComponent,
+        TempSuitListComponent,
+        TempSuitEditComponent,
+        TempPackListComponent,
+        TempPackEditComponent,
+        TempLibComponent,
+        TempLibListComponent,
+        TempLibEditComponent
+    ]
+})
+export class TemplateModule {
+}

@@ -1,0 +1,103 @@
+import { Component, OnInit } from '@angular/core';
+import { Messages } from '../../../../model/msg';
+import { FormBuilder, Validators } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { WarningService } from '../../../../service/warning.service';
+import { RequestService } from '../../../../service/request.service';
+@Component({
+  selector: 'rev-temp-lib-edit',
+  templateUrl: './temp-lib-edit.component.html',
+  styleUrls: ['./temp-lib-edit.component.scss']
+})
+export class TempLibEditComponent implements OnInit {
+
+  public title;
+  public baseForm;
+  public category;
+  public categoryLsit=[{key:1,text:'haha'},{key:2,text:'gaga'}];
+  public Units;
+  public univalence;
+  public remark;
+  public name;
+  public Acessorial;
+  public brand;
+  public spec;
+  public model;
+  public wastage;
+  public woodworking;
+  public plasterer;
+  public lacquering;
+  public sellprice;
+  public  hydroelectric;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+  ) {
+  }
+
+  ngOnInit() {
+    this.title = '创建材料'
+    this.baseForm = this.fb.group({
+      category: [this.category, [
+        Validators.required,
+      ]],
+      Units: [this.Units, [
+        Validators.maxLength(10),
+      ]],
+      univalence: [this.univalence, [
+        Validators.minLength(10),
+      ]],
+      remark: [this.remark, [
+        Validators.minLength(100),
+      ]],
+      name: [this.name, [
+        Validators.required,
+        Validators.maxLength(30),
+      ]],
+      Acessorial: [this.Acessorial, [
+
+      ]],
+      brand: [this.brand, [
+        Validators.maxLength(10),
+      ]],
+      spec: [this.spec, [
+        Validators.maxLength(30),
+      ]],
+      model: [this.model, [
+        Validators.maxLength(30),
+      ]],
+      wastage: [this.wastage, [
+        Validators.maxLength(2),
+      ]],
+      woodworking: [this.remark, [
+        Validators.maxLength(10),
+      ]],
+      plasterer: [this.plasterer, [
+        Validators.maxLength(10),
+      ]],
+      lacquering: [this.lacquering, [
+        Validators.maxLength(10),
+      ]],
+      hydroelectric: [this.hydroelectric, [
+        Validators.maxLength(10),
+      ]],
+      sellprice: [this.sellprice, [
+        Validators.maxLength(10),
+      ]],
+    });
+  }
+  handleCancel() {
+    history.back();
+  }
+  checkAdd() {
+if(this.baseForm.controls.category.valid && this.baseForm.controls.name.valid){
+  return true
+}else{
+  return false
+}
+  }
+  handleOk() {
+console.log(this.baseForm)
+  }
+}

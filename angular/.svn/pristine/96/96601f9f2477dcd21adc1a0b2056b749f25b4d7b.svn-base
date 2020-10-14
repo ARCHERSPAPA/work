@@ -1,0 +1,368 @@
+import {Directive, ElementRef, Renderer, HostListener, HostBinding, Input, Output, EventEmitter} from '@angular/core';
+import {RequestService} from '../service/request.service';
+import {WarningService} from '../service/warning.service';
+import {Messages} from '../model/msg';
+import {QuoteService} from '../service/quote.service';
+import {Reg} from '../model/reg';
+import {RegularService} from '../service/regular.service';
+import * as Maths from './calculate';
+
+@Directive({
+    selector: '[revInputDecimal]'
+})
+export class InputDecimalDirective {
+
+    private colors = {
+        ERROR: 'red'
+    };
+
+    public arith: any;
+
+    constructor(private el: ElementRef,
+                private req: RequestService,
+                private warn: WarningService,
+                private quote: QuoteService,
+                private regular: RegularService) {
+        this.arith = new Maths.Calculate();
+    }
+
+
+    @HostBinding('style.color') color: string;
+    @HostBinding('style.borderColor') bc: string = null;
+
+    //role代表不同角色传参
+    //role=1: 代表报价时修改，
+    //role=2：增减项目的数量调整
+    //role=3: 增减项目列表中的实付款
+    //role=4：增减项目中最终的实付款
+    //role=5: 工程管理费用
+    //role=6：设计费
+    //role=7: 优惠金额
+    //role=8：实付金额
+    //role=10: 材料清单数据调整时
+
+    @Input('role') role: number;
+
+    @Input('infoId') infoId: string;
+
+    @Input('id') id: string;
+
+    //计算公式
+    @Input('formula') formula: string;
+
+    //当前输入数字
+    @Input() num: string;
+
+    //增减项目id
+    @Input('pauseId') pauseId: string;
+
+    @Input('choiceId') choiceId: string;
+
+    // @Output() priceEmitter: EventEmitter<any> = new EventEmitter<any>();
+    // @Output() dataEmitter: EventEmitter<any> = new EventEmitter<any>();
+    @Output() changeValue: EventEmitter<any> = new EventEmitter<any>();
+
+    @HostListener('keyup', ['$event']) onKeyup(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log("key up in here");
+
+        this.role = Number(this.role);
+        const val = this.el.nativeElement.value;
+        if (this.decimalByRole(this.role)) {
+            if (Reg.OPERATOR_SYMBOL.test(val)) {
+                if (!Reg.FOUR_OPERATOR.test(val)) {
+                    this.color = this.colors.ERROR;
+                    this.bc = this.colors.ERROR;
+                } else {
+                    this.color = null;
+                    this.bc = null;
+                }
+
+            } else if (!Reg.NUM_INT_AND_DECIMAL.test(val)) {
+                this.color = this.colors.ERROR;
+                this.bc = this.colors.ERROR;
+
+            } else {
+                this.color = null;
+                this.bc = null;
+            }
+
+        } else {
+            if (!Reg.NUM_DECIMAL_INT.test(val)) {
+                this.color = this.colors.ERROR;
+                this.bc = this.colors.ERROR;
+            } else {
+                this.color = null;
+                this.bc = null;
+
+            }
+        }
+    }
+
+    @HostListener('focus', ['$event']) onFocus(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.el.nativeElement.value = this.formula ? this.formula : this.num;
+    }
+
+    @HostListener('blur', ['$event']) onBlur(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.formula && Reg.OPERATOR_SYMBOL.test(this.formula)) {
+            this.color = null;
+            this.bc = null;
+        }
+        if (Reg.NUM_MONEY_DECIMAL.test(this.num)) {
+            this.color = null;
+            this.bc = null;
+        }
+        this.el.nativeElement.value = this.formula ? (this.formula + '=' + this.num) : this.num;
+    }
+    @HostListener('keydown', ['$event']) onKeyDown(e) {
+        // console.log(e)
+        if (e.keyCode == 13) {
+            // this.bc = null;
+            // this.color = null;
+        }
+    }
+
+    @HostListener('change', ['$event']) onChange(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.role = Number(this.role);
+        if (this.bc == null) {
+            if (this.role === 1) {
+                const formula = this.el.nativeElement.value;
+                const num = this.arith.computed(formula);
+                const params = {
+                    id: this.infoId,
+                    num: num
+                };
+                if (Reg.OPERATOR_SYMBOL.test(formula)) {
+                   params['formula'] = formula;
+                   this.el.nativeElement.value = formula + '=' + num;
+                } else {
+                    params['formula'] = null;
+                    this.el.nativeElement.value = num;
+                }
+                if (num >= 0) {
+                    this.req.doPost({
+                        url: 'upQuote',
+                        data: params,
+                        success: (res => {
+                            if (res && res.code == 200) {
+                                // this.quote.setTypeByParam("data", true);
+                                this.changeValue.emit({
+                                    formula: params['formula'],
+                                    num: params['num']
+                                });
+                                this.quote.setTypeByParam('price', true);
+                            } else {
+                                this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                            }
+                        })
+                    });
+                } else {
+                    this.warn.onMsgWarn(Messages.ERROR.NOT_VALUE_ZERO);
+                }
+
+            }
+            else if (this.role === 2) {
+                const params = {
+                    id: this.id,
+                    num: this.el.nativeElement.value,
+                    pauseId: this.pauseId
+                };
+                this.req.doPost({
+                    url: 'modifyPause2',
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            // this.reloadPause(this.pauseId);
+                            this.regular.setTypeByParam('detail', true);
+                            // this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 3) {
+                const params = {
+                    id: this.id,
+                    price: this.el.nativeElement.value,
+                    pauseId: this.pauseId
+                };
+                this.req.doPost({
+                    url: 'modifyPrice',
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.regular.setTypeByParam('detail', true);
+                            // this.reloadPause(this.pauseId);
+                            // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        } else {
+                            this.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 4) {
+                // console.log(this.el.nativeElement.value);
+                // this.reg.loadDetail(this.pauseId);
+                this.req.doPost({
+                    url: 'modifyPausePriceAndRemark',
+                    data: {
+                        pauseId: this.pauseId,
+                        price: this.el.nativeElement.value
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.regular.setTypeByParam('change', true);
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 5) {
+                this.req.doPost({
+                    url: 'costEngineer',
+                    data: {
+                        id: this.id,
+                        price: this.el.nativeElement.value
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.quote.setTypeByParam('price', true);
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 6) {
+                this.req.doPost({
+                    url: 'costDesign',
+                    data: {
+                        id: this.id,
+                        price: this.el.nativeElement.value,
+                        choiceId: this.choiceId
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.quote.setTypeByParam('price', true);
+                            this.quote.setTypeByParam('design', true);
+                            // this.reloadDesign(this.id);
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 7) {
+                this.req.doPost({
+                    url: 'savePriceOrRemark',
+                    data: {
+                        id: this.id,
+                        price: this.el.nativeElement.value
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            // this.quote.setQuoteBase(res.data);
+                            this.quote.setTypeByParam('data', true);
+                        } else {
+                            this.quote.setTypeByParam('price', true);
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+            else if (this.role === 8) {
+                this.req.doPost({
+                    url: 'savePriceOrRemark',
+                    data: {
+                        id: this.id,
+                        price: this.el.nativeElement.value
+                    },
+                    success: (res => {
+                        if (res && res.code !== 200) {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                        this.quote.setTypeByParam('price', true);
+                    })
+                });
+            }
+            else if (this.role === 10) {
+                const formula = this.el.nativeElement.value;
+                if (Reg.OPERATOR_SYMBOL.test(formula)) {
+                    let cformula = this.el.nativeElement.value;
+                        cformula = cformula.replace(/\/\d+(\.\d{1,2})?/g, (item) => {
+                        const p = item.split('/')[1];
+                        let w = 1;
+                        if (/\./g.test(p)) {
+                            w = p.toString().split('.')[1].length;
+                        }
+                        const result = (1 * Math.pow(10, w)) / (p * Math.pow(10, w));
+                        return '*' + result;
+                    });
+                    const num = this.arith.computed(cformula);
+                    this.formula = formula;
+                    this.num = num;
+                } else {
+                    this.formula = null;
+                    this.num = formula;
+                }
+                this.changeValue.emit({
+                    formula: this.formula,
+                    num: this.num
+                });
+            }
+            else if (this.role === 11){
+                this.req.doPost({
+                    url:"updateMasterActivityPrice",
+                    data:{
+                        id: this.id,
+                        activityPrice: this.num
+                    },
+                    success:(res =>{
+                        console.log(res);
+                        if(res && res.code == 200){
+                            this.changeValue.emit({
+                                value: this.el.nativeElement.value
+                            })
+                        }else{
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+        } else {
+            this.el.nativeElement.focus();
+            this.warn.onWarn(Messages.ERROR.INPUT);
+        }
+    }
+
+
+    decimalByRole(role) {
+        switch (role) {
+            case 1:
+                return true;
+            case 5:
+                return true;
+            case 6:
+                return true;
+            case 7:
+                return true;
+            case 10:
+                return true;
+            case 11:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+}

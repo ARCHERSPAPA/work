@@ -1,0 +1,30 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.select-brand{
+    display: inline-block;
+    .sale-brand{
+        // position: relative;
+        // top: 10px;
+        // ::ng-deep .ant-select-selection--multiple{
+        //     max-height: 32px;
+        //     .ant-select-selection__rendered{
+        //         max-height: 32px;
+        //         overflow: hidden;
+        //     }
+        // }
+        // ::ng-deep ul{
+        //     // display: flex;
+        //     // height: 0;
+        //     white-space:nowrap;
+        //     overflow: auto;
+        //     li{
+        //         display:inline-block;
+        //         float: none
+        //     }
+        // }
+        ::ng-deep ul{
+            display: flex;
+            height: 0;
+        }
+    }
+}

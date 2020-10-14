@@ -1,0 +1,285 @@
+<div class="temp" *ngIf="pkg">
+  <div class="temp-head">
+      <rev-title [title]="pkg.packageName"></rev-title>
+      <a href="javascript:void(0)" (click)="showModal(pkg)" class="head-fix" *ngIf="pState == 0">修改</a>
+  </div>
+  <div nz-row nzSpan="24">
+      <div nz-col nzSpan="4" class="mt-8">单价：{{pkg.price}}/每平米</div>
+      <div nz-col nzSpan="6" class="mt-8">适用面积范围：{{pkg.houseArea}}</div>
+      <div nz-col nzSpan="14" class="mt-8">适用户型：<span *ngIf="pkg.roomType">{{pkg.roomType.join(",")}}</span></div>
+      <div nz-col nzSpan="24" class="mt-8" *ngIf="pkg && pkg.remark">备注：{{pkg.remark}}</div>
+  </div>
+  <div nz-row class="mt-16">
+      <nz-tabset [nzSelectedIndex]="0">
+          <!---项目明细--->
+          <nz-tab nzTitle="项目明细">
+              <div nz-row class="temp-warp">
+                  <nz-table #pkgTable [nzData]="dataSource" [nzShowPagination]="false" nzBordered nzSize="middle">
+                      <thead>
+                            <tr>
+                                <th colspan="14" width="85%">大类</th>
+                                <th rowspan="2" width="15%" *ngIf="pState == 0">操作</th>
+                            </tr>
+                            <tr>
+                                <th>编号</th>
+                                <th>类别</th>
+                                <th>名称</th>
+                                <th>品牌</th>
+                                <th>规格</th>
+                                <th>型号</th>
+                                <th>单位</th>
+                                <th>材料单价</th>
+                                <th>材料耗损</th>
+                                <th>木工</th>
+                                <th>泥工</th>
+                                <th>漆工</th>
+                                <th>水电</th>
+                                <th>销售价</th>
+                            </tr>
+                         </thead>
+                        <tbody>
+                            <ng-template ngFor let-data [ngForOf]="pkgTable.data">
+                                <tr>
+                                    <td [colSpan]="14" align="center">{{data.packageName}}</td>
+                                    <td *ngIf="pState == 0">
+                                        <a href="javascript:void(0)" (click)="showBranchModal(2,data)">修改类名</a>
+                                        <a href="javascript:void(0)" class="ml-8" (click)="openItem(1,data)">添加</a>
+                                        <a href="javascript:void(0)" class="ml-8" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText='删除'
+                                        (nzOnConfirm)="delBranchItem(data.id)">删除</a>
+                                    </td>
+                                </tr>
+                                <tr *ngFor="let item of data.packinfo">
+                                    <td [title]="item.suiteBase.code?item.suiteBase.code:''">
+                                        {{item.suiteBase.code?item.suiteBase.code:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.categoryName?item.suiteBase.categoryName:''">
+                                        {{item.suiteBase.categoryName?item.suiteBase.categoryName:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.name?item.suiteBase.name:''">
+                                        {{item.suiteBase.name?item.suiteBase.name:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.brand?item.suiteBase.brand:''">
+                                        {{item.suiteBase.brand?item.suiteBase.brand:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.spec?item.suiteBase.spec:''">
+                                        {{item.suiteBase.spec?item.suiteBase.spec:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.model?item.suiteBase.model:''">
+                                        {{item.suiteBase.model?item.suiteBase.model:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.unit?item.suiteBase.unit:''">
+                                        {{item.suiteBase.unit?item.suiteBase.unit:'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.unitPrice?item.suiteBase.unitPrice:''">
+                                        {{item.suiteBase.unitPrice?(item.suiteBase.unitPrice|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.wastageRate?item.suiteBase.wastageRate:''">
+                                        {{item.suiteBase.wastageRate?(item.suiteBase.wastageRate|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.carpenterPrice?item.suiteBase.carpenterPrice:''">
+                                        {{item.suiteBase.carpenterPrice?(item.suiteBase.carpenterPrice|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.masonPrice?item.suiteBase.masonPrice:''">
+                                        {{item.suiteBase.masonPrice?(item.suiteBase.masonPrice|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.japannerPrice?item.suiteBase.japannerPrice:''">
+                                        {{item.suiteBase.japannerPrice?(item.suiteBase.japannerPrice|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.utilityCharge?item.suiteBase.utilityCharge:''">
+                                        {{item.suiteBase.utilityCharge?(item.suiteBase.utilityCharge|number:'1.2'):'--'}}
+                                    </td>
+                                    <td [title]="item.suiteBase.sellPrice?item.suiteBase.sellPrice:''">
+                                        {{item.suiteBase.sellPrice?(item.suiteBase.sellPrice|number:'1.2'):'--'}}
+                                    </td>
+                                    <td *ngIf="pState == 0">
+                                        <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText='删除'
+                                            (nzOnConfirm)="delBranchItem(item.id)">删除</a>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <tr *ngIf="pState == 0">
+                                <td [colSpan]="14" align="center" (click)="showBranchModal(1)"><a href="javascript:void(0)">添加大类</a></td>
+                                <td>--</td>
+                            </tr>
+                        </tbody>
+                  </nz-table>
+              </div>
+          </nz-tab>
+          <!---说明--->
+          <nz-tab nzTitle="说明">
+              <div nz-row nzSpan="24">
+                  <div class="explain">
+                      <textarea rows="10" nz-input [(ngModel)]="info" maxlength="5000" [disabled]="pState == 1"></textarea>
+                      <span class="count" *ngIf="info && info.length > 0"><span>{{info.length}}</span>/5000</span>
+                  </div>
+                  <div nz-row nzSpan="24" class="text-right mt-16" *ngIf="pState == 0">
+                      <button nz-button [nzType]="'primary'" (click)="handleSaveExplain()">保存</button>
+                  </div>
+              </div>
+          </nz-tab>
+      </nz-tabset>
+  </div>
+</div>
+
+<!---修改套餐参数--->
+<nz-modal nzWidth="600px" [(nzVisible)]="isVisible" nzTitle="编辑套餐" [nzFooter]="null" (nzOnCancel)="handleCancel()">
+  <form nz-form [formGroup]="mealForm" class="temp-modal">
+      <ul>
+          <nz-form-item>
+              <nz-form-label [nzSpan]="6">套餐名称</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                  <input nz-input name="mealName" formControlName="mealName" [(ngModel)]="mealName" maxlength="30"
+                      autocomplete="off" placeholder="请输入套餐名称" />
+                  <nz-form-explain *ngIf="mealForm.get('mealName').dirty && mealForm.get('mealName').errors">
+                      <ng-container *ngIf="mealForm.get('mealName').hasError('required')">
+                          必填选项
+                      </ng-container>
+                      <ng-container *ngIf="mealForm.get('mealName').hasError('maxLength')">
+                          至多输入30位字符
+                      </ng-container>
+
+                  </nz-form-explain>
+              </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+              <nz-form-label [nzSpan]="6">单价/每平米</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                  <input nz-input name="price" formControlName="price" [(ngModel)]="price" maxlength="10"
+                      autocomplete="off" placeholder="请输入单价" />
+                  <nz-form-explain *ngIf="mealForm.get('price').dirty && mealForm.get('price').errors">
+                      <ng-container *ngIf="mealForm.get('price').hasError('required')">
+                          必填选项
+                      </ng-container>
+                      <ng-container *ngIf="mealForm.get('price').hasError('price')">
+                          只能输入数字并且小数只能保留2位
+                      </ng-container>
+                  </nz-form-explain>
+              </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+              <nz-form-label [nzSpan]="6">适用面积范围</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                  <div nz-col nzSpan="11">
+                      <input nz-input type="text" name="areaStart" formControlName="areaStart" [(ngModel)]="areaStart"
+                          maxlength="10" autocomplete="off" placeholder="请输入范围开始值" />
+                      <nz-form-explain *ngIf="mealForm.get('areaStart').dirty && mealForm.get('areaStart').errors">
+                          <ng-container *ngIf="mealForm.get('areaStart').hasError('required')">
+                              必填选项
+                          </ng-container>
+                          <ng-container *ngIf="mealForm.get('areaStart').hasError('price')">
+                              最小面积只能输入数字且小数保留2位
+                          </ng-container>
+                      </nz-form-explain>
+                  </div>
+                  <div nz-col nzSpan="2" class="text-center">--</div>
+                  <div nz-col nzSpan="11">
+                      <input nz-input type="text" name="areaEnd" formControlName="areaEnd" [(ngModel)]="areaEnd"
+                          maxlength="10" autocomplete="off" placeholder="请输入范围结束值" />
+                      <nz-form-explain *ngIf="mealForm.get('areaEnd').dirty && mealForm.get('areaEnd').errors">
+                          <ng-container *ngIf="mealForm.get('areaEnd').hasError('required')">
+                              必填选项
+                          </ng-container>
+                          <ng-container *ngIf="mealForm.get('areaEnd').hasError('price')">
+                              最大面积只能输入数字且小数保留2位
+                          </ng-container>
+                      </nz-form-explain>
+                  </div>
+              </nz-form-control>
+          </nz-form-item>
+
+          <!--户型-->
+
+          <nz-form-item *ngFor="let control of hxArray;let i = index">
+              <nz-form-label [nzSpan]="6" *ngIf="i === 0">适用户型</nz-form-label>
+              <nz-form-label [nzSpan]="6" *ngIf="i !== 0"></nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                  <div nz-col nzSpan="4" class="text-right">卧室：</div>
+                  <div nz-col nzSpan="6">
+                      <input nz-input [formControlName]="control.room" maxlength="6"
+                          oninput="this.value=this.value.replace(/\D/g,'')" onpaste="return false;"
+                          placeholder="请输入房间数量"/>
+                      <nz-form-explain
+                          *ngIf="mealForm.get(control.room)?.dirty && mealForm.get(control.room)?.errors">
+                          <ng-container *ngIf="mealForm.get(control.room).hasError('required')">
+                              必填选项
+                          </ng-container>
+                          <ng-container *ngIf="mealForm.get(control.room).hasError('max')">
+                              最多为99室
+                          </ng-container>
+                      </nz-form-explain>
+                  </div>
+                  <div nz-col nzSpan="4" class="text-right">卫生间：</div>
+                  <div nz-col nzSpan="6">
+                      <input nz-input [formControlName]="control.bath" maxlength="6"
+                          oninput="this.value=this.value.replace(/\D/g,'')" onpaste="return false;"
+                          placeholder="请输入卫生间数量" />
+                  </div>
+
+                  <nz-form-explain *ngIf="mealForm.get(control.bath)?.dirty && mealForm.get(control.bath)?.errors">
+                      <ng-container *ngIf="mealForm.get(control.bath).hasError('required')">
+                          必填选项
+                      </ng-container>
+                      <ng-container *ngIf="mealForm.get(control.bath).hasError('max')">
+                          最多为99卫
+                      </ng-container>
+                  </nz-form-explain>
+                  <div nz-col nzSpan="2" class="text-right">
+                      <a href="javascript:void(0)" (click)="addHx()" *ngIf="i === 0">
+                          <i nz-icon type="plus-circle" class="circle"></i></a>
+                      <a href="javascript:void(0)" (click)="delHx(control,i,$event)" *ngIf="i !== 0">
+                          <i nz-icon type="minus-circle" class="circle del"></i>
+                      </a>
+                  </div>
+              </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+              <nz-form-label [nzSpan]="6">备注</nz-form-label>
+              <nz-form-control [nzSpan]="16" class="textarea">
+                  <textarea nz-input type="text" name="remark" [(ngModel)]="remark" formControlName="remark"
+                      maxlength="300" autocomplete="off" placeholder="请输入备注信息" rows="5"></textarea>
+                  <span class="count" *ngIf="remark && remark.length > 0"><span>{{remark.length}}</span>/300</span>
+                  <nz-form-explain *ngIf="mealForm.get('remark').dirty && mealForm.get('remark').errors">
+                      <ng-container *ngIf="mealForm.get('remark').hasError('maxLength')">
+                          最多输入300个字符
+                      </ng-container>
+                  </nz-form-explain>
+              </nz-form-control>
+          </nz-form-item>
+          <div class="btns">
+              <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+              <button nz-button nzType="primary" (click)="handleOk($event)" [disabled]="!mealForm.valid">提交
+              </button>
+          </div>
+      </ul>
+  </form>
+</nz-modal>
+
+<!---大项的添加与修改--->
+<nz-modal [(nzVisible)]="isBranchVisible" [nzTitle]="branchTitle" [nzFooter]="null" (nzOnCancel)="handleBranchCancel()">
+  <form nz-form [formGroup]="branchForm" class="temp-modal">
+      <nz-form-item>
+          <nz-form-label [nzSpan]="5">大类名称</nz-form-label>
+          <nz-form-control [nzSpan]="16">
+              <input nz-input name="branchName" formControlName="branchName" [(ngModel)]="branchName" maxlength="30"
+                  autocomplete="off" placeholder="请输入大项名称" />
+              <nz-form-explain *ngIf="branchForm.get('branchName').dirty && branchForm.get('branchName').errors">
+                  <ng-container *ngIf="branchForm.get('branchName').hasError('required')">
+                      必填选项
+                  </ng-container>
+                  <ng-container *ngIf="branchForm.get('branchName').hasError('maxLength')">
+                      至多输入30位字符
+                  </ng-container>
+
+              </nz-form-explain>
+          </nz-form-control>
+      </nz-form-item>
+      <div class="btns">
+          <button nz-button nzType="default" (click)="handleBranchCancel()">关闭</button>
+          <button nz-button nzType="primary" (click)="handleBranchOk($event)" [disabled]="!branchForm.valid">提交
+          </button>
+      </div>
+  </form>
+</nz-modal>

@@ -1,0 +1,12 @@
+@charset "utf8";
+.item-basic .ant-table-tbody>tr>td{
+  max-width: 60px;
+  font-size: 14px;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.delete{
+  color: #F5222D;
+}

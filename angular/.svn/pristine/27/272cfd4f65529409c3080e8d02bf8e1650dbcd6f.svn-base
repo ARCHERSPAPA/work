@@ -1,0 +1,63 @@
+<div class="master-sale">
+    <div class="master-sale-head">
+         <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="mt-24 master-sale-search">
+        <div>
+            <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="defaultRadio" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        </div>
+        <div class="searchInfo">
+            <input nz-input [(ngModel)]="searchInfo" placeholder="版本名称"/>
+            <button nz-button nzType="primary" (click)="searchData()">查询</button>
+        </div>
+    </div>
+    <div class="mt-16 select">
+        <button nz-button nzType="primary" [disabled]="showButton()">上架</button>
+        <span>已选{{checkedNumber}}项</span>
+    </div>
+    <nz-table 
+        #nzTable 
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+        (nzPageIndexChange)="changePage()"
+        [nzShowPagination]='true'
+        [nzData]="saleList"
+    >
+        <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"></th>
+                <th>编号</th>
+                <th>名称</th>
+                <th>编辑时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr *ngFor="let data of nzTable.data">
+                <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()"></td>
+                <td>12312312</td>
+                <td>唯美独尊报价</td>
+                <td>{{1595925260495 | date:'yy-MM-dd HH:mm'}}</td>
+                <td>
+                    <div *ngIf="state === 0">
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="确定上架该版本吗？"
+                       nzOkText="上架" (nzOnConfirm)="handleOperate('on',data)" class="ml-8">上架</a>
+                        <a href="javascript:void(0)" class="ml-8"(click)="handleOperate('copy',data)">复制</a>
+                        [queryParams]="{id:btoa(data.id)}"
+                        跳转到编辑活动
+                        <a href="javascript:void(0)"  class="ml-8">编辑</a>
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="删除后数据将无法恢复！"
+                        nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)" class="ml-8">删除</a>
+                    </div>
+                    <div *ngIf="state === 1">
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="下架后设计师将无法选择该版本材料？"
+                       nzOkText="下架" (nzOnConfirm)="handleOperate('off',data)" class="ml-8">下架</a>
+                        <a href="javascript:void(0)"  class="ml-8" [routerLink]="['./../add']" [queryParams]="{id:btoa(data.id)}">详情</a>
+                    </div>
+                </td>
+            </tr> -->
+        </tbody>    
+    </nz-table>
+ </div>

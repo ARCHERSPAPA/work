@@ -1,0 +1,68 @@
+<div class="master-sale">
+    <div class="master-sale-head">
+         <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="mt-24 master-sale-search">
+        <div class="searchRadio">
+            <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="defaultRadio" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        </div>
+    </div>
+    <div class="mt-16 select">
+        <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="state === 0" (nzOnConfirm)="versionShelve('off')" nz-popconfirm nzTitle="确定下架该基装版本吗？"
+        nzOkText="下架">下架</button>
+        <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="state === 1" (nzOnConfirm)="versionShelve('on')" nz-popconfirm nzTitle="确定上架该基装版本吗？"
+        nzOkText="上架">上架</button>
+        <span *ngIf="checkedNumber.length > 0">已选{{checkedNumber.length}}项</span>
+    </div>
+    <nz-table 
+        #nzTable 
+        nzSize="middle"
+        [nzBordered]="true"
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+        (nzPageIndexChange)="changePage()"
+        [nzShowPagination]='true'
+        [nzData]="saleList"
+    >
+        <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)" width="5%"></th>
+                <th width="10%">编号</th>
+                <th width="40%">名称</th>
+                <th width="state ===0 ? '20%' : '30%' ">编辑时间</th>
+                <th width="10%" *ngIf="state === 0">是否默认</th>
+                <th width="20%">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of nzTable.data">
+                <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()"></td>
+                <td>{{getCompileById(data.id)}}</td>
+                <td nz-tooltip [nzTitle]="data.versionName" nzPlacement="topLeft">
+                    {{data.versionName?data.versionName:'--'}}
+                </td>
+                <td>{{data.createTime | date:'yy-MM-dd HH:mm'}}</td>
+                <td *ngIf="state === 0">{{data.defaultVsersion && data.defaultVsersion == 1 ? '默认':'--'}}</td>
+                <td>
+                    <div *ngIf="state === 0">
+                        <a href="javascript:void(0)" [routerLink]="['./../edit']" [queryParams]="{id:btoa(data.id),versionName:data.name,detailState:state}">详情</a>
+                        <a href="javascript:void(0)" class="ml-8" nz-popconfirm nzTitle="确定下架该基装版本吗？"
+                       nzOkText="下架" (nzOnConfirm)="handleOperate('off',data)">下架</a>
+                       <a href="javascript:void(0)" class="ml-8" (click)="handleOperate('default',data)" *ngIf="data.defaultVsersion !== 1">设为默认</a>
+                    </div>
+                    <div *ngIf="state === 1">
+                        <a href="javascript:void(0)" [routerLink]="['./../edit']" [queryParams]="{id:btoa(data.id),versionName:data.name}">详情</a>
+                        <a href="javascript:void(0)" class="ml-8"(click)="handleOperate('copy',data)">复制</a>
+                        <a href="javascript:void(0)" class="ml-8" nz-popconfirm nzTitle="确定删除该基装版本吗？"
+                        nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)">删除</a>
+                        <a href="javascript:void(0)" class="ml-8"  nz-popconfirm nzTitle="确定上架该基装版本吗？"
+                       nzOkText="上架" (nzOnConfirm)="handleOperate('on',data)">上架</a>
+                    </div>
+                </td>
+            </tr>
+        </tbody>    
+    </nz-table>
+ </div>
+

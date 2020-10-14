@@ -1,0 +1,184 @@
+import { Component, OnInit } from '@angular/core';
+import {Default} from '../../../../model/constant';
+import {QuoteService} from '../../../../service/quote.service';
+import {getIndexByUrl} from '../../../../model/methods';
+import {Router, ActivatedRoute, NavigationStart, NavigationEnd, NavigationCancel} from '@angular/router';
+import {HeaderService} from "../../../../service/header.service";
+
+@Component({
+  selector: 'rev-cost-budget-detail',
+  templateUrl: './cost-budget-detail.component.html',
+  styleUrls: ['./../../cost.component.scss', './../../../detail/tab.scss', './cost-budget-detail.component.scss']
+})
+export class CostBudgetDetailComponent implements OnInit {
+    //报价id
+    public cid: string;
+    //成本核算
+    public pid: string;
+    public index = 0;
+    //预算tabs
+    public budgets: Array<any>;
+    //成本tabs
+    public costs: Array<any>;
+
+    public loading = false;
+
+
+
+    //切换按钮控制
+    public radioSwitch = [{
+        key: 1,
+        text: '预算'
+    }, {
+        key: 0,
+        text: '成本'
+    }];
+
+    public defaultSwitch: any = this.radioSwitch[0];
+
+    constructor(private quote: QuoteService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private header:HeaderService) {
+
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['cid']) {
+                this.cid = params['cid'];
+            }
+            if (params && params['pid']) {
+                this.pid = params['pid'];
+            }
+        });
+
+        //预算tabs设计
+        this.budgets = [
+            {
+                name: '预算',
+                url: 'price',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '材料清单',
+                url: 'makings',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '合同',
+                url: 'contract',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '设计图纸',
+                url: 'graph',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+
+        ];
+
+
+        //成本tabs设计
+        this.costs = [
+            {
+                name: '承包合同',
+                url: 'contract',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '交底记录',
+                url: 'disclose',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '收款情况',
+                url: 'receivables',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+            {
+                name: '工作批注',
+                url: 'annotate',
+                params: {
+                    cid: this.cid,
+                    pid: this.pid
+                }
+            },
+
+        ];
+
+        //判断当前url
+        const url = this.router.url.split('budget');
+        if (url && url.length > 1) {
+            if (url[1].includes('detail')) {
+                this.defaultSwitch = this.radioSwitch[0];
+                this.index = getIndexByUrl(url[1], this.budgets);
+            } else {
+                this.defaultSwitch = this.radioSwitch[1];
+                this.index = getIndexByUrl(url[1], this.costs);
+            }
+            console.log(this.index);
+        }
+
+
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationStart) {
+                this.loading = true;
+            } else if (event instanceof NavigationEnd) {
+                setTimeout(() => {
+                    this.loading = false;
+                }, 1500);
+            } else if (event instanceof NavigationCancel) {
+                this.loading = false;
+            }
+        });
+
+    }
+
+    ngDoCheck(){
+        this.costs[0].name = this.header.getHeaderVersion()?'成本':'承包合同';
+    }
+
+
+
+    /**
+     * 切换
+     * @param {number} status
+     */
+    handleSwitch(key: number) {
+        if (key === 1) {
+            this.defaultSwitch = this.radioSwitch[0];
+            this.router.navigate(['/rev/cost/budget/detail/price', 6], {preserveQueryParams: true});
+        } else {
+            this.defaultSwitch = this.radioSwitch[1];
+            this.router.navigate(['/rev/cost/budget/costing/contract', 6], {preserveQueryParams: true});
+        }
+    }
+
+    tabClick(url, params) {
+        this.quote.setTypeByParam('head', true);
+        this.router.navigate(['./' + url + '', Default.STATE.ITEM_6], {queryParams: params, relativeTo: this.activatedRoute});
+    }
+
+}

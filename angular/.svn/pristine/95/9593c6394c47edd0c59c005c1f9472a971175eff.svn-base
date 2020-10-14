@@ -1,0 +1,783 @@
+import { Component, OnInit, Input, ElementRef } from '@angular/core';
+import { RequestService } from '../../service/request.service';
+import { ConfigService } from '../../service/config.service';
+import { Messages } from '../../model/msg';
+import { WarningService } from '../../service/warning.service';
+import { MakeService } from '../../service/make.service';
+import { Default } from '../../model/constant';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { bounceAnimate } from '../../animation/transform.component';
+import { getVersionType } from '../../model/methods';
+import { UserService } from '../../service/user.service';
+import { BufferService } from '../../service/buffer.service';
+
+
+declare const $: any;
+
+@Component({
+    selector: 'rev-item-cart',
+    templateUrl: './item-cart.component.html',
+    styleUrls: ['./item-cart.component.scss'],
+    animations: [bounceAnimate]
+})
+export class ItemCartComponent implements OnInit {
+    //报价id
+    @Input() id: number;
+    //是否显示列表
+    // @Input() visible: boolean = false;
+    //当前选择四大类型
+    @Input() type: number;
+
+    //外部传入version id
+    @Input() vid: number;
+
+    //基础报价时的小项菜单名称
+    @Input() infoName: string;
+
+    //小项菜单的id
+    @Input() infoId: number;
+
+    @Input() versionId: number;
+
+    //增减项主的id
+    @Input() aid: number;
+
+    //显示列表的title
+    @Input() title: string;
+
+    public loading = false;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+
+    public category = '';
+    public projectName = '';
+
+    /**
+     * 版本相关
+     */
+    public changeOptions: any;
+
+
+    /**
+     * 类型相关
+     */
+    public moduleList: any;
+    public categoryList: Array<any> = [];
+
+    /**
+     * 选择选中的ids
+     * @type {any[]}
+     */
+    private selectModuleIds: Array<any> = [];
+
+    /**
+     * 选择选中的项目item
+     * @type {any[]}
+     */
+    public selectModules: Array<any> = [];
+
+
+    private configBase: any;
+
+    /**
+     * 是否显示当前已选中文件
+     * @type {boolean}
+     */
+    // public toggleModule: boolean = false;
+    // public switch: string;
+
+    //购物车效果
+    // public balls: Array<any> = [
+    //     {show: false},
+    //     {show: false},
+    //     {show: false},
+    //     {show: false}
+    // ];
+
+    //全选时的加载
+    public loadAll = false;
+    public clickSelectAll = false;
+    //全选时的加载情况
+    public loadingModuleAll = true;
+
+    public bufferName: string;
+
+    //区别展示与否
+    public toggleType = 'down';
+    public toggle = false;
+
+    constructor(private request: RequestService,
+        private warn: WarningService,
+        private makes: MakeService,
+        public modal: NgbActiveModal,
+        private config: ConfigService,
+        private user: UserService,
+        private el: ElementRef,
+        private buffer: BufferService) {
+    }
+
+    ngOnInit() {
+        if (!this.config.getConfigBase()) {
+            this.config.loadConfig(this.id);
+        }
+
+        /**
+         * 判断是否已存在本地
+         */
+        this.bufferName = this.buffer.getRandKey(this.id, this.type);
+        const buf = this.buffer.getBuffer(this.bufferName);
+        if (buf) {
+            const sd = this.buffer.getBuffer(this.bufferName);
+            this.versionId = sd.versionId;
+            if (this.versionId) {
+                this.loadCategory();
+                this.category = sd.category ? sd.category : '';
+            }
+            this.projectName = sd.projectName;
+        } else {
+            if (this.versionId) {
+                this.loadCategory();
+            }
+        }
+
+        this.changeData();
+    }
+
+    /**
+     * 初始化时调用此项，选择默认第一项
+     */
+    changeChildOptions() {
+        const that = this;
+        if (that.configBase && that.configBase.length > 0) {
+            for (const tc of that.configBase) {
+                if (that.getSelectType()) {
+                    if (tc.type == that.getSelectType()) {
+                        that.changeOptions = tc.versions;
+                        if (that.changeOptions && that.changeOptions.length === 1) {
+                            that.versionId = that.changeOptions[0].versionId;
+                            that.loadCategory();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    changeVersion(vid: number) {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.projectName = '';
+        this.category = '';
+        this.versionId = vid;
+        if (this.versionId) {
+            this.loadCategory();
+            this.clickSelectAll = false;
+        } else {
+            this.categoryList = [];
+            this.moduleList = [];
+        }
+        // this.searchData();
+    }
+
+    changeData() {
+        const that = this;
+        this.loading = true;
+        // if (that.versionId) {
+        // const params = {
+        //     pageNo: that.pageNo,
+        //     pageSize: that.pageSize,
+        //     category: that.category,
+        //     projectName: that.projectName,
+        //     companyId: that.user.getCompanyId(),
+        //     versionType: that.getSelectType()
+        // };
+        //2.2.9
+        const params = {
+            page: that.pageNo,
+            pageSize: that.pageSize,
+            category: that.category,
+            name: that.projectName,
+            companyId: that.user.getCompanyId(),
+
+        };
+        if (that.versionId) {
+            params['versionid'] = that.versionId;
+        }
+        // let url = 'moduleListQuote'
+        //2.2.9
+        let url = 'materialDetailQuery'
+        that.request.doPost({
+            url: url,
+            data: params,
+            success: (res => {
+                // console.log(res);
+                this.loading = false;
+                if (res && res.code == 200) {
+                    that.moduleList = res.data.list;
+                    that.moduleList.forEach(v => {
+                        v['specifications'] = v['spec'];
+                        v['projectName'] = v['name'];
+                        v['colours'] = v['color'];
+                        v['versionId'] = v['combos'];
+                        v['modelNum'] = v['model']
+                    });
+
+                    that.total = res.data.total;
+                    console.log(that.moduleList)
+                } else {
+                    that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+        // }
+    }
+
+    ngDoCheck() {
+        if (this.config.getConfigBase() && !this.configBase) {
+            this.configBase = this.config.getConfigBase();
+            this.changeChildOptions();
+        }
+        // this.switch = this.toggleModule ? "down" : "up";
+        // console.log(this.selectModules);
+
+        if (this.selectModules && this.selectModules.length == 0) {
+            // console.log(this.toggle);
+            this.toggle = false;
+            this.toggleType = this.toggle ? 'up' : 'down';
+        }
+    }
+
+    searchData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.selectModuleIds = [];
+        this.changeData();
+        this.loadAll = true;
+        this.clickSelectAll = false;
+    }
+
+    /**
+     * 加载类别
+     */
+    loadCategory() {
+        if (this.versionId) {
+            this.request.doPost({
+                url: 'categoryList',
+                data: {
+                    versionId: this.versionId
+                },
+                success: (res => {
+                    if (res && res.code === 200) {
+                        this.categoryList = res.data;
+                        // if(this.categoryList && this.categoryList.length === 1){
+                        //     this.category = this.categoryList[0];
+                        // }
+                        if (this.category) {
+                            const findCategory = this.categoryList.filter(cate => cate === this.category);
+                            if (findCategory && findCategory.length <= 0) {
+                                this.category = this.categoryList[0];
+                            }
+                        }
+                        this.searchData();
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    // selectModule(e, module) {
+    //     // console.log(e);
+    //     let that = this;
+    //     // let native = this.el.nativeElement.querySelector("#module-li-" + module.id);
+    //     let native = e.target;
+    //     let balls = this.el.nativeElement.querySelectorAll(".ball");
+    //     let moduleShow = this.el.nativeElement.querySelector(".item-content");
+    //
+    //     let startPoint = {
+    //         x: native.offsetLeft + native.offsetWidth / 2,
+    //         y: native.offsetTop + native.offsetHeight / 2 - moduleShow.scrollTop
+    //     };
+    //
+    //     let endPoint = this.getEndPoint();
+    //
+    //     let topPoint = {
+    //         x: endPoint.x - 240,
+    //         y: endPoint.y - 40
+    //     }
+    //
+    //     let a = ((startPoint.y - endPoint.y) * (startPoint.x - topPoint.x) - (startPoint.y - topPoint.y) * (startPoint.x - endPoint.x)) / ((startPoint.x * startPoint.x - endPoint.x * endPoint.x) * (startPoint.x - topPoint.x) - (startPoint.x * startPoint.x - topPoint.x * topPoint.x) * (startPoint.x - endPoint.x));
+    //     let b = ((endPoint.y - startPoint.y) - a * (endPoint.x * endPoint.x - startPoint.x * startPoint.x)) / (endPoint.x - startPoint.x);
+    //     let c = startPoint.y - a * startPoint.x * startPoint.x - b * startPoint.x;
+    //
+    //     //运动小球
+    //     let moveBall, index = -1;
+    //
+    //     for (let i = 0; i < that.balls.length; i++) {
+    //         if (!that.balls[i].show) {
+    //             that.balls[i].show = true;
+    //             moveBall = balls[i];
+    //             index = i;
+    //             if (index >= that.balls.length - 1) {
+    //                 that.balls.push({show: false});
+    //             }
+    //             break;
+    //         }
+    //     }
+    //
+    //     let x = startPoint.x;
+    //     let y = startPoint.y;
+    //     moveBall.style.left = x + "px";
+    //     moveBall.style.top = y + "px";
+    //     var timer = setInterval(function () {
+    //         if (x < endPoint.x) {
+    //             x += (index + 1) * 10;
+    //             moveBall.style.left = x + 'px';
+    //             moveBall.style.top = a * x * x + b * x + c + 'px';
+    //         } else {
+    //             module["num"] = 1;
+    //             that.selectModules.push(module);
+    //             clearInterval(timer);
+    //             moveBall.style = null;
+    //             that.balls[index].show = false;
+    //         }
+    //     }, (index + 1) * 5);
+    // }
+
+    /**
+     * 添加
+     * @param e
+     * @param data
+     */
+    selectModule(e, data) {
+        e.stopPropagation();
+        e.preventDefault();
+        data['num'] = 1;
+        this.selectModules.push(data);
+    }
+
+    removeModule(e, i) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.selectModules.splice(i, 1);
+        if (this.selectModules.length === 0) {
+            this.toggle = false;
+        }
+    }
+
+
+    //获取终点坐标
+    getEndPoint() {
+        const point = this.el.nativeElement.querySelector('#count');
+        return {
+            x: point.offsetLeft + point.offsetWidth,
+            y: point.offsetTop + point.offsetHeight / 2 + 70
+        };
+    }
+
+    // showModules() {
+    //     this.toggleModule = !this.toggleModule;
+    // }
+
+
+    // existModuleId(id) {
+    //     let ids = this.selectModuleIds
+    //     if (ids && ids.length > 0) {
+    //         for (let i = 0; i < ids.length; i++) {
+    //             if (ids[i] == id) return true;
+    //         }
+    //     }
+    //     return false;
+    // }
+
+    /**
+     * 选择去重
+     * @param id
+     * @returns {boolean}
+     */
+    // existModuleById(id) {
+    //     let modules = this.selectModules;
+    //     if (modules && modules.length > 0) {
+    //         for (let module of modules) {
+    //             if (module.id == id) return true;
+    //         }
+    //     }
+    // }
+    //
+    // findModuleById(id) {
+    //     let index = 0;
+    //     return index;
+    // }
+
+
+    /**
+     * 取消
+     */
+    cancel() {
+        this.resetIds();
+        this.modal.dismiss();
+    }
+
+    /**
+     * 提交数据
+     */
+    send(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this, params = {};
+        if (that.selectModules && that.selectModules.length > 0) {
+            params['infoIds'] = that.getOfferIds(that.selectModules);
+            params['type'] = that.type;
+            params['infoBranchName'] = that.infoName ? that.infoName : '';
+            if (that.infoId) {
+                params['infoBranchId'] = that.infoId;
+            }
+
+            if (that.aid) {
+                params['pauseId'] = that.aid;
+                that.request.doPost({
+                    url: 'addPause',
+                    data: params,
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            //存储你的查询信息
+                            this.buffer.setBuffer(this.bufferName,
+                                {
+                                    versionId: this.versionId,
+                                    category: this.category,
+                                    projectName: this.projectName
+                                });
+                            // that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                            that.resetIds();
+                            that.modal.close(res);
+                        } else {
+                            that.warn.onError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            } else {
+                params['id'] = that.id;
+                if (params['infoBranchId']) {
+                    this.doAddBasicBatch(params, params['infoIds']);
+                } else {
+                    that.warn.onMsgWarn(Messages.ERROR_TEXT);
+                }
+
+            }
+
+        } else {
+            that.warn.onWarn(Messages.SELECT_NOT_EMPTY);
+        }
+    }
+
+    doAddBasicBatch(params, ids) {
+        if (ids.length <= Default.UPLOAD.MAX_DATA) {
+            params['infoIds'] = ids;
+            this.addBasicBatch(params)
+                .then(res => {
+                    this.buffer.setBuffer(this.bufferName,
+                        {
+                            versionId: this.versionId,
+                            category: this.category,
+                            projectName: this.projectName
+                        });
+
+                    this.warn.onSuccess(res['msg'] || Messages.SUCCESS.DATA);
+                    this.resetIds();
+                    this.modal.close(res);
+                }).catch(err => {
+                    this.warn.onMsgError(err.msg || Messages.FAIL.DATA);
+                });
+        } else {
+            params['infoIds'] = ids.splice(0, Default.UPLOAD.MAX_DATA);
+            this.addBasicBatch(params)
+                .then(res => {
+                    this.doAddBasicBatch(params, ids);
+                })
+                .catch(err => {
+                    this.warn.onMsgError(err.msg || Messages.FAIL.DATA);
+                });
+        }
+
+    }
+
+    //分段执行添加任务
+    addBasicBatch(params) {
+        return new Promise((resolve, reject) => {
+            this.request.doPost({
+                url: 'addBasicQuote',
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res);
+                    } else {
+                        reject(res);
+                    }
+                })
+            });
+        });
+
+    }
+
+    //组装ids
+    getOfferIds(modules) {
+        const ids = [];
+        if (modules && modules.length > 0) {
+            for (const module of modules) {
+                ids.push(module.id);
+            }
+        }
+        return ids;
+    }
+
+    /**
+     * 提交材料清单数据
+     */
+    sendTo(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.selectModules && this.selectModules.length > 0) {
+            this.buffer.setBuffer(this.bufferName,
+                {
+                    versionId: this.versionId,
+                    category: this.category,
+                    projectName: this.projectName
+                });
+            this.modal.close(JSON.stringify(this.selectModules));
+        } else {
+            this.warn.onWarn(Messages.SELECT_NOT_EMPTY);
+        }
+    }
+
+    /**
+     * 重置数据
+     */
+    resetIds() {
+        this.selectModuleIds = [];
+        this.selectModules = [];
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.projectName = '';
+        this.category = '';
+        this.clickSelectAll = false;
+        this.loadAll = false;
+    }
+
+    /**
+     * 全选
+     */
+    selectModuleAll(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        that.clickSelectAll = !that.clickSelectAll;
+        const params = {
+            pageNo: Default.PAGE.PAGE_NO,
+            pageSize: that.total ? that.total : Default.PAGE.PAGE_SIZE,
+            category: that.category,
+            projectName: that.projectName,
+            companyId: that.user.getCompanyId(),
+            versionType: that.getSelectType()
+        };
+
+        if (that.versionId) {
+            params['versionId'] = that.versionId;
+        }
+
+
+        if (that.total != that.makes.getMarkings().length) {
+            that.loadModuleAll(params);
+        } else {
+            if (that.loadAll && that.clickSelectAll) {
+                that.loadAll = false;
+                that.loadModuleAll(params);
+            } else {
+                if (that.clickSelectAll) {
+                    that.moduleAll(that.makes.getMarkings());
+                } else {
+                    that.moduleRemoveAll(that.makes.getMarkings());
+                }
+            }
+        }
+    }
+
+    loadModuleAll(params) {
+        const that = this;
+        that.loading = true;
+        that.request.doPost({
+            url: 'moduleListQuote',
+            data: params,
+            success: (res => {
+                that.loading = false;
+                if (res && res.code == 200) {
+                    if (res.data && res.data.pageSet) {
+                        that.makes.setMarking(res.data.pageSet);
+                        that.moduleAll(res.data.pageSet);
+                    }
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    moduleAll(data) {
+        const that = this;
+        if (data && data.length > 0) {
+            for (const d of data) {
+                d['num'] = 1;
+                that.selectModules.push(d);
+            }
+        }
+    }
+
+    moduleRemoveAll(data) {
+        const that = this;
+        if (data && data.length > 0) {
+            let dl = data.length,
+                sl = that.selectModules.length,
+                flag = true; //记录删除一次
+
+            for (let i = 0; i < dl; i++) {
+                flag = true;
+                for (let j = 0; j < sl; j++) {
+                    if (that.selectModules[j].id === data[i].id && flag) {
+                        that.selectModules.splice(j, 1, '');
+                        flag = false;
+                    }
+                }
+            }
+            that.selectModules = that.sortModuleAll(that.selectModules);
+        }
+
+    }
+
+    sortModuleAll(data) {
+        const arr = [];
+        if (data && data.length > 0) {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i]) {
+                    arr.push(data[i]);
+                }
+            }
+        }
+        return arr;
+    }
+
+    changeCategory(category: string) {
+        this.category = category;
+        this.searchData();
+    }
+
+    getName() {
+        let that = this, name = '';
+        if (that.configBase) {
+            if (that.configBase && that.configBase.length > 0) {
+                for (const tc of that.configBase) {
+                    if (that.versionId && !name) {
+                        if (tc.versions && tc.versions.length > 0) {
+                            for (const option of tc.versions) {
+                                if (option.versionId === Number(that.versionId)) {
+                                    name = option.name;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return name ? name : '版本名称';
+    }
+
+    /**
+     * 拉取对应的装修类型
+     * @returns {number}
+     */
+    getSelectType() {
+        return getVersionType(this.type);
+    }
+
+    // setCookie(){
+    //     this.cookie.set(this.id+"_BASIC_"+this.type,JSON.stringify({versionId:this.versionId,category: this.category,projectName: this.projectName}));
+    // }
+
+    getVersionName(id) {
+        // if (id && this.changeOptions && this.changeOptions.length > 0) {
+        //     const v = this.changeOptions.filter(item => item.versionId === id);
+        //     return v && v.length == 1 ? v[0].name : null;
+        // }
+        // return null;
+        let versions = ''
+        if (id) {
+            id.forEach((v, i) => {
+                versions += v.comboName
+                if (i + 1 != id.length) {
+                    versions += ','
+                }
+            });
+            return versions;
+        }
+
+    }
+
+    /**
+     * 交互下拉选出
+     * @param e
+     */
+    toggleClick(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.toggle = !this.toggle;
+        this.toggleType = this.toggle ? 'up' : 'down';
+    }
+
+    exist(id): boolean {
+        if (this.selectModules && this.selectModules.length) {
+            const m = this.selectModules.filter(m => m.id === id);
+            return m && m.length > 0;
+        }
+        return false;
+    }
+
+    /**
+     * 手动删除添加项
+     * @param e
+     * @param {number} id
+     */
+    manualRemoveModlue(e: any, id: number) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (this.selectModules && this.selectModules.length > 0) {
+            let index = 0;
+            this.selectModules.map((s, i) => {
+                if (s.id === id) {
+                    index = i;
+                }
+            });
+            // console.log(index);
+            this.removeModule(e, index);
+        }
+
+    }
+
+    /**
+     * 添加此细项的数量
+     * @param {number} id
+     * @returns {any}
+     */
+    moduleSize(id: number) {
+        if (this.selectModules && this.selectModules.length > 0) {
+            const size = this.selectModules.filter(m => m.id === id);
+            if (size && size.length > 0) { return size.length; }
+            return 0;
+        }
+        return 0;
+    }
+
+    ngOnDestroy() {
+        this.resetIds();
+        this.config.setConfigBase(null);
+    }
+}

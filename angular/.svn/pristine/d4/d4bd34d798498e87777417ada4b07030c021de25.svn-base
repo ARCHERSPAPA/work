@@ -1,0 +1,188 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {GuardService} from '../../service/guard.service';
+import {SettleWageListComponent} from './settle-wage/wage-list/wage-list.component';
+import {SettleWageDetailComponent} from './settle-wage/wage-detail/wage-detail.component';
+import {AuditListComponent} from './settle-audit/audit-list/audit-list.component';
+import {AuditDetailComponent} from './settle-audit/audit-detail/audit-detail.component';
+import {SettleDetailAttendComponent} from './settle-detail/settle-detail-attend/settle-detail-attend.component';
+import {SettleDetailRecordComponent} from './settle-detail/settle-detail-record/settle-detail-record.component';
+import {SettleDetailCostComponent} from './settle-detail/settle-detail-cost/settle-detail-cost.component';
+import {SettleAuditComponent} from './settle-audit/settle-audit.component';
+import {SettleWageComponent} from './settle-wage/settle-wage.component';
+import {SettleDetailVerifyComponent} from './settle-detail/settle-detail-verify/settle-detail-verify.component';
+import {ItemQuantityComponent} from '../detail/item-quantity/item-quantity.component';
+import {SettleMaterialComponent} from "./settle-material/settle-material.component";
+import {SettleMaterialOrderComponent} from "./settle-material/settle-material-order/settle-material-order.component";
+import {SettleMaterialWageComponent} from "./settle-material/settle-material-wage/settle-material-wage.component";
+import {SettleMaterialDetailComponent} from "./settle-material/settle-material-detail/settle-material-detail.component";
+import {SettleDetailOrderComponent} from "./settle-detail/settle-detail-order/settle-detail-order.component";
+import {SettleDetailScheduleComponent} from "./settle-detail/settle-detail-schedule/settle-detail-schedule.component";
+
+const routes: Routes = [
+    {
+        path: '',
+        redirectTo: 'wage',
+        pathMatch: 'full'
+    },
+    {
+        path: 'wage',
+        component: SettleWageComponent,
+        data: {
+            breadcrumb: '工费结算'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: SettleWageListComponent,
+                canActivate: [GuardService]
+            },
+            {
+                path: 'detail',
+                component: SettleWageDetailComponent,
+                data: {
+                  breadcrumb: '详情'
+                },
+                children: [
+                    {
+                        path: '',
+                        redirectTo: 'cost',
+                        pathMatch: 'full'
+                    },
+                    {
+                        path: 'cost',
+                        component: SettleDetailCostComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'record',
+                        component: SettleDetailRecordComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'verify',
+                        component: SettleDetailVerifyComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'quantity',
+                        component: ItemQuantityComponent,
+                        canActivate: [GuardService]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path: 'audit',
+        component: SettleAuditComponent,
+        data: {
+          breadcrumb: '工费审核'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: AuditListComponent,
+                canActivate: [GuardService]
+            },
+            {
+                path: 'detail',
+                component: AuditDetailComponent,
+                data: {
+                  breadcrumb: '详情'
+                },
+                children: [
+                    {
+                        path: '',
+                        redirectTo: 'attend',
+                        pathMatch: 'full'
+                    },
+                    {
+                        path: 'attend',
+                        component: SettleDetailAttendComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'record',
+                        component: SettleDetailRecordComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'verify',
+                        component: SettleDetailVerifyComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'quantity',
+                        component: ItemQuantityComponent,
+                        canActivate: [GuardService]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path:"material",
+        component:SettleMaterialComponent,
+        children:[
+            {
+                path:'',
+                redirectTo:"order",
+                pathMatch:"full"
+            },
+            {
+                path:"order",
+                component:SettleMaterialOrderComponent,
+                canActivate:[GuardService]
+            },
+            {
+                path:"wage",
+                component:SettleMaterialWageComponent,
+                canActivate:[GuardService]
+            },
+            {
+                path:"detail",
+                component:SettleMaterialDetailComponent,
+                children:[
+                    {
+                        path:'',
+                        redirectTo:"info",
+                        pathMatch:"full"
+                    },
+                    {
+                        path:"info",
+                        component:SettleDetailOrderComponent,
+                        canActivate:[GuardService]
+                    },
+                    {
+                        path:"schedule",
+                        component:SettleDetailScheduleComponent,
+                        canActivate:[GuardService]
+                    }
+                ]
+            }
+        ]
+    }
+];
+
+@NgModule({
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes)
+  ],
+  exports: [
+      RouterModule
+  ]
+})
+export class SettleRoutingModule { }

@@ -1,0 +1,125 @@
+<div class="master">
+  <div class="master-head">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+  </div>
+
+  <div class="master-warp">
+    <div nz-row class="mt-24">
+      <div nz-col nzSpan="8">
+        <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+      </div>
+      <div nz-col nzSpan="16">
+        <select-brand [showMaterial]="true" [type]="1"
+                      (handleCategory)="handleCategory($event)"
+                      (handleBrand)="handleBrand($event)"
+                      (handleMaterialSupplier)="handleMaterialSupplier($event)"
+                      (handleSearch)="handleSearch($event)"
+                      (handleInput)="handleInput($event)"
+                      #resetData></select-brand>
+      </div>
+    </div>
+    <div nz-row class="mt-16">
+      <nz-table [nzData]="materials" nzSize="small" [nzTotal]="total" [nzTitle]="header"
+                [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzFrontPagination]="false"
+                (nzPageIndexChange)="changeData()" [nzShowPagination]="true" #materialTable
+                [nzScroll]="{ x:'110%'}" nzBordered="true" [nzLoading]="loading">
+        <thead>
+        <tr>
+          <th nzLeft="0px" nzWidth="62px" nzShowCheckbox [(nzChecked)]="allChecked"
+              [nzIndeterminate]="indeterminate"
+              (nzCheckedChange)="checkAll($event)"></th>
+          <th nzLeft="62px">SPU编号</th>
+          <th>图片</th>
+          <th>品牌</th>
+          <th>类别</th>
+          <th>名称</th>
+          <th>SKU编号</th>
+          <th>规格</th>
+          <th>型号</th>
+          <th>材质</th>
+          <th>颜色</th>
+          <th>产地</th>
+          <th>单位</th>
+          <th>供货价</th>
+          <th>销售价</th>
+          <th>材料商</th>
+          <th nzRight="0px">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let data of materialTable.data">
+          <td nzLeft="0px" nzShowCheckbox [(nzChecked)]="data.checked"
+              (nzCheckedChange)="refreshStatus()"></td>
+          <td nzLeft="62px" [rowSpan]="data.rows" *ngIf="data.rows > 0" style="vertical-align: middle;">
+            <span>{{data.spu?data.spu:'--'}}</span>
+          </td>
+          <td>
+            <a *ngIf="data.image" href="javascript:void(0)" (click)="openLarge(data.image)">[图片]</a>
+            <span *ngIf="!data.image">--</span>
+          </td>
+          <td [title]="data.brand?data.brand:''">
+            <span>{{data.brand?data.brand:'--'}}</span></td>
+          <td [title]="data.category?data.category:''">
+            <span>{{data.category?data.category:'--'}}</span></td>
+          <td [title]="data.name?data.name:''">
+            <span>{{data.name?data.name:'--'}}</span></td>
+          <td [title]="data.sku?data.sku:''">
+            <span>{{data.sku?data.sku:'--'}}</span></td>
+          <td [title]="data.spec?data.spec:''">
+            <span>{{data.spec?data.spec:'--'}}</span></td>
+          <td [title]="data.model?data.model:''">
+            <span>{{data.model?data.model:'--'}}</span></td>
+          <td [title]="data.material?data.material:''">
+            <span>{{data.material?data.material:'--'}}</span></td>
+          <td [title]="data.color?data.color:''">
+            <span>{{data.color?data.color:'--'}}</span></td>
+          <td [title]="data.origin?data.origin:''">
+            <span>{{data.origin?data.origin:'--'}}</span></td>
+          <td [title]="data.origin?data.origin:''">
+            <span>{{data.unit?data.unit:'--'}}</span></td>
+          <td [title]="data.supplyPrice?data.supplyPrice:''">
+            <span>{{data.supplyPrice?(data.supplyPrice | number:'1.2'):'--'}}</span></td>
+          <td [title]="data.price?data.price:''">
+                        <span *ngIf="state === 0">
+                            <nz-input-number [(ngModel)]="data.price" [nzSize]="'small'"
+                                             [nzMin]="0" [nzStep]="0.01" [nzPrecision]="2"
+                                             (ngModelChange)="modelPriceChange($event,data)"></nz-input-number>
+                        </span>
+            <span *ngIf="state === 1">{{data.price?(data.price | number:'1.2'):'--'}}</span>
+          </td>
+          <td [title]="data.supplierName?data.supplierName:''">
+            <span>{{data.supplierName?data.supplierName:'--'}}</span></td>
+          <td nzRight="0px">
+            <a href="javascript:void(0)" *ngIf="state === 0" (click)="shelvesUpOrDown(1,[data.id])">上架</a>
+            <a href="javascript:void(0)" *ngIf="state === 1" (click)="shelvesUpOrDown(0,[data.id])">下架</a>
+            <a href="javascript:void(0)" class="ml-8" [routerLink]="['/view/print']" target="_blank" [queryParams]="{id:btoa([data.id])}">打印编码</a>
+          </td>
+        </tr>
+
+        </tbody>
+      </nz-table>
+    </div>
+
+  </div>
+
+</div>
+
+<ng-template #header>
+  <button nz-button nzType="primary" [disabled]="selectItems.length === 0"
+          *ngIf="state === 0" (click)="batchItem(1)">上架</button>
+
+  <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="state === 1"
+          nz-popconfirm nzTitle="下架后设计师将无法选择该版本材料?" nzOkText="下架"
+          (nzOnConfirm)="batchItem(0)" nzPlacement="topLeft">下架</button>
+
+  <button nz-button nzType="primary" class="ml-8" [disabled]="selectItems.length === 0"
+          (click)="printAll()">打印编码<a [routerLink]="['/view/print']" target="_blank"
+                                      [queryParams]="{id:btoa(printIds)}" id="print" (click)="printLocking()"></a>
+  </button>
+
+  <span class="ml-8" *ngIf="selectItems.length > 0">已选{{selectItems.length}}项</span>
+
+</ng-template>
+
+<!--查看图片-->
+<rev-imgview [album]="_albums" [index]="0" *ngIf="_albums.length > 0"></rev-imgview>

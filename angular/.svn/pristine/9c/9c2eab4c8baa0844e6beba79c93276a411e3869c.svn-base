@@ -1,0 +1,19 @@
+@charset "utf-8";
+@import "../../../../assets/scss/mixin";
+
+.ant-table-tbody>tr>td span,a{
+  max-width: 120px;
+  display:inline-block;
+  vertical-align: middle;
+  text-decoration: none;
+  @include ellipsis;
+  &.master-img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    > img{
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

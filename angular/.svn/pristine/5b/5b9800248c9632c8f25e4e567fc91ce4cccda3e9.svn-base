@@ -1,0 +1,19 @@
+@charset "utf-8";
+.warranty {
+  //overflow: hidden;
+  .content {
+    padding-top: 48px;
+    .warranty_table {
+      margin-top: 12px;
+    }
+  }
+  tr td {
+    font-size: 14px;
+  }
+
+}
+
+.notice-head {
+  display: flex;
+  justify-content: space-between;
+}

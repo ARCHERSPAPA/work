@@ -1,0 +1,537 @@
+<div class="detail-price" nz-col nzSpan="20" nzOffset="2">
+    <!-----series table start --->
+    <nz-table #nestedTable [nzData]="data" [nzFrontPagination]="false"
+              [nzShowPagination]="false" [nzTitle]="header"   [nzLoading]="loading">
+        <tbody>
+        <ng-template ngFor let-data [ngForOf]="nestedTable.data">
+            <!---装修类型start--->
+            <tr *ngIf="data.type === 1">
+                <td nzShowExpand [(nzExpand)]="data.expand"></td>
+                <td colspan="6">{{data.name}}</td>
+                <td colspan="5" [nzTitle]="data && data.remark?data.remark:'暂无备注信息'"
+                    nzPlacement="topLeft" nz-tooltip>备注：{{data && data.remark?data.remark:'--'}}
+                </td>
+                <td colspan="2">
+                    <span [ngSwitch]="data.versionType">
+                        <span *ngSwitchCase="2">小计：{{getMainColumn(data.infoMaps,'univalent') |number:'1.2'}}</span>
+                        <span *ngSwitchDefault>小计：{{(data.smallTotal?data.smallTotal:0)|number:'1.2'}}</span>
+                    </span>
+                </td>
+            </tr>
+            <tr *ngIf="data.type === 1" [nzExpand]="data.expand">
+                <td></td>
+                <td colspan="13">
+                    <nz-table #middleTable [nzData]="data.infoMaps" nzSize="middle"
+                              [nzFrontPagination]="false" [nzShowPagination]="false">
+        <tbody>
+        <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+            <tr>
+                <td nzShowExpand [(nzExpand)]="mid.expand" width="5%"></td>
+                <td colspan="11" width="75%" [title]="mid.name?mid.name:''">{{mid.name?mid.name:''}}</td>
+                <td colspan="2" width="20%" *ngIf="data.versionType !== 2"></td>
+                <td colspan="2" width="20%" *ngIf="data.versionType === 2">
+                    <span>小计：{{getMainColumn(data.infoMaps,'univalent') |number:'1.2'}}</span>
+                </td>
+            </tr>
+            <tr [nzExpand]="mid.expand">
+                <td></td>
+                <td colspan="13">
+                    <nz-table #sinTable [nzData]="mid['infos']" nzSize="middle"
+                              [nzFrontPagination]="false" [nzShowPagination]="false">
+        <thead>
+        <tr>
+            <th width="15%">名称</th>
+            <th width="15%">类别</th>
+            <th width="10%">规格</th>
+            <th width="5%">单位</th>
+            <th width="10%">单价</th>
+            <th width="10%">数量</th>
+            <th width="10%">合计</th>
+            <th width="10%">说明</th>
+            <th width="10%">备注</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let sin of sinTable.data;let t = index">
+            <td [title]="sin.name?sin.name:''">{{sin.name?sin.name:'--'}}</td>
+            <td [title]="sin.category?sin.category:''">{{sin.category?sin.category:'--'}}</td>
+            <td [title]="sin.specifications?sin.specifications:''">{{sin.specifications?sin.specifications:'--'}}</td>
+            <td [title]="sin.unit?sin.unit:0">{{sin.unit?sin.unit:'--'}}</td>
+            <td [title]="sin.univalent?sin.univalent:0">{{(sin.univalent?sin.univalent:0)|number:'1.2'}}</td>
+            <td [title]="sin.num?sin.num:0">{{sin.formula?(sin.formula+'='+sin.num):sin.num}}</td>
+            <td [title]="converseToDecimal(sin.univalent,sin.num)">
+                {{converseToDecimal(sin.univalent,sin.num)|number:'1.2'}}
+            </td>
+            <td [nzTitle]="sin.offerExplain?sin.offerExplain:'暂无说明信息'"
+                nzPlacement="topLeft" nz-tooltip>
+                <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+            <td [nzTitle]="sin.remark?sin.remark:'暂无备注信息'"
+                nzPlacement="topLeft" nz-tooltip>{{sin.remark?sin.remark:'--'}}
+            </td>
+        </tr>
+        </tbody>
+    </nz-table>
+    </td>
+    </tr>
+    </ng-template>
+    </tbody>
+    </nz-table>
+    </td>
+    </tr>
+    <!----装修类型end------>
+
+    <!------主材、个性化、材料清单----->
+    <tr *ngIf="showSubByType1(data.type)">
+   
+        <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
+        <td colspan="11" width="75%">{{data.name?data.name:(data.type === 5?'材料清单':'')}}</td>
+        <td colspan="2" width="20%" *ngIf="data.type !== 5">
+            <span>小计：{{getMainColumn(data.infoMaps,'univalent') |number:'1.2'}}</span>
+        </td>
+        <!--<td nzShowExpand [(nzExpand)]="data.expand"></td>-->
+        <!--<td colspan="7">{{data.name?data.name:((data.type === 5)?'材料清单':'')}}</td>-->
+        <!--<td colspan="2" *ngIf="type !== 5">小计：{{getTotal(data.infos,'univalent') |number:'1.2'}}</td>-->
+        <!--<td colspan="2" *ngIf="type === 5"></td>-->
+        <!--<td colspan="2"></td>-->
+    </tr>
+    <tr *ngIf="showSubByType1(data.type) && data.infoMaps" [nzExpand]="data.expand">
+        <td width="5%"></td>
+        <td colspan="14" width="95%">
+            <nz-table #middleTable [nzData]="data.infoMaps" nzSize="middle"
+                      [nzFrontPagination]="false" [nzShowPagination]="false">
+                <tbody>
+                <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+                    <tr>
+                        <td nzShowExpand [(nzExpand)]="mid.expand" width="5%"></td>
+                        <td colspan="11" [title]="mid.name?mid.name:''" width="75%">{{mid.name?mid.name:''}}</td>
+                        <td colspan="2" width="20%" *ngIf="data.type !== 5">小计：{{getTotal(mid.infos,'univalent') |number:'1.2'}}</td>
+                    </tr>
+                    <tr [nzExpand]="mid.expand">
+                        <td width="5%"></td>
+                        <td colspan="13" width="95%">
+                            <nz-table #sinTable [nzData]="mid['infos']" nzSize="small" [nzBordered]="false"
+                                      [nzFrontPagination]="true" [nzShowPagination]="true" [nzPageSize]="pageSize">
+                <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>类型</th>
+                    <th>品牌</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th *ngIf="data.type !== 3">材质</th>
+                    <th *ngIf="data.type !== 3">颜色</th>
+                    <th>单位</th>
+                    <th *ngIf="data.type == 5">产地</th>
+                    <th *ngIf="data.type !== 5">单价</th>
+                    <th width="10%">数量</th>
+                    <th *ngIf="data.type !== 5">合计</th>
+                    <th>说明</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let inner of sinTable.data;let i = index">
+                    <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+                    <td [title]="inner.category?inner.category:''">
+                        {{inner.category?inner.category:'--'}}
+                    </td>
+                    <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}
+                    </td>
+                    <td [title]="inner.specifications?inner.specifications:''">
+                        {{inner.specifications?inner.specifications:'--'}}
+                    </td>
+                    <td [title]="inner.model?inner.model:''">{{inner.model?inner.model:'--'}}
+                    </td>
+                    <td [title]="inner.material?inner.material:''" *ngIf="data.type !== 3">
+                        {{inner.material?inner.material:'--'}}
+                    </td>
+                    <td *ngIf="data.type !== 3 && inner.colours && inner.colours.length > 0"
+                        [title]="renderColors(inner.colours)[0]">
+                        {{renderColors(inner.colours)[0]}}
+                    </td>
+                    <td *ngIf="data.type !== 3 &&(!inner.colours || inner.colours.length === 0)">--</td>
+                    <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+                    <td [title]="inner.origin?inner.origin:0" *ngIf="data.type == 5">{{inner.origin?inner.origin:'--'}}</td>
+                    <td [title]="inner.univalent?inner.univalent:0" *ngIf="data.type !== 5">
+                        {{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+                    </td>
+                    <td [title]="inner.num?inner.num:0">
+                        {{inner.formula?(inner.formula+'='+inner.num):inner.num}}
+                    </td>
+                    <td [title]="converseToDecimal(inner.univalent,inner.num)" *ngIf="data.type !== 5">
+                        {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+                    </td>
+                    <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'"
+                        nzPlacement="topLeft" nz-tooltip>
+                        <a href="javascript:void(0)"><i nz-icon type="info-circle"></i></a></td>
+                    <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'"
+                        nzPlacement="topLeft" nz-tooltip>{{inner.remark?inner.remark:'--'}}
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </td>
+    </tr>
+    </ng-template>
+    </tbody>
+    </nz-table>
+    </td>
+    </tr>
+    <!----其它项目------>
+    <tr *ngIf="showSubByType2(data.type)">
+        <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
+        <td colspan="11" width="75%">{{data.name}}</td>
+        <td colspan="2" width="20%">小计：{{getOtherTotal(data.infoMaps,'totalPrice') |number:'1.2'}}</td>
+    </tr>
+    <tr *ngIf="showSubByType2(data.type) && data.infoMaps" [nzExpand]="data.expand">
+        <td width="5%"></td>
+        <td colspan="13" width="95%">
+            <nz-table #middleTable [nzData]="data.infoMaps" nzSize="middle"
+                      [nzFrontPagination]="false" [nzShowPagination]="false">
+                <tbody>
+                <ng-template ngFor let-mid [ngForOf]="middleTable.data" let-i="index">
+                    <tr>
+                        <td nzShowExpand [(nzExpand)]="mid.expand" width="5%"></td>
+                        <td colspan="11" [title]="mid.name?mid.name:''" width="75%">{{mid.name?mid.name:''}}</td>
+                        <td colspan="2" width="20%">小计：{{getDiscountTotal(mid.infos,'totalPrice') |number:'1.2'}}</td>
+                    </tr>
+                    <tr [nzExpand]="mid.expand">
+                        <td width="5%"></td>
+                        <td colspan="13" width="95%">
+                            <nz-table #innerTable [nzData]="mid['infos']" nzSize="small" [nzBordered]="false"
+                                      [nzFrontPagination]="false" [nzShowPagination]="false">
+                                <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>单位</th>
+                                    <th>单价</th>
+                                    <th nzWidth="80px">数量</th>
+                                    <th>应收</th>
+                                    <th>实收</th>
+                                    <th>备注</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr *ngFor="let inner of innerTable.data;let i = index">
+                                    <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+                                    <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+                                    <td [title]="inner.univalent?inner.univalent:0">
+                                        {{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+                                    </td>
+                                    <td [title]="inner.num?inner.num:0">
+                                        {{(inner.num?inner.num:0)|number:'1.2'}}
+                                    </td>
+                                    <td [title]="converseToDecimal(inner.univalent,inner.num)">
+                                        {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+                                    </td>
+                                    <td [title]="inner.totalPrice?inner.totalPrice:0">
+                                        {{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}
+                                    </td>
+                                    <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无备注信息'"
+                                        nzPlacement="topLeft" nz-tooltip>{{inner.offerExplain?inner.offerExplain:'--'}}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </nz-table>
+                        </td>
+                    </tr>
+                </ng-template>
+                </tbody>
+            </nz-table>
+        </td>
+    </tr>
+
+    <!-----工程费用----->
+    <tr *ngIf="showSubByType3(data.type)">
+        <td></td>
+        <td colspan="6">{{data.name}}</td>
+        <td colspan="5">应收：{{ (data.infos && data.infos[0]['univalent']?data.infos[0]['univalent']:0)
+            |number:'1.2'}}x{{data.infos && data.infos[0]['num']?data.infos[0]['num']:ratio}}
+        </td>
+        <td colspan="2">实收：{{(data.infos[0].totalPrice?data.infos[0].totalPrice:0)|number:'1.2'}}
+        </td>
+    </tr>
+    <!-----设计费用---->
+    <tr *ngIf="showSubByType4(data.type)">
+        <td nzShowExpand [(nzExpand)]="data.expand" width="5%"></td>
+        <td colspan="11" width="75%">{{data.name}}</td>
+        <td colspan="2" width="20%">小计：{{getDesignTotal(data.infos,'totalPrice')|number:'1.2'}}</td>
+    </tr>
+
+
+    <tr *ngIf="showSubByType4(data.type)" [nzExpand]="data.expand">
+        <td></td>
+        <td colspan="13">
+            <nz-table #innerTable [nzData]="data['infos']" nzSize="middle"
+                      [nzFrontPagination]="false" [nzShowPagination]="false">
+                <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>单位</th>
+                    <th>面积</th>
+                    <th>应收</th>
+                    <th>实收</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let inner of innerTable.data;let i = index">
+                    <td [title]="inner.name?inner.name:''">
+                        <label nz-radio [ngModel]="inner.yn" disabled>{{inner.name?inner.name:'--'}}</label>
+                    </td>
+                    <td [title]="inner.univalent?inner.univalent:0">{{inner.univalent?inner.univalent:'--'}}</td>
+                    <td [title]="inner.num?inner.num:0">{{(inner.num?inner.num:0)|number:'1.2'}}</td>
+                    <td [title]="inner.discountPrice">{{inner.discountPrice?(inner.discountPrice |number:'1.2'):'--'}}
+                    </td>
+                    <td [title]="inner.totalPrice?inner.totalPrice:0">
+                        {{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+
+        </td>
+    </tr>
+    </ng-template>
+    </tbody>
+    </nz-table>
+    <!---备注--->
+    <div nz-row class="mt-20" *ngIf="(type !== 5) || !type">
+        <div nz-col nzSpan="16">
+            <label nz-col nzSpan="2" class="text">备注：</label>
+            <div nz-col nzSpan="22" class="textarea">
+                <textarea nz-input rows="7" placeholder="请输入备注信息" [value]="remarks"
+                          disabled></textarea>
+                <span class="count" *ngIf="remarks && remarks.length"><span>{{remarks.length}}</span>/5000</span>
+            </div>
+        </div>
+        <div nz-col nzSpan="8">
+            <div nz-row nzType="flex" nzJustify="left" nzAlign="top" class="img-list">
+                <div nz-col class="remark-img ml-8" *ngFor="let img of remarkImgs;let i = index"
+                     [ngStyle]="showRemarkImgBg(img)" (click)="openLarge(remarkImgs,i)"
+                     [ngClass]="{'mb-8': remarkImgs.length > 4 && i < 5}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div nz-row class="mt-20" *ngIf="(type !== 5) || !type">
+        <div nz-col nzSpan="10" nzOffset="14">
+            <div nz-col nzSpan="24" class="text-right mt-20">
+                <span class="text">总计：{{ totalPrice |number:'1.2'}}</span>
+                <span class="text ml-20">优惠：{{preferentialPrice|number:'1.2'}}</span>
+                <span class="text ml-20">实付：{{finalPrice|number:'1.2'}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!---历史数据展示--->
+    <div class="mt-20" *ngIf="((type !== 5) || !type) && regulars && regulars.length > 0">
+        <nz-table #regulaTable [nzData]="regulars" [nzFrontPagination]="false" [nzShowPagination]="false">
+            <tbody>
+            <ng-template ngFor let-data [ngForOf]="regulaTable.data">
+                <tr>
+                    <td nzShowExpand [(nzExpand)]="data.expand"></td>
+                    <td colspan="4" nzWidth="150px">{{data.pause && data.pause.name?data.pause.name:'增减项目'}}</td>
+                    <!--<td colspan="3">小计：{{getTotal(data.details) > 0?'+':''}}{{getTotal(data.details)|number:'1.2'}}</td>-->
+                    <td colspan="4" *ngIf="data.states && data.states.length > 0" [nzTitle]="allProgress" nz-tooltip>
+                        <div *ngIf="data.states">
+                            <div class="limit-content">
+                                {{data.states[0].name}}（{{data.states[0].position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}{{(data.states[0].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
+                            </div>
+                            <div *ngIf="data.states.length > 1" class="limit-content">
+                                {{data.states[data.states.length-1].name}}
+                               <!--  {{data.states[data.states.length-1].state == 40 || data.states[data.states.length-1].state == 41 ? '':'（' + data.states[data.states.length-1].position + '）'}} -->
+                                {{ data.states[data.states.length-1].position ? '（' + data.states[data.states.length-1].position + '）':''}}
+                                {{getExamineState(data.states[data.states.length-1].state)}} {{(data.states[data.states.length-1].auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
+                            </div>
+                        </div>
+                        <ng-template #allProgress>
+                            <ul *ngIf="data.states">
+                                <li *ngFor="let item of data.states; let i=index">
+                                    <div *ngIf="i == 0">
+                                        {{item.name}}（{{item.position}}）申请{{data.pause && data.pause.name?data.pause.name.slice(0,4):'增减项目'}}{{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
+                                    </div>
+                                    <div *ngIf="i !== 0">
+                                        {{item.name}}
+                                       <!--  {{item.state == 40 || item.state == 41 ? '':'（' + item.position + '）'}} -->
+                                        {{item.position ? '（' + item.position + '）':''}}
+                                        {{getExamineState(item.state)}} 
+                                        {{(item.auditTime | date:'yyyy-MM-dd HH:mm:ss')}}
+                                    </div>
+                                </li>
+                            </ul>
+                        </ng-template>
+                    </td>  
+                    <td colspan="4" *ngIf="!data.states">--</td>
+                    <td colspan="2">应付：{{data.pause.applyPrice?(data.pause.applyPrice >
+                        0?'+':'')+(data.pause.applyPrice|number:'1.2'):'0.00'}}
+                    </td>
+                    <td colspan="2">实付：{{data.pause.applyActualPrice?(data.pause.applyActualPrice >
+                        0?'+':'')+(data.pause.applyActualPrice |number:'1.2'):'0.00'}}
+                    </td>
+                    <td colspan="4">项目总额：{{(data.pause.finalPrice?data.pause.finalPrice:0)|number:'1.2'}}</td>
+                </tr>
+                <tr *ngIf="data.details && data.details.length > 0" [nzExpand]="data.expand">
+                    <td></td>
+                    <td colspan="13">
+                        <nz-table #innerTable [nzData]="data.details" [nzFrontPagination]="false"
+                                  [nzShowPagination]="false">
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>类别</th>
+                <th>品牌</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>材质</th>
+                <th width="10%">颜色</th>
+                <th>单位</th>
+                <th>单价</th>
+                <th>数量</th>
+                <th>合计/应收</th>
+                <th>实收</th>
+                <th>说明</th>
+                <!--<th *ngIf="state === 6">成本单价</th>-->
+                <!--<th *ngIf="state === 6">成本合计</th>-->
+                <th>备注</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let inner Of innerTable.data">
+                <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+                <td [title]="inner.category?inner.category:''">{{inner.category?inner.category:'--'}}</td>
+                <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}</td>
+                <td [title]="inner.specifications?inner.specifications:0">
+                    {{inner.specifications?inner.specifications:'--'}}
+                </td>
+                <td>{{inner.model?inner.model:'--'}}</td>
+                <td [title]="inner.material?inner.material:''">{{inner.material?inner.material:'--'}}</td>
+                <td *ngIf="inner.colours && inner.colours.length > 0"  width="10%">
+                    {{renderColors(inner.colours)[0]}}
+                </td>
+                <td *ngIf="!inner.colours || inner.colours.length === 0"  width="10%">--</td>
+                <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+                <td [title]="inner.univalent?inner.univalent:0">{{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+                </td>
+                <td [title]="inner.num?inner.num:0">{{inner.num|number:'1.2'}}</td>
+                <td [title]="(inner.univalent?inner.univalent:0)*(inner.num?inner.num:0)">
+                    {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+                </td>
+                <td>{{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}</td>
+                <td *ngIf="state !== 6" [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'"
+                    nzPlacement="topLeft" nz-tooltip>{{inner.offerExplain?inner.offerExplain:'--'}}
+                </td>
+                <!--<td *ngIf="state === 6">{{(inner.primeCost?inner.primeCost:0)|number:'1.2'}}</td>-->
+                <!--<td *ngIf="state === 6">{{(inner.primetotalPrice?inner.primetotalPrice:0)|number:'1.2'}}</td>-->
+                <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'"
+                nzPlacement="topLeft" nz-tooltip>{{inner.remark?inner.remark:'--'}}</td>
+            </tr>
+            <tr>
+                <td colspan="13"  [nzTitle]="data.pause && data.pause.remark?data.pause.remark:'暂无备注信息'"
+                    nzPlacement="topLeft" nz-tooltip>备注：{{data.pause && data.pause.remark?data.pause.remark:'暂无备注信息'}}</td>
+            </tr>
+            </tbody>
+        </nz-table>
+        </td>
+        </tr>
+        </ng-template>
+        </tbody>
+        </nz-table>
+    </div>
+
+    <div *ngIf="((type !== 5) || !type) && list && list.pause && list.pause.state === 0" class="mt-20">
+        <nz-table [nzFrontPagination]="false" [nzShowPagination]="false"
+                  [nzData]="list" [nzNoResult]="noResult">
+            <tbody>
+            <tr>
+                <td nzShowExpand [(nzExpand)]="list.expand"></td>
+                <td colspan="4" nzWidth="150px">{{list.pause && list.pause.name?list.pause.name:'增减项目'}}</td>
+                <td colspan="4">进度：--</td>
+                <td colspan="2">应付：{{list.pause.applyPrice?(list.pause.applyPrice >
+                    0?'+':'')+(list.pause.applyPrice|number:'1.2'):'0.00'}}
+                </td>
+                <td colspan="2">实付：{{list.pause.applyActualPrice?(list.pause.applyActualPrice >
+                    0?'+':'')+(list.pause.applyActualPrice |number:'1.2'):'0.00'}}
+                </td>
+                <td colspan="4">项目总额：{{(list.pause.finalPrice?list.pause.finalPrice:0)|number:'1.2'}}</td>
+            </tr>
+            <tr *ngIf="list.details && list.details.length > 0" [nzExpand]="list.expand">
+                <td></td>
+                <td colspan="12">
+                    <nz-table #innerTable [nzData]="list.details" [nzFrontPagination]="false"
+                              [nzShowPagination]="false">
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>类别</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>材质</th>
+                <th width="10%">颜色</th>
+                <th>单位</th>
+                <th>单价</th>
+                <th>数量</th>
+                <th>合计/应收</th>
+                <th>实收</th>
+                <th>说明</th>
+                <th>备注</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let inner Of innerTable.data">
+                <td [title]="inner.name?inner.name:''">{{inner.name?inner.name:'--'}}</td>
+                <td [title]="inner.category?inner.category:''">{{inner.category?inner.category:'--'}}</td>
+                <td [title]="inner.specifications?inner.specifications:0">
+                    {{inner.specifications?inner.specifications:'--'}}
+                </td>
+                <td>{{inner.model?inner.model:'--'}}</td>
+                <td [title]="inner.material?inner.material:''">{{inner.material?inner.material:'--'}}</td>
+                <td *ngIf="inner.colours && inner.colours.length > 0"  width="10%">
+                    {{renderColors(inner.colours)[0]}}
+                </td>
+                <td *ngIf="!inner.colours || inner.colours.length === 0"  width="10%">--</td>
+                <td [title]="inner.unit?inner.unit:0">{{inner.unit?inner.unit:'--'}}</td>
+                <td [title]="inner.univalent?inner.univalent:0">{{(inner.univalent?inner.univalent:0)|number:'1.2'}}
+                </td>
+                <td [title]="inner.num?inner.num:0">{{(inner.num?inner.num:0)|number:'1.2'}}</td>
+                <td [title]="(inner.univalent?inner.univalent:0)*(inner.num?inner.num:0)">
+                    {{converseToDecimal(inner.univalent,inner.num)|number:'1.2'}}
+                </td>
+                <td>{{(inner.totalPrice?inner.totalPrice:0)|number:'1.2'}}</td>
+                <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'"
+                    nzPlacement="topLeft" nz-tooltip>{{inner.offerExplain?inner.offerExplain:'--'}}
+                </td>
+                <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'"
+                    nzPlacement="topLeft" nz-tooltip>{{inner.remark?inner.remark:'--'}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="12" class="textarea" [nzTitle]="list.pause && list.pause.remark?list.pause.remark:'暂无备注信息'"
+                    nzPlacement="topLeft" nz-tooltip>
+                    备注：{{list.pause && list.pause.remark?list.pause.remark:'暂无备注信息'}}
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+        </td>
+        </tr>
+        </tbody>
+        </nz-table>
+    </div>
+</div>
+
+<ng-template #header>
+    <div nz-row nzSpan="24">
+        <div nz-col nzSpan="18">名称</div>
+    </div>
+</ng-template>
+
+<!---显示项目总金额---->
+<ng-template #noResult>
+    <div nz-row>
+        <div nz-col nzOffset="16" nzSpan="8" class="text-right">
+            <span class="text-blink">项目总额：{{(list.pause && list.pause.finalPrice?list.pause.finalPrice:0)|number:'1.2'}}</span>
+        </div>
+    </div>
+</ng-template>
+

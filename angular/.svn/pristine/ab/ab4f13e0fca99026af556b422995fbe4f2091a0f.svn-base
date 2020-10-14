@@ -1,0 +1,317 @@
+<div class="createMaterial">
+    <div class="createMaterial-base">
+  <form nz-form [formGroup]="materialBaseForm">
+      <div class="createMaterial-base-title">
+        基础信息
+      </div>
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="1" style="margin-right: 24px;">品牌</nz-form-label>
+          <nz-form-control [nzSpan]="11">
+          <nz-select style="width: 320px; margin-right: 6px"nzPlaceHolder='请选择品牌' nzAllowClear="false" class="serchs" [(ngModel)]="brand"
+        [ngModelOptions]="{standalone: true}" >
+        <nz-option *ngFor="let audit of brandType" [nzValue]="audit.id" [nzLabel]="audit.content">
+        </nz-option>
+      </nz-select>
+            <nz-form-explain *ngIf="materialBaseForm.get('brand').dirty && materialBaseForm.get('brand').errors">
+              <ng-container *ngIf="materialBaseForm.get('brand').hasError('required')">
+                品牌必填
+              </ng-container>
+            </nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="1" style="margin-right: 24px;">名称</nz-form-label>
+          <nz-form-control [nzSpan]="11">
+            <input nz-input [(ngModel)]=" name" nzSize="default" name="name" formControlName="name" maxlength="30"
+            placeholder="请输入名称" />
+            <nz-form-explain *ngIf="materialBaseForm.get('name').dirty && materialBaseForm.get('name').errors">
+              <ng-container *ngIf="materialBaseForm.get('name').hasError('required')">
+                名称必填
+              </ng-container>
+              <ng-container *ngIf="materialBaseForm.get('name').hasError('required')">
+                名称必填
+              </ng-container>
+            </nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col [nzSpan]="12">
+        <nz-form-item style="margin-top:8px">
+          <nz-form-label [nzSpan]="1" style="margin-right: 24px;">类别</nz-form-label>
+          <nz-form-control [nzSpan]="11">
+            <nz-select style="width: 320px; margin-right: 6px" nzPlaceHolder='请选择类别'nzAllowClear="false" class="serchs" [(ngModel)]="materialType"
+            [ngModelOptions]="{standalone: true}" >
+            <nz-option *ngFor="let audit of brandType" [nzValue]="audit.id" [nzLabel]="audit.content">
+            </nz-option>
+          </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+ 
+
+      <div nz-col [nzSpan]="12">
+        <nz-form-item style="margin-top:8px">
+          <nz-form-label [nzSpan]="1" style="margin-right: 24px;">型号</nz-form-label>
+          <nz-form-control [nzSpan]="11">
+            <input nz-input [(ngModel)]="model" nzSize="default" name="model" formControlName="model" maxlength="30"
+              placeholder="请输入型号" />
+            <nz-form-explain *ngIf="materialBaseForm.get('model').dirty && materialBaseForm.get('model').errors">
+              <ng-container *ngIf="materialBaseForm.get('model').hasError('required')">
+                型号必填
+              </ng-container>
+            </nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+    </div>
+    <div class="createMaterial-base-title" style='margin-top: 90px'>
+      销售信息
+    </div>
+    <div class="createMaterial-list " >
+      <form nz-form [formGroup]="materialForm">
+      <nz-table #nzTable [nzData]="materialSaleList" [nzBordered]="true" [nzFrontPagination]="false"
+        [nzShowPagination]="false" nzSize="middle">
+        <thead nz-thead>
+          <tr>
+            <th nz-th *ngIf='!newMaterial'width="40px"><span>SKU</span></th>
+            <th nz-th ><span>规格</span></th>
+            <th nz-th><span>材质</span></th>
+            <th nz-th><span>颜色</span></th>
+            <th nz-th><span>产地</span></th>
+            <th nz-th><span>单位</span></th>
+            <th nz-th><span>市场价</span></th>
+            <th nz-th><span>供货价</span></th>
+            <th nz-th><span>销售价</span></th>
+            <th nz-th width="116px"><span>照片</span></th>
+            <th nz-th ><span>操作</span></th>
+          </tr>
+        </thead>
+        <tbody nz-tbody style="font-size: 12px">
+          <tr nz-tbody-tr *ngFor="let material of nzTable.data;let i=index;">
+            <td nz-td [title]="material.sku" *ngIf='!newMaterial'>
+              {{material.sku?material.sku:'--'}}
+            </td>
+            <td [title]="material.spec?material.spec:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.spec?material.spec:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input [(ngModel)]="material.spec" [name]="'spec'+i"
+                      [formControlName]="'spec'+i" placeholder="请输入规格名称" maxlength=30>
+                    <nz-form-explain *ngIf="materialForm.get('spec'+i).dirty && materialForm.get('spec'+i).errors">
+                      <ng-container *ngIf="materialForm.get('spec'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.name?material.name:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.name?material.name:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input [(ngModel)]="material.name" [name]="'name'+i"
+                      [formControlName]="'name'+i" placeholder="请输入材料名称" maxlength=30>
+                    <nz-form-explain *ngIf="materialForm.get('name'+i).dirty && materialForm.get('name'+i).errors">
+                      <ng-container *ngIf="materialForm.get('name'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.brand?material.brand:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.brand?material.brand:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input [(ngModel)]="material.brand" [name]="'brand'+i"
+                      [formControlName]="'brand'+i" placeholder="请输入颜色名称" maxlength=30>
+                    <nz-form-explain *ngIf="materialForm.get('brand'+i).dirty && materialForm.get('brand'+i).errors">
+                      <ng-container *ngIf="materialForm.get('brand'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.place?material.place:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.place?material.place:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input [(ngModel)]="material.place" [name]="'place'+i"
+                      [formControlName]="'place'+i" placeholder="请输入场地名称" maxlength=30>
+                    <nz-form-explain *ngIf="materialForm.get('place'+i).dirty && materialForm.get('place'+i).errors">
+                      <ng-container *ngIf="materialForm.get('place'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.Units?material.Units:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.Units?material.Units:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input [(ngModel)]="material.Units" [name]="'Units'+i"
+                      [formControlName]="'Units'+i" placeholder="请输入单位名称" maxlength=30>
+                    <nz-form-explain *ngIf="materialForm.get('Units'+i).dirty && materialForm.get('Units'+i).errors">
+                      <ng-container *ngIf="materialForm.get('Units'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                      <ng-container *ngIf="materialForm.get('Units'+i).hasError('required')">
+                        单位名称不能为空
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.marketPrice?material.marketPrice:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.marketPrice?material.marketPrice:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <nz-input-number [(ngModel)]="material.marketPrice" style="width: 100%;"
+                    [formControlName]="'marketPrice'+i" nzPlaceHolder="请输入市场价格" maxlength=10 [nzMin]="1"  [nzStep]="1"></nz-input-number>
+                    <!-- <input type="text" nz-input [(ngModel)]="material.marketPrice" [name]="'marketPrice'+i"
+                      [formControlName]="'marketPrice'+i" placeholder="请输入市场价格" maxlength=30> -->
+                    <nz-form-explain *ngIf="materialForm.get('marketPrice'+i).dirty && materialForm.get('marketPrice'+i).errors">
+                      <ng-container *ngIf="materialForm.get('marketPrice'+i).hasError('maxlength')">
+                        请填写10位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.supplyPrice?material.supplyPrice:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.supplyPrice?material.supplyPrice:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <nz-input-number [(ngModel)]="material.supplyPrice" style="width: 100%;"
+                    [formControlName]="'supplyPrice'+i" nzPlaceHolder="请输入供货价格" maxlength=10 [nzMin]="1"  [nzStep]="1"></nz-input-number>
+                    <!-- <input type="text" nz-input [(ngModel)]="material.supplyPrice" [name]="'supplyPrice'+i"
+                      [formControlName]="'supplyPrice'+i" placeholder="请输入供货价格" maxlength=30> -->
+                    <nz-form-explain *ngIf="materialForm.get('supplyPrice'+i).dirty && materialForm.get('supplyPrice'+i).errors">
+                      <ng-container *ngIf="materialForm.get('supplyPrice'+i).hasError('maxlength')">
+                        请填写10位以内的字符
+                      </ng-container>
+                      <ng-container *ngIf="materialForm.get('supplyPrice'+i).hasError('required')">
+                        市场价格不能为空
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td [title]="material.sellingPrice?material.sellingPrice:''">
+              <ng-container *ngIf="!material.edit">
+                {{material.sellingPrice?material.sellingPrice:'--'}}
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <nz-input-number [(ngModel)]="material.sellingPrice" style="width: 100%;"
+                    [formControlName]="'sellingPrice'+i" nzPlaceHolder="请输入销售价格" maxlength=10 [nzMin]="1"  [nzStep]="1"></nz-input-number>
+                    <!-- <input type="text" nz-input [(ngModel)]="material.sellingPrice" [name]="'sellingPrice'+i"
+                      [formControlName]="'sellingPrice'+i" placeholder="请输入市场价格" maxlength=30> -->
+                    <nz-form-explain *ngIf="materialForm.get('sellingPrice'+i).dirty && materialForm.get('sellingPrice'+i).errors">
+                      <ng-container *ngIf="materialForm.get('sellingPrice'+i).hasError('maxlength')">
+                        请填写10位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td >
+              <ng-container *ngIf="!material.edit">
+                <nz-dropdown *ngIf="material.fileName">
+                  <a nz-dropdown style="color: #1890FF;">
+                   [图片]
+                  </a>
+                  <ul nz-menu nzSelectable>
+                    <li nz-menu-item (click)='delImg(i)'>
+                      <a>删除图片</a>
+                    </li>
+                    <li nz-menu-item (click)='setDefault(i)'>
+                         <a>设为默认封面</a>
+                    </li>
+                    <li nz-menu-item (click)='openLarge(material.img)'>
+                      <a>查看大图</a> 
+                    </li>
+                  </ul>
+                </nz-dropdown>
+                <span *ngIf="!material.fileName">
+                  --
+                </span>
+                <span style="color:rgba(0,0,0,0.45);" *ngIf="material.default">(已默认)</span>
+              </ng-container>
+              <ng-container *ngIf="material.edit">
+                <nz-form-item class="layout">
+                  <nz-form-control>
+                    <input type="text" nz-input disabled [(ngModel)]="material.fileName" [name]="'place'+i"
+                      [formControlName]="'fileName'+i"  maxlength=30>
+                    <i nz-icon type="upload" class="upload" (click)='uploadImg(i)'></i>
+                    <nz-form-explain *ngIf="materialForm.get('fileName'+i).dirty && materialForm.get('fileName'+i).errors">
+                      <ng-container *ngIf="materialForm.get('fileName'+i).hasError('maxlength')">
+                        请填写30位以内的字符
+                      </ng-container>
+                    </nz-form-explain>
+                  </nz-form-control>
+                </nz-form-item>
+              </ng-container>
+            </td>
+            <td nz-td>
+              <div *ngIf="material.edit">
+                <a href="javascript:void(0)"(click)='save(i)' class="work_a">保存</a>
+                <a href="javascript:void(0)" (click)='cancel(i)'class="work_a" *ngIf="isEdit">取消</a>
+              </div>
+              <div *ngIf="!material.edit">
+                <a href="javascript:void(0)" (click)='copy(material,i+1)' class="work_a">复制</a>
+                <a href="javascript:void(0)" (click)='edit(i)'class="edit">编辑</a>
+                <a href="javascript:void(0)" *ngIf='materialSaleList.length>1'(click)='del(i)'class="work_a">删除</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </form>
+    </div>
+    <div nz-row>
+      <div class="btns">
+        <button nz-button nzType="default" nzSize='large' style='margin-right:24px' (click)="handleCancel()">返回</button>
+        <button nz-button nzType="primary" nzSize='large' [disabled]="checkMaterial()" (click)="MaterialSubmit($event)">创建材料
+        </button>
+      </div>
+    </div>
+
+</div>
+<rev-imgview [album]="_albums" [index]="index" *ngIf="_albums.length>0"></rev-imgview>

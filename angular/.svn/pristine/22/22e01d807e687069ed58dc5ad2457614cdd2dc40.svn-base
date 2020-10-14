@@ -1,0 +1,37 @@
+<div class="warranty">
+    <div class="head">
+        <rev-detail-head></rev-detail-head>
+    </div>
+    <div class="top-split"></div>
+    <div class="content">
+        <div class="wage-detail">
+            <!---详情渲染--->
+            <div nz-row *ngIf="records && records.length > 0" class="wage-render">
+                <dl *ngFor="let record of records" [hidden]="record.state">
+                    <dt nz-row>
+                        <span nz-col nzSpan="16" class="wage-name">{{record.originatorType == 2?'保修申请':'维修确认'}}</span>
+                        <span nz-col nzSpan="8" class="wage-gray text-right">{{record.modifyTime?(record.modifyTime|date:'yyyy-MM-dd HH:mm'):''}}</span>
+                    </dt>
+                    <dd *ngIf="record.dynamicInfo" class="wage-content">{{record.dynamicInfo}}</dd>
+                    <dd *ngIf="record.img && record.img.length > 0" class="wage-img">
+                        <div (click)="showLargeImg(img.imgUrl)" *ngFor="let img of record.img"
+                             [ngStyle]="shoWageImgBg(img.imgUrl)"></div>
+                    </dd>
+                </dl>
+            </div>
+            <div nz-row *ngIf="records && records.length == 0" class="wage-render">
+                <dl>
+                    <dd class="wage-content">暂无数据显示</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--放大图片-->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="图片展示" nzWidth="1000px"
+          (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <div class="large-img" *ngIf="src">
+        <img [src]="src"/>
+    </div>
+</nz-modal>

@@ -1,0 +1,135 @@
+import { Component, OnInit } from '@angular/core';
+import { btoa } from '../../../../model/methods';
+import { auditStatus, Default } from './../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+@Component({
+  selector: 'rev-supplier-material-list',
+  templateUrl: './supplier-material-list.component.html',
+  styleUrls: ['./supplier-material-list.component.scss']
+})
+export class SupplierMaterialListComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+  public query;
+  public state;
+  public querys;
+  public companyName;
+  public companyPhone;
+  public serchType = 1;
+  public isFirst = true;
+  public legaLperson;
+  public queryType = [{
+    key: 1,
+    text: '材料商名字'
+  },
+  {
+    key: 2,
+    text: '联系电话'
+  },
+  {
+    key: 3,
+    text: '法人'
+  }];
+  public radioSwitch = [
+    {
+      key: -1,
+      text: '未添加'
+    },
+    {
+      key: 0,
+      text: '审核中'
+    },
+    {
+      key: 1,
+      text: '合作中'
+    },
+    {
+      key: 2,
+      text: '未通过'
+    },
+  ];
+  public pageType = -1;
+  public materialList;
+
+  constructor(
+    private req: RequestService,
+    private warn: WarningService,
+  ) { }
+
+  ngOnInit() {
+    this.querys = 1;
+    // this.getMaterList();
+    this.changePage();
+  }
+  swichType(e) {
+    this.serchType = e;
+  }
+  btoa(id: string) {
+    return btoa(id);
+  }
+
+  create(id) {
+    this.req.doPost({
+      url: 'companyAplly',
+      data: {
+        materialId: id
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.changePage();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  handleSwitch(e) {
+    this.pageType = e;
+    this.changePage();
+  }
+  // getMaterList() {
+  //   this.req.doPost({
+  //     url: 'materialDorpList',
+  //     success: res => {
+  //     }
+  //   })
+  // }
+  changePage(e = 0) {
+
+    if (e) {
+      if (this.isFirst) {
+        this.companyName = this.query;
+      }
+      this.pageNo = Default.PAGE.PAGE_NO;
+      this.pageSize = Default.PAGE.PAGE_SIZE;
+    }
+    let param = {
+      pageNo: this.pageNo,
+      pageSize: this.pageSize,
+      state: this.pageType
+    }
+    if (this.serchType == 1) {
+      param['companyName'] = this.query;
+    } else if (this.serchType == 2) {
+      param['companyPhone'] = this.query;
+    }
+    else if (this.serchType == 3) {
+      param['legaLperson'] = this.query;
+    }
+    this.req.doPost({
+      url: 'materialList',
+      data: param,
+      success: res => {
+        if (e) {
+          this.isFirst = false;
+        }
+        this.materialList = res.data.pageSet;
+        this.total = res.data.total;
+      }
+    })
+  }
+}

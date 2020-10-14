@@ -1,0 +1,6 @@
+<div *ngIf="dataVersion">
+<rev-new-makings></rev-new-makings>
+</div>
+<div *ngIf="!dataVersion">
+  <rev-makings></rev-makings>
+</div>

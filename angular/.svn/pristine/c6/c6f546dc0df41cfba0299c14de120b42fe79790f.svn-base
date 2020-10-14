@@ -1,0 +1,12 @@
+import { NgModule } from '@angular/core';
+import {SelectBrandComponent} from '../component/selectBrand/selectBrand.component';
+
+
+@NgModule({
+  imports: [],
+  declarations: [
+    SelectBrandComponent
+  ],
+  exports: [SelectBrandComponent]
+})
+export class SelectBrandModule { }

@@ -1,0 +1,9 @@
+<div class="supplier">
+    <div class="supplier-head">
+     
+      <rev-title [title]="title"*ngIf="!isInfo"  [isNewPage]='false' [atags]="buttons" [show]="showBtn" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="supplier-content">
+      <router-outlet *ngIf='showTitle'></router-outlet>
+    </div>
+  </div>

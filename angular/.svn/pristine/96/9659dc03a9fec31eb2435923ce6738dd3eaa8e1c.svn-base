@@ -1,0 +1,129 @@
+import { Component, OnInit } from '@angular/core';
+import { atob } from '../../../../model/methods';
+import { Router, ActivatedRoute } from '@angular/router';
+import { auditStatus, Default } from './../../../../model/constant';
+@Component({
+  selector: 'rev-supplier-material-info',
+  templateUrl: './supplier-material-info.component.html',
+  styleUrls: ['./supplier-material-info.component.scss']
+})
+export class SupplierMaterialInfoComponent implements OnInit {
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+
+  public title: string = '材料';
+  public buttons: Array<any>;
+  public showBtn = true;
+  public showTitle = true;
+  public pageType = 2;
+  public brand;
+  public checkedNumber;
+  public type;
+  public materialType;
+  public isAllDisplayDataChecked: boolean;
+
+  public indeterminate = false;
+  public radioSwitch = [
+    {
+      key: 2,
+      text: '已创建'
+    },
+    {
+      key: 3,
+      text: '审核中'
+    },
+    {
+      key: 4,
+      text: '已通过'
+    },
+    {
+      key: 5,
+      text: '未通过'
+    },
+  ];
+  public materialList = [{ univalent: 123 ,checked:false}];
+  ngOnInit() {
+    this.materialType = auditStatus;
+    this.buttons = [{
+      name: '模板下载',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '创建材料',
+    }];
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['name']) {
+        this.title = atob(params['name']);
+      }
+    });
+  }
+
+  btoa(id: string) {
+    return btoa(id);
+  }
+  submit() {
+
+  }
+  addMaterial() {
+
+  }
+  handleName(e) {
+    switch (e) {
+      case '创建材料':this.router.navigate(['../edit'], { relativeTo: this.activatedRoute });
+        
+        break;
+    
+      default:
+        break;
+    }
+    console.log(e)
+  }
+  handleSwitch(e) {
+    this.pageType = e;
+  }
+  apply() {
+
+  }
+  getNum(){
+    this.checkedNumber=0;
+    this.materialList.forEach(v=>{
+      if(v['checked']){
+        this.checkedNumber+=1
+      }
+    })
+  }
+  refreshStatus() {
+
+    const allChecked = this.materialList.every(value => value.checked === true);
+    const allUnChecked = this.materialList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+   this.getNum()
+}
+checkAll(event) {
+  if (event) {
+      this.materialList.filter((item, i) => {
+              item['checked'] = true;
+      });
+  } else {
+      this.materialList.filter(item => {
+          item['checked'] = false;
+      });
+  }
+  this.indeterminate = false;
+  this.getNum()
+}
+  changeData() {
+
+  }
+}

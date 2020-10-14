@@ -1,0 +1,210 @@
+import { Component, OnInit, Input, EventEmitter,  Output  } from '@angular/core';
+import { RequestService } from '../../service/request.service';
+import {WarningService} from '../../service/warning.service';
+import {Messages} from '../../model/msg';
+
+@Component({
+  selector: 'select-brand',
+  templateUrl: './selectBrand.component.html',
+  styleUrls: ['./selectBrand.component.scss']
+})
+export class SelectBrandComponent implements OnInit {
+
+
+    @Input() showActivity: boolean = false; // 已通过活动
+    @Input() showMaterial: boolean = false; // 全部材料商
+    @Input() type: any; // 类别请求参数 1-主材；2-辅材；3-软装
+    @Output() handleCategory = new EventEmitter<any>();
+    @Output() handleBrand = new EventEmitter<any>();
+    @Output() handleMaterialSupplier = new EventEmitter<any>();
+    @Output() handleActivity = new EventEmitter<any>();
+    @Output() handleSearch = new EventEmitter<any>();
+    @Output() handleInput = new EventEmitter<any>();
+    @Output() handleResetData = new EventEmitter<any>();
+
+
+    public activityStatus:Array<any> = [{id:'',activityName:'通过材料'}]; //活动选择
+    public componeyStatus:Array<any> = [{id:'',companyName:'全部材料商'}]; // 材料商选择
+    public brandStatus:Array<any> = []; // 品牌选择
+    public categoryStatus:Array<any> = [{id:'',categoryName:'全部类别'}]; // 类别选择
+    // 查询条件
+    public material = ''; // 活动id
+    public company = ''; // 材料商id
+    public category = {id:'',categoryName:'全部类别'}; // 类别
+    public brand = undefined; // 品牌
+    public condition = 2;
+    public spu = '';
+    public sku = '';
+    public name = '';
+    public spec = '';
+    public model = '';
+    public compareFn = (o1: any, o2: any) => o1 && o2 ? o1.id === o2.id : o1 === o2; //类别选择框为对象
+
+
+    constructor(
+        private request: RequestService,
+        private warn: WarningService,) {}
+
+    ngOnInit() {
+        if(this.showMaterial){
+            this.getmaterialSupplierList();
+        }
+        this.getMarterialcategoryList()
+    }
+
+
+
+    // 所有的活动
+    getmaterialList(){
+        if(this.company){
+            this.request.doPost({
+                url: 'materialByList',
+                data:{
+                    materialId:this.company
+                },
+                success: (res => {
+                    if (res && res.code === 200) {
+                        this.activityStatus = res.data
+                        this.activityStatus.unshift({id:'',activityName:'通过材料'})
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }else{
+            this.activityStatus = [{id:'',activityName:'通过材料'}];
+        }
+    }
+
+    // 所有的材料商
+    getmaterialSupplierList(){
+        this.request.doPost({
+            url: 'materialSupplierListBySelect',
+            success: (res => {
+                if (res && res.code === 200) {
+                    this.componeyStatus = res.data;
+                    this.componeyStatus.unshift({id:'',companyName:'全部材料商'})
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    //所有的类别
+    getMarterialcategoryList(){
+        this.request.doPost({
+            url: 'getMarterialCategory',
+            data:{ 
+                type:this.type
+             },
+            success: (res => {
+                if (res && res.code === 200) {
+                    this.categoryStatus = res.data
+                    this.categoryStatus.unshift({id:'',categoryName:'全部类别'})
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    //所有的品牌
+    getMarterialBrand(){
+        if(this.category.id){
+            this.request.doPost({
+                url: 'getMarterialBrand',
+                data:{
+                    id:this.category.id
+                },
+                success: (res => {
+                    if (res && res.code === 200) {
+                        this.brandStatus = res.data
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }else{
+            this.brandStatus = []
+        }
+    }
+
+    // 活动
+    changeActivity(){
+        this.handleActivity.emit(this.material);
+    }
+
+    // 材料商
+    changeMaterialSupplier(){
+        if (this.showActivity) {
+            this.material = '';
+            this.getmaterialList();
+        }
+        this.handleMaterialSupplier.emit(this.company);       
+    }
+
+    /*  类别
+     *  拉出品牌
+     */
+    changeCategory(){
+        this.brand = undefined
+        this.getMarterialBrand()
+        if(this.category.id){
+            this.handleCategory.emit(this.category);
+        }else{
+            this.handleCategory.emit({id:'',categoryName:''});
+        }
+    }
+
+    //品牌
+    changeBrand() {
+        this.handleBrand.emit(this.brand);
+    }
+
+    // 切换搜索条件清空输入框
+    clearInput(){
+        this.spu = '';
+        this.sku = '';
+        this.name = '';
+        this.spec = '';
+        this.model = '';
+    }
+
+    // 输入框变化
+    changeIpt(){
+        this.handleInput.emit({
+            spu:this.spu,
+            sku:this.sku,
+            name:this.name,
+            spec:this.spec,
+            model:this.model
+        })
+    }
+    // 搜索
+    searchCondition(){
+        this.handleSearch.emit({
+            spu:this.spu,
+            sku:this.sku,
+            name:this.name,
+            spec:this.spec,
+            model:this.model
+        });
+    }
+
+    // tab切换重置
+    resetData(){
+        this.material = '';
+        this.company = '';
+        this.category = {id:'',categoryName:'全部类别'};
+        this.brand = undefined;
+        this.spu = null;
+        this.sku = null;
+        this.name = null;
+        this.spec = null;
+        this.model = null;
+        this.brandStatus = [];
+        this.activityStatus = [{id:'',activityName:'通过材料'}];
+        this.condition = 2;
+    }
+}

@@ -1,0 +1,108 @@
+.settle-head {
+    margin: 24px 0;
+    &-body {
+        display: flex;
+        font-size: 14px;
+    }
+    &-info {
+        width: 30%;
+        ul {
+            margin-top: 16px;
+            li {
+                margin-top: 16px;
+            }
+        }
+        h5 {
+            margin-top: 58px;
+            font-size: 14px;
+        }
+    }
+    &-title {
+        span {
+            font-size: 20px;
+            margin-right: 24px;
+        }
+    }
+    &-detail {
+        margin-top: 16px;
+        position: relative;
+        width: 70%;
+        .progress {
+            height: 6px;
+            .progress-first {
+                display: inline-block;
+                height: 6px;
+                background: #1890ff;
+                position: absolute;
+                transition: 1s;
+                border-radius: 20px;
+            }
+            .progress-last {
+                border-radius: 20px;
+                display: inline-block;
+                height: 100%;
+                background: #69c0ff;
+            }
+        }
+        .progress-label {
+            display: inline-block;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: 69px;
+            border-right: 10px solid transparent;
+            border-left: 10px solid transparent;
+            border-bottom: 7px solid #1890ff;
+
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+        }
+        .price-total {
+            display: inline-block;
+            width: 160px;
+            > div {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+        }
+        .info-price {
+            margin-top: 36px;
+        }
+        .price {
+            display: inline-block;
+            width: 272px;
+            div {
+                margin-bottom: 16px;
+            }
+        }
+    }
+    .circle {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    .top16 {
+        margin-top: 16px;
+    }
+    .top8 {
+        margin-top: 8px;
+    }
+    .font20 {
+        font-size: 20px;
+    }
+    .width160 {
+        display: inline-block;
+        width: 160px;
+        margin-bottom: 12px;
+    }
+    .grey {
+        color: rgba(0, 0, 0, 0.45);
+    }
+    .red {
+        color: red;
+    }
+}

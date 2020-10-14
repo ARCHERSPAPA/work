@@ -1,0 +1,33 @@
+@import "./../../../../../assets/scss/mixin";
+.settle-material {
+    &-head {
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        >div{
+            display: flex;
+        }
+        .compact{
+            text-align: right;
+            width: 362px;
+        }
+        div{
+            input{
+                width: 240px;
+                margin-right: 8px;
+            }
+        }
+    }
+    &-list{
+        margin-top: 16px;
+        tr th,tr td{
+            font-size: 14px;
+            max-width:100px;
+            vertical-align: middle;
+            a{
+                padding-right: 4px;
+            }
+            @include ellipsis();
+           }
+    }
+}

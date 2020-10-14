@@ -1,0 +1,116 @@
+<div class="settle-material-list">
+  <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false"  nzSize="middle"
+    [nzShowPagination]="false" nzSize="middle">
+    <thead nz-thead>
+      <tr>
+        <th nz-th><span>标题</span></th>
+        <th nz-th><span>SKU编号</span></th>
+        <th nz-th><span>品牌</span></th>
+        <th nz-th><span>名称</span></th>
+        <th nz-th><span>型号</span></th>
+        <th nz-th><span>规格</span></th>
+        <th nz-th><span>单位</span></th>
+        <th nz-th><span>供货价</span></th>
+        <th nz-th><span>核算数量</span></th>
+        <th nz-th><span>已提数量</span></th>
+        <th nz-th><span>本次数量</span></th>
+        <th nz-th><span>本次合计</span></th>
+      </tr>
+    </thead>
+    <tbody nz-tbody style="font-size: 12px">
+      <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+        <td nz-td [title]="material.rowName" [rowSpan]="material.rows" *ngIf="material.rows > 0"
+          style="vertical-align:middle;text-align: center;">
+          {{material.rowName?material.rowName:'--'}}
+        </td>
+        <td nz-td [title]="material.sku">
+          {{material.sku?material.sku:'--'}}
+        </td>
+        <td nz-td [title]="material.brand">
+          {{material.brand?material.brand:'--'}}
+        </td>
+        <td nz-td [title]="material.name">
+          {{material.name?material.name:'--'}}
+        </td>
+        <td nz-td [title]="material.model">
+          {{material.model?material.model:'--'}}
+        </td>
+        <td nz-td [title]="material.spec">
+          {{material.spec?material.spec:'--'}}
+        </td>
+        <td nz-td [title]="material.unit">
+          {{material.unit?material.unit:'--'}}
+        </td>
+        <td nz-td [title]="material.supplyPrice">
+          {{material.supplyPrice?material.supplyPrice:'--'}}
+        </td>
+        <td nz-td [title]="material.costNum">
+          {{material.costNum?material.costNum:'0'}}
+        </td>
+        <td nz-td [title]="material.passNum">
+          {{material.passNum?material.passNum:'0'}}
+        </td>
+        <td nz-td [title]="material.count" [ngStyle]="{'color':checkShowRed(material)}">
+          {{material.count?material.count:'0'}}
+        </td>
+        <td nz-td [title]="material.totalPrice"[ngStyle]="{'color':checkShowRed(material)}" >
+          {{material.totalPrice?material.totalPrice:'--'}}
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>
+<div class="btns">
+  <div *ngIf='type==1 && state==1'>
+    <button nz-button nzType="primary" 
+    nz-popconfirm nzTitle="确定该订单审核通过吗？" nzOkText="通过"
+      nzCancelText="取消" (nzOnConfirm)="pass(1)">
+      通过
+    </button>
+    <button nz-button nzType="default" (click)='showAudit(0)' >不通过</button>
+  </div>
+  <div *ngIf='type==2 && state==9'>
+    <button nz-button nzType="primary" (click)="showModal()">结算</button>
+    <button nz-button nzType="default" (click)="showAudit(1)">结算不通过</button>
+  </div>
+</div>
+<nz-modal 
+		[(nzVisible)]="isVisible" 
+		nzTitle="结算账号" 
+		[nzFooter]="null" 
+		(nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="wageForm">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired>选择结算账号</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+				<nz-select nzAllowClear="false" nzPlaceHolder="请选择结算账号" formControlName="account" [(ngModel)]="account">	
+					<nz-option *ngFor="let account of accountStatus" [nzValue]="account.id" [nzLabel]="account.companyName"></nz-option>
+				</nz-select>
+            </nz-form-control>
+        </nz-form-item>
+        <div class='btns'>
+            <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleOk(1)" [disabled]="!wageForm.valid">提交</button>
+        </div>          
+    </form>
+</nz-modal>
+
+<nz-modal
+        [(nzVisible)]="auditVisible"
+        [nzTitle]="type==1?'审核不通过':'结算不通过'"
+        nzOkText="提交"
+        nzCancelText="取消"
+        (nzOnCancel)="auditCancel()"
+        (nzOnOk)="checkpass(0)">
+    <div class="modify">
+        <form [formGroup]="auditForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">审核意见</nz-form-label>
+                <nz-form-control [nzSpan]="14" class="textarea">
+                    <textarea nz-input formControlName="msg" [(ngModel)]="msg" placeholder="请输入审核内容" maxlength="300" rows="4"></textarea>
+                    <span class="count" *ngIf="msg && msg.length > 0"><span>{{msg.length}}</span>/300</span>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>

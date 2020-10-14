@@ -1,0 +1,55 @@
+import { Component, OnInit } from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+
+@Component({
+  selector: 'rev-supplier-material-detail',
+  templateUrl: './supplier-material-detail.component.html',
+  styleUrls: ['./supplier-material-detail.component.scss']
+})
+export class SupplierMaterialDetailComponent implements OnInit {
+
+  public bread:string;
+
+  constructor(private activatedRoute:ActivatedRoute) { }
+
+  ngOnInit() {
+      this.activatedRoute.queryParams.subscribe(params =>{
+          this.bread = this.getMaterialType(Number(params["materialType"]));
+      })
+  }
+
+    ngAfterViewChecked(){
+        this.routeChange();
+    }
+
+    routeChange(){
+
+      // this.findData(this.activatedRoute.root,this.bread);
+        this.activatedRoute.snapshot.data["breadcrumb"] = this.bread;
+
+
+    }
+
+
+    findData(root:any,name:string){
+      // console.log(root);
+      //   if(root.firstChild){
+      //       if(root.data){
+      //           this.findData(root.firstChild,name);
+      //       }else{
+      //           root.firstChild.data["breadcrumb"] = name;
+      //       }
+      //
+      //   }
+    }
+
+    getMaterialType(type:number){
+      switch(type){
+          case 1: return "主材详情";
+          case 2: return "辅材详情";
+          case 3: return "软装详情";
+          default: return "其它";
+      }
+    }
+
+}

@@ -1,0 +1,52 @@
+import { Component, OnInit } from '@angular/core';
+import { Messages } from '../../../model/msg';
+import { FormBuilder, Validators } from '@angular/forms';
+import * as UserValidate from '../../../validate/user-validate';
+import { WarningService } from '../../../service/warning.service';
+import { RequestService } from '../../../service/request.service';
+@Component({
+  selector: 'rev-cost-base-add',
+  templateUrl: './cost-base-add.component.html',
+  styleUrls: ['./cost-base-add.component.scss']
+})
+export class CostBaseAddComponent implements OnInit {
+  public title;
+  public baseForm;
+  public category;
+  public categoryLsit;
+  public Units;
+  public univalence;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+  ) {
+  }
+
+  ngOnInit() {
+    this.title = '创建材料'
+    this.baseForm = this.fb.group({
+      category: [this.category, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+      Units: [this.Units, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+      univalence: [this.univalence, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+    });
+  }
+  handleCancel() {
+    history.back();
+  }
+  checkAdd() {
+
+  }
+  handleOk() {
+
+  }
+}

@@ -1,0 +1,45 @@
+import { Component, OnInit } from '@angular/core';
+import {HeaderService} from "../../../service/header.service";
+
+@Component({
+  selector: 'rev-item-price',
+  templateUrl: './item-price.component.html'
+})
+export class ItemPriceComponent implements OnInit {
+
+
+  public dataVersion:number = 0;
+
+  constructor(private header:HeaderService) { }
+
+  ngOnInit() {
+      console.log(this.header.getHeaderVersion());
+  }
+
+    // ngAfterContentInit(){
+    //   console.log("content init",this.header.getHeaderVersion());
+    // }
+    //
+    // ngAfterViewInit(){
+    //   console.log("view init",this.header.getHeaderVersion());
+    // }
+    //
+    // ngOnDestroy(){
+    //   console.log("Destroy ", this.header.getHeaderVersion());
+    // }
+
+    // ngDoCheck (){
+    //     console.log("checked ",this.header.getHeaderVersion());
+    //     this.isNewData = this.header.getHeaderVersion();
+    // }
+    //
+    ngAfterContentChecked  (){
+        this.dataVersion = this.header.getHeaderVersion();
+    }
+
+    // ngAfterViewChecked(){
+    //   // console.log("after view checked", this.header.getHeaderVersion());
+    //     this.isNewData = this.header.getHeaderVersion();
+    // }
+
+}

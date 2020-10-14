@@ -1,0 +1,39 @@
+import { Injectable } from '@angular/core';
+import {RequestService} from './request.service';
+import {WarningService} from './warning.service';
+import {Messages} from '../model/msg';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ConfigService {
+  private configBase: Array<any>;
+
+  constructor(private request: RequestService,
+              private warn: WarningService) { }
+
+  loadConfig(id,dataVersion:number = 0) {
+      const that = this;
+      let url = dataVersion == 1? 'configNewQuote':'configQuote'
+      that.request.doPost({
+          url: url,
+          data: {id: id},
+          success: (res => {
+              if (res && res.code == 200) {
+                  that.setConfigBase(res.data);
+              } else {
+                  that.warn.onError(res.msg || Messages.FAIL.DATA);
+              }
+          })
+      });
+  }
+
+  getConfigBase() {
+      return this.configBase;
+  }
+
+  setConfigBase(base) {
+      this.configBase = base;
+  }
+
+}

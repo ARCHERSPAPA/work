@@ -1,0 +1,211 @@
+import {Injectable} from '@angular/core';
+import {RequestService} from "../../../service/request.service";
+import {Messages} from "../../../model/msg";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class MasterPackService {
+
+    constructor(private req: RequestService) {
+    }
+
+
+    /**
+     * 拉取套餐管理的数据列表
+     * @param pramas
+     * @returns {Promise<any>}
+     */
+    getPackList(params: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialList",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 新建或者编辑套餐
+     * @param params
+     * @returns {Promise<any>}
+     */
+    savePack(params: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialSave",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 提交套餐审核
+     * @param {Array<any>} ids 需要审核时的id的数组
+     * @returns {Promise<any>}
+     */
+    submitPacks(ids: Array<any>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialSubmit",
+                data: {ids: ids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        if(res && res.code == 120){
+                            reject(Messages.PACK_EMPTY_ITEM);
+                        }else{
+                            reject(res.msg || Messages.FAIL.DATA);
+                        }
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 删除套餐
+     * @param {Array<any>} ids 需要删除套餐的id数组
+     * @returns {Promise<any>}
+     */
+    deletePacks(ids: Array<any>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialDelete",
+                data: {ids: ids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 撤回套餐
+     * @param {Array<any>} ids
+     * @returns {Promise<any>}
+     */
+    recallPacks(ids: Array<any>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialRecall",
+                data: {ids: ids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 上下架套餐
+     * @param {Array<any>} ids 需要上下架的套餐id
+     * @param {number} putaway 未上架为0，上架为1
+     * @returns {Promise<any>}
+     */
+    shelfPacks(ids: Array<any>, putaway: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packMaterialShelves",
+                data: {ids: ids, putaway: putaway},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 拉取套餐的材料详情
+     * @param params
+     * @returns {Promise<any>}
+     */
+    getMaterialList(params: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packDetailMaterialsList",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 添加材料
+     * @param {Array<any>} mids 材料id的集合
+     * @param {number} pid 当前套餐id
+     * @returns {Promise<any>}
+     */
+    addMaterials(pid: number,mids: Array<any>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packDetailMaterialsAdd",
+                data: {planId: pid, materialIds: mids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 删除材料
+     * @param {Array<any>} mids
+     * @param {number} pid
+     * @returns {Promise<any>}
+     */
+    delMaterials(pid: number,mids: Array<any>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "packDetailMaterialsDel",
+                data: {planId: pid, materialIds: mids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+
+}

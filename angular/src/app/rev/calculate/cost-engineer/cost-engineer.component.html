@@ -1,0 +1,106 @@
+<div class="cost">
+    <div class="cost-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="cost-content">
+        <form [formGroup]="modifyForm" nz-form>
+            <nz-form-item style="margin: 0;">
+                <div class="cost-detail">
+                    <span>工程管理费用系数<span class="cost-font">(该系数用于计算工程管理费，计算公式为：工程总额×工程管理费系数)</span></span>
+                </div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;"  (click)='setOpen(0)'>
+                    <nz-input-number [nzMin]="0" [nzMax]="1" [nzStep]="0.01" [ngModel]="percentage" [nzPrecision]="2"
+                    class="input"
+                        [ngStyle]="{ marginLeft: '16px',width:'320px',marginTop:'24px'}" formControlName="percentage"
+                        (ngModelChange)="submit(0)" class="designNumber" name='percentage'>
+                    </nz-input-number>
+                    <nz-form-explain *ngIf="modifyForm.get('percentage').dirty && modifyForm.get('percentage').errors">
+                        <ng-container *ngIf="modifyForm.get('percentage').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="modifyForm.get('percentage').hasError('numberPoint')">
+                            &nbsp;&nbsp;输入格式不正确(只能输入0-1的数字，精确到小数后两位)
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item >
+                <div class="cost-detail">
+                    <span>减项审核设置<span class="cost-font">(该数值是用于设计师或工长做减项目，减少金额小于多少时需要公司审核的设置)</span></span>
+                </div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;" class="cost-inp" (click)='setOpen(1)'>
+                    <nz-input-number [nzMin]="-9999999" [nzMax]="9999999" [nzStep]="100" [ngModel]="addPercentage"[nzPrecision]="2"
+                        [ngStyle]="{ margin: '24px 24px 0 16px',width:'320px',paddingLeft:'10px' }"
+                        formControlName="addPercentage" (ngModelChange)="submit(1)" class="designNumber"
+                        name='addPercentage'>
+                    </nz-input-number>
+                    <span class="symbol">{{symbol}}</span>
+                    <nz-radio-group [(ngModel)]="addRatioType" [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="addTypechange()">
+                        <label nz-radio nzValue="1">正</label>
+                        <label nz-radio nzValue="2">负</label>
+                    </nz-radio-group>
+                    <nz-form-explain
+                        *ngIf="modifyForm.get('addPercentage').dirty && modifyForm.get('addPercentage').errors">
+                        <ng-container *ngIf="modifyForm.get('addPercentage').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="modifyForm.get('addPercentage').hasError('numberPoint')">
+                            &nbsp;&nbsp;输入格式不正确(只能输入-9999999-9999999的数字，精确到小数后两位)
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item >
+                <div class="cost-detail">
+                    <span>图纸审核设置</span>
+                </div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;" class="cost-inp" >
+                    <span style="margin:0 24px 0 16px">签署承包合同后图纸自动至为已审核</span><nz-switch [ngModel]="imgState" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="configDrawState($event)" nzCheckedChildren="至为" nzUnCheckedChildren="不至为"></nz-switch>
+                    <br>
+                    <nz-form-explain>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item >
+                <div class="cost-detail">
+                    <span>提交派单前置条件</span>
+                </div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;" class="cost-inp" >
+                    <span style="margin:0 24px 0 16px">图纸需确认</span><nz-switch [ngModel]="graphConfrim" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="configGraphState($event)" nzCheckedChildren="需要" nzUnCheckedChildren="不需要"></nz-switch>
+                    <br>
+                    <nz-form-explain>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item >
+                <div class="cost-detail">
+                    <span>设计费成本占比</span>
+                </div>
+                <nz-form-control [nzSpan]="19" style="text-align: left;" class="cost-inp"(click)='setOpen(3)' >
+                    <nz-input-number
+                    [ngModel]="designPrice"
+                    [nzMin]="0"
+                    class="input"
+                    [nzPrecision]='0'
+                    formControlName="designPrice"
+                    [nzMax]="100"
+                    [nzStep]="1"
+                    (ngModelChange)="submit(3)" 
+                    [nzFormatter]="formatterPercent"
+                    [nzParser]="parserPercent"
+                  ></nz-input-number>
+                    <br>
+                    <nz-form-explain
+                    *ngIf="modifyForm.get('designPrice').dirty && modifyForm.get('designPrice').errors">
+                    <ng-container *ngIf="modifyForm.get('designPrice').hasError('required')">
+                        请填写2位以内的整数
+                    </ng-container>
+                </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</div>

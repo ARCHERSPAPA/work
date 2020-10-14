@@ -1,0 +1,247 @@
+<div class="cost-add">
+  <div class="cost-add-head">
+    <rev-title [title]="title" [isNewPage]='false' [show]="false">
+    </rev-title>
+  </div>
+  <div class="form">
+    <form nz-form [formGroup]="baseForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="4" nzRequired>类别</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <nz-select nzAllowClear="true" nzPlaceHolder='请选择' [(ngModel)]="category" nzSize="large"
+            formControlName="category">
+            <nz-option *ngFor="let audit of categoryLsit" [nzValue]="audit.id" [nzLabel]="audit.name">
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4" nzRequired>名称</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="name" nzSize="large" name="name" formControlName="name" maxlength="18"
+            placeholder="请输入" />
+          <nz-form-explain *ngIf="baseForm.get('name').dirty && baseForm.get('name').errors">
+            <ng-container *ngIf="baseForm.get('name').hasError('required')">
+              名称必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('name').hasError('maxlength')">
+              请填写1~30位字符
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">关联辅材</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <!-- <nz-select nzAllowClear="true" nzPlaceHolder='请选择' [(ngModel)]="Acessorial" nzSize="large"
+            [ngModelOptions]="{standalone: true}">
+            <nz-option *ngFor="let audit of categoryLsit" [nzValue]="audit.key" [nzLabel]="audit.text">
+            </nz-option>
+          </nz-select> -->
+          <div class="infoCli" (click)='openModel()' [nzTitle]="Acessorial?Acessorial:'暂无关联辅材'" nzPlacement="topLeft"
+            nz-tooltip></div>
+          <input nz-input [(ngModel)]="Acessorial" nzSize="large" name="Acessorial" formControlName="Acessorial"
+            disabled='true' maxlength="18" placeholder="请选择" />
+          <nz-form-explain *ngIf="baseForm.get('Acessorial').dirty && baseForm.get('Acessorial').errors">
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">品牌</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="brand" nzSize="large" name="brand" formControlName="brand" maxlength="10"
+            placeholder="请输入" />
+          <nz-form-explain *ngIf="baseForm.get('brand').dirty && baseForm.get('brand').errors">
+            <ng-container *ngIf="baseForm.get('brand').hasError('maxlength')">
+              请填写10位以内的字符
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item nzRequired class="layout">
+        <nz-form-label [nzSpan]="4">规格</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="spec" nzSize="large" name="spec" formControlName="spec" maxlength="30"
+            placeholder="请输入" />
+          <nz-form-explain *ngIf="baseForm.get('spec').dirty && baseForm.get('spec').errors">
+            <ng-container *ngIf="baseForm.get('spec').hasError('minlength')">
+              请填写30位以内的字符
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">型号</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="model" nzSize="large" name="model" formControlName="model" maxlength="30"
+            placeholder="请输入" />
+          <nz-form-explain *ngIf="baseForm.get('model').dirty && baseForm.get('model').errors">
+            <ng-container *ngIf="baseForm.get('model').hasError('minlength')">
+              请填写30位以内的字符
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-input-group nzCompact style="display: flex;     margin: 16px 0 0 33px;
+      ">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8">材料单价</nz-form-label>
+          <nz-form-control [nzSpan]="16">
+            <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence" [nzPrecision]='2'
+              [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="univalence" style="    width: 172%;
+                  margin-left: -1px;" nzPlaceHolder="请输入">
+            </nz-input-number>
+            <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+              <ng-container *ngIf="baseForm.get('univalence').hasError('maxlength')">
+                请填写10位以内的数字
+              </ng-container>
+            </nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item style=" display:inline-block;width: 42%;
+            margin-left: 117px;">
+          <nz-form-control [nzSpan]="24">
+            <input nz-input [(ngModel)]="Units" nzSize="large" name="Units" formControlName="Units" maxlength="10"
+              placeholder="单位" />
+            <nz-form-explain *ngIf="baseForm.get('Units').dirty && baseForm.get('Units').errors">
+              <ng-container *ngIf="baseForm.get('Units').hasError('maxlength')">
+                请填写10位以内的字符
+              </ng-container>
+            </nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+      </nz-input-group>
+      <div style="  margin-left: 36px;">
+        <div class="inputCompact layout">
+          <nz-form-item style="width: 100%;margin-left: -30px;">
+            <nz-form-label [nzSpan]="8">销售价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="sellprice" nzSize="large" name="sellprice" [nzPrecision]='2'
+                [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="sellprice" style="width:calc(100% - 8px)"
+                maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('sellprice').dirty && baseForm.get('sellprice').errors">
+                <ng-container *ngIf="baseForm.get('sellprice').hasError('maxlength')">
+                  请填写10位以内的数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="    width: 100%;">
+            <nz-form-label [nzSpan]="8">材料损耗</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="wastage" nzSize="large" name="wastage" [nzPrecision]='0'
+              [nzFormatter]="formatterPercent"
+              [nzParser]="parserPercent"
+                [nzMax]='99' [nzMin]="0" [nzStep]="1" formControlName="wastage" style="width:100% " nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('wastage').dirty && baseForm.get('wastage').errors">
+
+                <ng-container *ngIf="baseForm.get('wastage').hasError('maxlength')">
+                  请填写2位以内的整数
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div>
+        <div class="inputCompact layout">
+          <nz-form-item style="width: 100%;">
+            <nz-form-label [nzSpan]="8">木工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="woodworking" nzSize="large" name="woodworking" [nzPrecision]='2'
+                [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="woodworking"
+                style="width:calc(100% - 20px)" maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('woodworking').dirty && baseForm.get('woodworking').errors">
+                <ng-container *ngIf="baseForm.get('woodworking').hasError('maxlength')">
+                  请填写10位以内的数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="   width: calc(100% - 16px);
+          margin-left: 16px;">
+            <nz-form-label [nzSpan]="8">泥工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="plasterer" nzSize="large" name="plasterer" [nzPrecision]='2'
+                [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="plasterer" style="width:100% "
+                nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('plasterer').dirty && baseForm.get('plasterer').errors">
+                <ng-container *ngIf="baseForm.get('plasterer').hasError('maxlength')">
+                  请填写10位以内的数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div>
+        <div class="inputCompact layout">
+          <nz-form-item style=" width:100%">
+            <nz-form-label [nzSpan]="8">漆工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="lacquering" nzSize="large" name="lacquering" [nzPrecision]='2'
+                [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="lacquering"
+                style="width:calc(100% - 20px) ;" maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('lacquering').dirty && baseForm.get('lacquering').errors">
+                <ng-container *ngIf="baseForm.get('lacquering').hasError('maxlength')">
+                  请填写10位以内的数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="   width: calc(100% - 16px);
+  margin-left: 16px;">
+            <nz-form-label [nzSpan]="8">水电单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="hydroelectric" nzSize="large" name=" hydroelectric"
+                [nzPrecision]='2' [nzMax]='9999999' [nzMin]="0" [nzStep]=".1" formControlName="hydroelectric"
+                style="width:100% " maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('hydroelectric').dirty && baseForm.get('hydroelectric').errors">
+                <ng-container *ngIf="baseForm.get('hydroelectric').hasError('maxlength')">
+                  请填写10位以内的数字
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <nz-form-item style="width: 100%;" class="layout">
+        <nz-form-label [nzSpan]="4">说明</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <textarea nz-input name="remark" [(ngModel)]="remark" formControlName="remark" maxlength='100' cols="30"
+            rows="10">
+    </textarea>
+          <span class="count" *ngIf="remark"><span style="color: red;">{{remark.length}}</span>/100</span>
+          <nz-form-explain *ngIf="baseForm.get('remark').dirty && baseForm.get('remark').errors">
+            <ng-container *ngIf="baseForm.get('remark').hasError('maxlength')">
+              请填写0~100位的字符
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <div nz-row>
+        <div class="btns layout">
+          <button nz-button nzType="default" nzSize='large' style='margin: 0 24px 0 116px;'
+            (click)="handleCancel()">取消</button>
+          <button nz-button nzType="primary" nzSize='large' [disabled]="!checkAdd()"
+            (click)="handleOk()">{{baseId?'修改':'提交'}}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

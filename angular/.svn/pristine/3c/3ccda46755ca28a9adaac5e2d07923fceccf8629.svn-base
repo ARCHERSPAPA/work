@@ -1,0 +1,347 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {FormGroup, FormBuilder, Validators, FormControl} from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {atob} from '../../../../model/methods';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ItemBasicComponent} from "../../../../plugins/item-basic/item-basic.component";
+import { TempPackEditService } from './../../temp-pack/temp-pack-edit/temp-pack-edit.service'
+
+@Component({
+  selector: 'rev-temp-suit-edit',
+  templateUrl: './temp-suit-edit.component.html',
+  styleUrls: ['./temp-suit-edit.component.scss','./../../template.component.scss',]
+})
+export class TempSuitEditComponent implements OnInit {
+
+    public mealForm: FormGroup;
+    public pState:number;
+    public sid: string;
+    public companyId: number;
+    //主要内容修改(参数)
+    public isVisible = false;
+    public mealName: string;
+    public price: number;
+    public areaStart: number;
+    public areaEnd: number;
+    public remark: string;
+    public hxArray: Array<any> = [];
+
+    public pkg: any;
+    //说明
+    public info: string;
+
+    //数据列表
+    public dataSource: Array<any> = [];
+
+    //大项的添加或者修改
+    public isBranchVisible = false;
+    public branchForm: FormGroup;
+    public branchName: string;
+    public branchTitle: string;
+    public branchItem: any;
+
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private fb: FormBuilder,
+                private warn: WarningService,
+                private modalService:NgbModal,
+                private tempPackEditService:TempPackEditService) {
+    }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['sid']) {
+                this.sid = atob(params['sid']);
+                this.pState = params['pState']
+                this.loadData(this.sid);
+            }
+        });
+
+        //套餐参数设置
+        this.mealForm = this.fb.group({
+            mealName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]
+            ],
+            price: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice,
+            ]
+            ],
+            areaStart: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            areaEnd: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            remark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+        
+        //添加或者修改大项名称
+        this.branchForm = this.fb.group({
+            branchName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+    }
+
+
+    /**
+     * 加载头部基础数据
+     * @param sid
+     */
+    loadData(sid) {
+        const that = this;
+        if (sid) {
+            this.tempPackEditService.getHeadInfo(sid).then(data=>{
+                data.package.roomType = JSON.parse(data.package.roomType);
+                that.pkg = data.package;
+                if (data && data.package && data.package.offerExplain) {
+                    that.info = data.package.offerExplain;
+                }
+                if (data && data.infoVoList && data.infoVoList.length > 0) {
+                    that.dataSource = data.infoVoList;
+                } else {
+                    that.dataSource = [];
+                }
+                that.setTitleParams(data.package);
+            }).catch(err=>{
+                this.warn.onMsgError(err);
+            })
+        }
+
+    }
+
+    showModal(data) {
+        this.isVisible = true;
+        this.setTitleParams(data);
+    }
+
+    setTitleParams(data) {
+        this.price = data.price;
+        this.mealName = data.packageName;
+        this.areaStart = data.houseArea.split('-')[0].split('㎡')[0];
+        this.areaEnd = data.houseArea.split('-')[1].split('㎡')[0];
+        this.remark = data.remark;
+        this.hxArray = [];
+        this.getHxArray(data.roomTypeList);
+    }
+
+    getHxArray(roomList) {
+        if (roomList && roomList.length > 0) {
+            for (let i = 0; i < roomList.length; i++) {
+                const control = {id:i, room: `room${i}`, bath: `bath${i}`};
+                const index = this.hxArray.push(control);
+                this.mealForm.addControl(this.hxArray[index - 1].room, new FormControl(roomList[i].room, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+                this.mealForm.addControl(this.hxArray[index - 1].bath, new FormControl(roomList[i].toilet, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+            }
+        } else {
+            this.addHx();
+        }
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        // this.mealForm.reset();
+    }
+
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.mealForm.valid && this.sid) {
+            if (Number(this.areaStart) < Number(this.areaEnd)) {
+                // const companyId = this.user.getCompanyId();
+                const params = {
+                    packageType: 1,
+                    packageName: this.mealName,
+                    price: this.price,
+                    houseArea: this.areaStart + '㎡-' + this.areaEnd + '㎡',
+                    roomType: this.getHxByParams(this.mealForm.value),
+                    remark: this.remark,
+                    id: this.sid
+                };
+                this.tempPackEditService.modifyTitle(params).then(data=>{
+                    this.handleCancel();
+                    this.warn.onMsgSuccess(data);
+                    this.loadData(this.sid);
+                }).catch(err=>{
+                    this.handleCancel();
+                    this.warn.onMsgError(err);
+                })
+            } else {
+                this.warn.onMsgWarn(Messages.AREAS);
+            }
+        }
+
+    }
+
+    /**
+     * 新增户型单元
+     */
+    addHx() {
+        const id = (this.hxArray.length > 0) ? this.hxArray[this.hxArray.length - 1].id + 1 : 0;
+        const control = {id, room: `room${id}`, bath: `bath${id}`};
+        const index = this.hxArray.push(control);
+        this.mealForm.addControl(this.hxArray[index - 1].room, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+        this.mealForm.addControl(this.hxArray[index - 1].bath, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+    }
+
+    /**
+     * 删除户型
+     * @param {number} index
+     */
+    delHx(control: any, index: number, e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.hxArray.length > 1) {
+            this.mealForm.removeControl(control.room);
+            this.mealForm.removeControl(control.bath);
+            this.hxArray.splice(index, 1);
+        }
+    }
+
+    /**
+     * 获取当前数组对象信息
+     * @param values
+     * @returns {any[]}
+     */
+    getHxByParams(values) {
+        const arr = [];
+        if (values) {
+            this.hxArray.forEach(item => {
+                arr.push(values[item.room] + '室' + values[item.bath] + '卫');
+            });
+        }
+        return arr;
+    }
+
+    /**
+     * 添加或者修改大类（type=>1:添加，2：修改）
+     * @param {number} type
+     */
+    showBranchModal(type: number = 1, ...args) {
+        this.isBranchVisible = true;
+        this.branchTitle = (type === 1) ? '添加大类' : '修改大类';
+        if (args && args.length > 0) {
+            this.branchItem = args[0];
+            this.branchName = this.branchItem.packageName;
+        } else {
+            this.branchItem = null;
+        }
+
+    }
+
+    handleBranchOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.branchForm.valid) {
+            let params = {};
+            if (this.branchItem && this.branchItem.id) {
+                 params = {
+                     id: this.branchItem.id,
+                     packageName: this.branchForm.value.branchName
+                 };
+            } else {
+                params = {
+                    packageName: this.branchForm.value.branchName,
+                    id: this.sid
+                };
+            }
+            let url = (this.branchItem && this.branchItem.id > 0) ? 'updatePackageInfo' : 'addPackageInfo';
+            this.tempPackEditService.operatePackageInfo(url,params).then(data=>{
+                this.handleBranchCancel();
+                this.warn.onMsgSuccess(data);
+                this.loadData(this.sid);
+            }).catch(err=>{
+                this.handleBranchCancel();
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    handleBranchCancel() {
+        this.isBranchVisible = false;
+        this.branchForm.reset();
+    }
+
+
+    delBranchItem(id: number) {
+        if (id) {
+            this.tempPackEditService.delOperate(id).then(data=>{
+                this.warn.onMsgSuccess(data);
+                this.loadData(this.sid);
+            }).catch(err=>{
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    // 添加小项
+    openItem(type:number = 1,...data){
+        const modal =  this.modalService.open(ItemBasicComponent,
+            {
+                centered: true,
+                keyboard: true,
+                size:"lg"
+            });
+        modal.componentInstance.type = type;
+        modal.result.then(res =>{
+            let ids = [];
+            res.forEach(item=>{
+                ids.push(item.id)
+            })
+            let params = {
+                packageId:this.sid,
+                parentId: data[0].id,
+                ids
+            }
+            this.tempPackEditService.addOperate(params).then(data=>{
+                this.warn.onMsgSuccess(data);
+                this.loadData(this.sid);
+            }).catch(err=>{
+                this.warn.onMsgError(err);
+            })
+        },(err) =>{
+            console.log(err);
+        })
+
+    }
+
+    //保存说明
+    handleSaveExplain() {
+        if (this.sid) {
+            let params = {
+                id: this.sid, 
+                offerExplain: this.info.trim()
+            }
+            this.tempPackEditService.modifyTitle(params).then(data=>{
+                this.warn.onMsgSuccess(data);
+            }).catch(err=>{
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+}

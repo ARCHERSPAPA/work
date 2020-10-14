@@ -1,0 +1,131 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Default } from './../../../model/constant';
+import { HttpClient } from '@angular/common/http';
+import { RequestService } from '../../../service/request.service';
+import { WarningService } from '../../../service/warning.service';
+import { Messages } from '../../../model/msg';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../../service/api.service';
+@Component({
+  selector: 'rev-cost-base',
+  templateUrl: './cost-base.component.html',
+  styleUrls: ['./cost-base.component.scss']
+})
+export class CostBaseComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+
+  public buttons: Array<any>;
+  public showBtn = true;
+  public title;
+  public baseList=[{companyName:'qwe',checked:false}];
+  public isAllDisplayDataChecked: boolean;
+  public indeterminate = false;
+  public baseType;
+  public baseTypes;
+  public query;
+  public httpOptions = {
+    withCredentials: true
+  };
+  @ViewChild('uploadFile') uploadFile: any;
+  constructor(
+    private httpClient: HttpClient,
+    private apiService: ApiService,
+    private req: RequestService,
+    private warn: WarningService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    this.title = '基础库管理';
+    this.buttons = [{
+      name: '模板下载',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      type: 'default'
+    }, {
+      name: '创建',
+    }];
+  }
+  changePage() {
+
+  }
+  checkSubmit() {
+    return this.baseList.some(v => {
+      return v['checked']
+    })
+  }
+  del(){
+
+  }
+  refreshStatus() {
+    const allChecked = this.baseList.every(value => value.checked === true);
+    const allUnChecked = this.baseList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+  }
+  checkAll(event) {
+    if (event) {
+      this.baseList.filter((item) => {
+        item['checked'] = true;
+      });
+    } else {
+      this.baseList.filter(item => {
+        item['checked'] = false;
+      });
+    }
+    this.indeterminate = false;
+  }
+  handleName(e) {
+    switch (e) {
+      case '新建导入':
+        document.getElementById('import').click();
+        break;
+      case '模板下载': const a = document.createElement('a');
+        a.href = '';
+        a.click();
+        break;
+      case '创建': this.router.navigate(['../add'], { queryParams: {}, relativeTo: this.activatedRoute });
+        break;
+      default:
+        break;
+    }
+  }
+  handleFileChange(e) {
+    const that = this;
+    const files = e.target.files;
+    const file = files[0];
+    // files[0]['uploadString'] = Date.now();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('versionType', '1');
+    // formData.append('supplierId', this.id);
+
+
+
+    // this.httpOptions['params'] = {  }
+    // this.httpOptions['params'] = { 'supplierId': this.id + '', 'type': this.materialType + '' }
+    this.httpClient.post(this.apiService.getUrl('materialImportExcel'), formData, this.httpOptions)
+      .subscribe(
+        (res: any) => {
+          if (res.code === 200) {
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            // that.loadData();
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        },
+        error => {
+          that.warn.onWarn('请求失败');
+        }
+      );
+    this.uploadFile.nativeElement.value = '';
+  }
+  swichType(){
+
+  }
+}

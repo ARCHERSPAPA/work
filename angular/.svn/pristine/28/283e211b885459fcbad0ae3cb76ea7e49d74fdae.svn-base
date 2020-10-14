@@ -1,0 +1,437 @@
+import { Component, OnInit,ViewChild } from '@angular/core';
+import {Default} from '../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {FormBuilder, FormGroup,Validators} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import {compiledTplId} from '../../../../model/methods';
+
+@Component({
+  selector: 'rev-master-sale-add',
+  templateUrl: './sale-add.component.html',
+  styleUrls: ['./sale-add.component.scss']
+})
+export class MasterSaleAddComponent implements OnInit {
+    public title: string;
+    public id: string; //销售版本id
+    public versionName: string; //版本名称
+    public radioSwitch = [
+		{
+			key: 1,
+			text: '已添加'
+		},
+		{
+			key: 0,
+			text: '未添加'
+		}
+    ];  
+    public addNum = 0; // 已添加总数
+    public state = 1; // 1已添加 0未添加
+    public isVisible = false;
+    //版本编辑表单
+    public editionForm: FormGroup;
+    public editionName: string;
+    
+    public activityStatus:Array<any> = []; //活动选择
+    public componeyStatus:Array<any> = []; // 材料商选择
+    public brandStatus:Array<any> = []; // 品牌选择
+    public categoryStatus:Array<any> = []; // 类别选择
+    // 查询条件
+    public material = ''; // 活动id
+    public company = ''; // 材料商id
+    public category = ''; // 类别
+    public brand = undefined; // 品牌
+    public condition = 2;
+    public spu = '';
+    public sku = '';
+    public name = '';
+    public spec = '';
+    public model = '';
+
+    public checkedNumber :Array<any> = [] //选中的数据
+
+	public pageNo = Default.PAGE.PAGE_NO;
+    public pageSize = Default.PAGE.PAGE_SIZE;
+    public total = Default.PAGE.PAGE_TOTAL;
+
+    public imgsArr:Array<any> = []; //显示大图的图片
+    public index = 0; //图片索引
+    
+    public materialList:Array<any> = []; // 表格数据
+    public isAllDisplayDataChecked: boolean;
+    public indeterminate = false;
+    
+
+    constructor(
+		private request: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+	) { }
+
+    ngOnInit() {
+        this.title = '创建版本';
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['id']) {
+                this.id = atob(params.id);
+                this.versionName = params.versionName
+                this.changeData();
+            }
+          });
+        this.editionForm = this.fb.group({
+            editionName: [this.editionName, [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+    }
+
+    // 活动
+    handleActivity(e){
+        this.material = e
+        this.changeData(true)
+    }
+
+    // 材料商
+    handleMaterialSupplier(e){
+        this.company = e
+        this.changeData(true)
+    }
+
+    //类别
+    handleCategory(e){
+        this.category = e.categoryName
+        this.brand = []
+        this.changeData(true)
+    }
+
+    //品牌
+    handleBrand(e){
+        this.brand = e
+        this.changeData(true)
+    }
+    // 搜索框变化
+    handleInput(e){
+        this.spu = e.spu
+        this.sku = e.sku
+        this.name = e.name
+        this.spec = e.spec
+        this.model = e.model
+    }
+
+    // 搜索
+    handleSearch(e){
+        this.spu = e.spu
+        this.sku = e.sku
+        this.name = e.name
+        this.spec = e.spec
+        this.model = e.model
+        this.changeData(true)
+    }
+
+    
+    // 修改版本名
+    showModal(name: string) {
+        this.isVisible = true;
+        this.editionName = name;
+    }
+
+    //修改版本名后提交
+    handleItemOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.editionForm.valid) {
+            const name = this.editionForm.value.editionName.trim();
+            const params = {
+                name:name
+            }
+            if(this.id){
+                params['id'] = this.id
+            }
+            this.request.doPost({
+                url: 'versionSave',
+                data: params,
+                success: (res => {
+                    this.handleItemCancel();
+                    if (res && res.code === 200) {
+                        this.versionName = name;
+                        if(!this.id){
+                            this.id = res.data;
+                        }
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        // this.changeData();
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+
+        }
+    }
+
+    //修改取消
+    handleItemCancel() {
+        this.isVisible = false;
+        this.editionForm.reset();
+    }
+     
+
+    handleSwitch(status){
+        this.state = status
+        if(this.state == 1){
+            this.material = ''
+        }
+        this.checkedNumber = [];
+        this.changeData(true);
+    }
+
+  
+    // 表格数据
+    changeData(...args) {
+        const that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        const params = {
+            versionId:this.id,
+            pageNum: this.pageNo,
+            pageSize: this.pageSize,
+            status:this.state
+        };
+        if (this.material) {
+            params['activityId'] = this.material;
+        }
+        if (this.company) {
+            params['supplierId'] = this.company
+        }
+        if(this.category){
+            params['category'] = this.category;
+        }
+        if (this.brand && this.brand.length > 0) {
+            params['brand'] = this.brand;
+        }
+        if (this.spu) {
+            params['spu'] = this.spu.trim();
+        }
+        if (this.sku) {
+            params['sku'] = this.sku.trim();
+        }
+        if (this.name) {
+            params['name'] = this.name.trim();
+        }
+        if (this.spec) {
+            params['spec'] = this.spec.trim();
+        }
+        if (this.model) {
+            params['model'] = this.model.trim();
+        }
+        that.request.doPost({
+            url: 'versionQueryMaterial',
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.materialList = res.data.list;
+                    that.total = res.data.total;
+                    if(this.materialList){
+                        that.materialList.reverse().forEach((order, index) => {
+                            that.getNum(index);
+                        })
+                        that.materialList.reverse();
+                        if(that.state == 1){
+                            that.addNum = that.total;
+                            if(that.addNum == 0){    
+                                that.radioSwitch[0].text = '已添加'
+                            }else{
+                                that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                            }
+                        }
+                    }
+                    that.isAllDisplayDataChecked = false;
+                    that.indeterminate = false;
+                    that.materialList.filter(v => {
+                        v['checked'] = false;
+                    });
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    // 表格数据合并
+    getNum(index) {
+        let current = this.materialList[index];
+        let next = this.materialList[index + 1];
+        if (next) {
+            if (current.spu == next.spu) {
+                if (current["rows"]) {
+                    current["rows"] = current["rows"] + 1;
+                } else {
+                    current["rows"] = 2;
+                }
+                next["rows"] = current["rows"];
+                current["rows"] = 0;
+            } else {
+                if (!current["rows"]) {
+                    current["rows"] = 1;
+                }
+                if (!next["rows"]) {
+                    next["rows"] = 1;
+                }
+            }
+        }
+    }
+	//全选
+	checkAll(e) {
+        this.isAllDisplayDataChecked = e;
+        this.materialList.forEach(item =>{
+            item.checked = this.isAllDisplayDataChecked;
+        })
+        this.refreshStatus();
+	}
+	
+	//单个选择
+    refreshStatus() {
+        const allChecked = this.materialList.every(value => value.checked === true);
+        const allUnChecked = this.materialList.every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+        this.checkedNumber = this.materialList.filter(value => value.checked);
+    }
+
+    //批量添加 删除
+    opreateMaterial(str){
+        const that = this;
+        const param = {};
+        let url = '';
+        let detailIds = [];
+        this.checkedNumber.forEach(item=>{
+            if(str == 'add'){
+                detailIds.push({detailId:item.id,activityId:this.material})
+            }else{
+                detailIds.push({detailId:item.id})
+            }
+        })
+        if(str == 'add'){
+            url = 'versionAddDetail';
+            param['id'] = this.id;
+            param['materialList'] = detailIds
+        }else{
+            url = 'versionDelDetail';
+            param['id'] = this.id;
+            param['materialList'] = detailIds
+        }
+        if(this.id){    
+            that.request.doPost({
+                url: url,
+                data: param,
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        if(str == 'add'){
+                            that.warn.onSuccess('添加成功');
+                            that.addNum += Number(that.checkedNumber.length)
+                            that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                        }else{
+                            that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        }
+                        that.checkedNumber = [];
+                        that.changeData();
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }else{
+            that.warn.onWarn('请先填写版本名称');
+        }
+        
+    }
+
+    // 表格添加 删除
+    handleOperate(str,item){
+        const that = this;
+        const param = {};
+        let url = '';
+        if(str == 'add'){
+            url = 'versionAddDetail';
+            param['id'] = this.id;
+            param['materialList'] = [{
+                detailId:item.id,
+                activityId:this.material
+            }]
+        }else{
+            url = 'versionDelDetail';
+            param['id'] = this.id;
+            param['materialList'] = [{
+                detailId:item.id 
+            }]
+        }
+        if(this.id){
+            that.request.doPost({
+                url: url,
+                data: param,
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        that.changeData();
+                        if(str == 'add'){
+                            that.warn.onSuccess('添加成功');
+                            that.addNum += 1
+                            that.radioSwitch[0].text = `已添加（${that.addNum}）`
+                        }else{
+                            that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        }
+                        that.checkedNumber = [];
+                    } else if(res && res.code == 120){
+                        that.warn.onModalInfo({
+                            title: '提示',
+                            content: res.msg || '该材料已被添加，请勿重复操作',
+                            ok: () => {
+                                console.log('tips');
+                            }
+                        });
+                    }else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }else{
+            that.warn.onWarn('请先填写版本名称');
+        }
+    }
+    
+    // 显示大图
+    openBigImg(img){
+        this.imgsArr = [];
+        this.imgsArr.push({ src: img, thumb: img });
+    }
+
+    //底部按钮上架
+    shelfOn(){
+        const that = this;
+        const param = {
+            versions:[this.id],
+            status:1
+        };
+        if(this.id){
+            that.request.doPost({
+                url: 'versionShelves',
+                data: param,
+                success: function (res) {
+                    if (res && res.code === 200) {
+                        that.warn.onSuccess('上架成功');
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            });
+        }else{
+            that.warn.onWarn('请先填写版本名称');
+        }
+    }
+
+    //编译id
+    getCompileById(id: number) {
+        return compiledTplId(id);
+    }
+}

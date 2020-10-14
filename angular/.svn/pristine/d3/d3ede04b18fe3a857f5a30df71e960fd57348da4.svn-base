@@ -1,0 +1,76 @@
+<div class="supplier-materialList">
+    <div class="supplier-materialList-head">
+        <radio-switch [radioSwitch]='radioSwitch' style="z-index: 100000;" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        <div>
+            <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" nzPlaceHolder='公司名称/联系人/手机号'class="serchs" [(ngModel)]="querys"
+            [ngModelOptions]="{standalone: true}" (ngModelChange)="swichType($event)">
+            <nz-option *ngFor="let audit of queryType" [nzValue]="audit.key" [nzLabel]="audit.text">
+            </nz-option>
+          </nz-select>
+            <input  type="text" nz-input [(ngModel)]="query" placeholder="材料商名称/法人/手机号">
+            <button nz-button nzType='primary' (click)='changePage(1)'>查询</button>
+        </div>
+    </div>
+    <div class="supplier-materialList-list">
+        <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false"
+        [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changePage()' nzSize="middle"
+            [nzShowPagination]="true" nzSize="middle">
+            <thead nz-thead>
+                <tr>
+        
+                    <th nz-th><span>材料商</span></th>
+                    <th nz-th><span>社会信用代码</span></th>
+                    <th nz-th><span>法人</span></th>
+                    <th nz-th><span>身份证</span></th>
+                    <th nz-th><span>手机号</span></th>
+                    <th nz-th><span>时间</span></th>
+                    <th nz-th><span>编辑人</span></th>
+                    <th nz-th *ngIf='pageType!=0'><span>操作</span></th>
+                </tr>
+            </thead>
+            <tbody nz-tbody style="font-size: 12px">
+                <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+                    <td nz-td [title]="material.companyName">
+                        {{material.companyName?material.companyName:'--'}}
+                    </td>
+                    <td nz-td [title]="material.code">
+                        {{material.code?material.code:'--'}}
+                    </td>
+                    <td nz-td [title]="material.legaLperson">
+                        {{material.legaLperson?material.legaLperson:'--'}}
+                    </td>
+                    <td nz-td [title]="material.idCard | FourPipe">
+                        {{material.idCard?(material.idCard | FourPipe):'--'}}
+                    </td>
+                    <td nz-td [title]="material.companyPhone">
+                        {{material.companyPhone?material.companyPhone:'--'}}
+                    </td>
+                    <td nz-td *ngIf='pageType==-1'>
+                        {{material.createTime?(material.createTime|date:'yyyy-MM HH:mm'):'--'}}
+                    </td>
+                    <td nz-td *ngIf='pageType==0'>
+                        {{material.applyTime?(material.applyTime|date:'yyyy-MM HH:mm'):'--'}}
+                    </td>
+                    <td nz-td *ngIf='pageType==1 || pageType==2'>
+                        {{material.examineTime?(material.examineTime|date:'yyyy-MM HH:mm'):'--'}}
+                    </td>
+                    <td nz-td [title]="material.employeeName">
+                        {{material.employeeName?material.employeeName:'--'}}
+                    </td>
+          
+                    <td nz-td *ngIf='pageType!=0'>
+                        <a href="javascript:void(0)" class="work_a" *ngIf='pageType==-1'
+                            nz-popconfirm nzTitle="确定创建并申请该材料商合作吗？" nzOkText="创建" nzCancelText="取消"
+                            (nzOnConfirm)="create(material.id)">添加合作</a>
+                        <a [routerLink]="['./../info']" [queryParams]="{name:material.companyName,id:btoa(material.id)}" *ngIf='pageType==1'>
+                            详情
+                        </a>
+
+                        <a href="javascript:void(0)" class="work_a" *ngIf='pageType==2' nz-popconfirm
+                            nzTitle="确定向该合作商申请合作吗？" nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="create(material.id)">申请合作</a>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>

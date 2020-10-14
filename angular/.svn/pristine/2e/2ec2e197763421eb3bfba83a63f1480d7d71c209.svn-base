@@ -1,0 +1,267 @@
+<div class="cost-add">
+  <div class="cost-add-head">
+    <rev-title [title]="title" [isNewPage]='false' [show]="false">
+    </rev-title>
+  </div>
+  <div class="form">
+    <form nz-form [formGroup]="baseForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="4" nzRequired>类别</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <nz-select nzAllowClear="true" nzPlaceHolder='请选择类别' [(ngModel)]="category" nzSize="large"
+            [ngModelOptions]="{standalone: true}">
+            <nz-option *ngFor="let audit of categoryLsit" [nzValue]="audit.key" [nzLabel]="audit.text">
+            </nz-option>
+          </nz-select>
+          <nz-form-explain *ngIf="baseForm.get('category').dirty && baseForm.get('category').errors">
+            <ng-container *ngIf="baseForm.get('category').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('category').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4" nzRequired>名称</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="Units" nzSize="large" name="Units" formControlName="Units" maxlength="18"
+            placeholder="18位社会信用代码" />
+          <nz-form-explain *ngIf="baseForm.get('Units').dirty && baseForm.get('Units').errors">
+            <ng-container *ngIf="baseForm.get('Units').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('Units').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">关联辅材</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <nz-select nzAllowClear="true" nzPlaceHolder='请选择辅材' [(ngModel)]="category" nzSize="large"
+            [ngModelOptions]="{standalone: true}">
+            <nz-option *ngFor="let audit of categoryLsit" [nzValue]="audit.key" [nzLabel]="audit.text">
+            </nz-option>
+          </nz-select>
+          <nz-form-explain *ngIf="baseForm.get('category').dirty && baseForm.get('category').errors">
+            <ng-container *ngIf="baseForm.get('category').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('category').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">品牌</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="category" nzSize="large" name="category" formControlName="category"
+            maxlength="18" placeholder="18位社会信用代码" />
+          <nz-form-explain *ngIf="baseForm.get('category').dirty && baseForm.get('category').errors">
+            <ng-container *ngIf="baseForm.get('category').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('category').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item nzRequired class="layout">
+        <nz-form-label [nzSpan]="4">规格</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="category" nzSize="large" name="category" formControlName="category"
+            maxlength="18" placeholder="18位社会信用代码" />
+          <nz-form-explain *ngIf="baseForm.get('category').dirty && baseForm.get('category').errors">
+            <ng-container *ngIf="baseForm.get('category').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('category').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item class="layout">
+        <nz-form-label [nzSpan]="4">型号</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <input nz-input [(ngModel)]="category" nzSize="large" name="category" formControlName="category"
+            maxlength="18" placeholder="18位社会信用代码" />
+          <nz-form-explain *ngIf="baseForm.get('category').dirty && baseForm.get('category').errors">
+            <ng-container *ngIf="baseForm.get('category').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('category').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <div style="  margin-left: 36px;">
+        <div class="inputCompact layout">
+          <nz-input-group nzCompact style="display: flex; justify-content: flex-end;
+      margin-right: 16px;">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">材料单价</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+                  formControlName="univalence" style="width:170px ;" maxlength="10"  nzPlaceHolder="请输入">
+                </nz-input-number>
+                <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                  <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                    社会信用必填
+                  </ng-container>
+                  <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                    请填写18位社会信用代码
+                  </ng-container>
+                </nz-form-explain>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item style=" display:inline-block;width: 81px;">
+              <nz-form-control [nzSpan]="24">
+                <input nz-input [(ngModel)]="Units" nzSize="large" name="Units" formControlName="Units" maxlength="10"
+                  placeholder="单位" />
+                <nz-form-explain *ngIf="baseForm.get('Units').dirty && baseForm.get('Units').errors">
+                  <ng-container *ngIf="baseForm.get('Units').hasError('required')">
+                    社会信用必填
+                  </ng-container>
+                  <ng-container *ngIf="baseForm.get('Units').hasError('minlength')">
+                    请填写18位社会信用代码
+                  </ng-container>
+                </nz-form-explain>
+              </nz-form-control>
+            </nz-form-item>
+          </nz-input-group>
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="    width: 100%;">
+            <nz-form-label [nzSpan]="8">材料损耗</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+              formControlName="univalence" style="width:100% " maxlength="10" nzPlaceHolder="请输入">
+            </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                  社会信用必填
+                </ng-container>
+                <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                  请填写18位社会信用代码
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div>
+        <div class="inputCompact layout">
+          <nz-form-item style="width: 100%;">
+            <nz-form-label [nzSpan]="8">木工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+                formControlName="univalence" style="width:calc(100% + 4px)" maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                  社会信用必填
+                </ng-container>
+                <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                  请填写18位社会信用代码
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="   width: calc(100% - 16px);
+          margin-left: 16px;">
+            <nz-form-label [nzSpan]="8">泥工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+              formControlName="univalence" style="width:100% " maxlength="10" nzPlaceHolder="请输入">
+            </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                  社会信用必填
+                </ng-container>
+                <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                  请填写18位社会信用代码
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div>
+        <div class="inputCompact layout">
+          <nz-form-item style=" width:100%">
+            <nz-form-label [nzSpan]="8">漆工单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+                formControlName="univalence" style="width:calc(100% + 4px) ;" maxlength="10" nzPlaceHolder="请输入">
+              </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                  社会信用必填
+                </ng-container>
+                <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                  请填写18位社会信用代码
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <div class="inputCompact layout">
+          <nz-form-item style="   width: calc(100% - 16px);
+  margin-left: 16px;">
+            <nz-form-label [nzSpan]="8">水电单价</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-input-number nz-input [(ngModel)]="univalence" nzSize="large" name="univalence"
+              formControlName="univalence" style="width:100% " maxlength="10" nzPlaceHolder="请输入">
+            </nz-input-number>
+              <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+                <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+                  社会信用必填
+                </ng-container>
+                <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+                  请填写18位社会信用代码
+                </ng-container>
+              </nz-form-explain>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <nz-form-item style="width: 100%;" class="layout">
+        <nz-form-label [nzSpan]="4">说明</nz-form-label>
+        <nz-form-control [nzSpan]="20">
+          <textarea nz-input name="remark" [(ngModel)]="remark"  formControlName="remark" maxlength='300' cols="30" rows="10">
+
+    </textarea>
+          <span class="count" *ngIf="remark && remark.length > 0"><span
+              style="color: red;">{{remark.length}}</span>/300</span>
+          <nz-form-explain *ngIf="baseForm.get('univalence').dirty && baseForm.get('univalence').errors">
+            <ng-container *ngIf="baseForm.get('univalence').hasError('required')">
+              社会信用必填
+            </ng-container>
+            <ng-container *ngIf="baseForm.get('univalence').hasError('minlength')">
+              请填写18位社会信用代码
+            </ng-container>
+          </nz-form-explain>
+        </nz-form-control>
+      </nz-form-item>
+      <div nz-row>
+        <div class="btns layout">
+          <button nz-button nzType="default" nzSize='large' style='margin: 0 24px 0 116px;'
+            (click)="handleCancel()">取消</button>
+          <button nz-button nzType="primary" nzSize='large' [disabled]="checkAdd()" (click)="handleOk()">提交
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

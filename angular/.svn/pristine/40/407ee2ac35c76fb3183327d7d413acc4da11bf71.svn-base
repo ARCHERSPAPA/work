@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-master-promotion',
+  templateUrl: './master-promotion.component.html',
+  styleUrls: ['./master-promotion.component.scss']
+})
+export class MasterPromotionComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

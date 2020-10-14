@@ -1,0 +1,4 @@
+<p>
+  settle-material-order works!
+</p>
+<a [routerLink]="['./../detail']">详情</a>

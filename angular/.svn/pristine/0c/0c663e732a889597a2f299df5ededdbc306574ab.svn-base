@@ -1,0 +1,104 @@
+<div class="supplier-materialList">
+  <rev-title [title]="title"  [isNewPage]='false' [buttons]="buttons" [show]="showBtn" (handleName)="handleName($event)"></rev-title>
+  <div class="supplier-materialList-head">
+      <radio-switch [radioSwitch]='radioSwitch' (handleSwitch)="handleSwitch($event)"></radio-switch>
+      <div>
+        <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" class="serchs"
+        [(ngModel)]="brand" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeData()">
+        <nz-option *ngFor="let audit of materialType" [nzValue]="audit.id" [nzLabel]="audit.content">
+        </nz-option>
+      
+    </nz-select>
+    <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" class="serchs"
+    [(ngModel)]="type" [ngModelOptions]="{standalone: true}" (ngModelChange)="changeData()">
+    <nz-option *ngFor="let audit of materialType" [nzValue]="audit.id" [nzLabel]="audit.content">
+    </nz-option>
+
+</nz-select>
+          <input type="text" nz-input>
+          <button nz-button nzType='primary'>查询</button>
+      </div>
+  </div>
+  
+  <div class="supplier-materialList-list">
+    <div style="margin-bottom: 16px;">
+      <button nz-button  [nzType]="'primary'"  (click)="submit()">
+       提交审核
+      </button>
+      <span style="margin-left: 8px;" *ngIf="checkedNumber">已选 {{checkedNumber}} 项</span>
+    </div>
+      <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false"
+      [nzScroll]="{ x:'130%' }"
+                [nzShowPagination]="false" nzSize="middle">
+          <thead nz-thead>
+          <tr>
+            <th nzLeft="0px" nzShowCheckbox   [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"></th>
+              <th nz-th><span>SPU编号</span></th>
+              <th nz-th><span>图片</span></th>
+              <th nz-th><span>品牌</span></th>
+              <th nz-th><span>类别</span></th>
+              <th nz-th><span>名称</span></th>
+              <th nz-th ><span>SKU编号</span></th>
+              <th nz-th><span>规格</span></th>
+              <th nz-th><span>型号</span></th>
+              <th nz-th><span>材质</span></th>
+              <th nz-th><span>颜色</span></th>
+              <th nz-th><span>产地</span></th>
+              <th nz-th><span>单位</span></th>
+              <th nz-th><span>市场价</span></th>
+              <th nz-th><span>供货价</span></th>
+              <th nz-th><span>销售价</span></th>
+              <th nz-th nzRight="0px"><span>操作</span></th>
+          </tr>
+          </thead>
+          <tbody nz-tbody style="font-size: 12px">
+          <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+           
+            <ng-container *ngIf="material.rows > 1">
+              <td [rowSpan]="material.rows" nzShowCheckbox nzLeft="0px" [(nzChecked)]="material.checked" (nzCheckedChange)="refreshStatus()"></td>
+              <td [rowSpan]="material.rows">{{material.spu?material.spu:'--'}}</td>
+            </ng-container>
+            <ng-container *ngIf="material.rows === 1">
+              <td   nzShowCheckbox nzLeft="0px" [(nzChecked)]="material.checked" (nzCheckedChange)="refreshStatus()"></td>
+              <td >{{material.spu}}</td>
+            </ng-container>  
+            <!-- <td nz-td [title]="material.spu">
+                  {{material.spu?material.spu:'--'}}
+              </td> -->
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+              <td nz-td nzRight="0px">
+                <a href="javascript:void(0)" class="work_a" *ngIf='pageType==2'
+                    nz-popconfirm nzTitle="确定申请该材料供货吗？" nzOkText="审核" nzCancelText="取消"
+                    (nzOnConfirm)="apply()">申请审核</a>
+                    <a href="javascript:void(0)" class="work_a" *ngIf='pageType==2'[routerLink]="['./../edit']" [queryParams]="{name:btoa('haha')}"
+                    >编辑</a>
+                    <a href="javascript:void(0)" class="work_a" *ngIf='pageType==3'
+                    nz-popconfirm nzTitle="确定撤回该材料审核申请吗？" nzOkText="撤回" nzCancelText="取消"
+                    (nzOnConfirm)="apply()">申请审核</a>
+                <a [routerLink]="['./../edit']" [queryParams]="{name:btoa('haha')}" *ngIf='pageType==4'>
+                    修改
+                </a>
+                <a href="javascript:void(0)" class="work_a" *ngIf='pageType==5' nz-popconfirm
+                nzTitle="确定申请该材料供货吗？" nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="apply()">添加</a>
+                <a href="javascript:void(0)" class="work_a" *ngIf='pageType==5'[routerLink]="['./../edit']" [queryParams]="{name:btoa('haha')}"
+                >编辑</a>
+            </td>
+
+          </tr>
+          </tbody>
+      </nz-table>
+  </div>
+</div>

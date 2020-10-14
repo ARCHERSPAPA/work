@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-settle-material-wage',
+  templateUrl: './settle-material-wage.component.html',
+  styleUrls: ['./settle-material-wage.component.scss']
+})
+export class SettleMaterialWageComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

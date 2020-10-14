@@ -1,0 +1,305 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Default } from './../../../../model/constant';
+import { HttpClient } from '@angular/common/http';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../../../service/api.service';
+import { btoa } from '../../../../model/methods';
+import { TempLibListService } from './temp-lib-list.service';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+@Component({
+  selector: 'rev-temp-lib-list',
+  templateUrl: './temp-lib-list.component.html',
+  styleUrls: ['./temp-lib-list.component.scss']
+})
+export class TempLibListComponent implements OnInit {
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+
+  public buttons: Array<any>;
+  public showBtn = true;
+  public title: string;
+  public baseList;//列表数据
+  public isAllDisplayDataChecked: boolean;
+  public indeterminate = false;
+  public baseType = 0;//已选择的类别
+  public baseTypes;//类别选择的列表
+  public query: string;//搜索绑定
+  public queryType = 1;//搜索类别默认名称
+  public queryList = [{ key: 1, text: '名称' }, { key: 2, text: '品牌' }, { key: 3, text: '规格' }, { key: 4, text: '型号' }, { key: 5, text: '编号' }];
+  public httpOptions = {
+    withCredentials: true
+  };
+  @ViewChild('uploadFile') uploadFile: any;
+  constructor(
+    private httpClient: HttpClient,
+    private apiService: ApiService,
+    private req: RequestService,
+    private warn: WarningService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private baseMaterial: TempLibListService
+  ) { }
+
+  ngOnInit() {
+    this.title = '基础库管理';
+    this.buttons = [{
+      name: '下载数据',
+      type: 'primary'
+    }, {
+      name: '模板下载',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      type: 'default'
+    }, {
+      name: '创建',
+    }];
+    this.getCategory();
+    this.changePage();
+  }
+
+  btoa(id: string) {
+    return btoa(id);
+  }
+  getCategory() {
+    this.baseMaterial.getCategory().then(res => {
+      this.baseTypes = res;
+      this.baseTypes.unshift({ id: 0, name: '全部类别' })
+    }).catch(error => {
+      this.warn.onError(error || Messages.FAIL.DATA);
+    })
+  }
+
+  changePage(e = 0) {
+    if (e) {
+      this.pageNo = Default.PAGE.PAGE_NO;
+      this.pageSize = Default.PAGE.PAGE_SIZE;
+    }
+    let param = {
+      pageNum: this.pageNo,
+      pageSize: this.pageSize,
+    }
+    if (this.baseType) {
+      param['categoryId'] = this.baseType;
+    }
+    if (this.queryType === 1) {
+      param['name'] = this.query;
+    } else if (this.queryType === 2) {
+      param['brand'] = this.query;
+    }
+    else if (this.queryType === 3) {
+      param['spec'] = this.query;
+    }
+    else if (this.queryType === 4) {
+      param['model'] = this.query;
+    }
+    else if (this.queryType === 5) {
+      param['code'] = this.query;
+    }
+    this.req.doPost({
+      url: 'baseListPage',
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.baseList = res.data.list;
+          this.baseList.filter(v => {
+            v['checked'] = false;
+          })
+          this.total = res.data.total;
+          this.indeterminate = false;
+          this.isAllDisplayDataChecked = false;
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  //判断是否能够点击批量操作
+  checkSubmit() {
+    if (this.baseList && this.baseList.length > 0) {
+      return this.baseList.some(v => {
+        return v['checked'];
+      })
+    }
+  }
+  //删除
+  del(id) {
+    if (id) {
+      id = Array.of(id);
+    } else {
+      id = [];
+      this.baseList.forEach(v => {
+        if (v['checked']) {
+          id.push(v['id']);
+        }
+      })
+    }
+    this.req.doPost({
+      url: 'baseDeleteList',
+      data: {
+        id: id
+      },
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.changePage();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  refreshStatus() {
+    const allChecked = this.baseList.every(value => value.checked === true);
+    const allUnChecked = this.baseList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+  }
+  //全选
+  checkAll(event) {
+    if (event) {
+      this.baseList.filter((item) => {
+        item['checked'] = true;
+      });
+    } else {
+      this.baseList.filter(item => {
+        item['checked'] = false;
+      });
+    }
+    this.indeterminate = false;
+  }
+  //右上边的按钮操作
+  handleName(e) {
+    switch (e) {
+      case '新建导入':
+        document.getElementById('import').click();
+        break;
+      case '模板下载': const a = document.createElement('a');
+        a.href = 'https://qiniu.madrock.com.cn/moudle/jckmb.xlsx';
+        a.click();
+        break;
+      case '创建': this.router.navigate(['../edit'], { queryParams: {}, relativeTo: this.activatedRoute });
+        break;
+      case '下载数据':
+        this.getAllData().then(res => {
+          this.renderExecl(res);
+        })
+        break;
+      default:
+        break;
+    }
+  }
+  getAllData(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'baseAll',
+        success: res => {
+          if (res && res.code == 200) {
+            this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            resolve(res.data)
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+          console.log(res)
+        }
+      })
+    })
+  }
+  //渲染EXCEL
+  renderExecl(data) {
+    const keyMap = {
+      'code': '编号',
+      'name': '项目名称', //设置ECCLE的列名对应原石数据的字段
+      'brand': '品牌',
+      'spec': '规格',
+      'model': '型号',
+      'unit': '单位',
+      'unitPrice': '材料单价',
+      'wastageRate': '材料损耗',
+      'carpenterPrice': '木工单价',
+      'masonPrice': '泥工单价',
+      'japannerPrice': '漆工单价',
+      'utilityCharge': '水电单价',
+      'sellPrice': '销售价',
+      'remark': '施工说明',
+    };
+    let arrList = JSON.parse(JSON.stringify(data));
+    let workbook: XLSX.WorkBook = { Sheets: {}, SheetNames: [] };
+    arrList.forEach((v) => {
+      v['list'].forEach(item => {
+        delete item.id;                    //删除不必要的字段
+        delete item.companyId;
+        delete item.categoryId;
+        delete item.createTime;
+        delete item.modifyTime;
+        delete item.state;
+        delete item.auxiliaryList;
+        delete item.categoryName;
+        delete item.checked;
+        //替换新的属性名KeyMap中的对应值
+        for (let key in item) {
+          let newKey = keyMap[key];
+          if (newKey) {
+            item[newKey] = item[key];
+            delete item[key];
+          }
+        }
+      });
+      workbook.SheetNames.push(v['category'])
+    });
+    arrList.map(v => {
+      let sheet = XLSX.utils.json_to_sheet(v['list']); //将workbook中的相关属性完善
+      let name = v['category'];
+      let obj = {};
+      obj["" + name + ""] = sheet;
+      Object.assign(workbook.Sheets, obj);
+    });
+    console.log(workbook)
+    this.ExcelDownload(workbook);
+  }
+
+  ExcelDownload(workbook) {
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data: Blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+    FileSaver.saveAs(data, 'jckmb' + '.xlsx');
+  }
+
+  //上传
+  handleFileChange(e) {
+    const that = this;
+    const files = e.target.files;
+    const file = files[0];
+    const formData = new FormData();
+    console.log(file)
+    formData.append('file', file);
+    formData.append('versionType', '1');
+
+    this.httpClient.post(this.apiService.getUrl('baseImportMaterial'), formData, this.httpOptions)
+      .subscribe(
+        (res: any) => {
+          if (res.code === 200) {
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            that.changePage();
+            that.getCategory();
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        },
+        error => {
+          that.warn.onWarn('请求失败');
+        }
+      );
+    this.uploadFile.nativeElement.value = '';
+  }
+  swichType(e: any) {
+    this.changePage();
+  }
+}

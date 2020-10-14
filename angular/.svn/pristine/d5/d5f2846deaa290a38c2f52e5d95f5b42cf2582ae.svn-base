@@ -1,0 +1,112 @@
+<div class="master-sale">
+    <div class="master-sale-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+    <div class="mt-24 master-sale-search">
+        <div class="searchRadio">
+            <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="defaultRadio" (handleSwitch)="handleSwitch($event)"></radio-switch>
+        </div>
+    </div>
+    <div class="mt-16 select">
+        <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="state === 0" (nzOnConfirm)="versionShelve('on')" nz-popconfirm nzTitle="确定上架该整装版本吗？"
+        nzOkText="上架">上架</button>
+        <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="state === 1" (nzOnConfirm)="versionShelve('off')" nz-popconfirm nzTitle="确定下架该整装版本吗？"
+        nzOkText="下架">下架</button>
+        <button nz-button nzType="danger" class="ml-8" [disabled]="checkedNumber.length == 0" *ngIf="state === 0" (nzOnConfirm)="versionShelve('del')" nz-popconfirm nzTitle="确定删除该整装版本吗？"
+        nzOkText="删除">删除</button>
+        <span *ngIf="checkedNumber.length > 0">已选{{checkedNumber.length}}项</span>
+    </div>
+    <div class="temp-warp">
+        <nz-table 
+            #nzTable 
+            nzSize="middle"
+            [nzBordered]="true"
+            [nzFrontPagination]="false"
+            [(nzPageIndex)]='pageNo' 
+            [(nzPageSize)]="pageSize" 
+            [nzTotal]="total"
+            (nzPageIndexChange)="changePage()"
+            [nzShowPagination]='true'
+            [nzData]="saleList"
+        >
+            <thead>
+                <tr>
+                    <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)" width="5%"></th>
+                    <th width="10%">编号</th>
+                    <th width="40%">名称</th>
+                    <th width="20%">备注</th>
+                    <th width="10%">是否上架</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of nzTable.data">
+                    <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()"></td>
+                    <td>{{getCompileById(data.id)}}</td>
+                    <td [nzTitle]="data.packageName" nz-tooltip nzPlacement="topLeft">
+                    {{data.packageName?data.packageName:'--'}}
+                    </td>
+                    <td nz-tooltip [nzTitle]="data.remark" nzPlacement="topLeft">{{data.remark?data.remark:'--'}}</td>
+                    <td [ngSwitch]="data.state">
+                        <span *ngSwitchCase="0">未上架</span>
+                        <span *ngSwitchCase="1">已上架</span>
+                        <span *ngSwitchDefault>--</span>
+                    </td>
+                    <td>
+                        <div *ngIf="state === 0">
+                            <a href="javascript:void(0)" [routerLink]="['./../edit']" [queryParams]="{sid:btoa(data.id),pState:state}">详情</a>
+                            <a href="javascript:void(0)" class="ml-8"(click)="handleOperate('copy',data)">复制</a>
+                            <a href="javascript:void(0)" class="ml-8" nz-popconfirm nzTitle="确定删除该整装版本吗？"
+                            nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)">删除</a>
+                            <a href="javascript:void(0)" class="ml-8"  nz-popconfirm nzTitle="确定上架该整装版本吗？"
+                            nzOkText="上架" (nzOnConfirm)="handleOperate('on',data)">上架</a>
+                        </div>
+                        <div *ngIf="state === 1">
+                            <a href="javascript:void(0)" [routerLink]="['./../edit']" [queryParams]="{sid:btoa(data.id),pState:state}">详情</a>
+                            <a href="javascript:void(0)" class="ml-8" nz-popconfirm nzTitle="确定下架该整装版本吗？"
+                            nzOkText="下架" (nzOnConfirm)="handleOperate('off',data)">下架</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>    
+        </nz-table>
+    </div>
+</div>
+
+<nz-modal nzWidth="600px" [(nzVisible)]="isVisible" nzTitle="新建整装" [nzFooter]="null" (nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="wholeForm" class="temp-modal">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6">整装名称</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+                <input nz-input name="packageName" formControlName="packageName"
+                       [(ngModel)]="packageName" maxlength="30"
+                       autocomplete="off" placeholder="请输入整装名称"/>
+                <nz-form-explain *ngIf="wholeForm.get('packageName').dirty && wholeForm.get('packageName').errors">
+                    <ng-container *ngIf="wholeForm.get('packageName').hasError('required')">
+                        必填选项
+                    </ng-container>
+                    <ng-container *ngIf="wholeForm.get('packageName').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6">备注</nz-form-label>
+            <nz-form-control [nzSpan]="18" class="textarea">
+                   <textarea nz-input type="text" name="remark" [(ngModel)]="remark" formControlName="remark" maxlength="300" autocomplete="off" placeholder="请输入备注信息" rows="5"></textarea>
+                <span class="count" *ngIf="remark && remark.length > 0"><span>{{remark.length}}</span>/300</span>
+                <nz-form-explain *ngIf="wholeForm.get('remark').dirty && wholeForm.get('remark').errors">
+                    <ng-container *ngIf="wholeForm.get('remark').hasError('maxLength')">
+                        最多输入300个字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <div class='btns'>
+            <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleOk($event)" [disabled]="!wholeForm.valid">提交</button>
+        </div>          
+    </form>
+</nz-modal>

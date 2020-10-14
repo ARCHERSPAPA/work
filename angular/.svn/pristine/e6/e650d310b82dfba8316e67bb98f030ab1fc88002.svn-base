@@ -1,0 +1,95 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{getTitle(type)}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="ant-modal-body">
+    <div nz-row class="mb-16">
+        <div nz-col nzSpan="5" nzOffset="10">
+            <nz-select style="width: 100%;" [(ngModel)]="category" nzAllowClear nzPlaceHolder="请选择类别">
+                <nz-option [nzValue]="cate.value" [nzLabel]="cate.text" *ngFor="let cate of categories"></nz-option>
+            </nz-select>
+        </div>
+        <div nz-col nzSpan="5" nzOffset="1">
+            <input nz-input placeholder="请输入需要查询的内容" [(ngModel)]="info"/>
+        </div>
+        <div nz-col nzSpan="2" nzOffset="1">
+            <button nz-button nzType="primary">查询</button>
+        </div>
+    </div>
+    <div nz-row class="item-basic">
+        <nz-table [nzData]="dataSet" #ajaxTable nzSize="small" [nzScroll]="{ y: '700px' }"
+                  [nzLoading]="loading" nzFrontPagination="true" nzShowPagination="true"
+                  [nzTotal]="total" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                  (nzPageIndexChange)="changeData()"
+                  [nzWidthConfig]="['60px','100px','100px','60px','60px','40px','40px','60px','60px','60px','60px','60px','60px',null]">
+            <thead>
+            <tr>
+                <th width="5%">编号</th>
+                <th width="10%">类别</th>
+                <th width="10%">名称</th>
+                <th width="5%">品牌</th>
+                <th width="10%">规格</th>
+                <th width="5%">型号</th>
+                <th width="5%">单位</th>
+                <th width="10%">材料单价</th>
+                <th width="10%">材料损耗</th>
+                <th width="5%">木工</th>
+                <th width="5%">泥工</th>
+                <th width="5%">漆工</th>
+                <th width="10%">水电工</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of ajaxTable.data; let i = index">
+                <td width="5%">{{(pageNo - 1)*pageSize + (i+1)}}</td>
+                <td [nzTitle]="data.category?data.category:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.category?data.category:'--'}}
+                </td>
+                <td [nzTitle]="data.name?data.name:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.name?data.name:'--'}}
+                </td>
+                <td [nzTitle]="data.brand?data.brand:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.brand?data.brand:'--'}}
+                </td>
+                <td [nzTitle]="data.specifications?data.specifications:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.specifications?data.specifications:'--'}}
+                </td>
+                <td [nzTitle]="data.model?data.model:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.model?data.model:'--'}}
+                </td>
+                <td [nzTitle]="data.unit?data.unit:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.unit?data.unit:'--'}}
+                </td>
+                <td [nzTitle]="data.materialPrice?data.materialPrice:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.materialPrice?data.materialPrice:'--'}}
+                </td>
+                <td [title]="data.materialNum?data.materialNum:''" width="10%">
+                    {{data.materialNum?data.materialNum:'--'}}
+                </td>
+                <td [nzTitle]="data.carpentryNum?data.carpentryNum:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.carpentryNum?data.carpentryNum:'--'}}
+                </td>
+                <td [nzTitle]="data.tilerNum?data.tilerNum:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.tilerNum?data.tilerNum:'--'}}
+                </td>
+                <td [nzTitle]="data.paintingNum?data.paintingNum:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.paintingNum?data.paintingNum:'--'}}
+                </td>
+                <td [nzTitle]="data.plumberNum?data.plumberNum:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.plumberNum?data.plumberNum:'--'}}
+                </td>
+                <td>
+                    <a href="javascript:void(0)">添加</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+
+<div class="ant-modal-footer">
+    <button type="button" class="ant-btn ant-btn-primary">确定</button>
+</div>

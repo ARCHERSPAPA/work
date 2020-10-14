@@ -1,0 +1,27 @@
+@charset "utf-8";
+@import "./../../../../../assets/scss/mixin";
+.master-sale{
+    &-search{
+        display: flex;
+        justify-content: space-between;
+        .searchInfo{
+            input{
+                width: 240px;
+                margin-right: 8px;
+            }
+        }
+    }
+    .select{
+        margin-bottom: 16px;
+        span{
+            font-size:14px;
+            color:rgba(0,0,0,0.65);
+            margin-left: 8px;
+        }
+    }
+    tr td {
+		// max-width: 44px;
+		@include compatibility(word-break, break-word);
+		@include ellipsis();
+	}
+}

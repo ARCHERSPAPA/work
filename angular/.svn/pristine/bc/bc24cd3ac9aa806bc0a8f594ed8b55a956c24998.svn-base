@@ -1,0 +1,34 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {ViewContractComponent} from './view-contract/view-contract.component';
+import {ViewQuoteComponent} from './view-quote/view-quote.component';
+import {ViewExplainComponent} from './view-explain/view-explain.component';
+import { ViewMaterialsComponent } from './view-materials/view-materials.component';
+const routes: Routes = [
+    {
+        path: 'contract',
+        component: ViewContractComponent
+    },
+    {
+        path: 'quote',
+        component: ViewQuoteComponent
+    },
+    {
+        path: 'explain',
+        component: ViewExplainComponent
+    },
+    {
+      path: 'print',
+      component: ViewMaterialsComponent
+  }
+];
+
+@NgModule({
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes)
+  ],
+  exports: [ RouterModule]
+})
+export class ViewRoutingModule { }

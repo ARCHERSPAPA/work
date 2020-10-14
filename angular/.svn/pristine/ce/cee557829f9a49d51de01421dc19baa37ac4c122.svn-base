@@ -1,0 +1,114 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+@Component({
+  selector: 'rev-supplier-material-edit',
+  templateUrl: './supplier-material-edit.component.html',
+  styleUrls: ['./supplier-material-edit.component.scss']
+})
+export class SupplierMaterialEditComponent implements OnInit {
+  public materialForm;
+  public modalList = [{ univalent: 123, edit: true, name: '', brand: '', place: '', fileName: '' }]
+  public materialSaleList;
+  public brand;
+  public currentIndex = 0;
+  public preLIst;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+  ) { }
+
+  ngOnInit() {
+    this.materialSaleList = this.modalList;
+    this.materialForm = this.fb.group({
+      brand: [this.brand, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+    });
+    this.receiveForm(this.materialSaleList[0], 0)
+  }
+  handleOk($event) {
+
+  }
+  checkMaterial() {
+
+  }
+  uploadImg(i) {
+    let that = this
+    console.log(this.materialForm)
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = '新增证书';
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.componentInstance.hasCut = false;
+    modalRef.result.then((result) => {
+      that.materialSaleList[i].fileName = result.fileName.substr(0, 6) + '...';
+      console.log(result)
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+
+  receiveForm(material: any, index) {
+    this.materialForm.addControl('brand' + index, new FormControl(material.brand, [Validators.maxLength(30)]));
+    this.materialForm.addControl('name' + index, new FormControl(material.name, [Validators.maxLength(30)]));
+    this.materialForm.addControl('place' + index, new FormControl(material.place, [Validators.maxLength(30)]));
+  }
+  handleCancel() {
+    history.back()
+  }
+  save(i) {
+
+    this.materialSaleList[i]['edit'] = false;
+    console.log(this.materialSaleList)
+  }
+  copy(item, i) {
+    console.log(i)
+    this.currentIndex += 1
+    item['default'] = false;
+    this.materialSaleList.push(this.resData(item));
+    this.receiveForm(item, this.currentIndex)
+  }
+  edit(i) {
+    console.log(i)
+    this.materialSaleList[i]['edit'] = true;
+    this.preLIst = this.resData(this.materialSaleList[i]);
+    console.log(this.preLIst)
+  }
+  setDefault(i) {
+    console.log(i)
+    this.materialSaleList.forEach(v => {
+      v['default'] = false;
+    });
+    this.materialSaleList[i]['default'] = true;
+  }
+  resData(data) {
+    let arr;
+    arr = JSON.stringify(data)
+    return JSON.parse(arr)
+  }
+  del(i) {
+    console.log()
+    this.materialSaleList.splice(i, 1)
+    this.currentIndex -= 1
+  }
+  cancel(i) {
+    this.materialSaleList[i] = this.preLIst;
+    console.log(this.preLIst)
+    console.log(this.materialSaleList[i])
+    this.materialSaleList[i]['edit'] = false;
+  }
+  ngDoCheck() {
+    // console.log(this.preLIst)
+  }
+}

@@ -1,0 +1,563 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators, FormControl } from '@angular/forms';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute } from '@angular/router'
+import { atob } from '../../../../model/methods';
+import { NzModalService } from 'ng-zorro-antd';
+import { Messages } from '../../../../model/msg';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+import { valueOf } from 'core-js/fn/_';
+@Component({
+  selector: 'rev-supplier-material-edit',
+  templateUrl: './supplier-material-edit.component.html',
+  styleUrls: ['./supplier-material-edit.component.scss']
+})
+export class SupplierMaterialEditComponent implements OnInit {
+  //基础信息
+  public materialForm;
+  public materialBaseForm;
+  public brandType
+
+  //材料列表
+  public modalList = [{                    //创建时模板数据
+    spu: '', edit: true, name: '', brand: '', origin: '', fileName: '', unit: '', marketPrice: '', supplyPrice: '', spec: '', sellingPrice: '', image: '', color: '', material: ''
+  }]
+  public materialSaleList = [];
+  public brand;
+  public value = [];
+  public brandNum;
+  public name;
+  public model;
+  public category;
+  public categoryNum;
+  public currentIndex = 0;
+  public preLIst = [];
+  //放大图片
+  public _albums = [];
+  public index = 0;
+  public id; //材料ID
+  public supplierId; //材料商ID
+  public spu; //编辑的SPU
+  public pageType; //编辑的SPU
+  //编辑状态
+  public newMaterial: boolean = false;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+    private modal: NzModalService,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    console.log(this.activatedRoute);
+
+
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['newMaterial']) {
+        this.newMaterial = params['newMaterial'];
+      }
+      this.supplierId = atob(params['supplierId'])
+      if (params && params['id']) {
+        this.id = atob(params['id']);
+      }
+      if (params && params['type']) {
+        this.pageType = params['type'];
+      }
+      if (params && params['spu']) {
+        this.spu = atob(params['spu']);
+      }
+    });
+    if (!this.newMaterial) {         //异步获取回显数据
+      this.getEditList().then(res => {
+        this.getCategoryList().then(res => {
+          this.brandType.forEach(mat => {
+            if (mat['categoryName'] == this.category) {
+              this.getBrandList(mat['id']).then(res => {
+                this.value = [this.category, this.brand];
+              })
+            }
+          });
+        })
+      })
+    } else {
+      this.materialSaleList = this.modalList;
+      this.getCategoryList();
+    }
+    this, this.materialForm = this.fb.group({
+    });
+    this.materialBaseForm = this.fb.group({
+      brand: [this.brand, [
+        Validators.required,
+      ]],
+      name: [this.name, [
+        Validators.required,
+        Validators.maxLength(30),
+      ]],
+      model: [this.model, [
+        Validators.maxLength(30),
+      ]],
+    });
+    this.receiveForm(this.materialSaleList, 0)
+  }
+  //编辑时初始数据
+  getEditList() {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'editMaterialList',
+        data: {
+          spu: this.spu,
+          status: this.pageType
+        },
+        success: res => {
+          if (res && res.code == 200) {
+            this.materialSaleList = res.data;
+            this.currentIndex = this.materialSaleList.length - 1;
+            if (!this.newMaterial) {
+              this.brand = res.data[0].brand;
+              this.category = res.data[0].category;
+              this.name = res.data[0].name;
+              this.model = res.data[0].model;
+              resolve(res.data[0])
+              this.materialSaleList.forEach((v, i) => {
+                v['defaultImage'] = ''
+                this.receiveForm(v, i)
+                if (v['image']) {
+                  v['fileName'] = '图片'
+                }
+                if (v['id'] == this.id) {
+                  v['edit'] = true;
+                }
+                v['key'] = i;
+                this.preLIst.push(v);
+              })
+            }
+
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    })
+  }
+  showDel(id) {
+    if (this.materialSaleList.length > 1 && this.pageType == 2 && id) {
+      return false
+    }
+    if (this.materialSaleList.length > 1) {
+      return true
+    }
+  }
+  //提交材料
+  MaterialSubmit() {
+    if (!this.brand) {
+      this.warn.onWarn('请在基础信息中选择类别品牌')
+      return
+    }
+
+    if (!this.name) {
+      this.warn.onWarn('请在基础信息中填写名称')
+      return
+    }
+
+    if (this.materialSaleList.some(v => {
+      return v['edit']
+    })) {
+      this.warn.onWarn('请先保存销售信息中的数据')
+      return
+    }
+    let param = {};
+    param['supplierId'] = this.supplierId;
+    param['brand'] = this.brand ? this.brand : '';
+    param['name'] = this.name ? this.name : '';
+    param['model'] = this.model ? this.model : '';
+    param['brandNumber'] = this.brandNum ? this.brandNum : '';
+    param['category'] = this.category ? this.category : '';
+    param['categoryNumber'] = this.categoryNum ? this.categoryNum : '';
+    param['details'] = this.materialSaleList;
+    this.req.doPost({
+      url: "createMaterialSave",
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          history.back()
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+
+  }
+
+  getCategoryList(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'getMarterialCategory',
+        success: res => {
+          if (res && res.code == 200) {
+            this.renderDorpList(res.data);
+            resolve(this.renderDorpList(res.data))
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    })
+  }
+
+  getButton() {
+    if (!this.pageType) {
+      return '创建材料'
+    } else if (this.pageType == 0) {
+      return '编辑材料'
+    } else if (this.pageType == 2) {
+      return '修改材料'
+    }
+    else if (this.pageType == 3) {
+      return '编辑材料'
+    }
+  }
+  //判断是修改的提交还是其他
+  checkSubmit() {
+    if (this.pageType == 2) {
+      this.checkRepeat();
+    } else {
+      this.MaterialSubmit();
+    }
+  }
+
+  checkRepeat() {
+    if (!this.brand) {
+      this.warn.onWarn('请在基础信息中选择类别品牌')
+      return
+    }
+
+    if (!this.name) {
+      this.warn.onWarn('请在基础信息中填写名称')
+      return
+    }
+
+    if (this.materialSaleList.some(v => {
+      return v['edit']
+    })) {
+      this.warn.onWarn('请先保存销售信息中的数据')
+      return
+    }
+    let param = {};
+    param['supplierId'] = this.supplierId;
+    param['brand'] = this.brand ? this.brand : '';
+    param['name'] = this.name ? this.name : '';
+    param['model'] = this.model ? this.model : '';
+    param['brandNumber'] = this.brandNum ? this.brandNum : '';
+    param['category'] = this.category ? this.category : '';
+    param['categoryNumber'] = this.categoryNum ? this.categoryNum : '';
+    param['details'] = this.materialSaleList;
+    this.req.doPost({
+      url: 'checkMaterialRepeat',
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.checkProcess(res.msg)
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+
+  checkProcess(msg) {
+    this.modal.confirm({
+      nzTitle: '提示',
+      nzContent: `<b style="color: red;">${msg}</b>`,
+      nzOkText: '修改',
+      // nzOkType    : 'danger',
+      nzOnOk: () => this.MaterialSubmit(),
+      nzCancelText: '取消',
+      // nzOnCancel: () => console.log('Cancel')
+    });
+  }
+
+  renderDorpList(i) {
+    if (i && i.length > 0) {
+      this.brandType = new Array(i.length).fill({})
+      let arr = []
+      i.forEach((v, a) => {
+        if (this.newMaterial) {
+          v['value'] = { id: v['number'], name: v['categoryName'] };
+        } else {
+          v['value'] = v['categoryName']
+        }
+        v['label'] = v['categoryName'];
+        v['level'] = a;
+        v['children'] = [];
+        v["local"] = this;
+        // console.log(this.brandType)
+        arr.push(v)
+        // this.brandType[a]['children']=this.getBrandList(v['id'])
+      });
+      this.brandType = arr
+    }
+
+  }
+  //品牌
+  getBrandList(id) {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'getMarterialBrand',
+        data: {
+          id: id
+        },
+        success: res => {
+          resolve(this.renderBrandList(res.data))
+        }
+      })
+    })
+  }
+
+  //渲染品牌
+  renderBrandList(i) {
+    let arr = i
+    arr.forEach(v => {
+      if (this.newMaterial) {
+        v['value'] = { id: v['number'], name: v['brandName'] };
+      } else {
+        v['value'] = v['brandName']
+      }
+      v['label'] = v['brandName']
+      v['isLeaf'] = true
+    });
+    return arr;
+  }
+
+  //类别
+  loadData(node: any, index: number): PromiseLike<any> {
+    let that = node.local
+    return new Promise((resolve) => {
+      that.req.doPost({
+        url: 'getMarterialBrand',
+        data: {
+          id: node.id
+        },
+        success: res => {
+          let arr = res.data
+          arr.forEach(v => {
+            if (that.newMaterial) {
+              v['value'] = { id: v['number'], name: v['brandName'] };
+            } else {
+              v['value'] = v['brandName']
+            }
+
+            v['label'] = v['brandName']
+            v['isLeaf'] = true
+          });
+          node['children'] = arr
+          resolve();
+        }
+      })
+    });
+  }
+
+
+  uploadImg(i) {
+    let that = this
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = '新增照片(只能上传2M以内的图片)';
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.componentInstance.size = 2;
+    modalRef.componentInstance.hasCut = false;
+    modalRef.result.then((result) => {
+      that.materialSaleList[i].fileName = result.fileName.substr(0, 6) + '...';
+      that.materialSaleList[i].image = result.image;
+      that.materialSaleList[i].defaultImage = '';
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+  //渲染FROM
+  receiveForm(material: any, index) {
+    this.materialForm.addControl('spec' + index, new FormControl(material.spec, [Validators.maxLength(30)]));
+    this.materialForm.addControl('brand' + index, new FormControl(material.brand, [Validators.maxLength(30)]));
+    this.materialForm.addControl('name' + index, new FormControl(material.name, [Validators.maxLength(30)]));
+    this.materialForm.addControl('material' + index, new FormControl(material.material, [Validators.maxLength(30)]));
+    this.materialForm.addControl('origin' + index, new FormControl(material.origin, [Validators.maxLength(30)]));
+    this.materialForm.addControl('color' + index, new FormControl(material.color, [Validators.maxLength(30)]));
+    this.materialForm.addControl('fileName' + index, new FormControl(material.fileName, []));
+    this.materialForm.addControl('unit' + index, new FormControl(material.unit, [Validators.maxLength(30), Validators.required,]));
+    this.materialForm.addControl('marketPrice' + index, new FormControl(material.marketPrice, [Validators.maxLength(10)]));
+    this.materialForm.addControl('supplyPrice' + index, new FormControl(material.supplyPrice, [Validators.maxLength(10), Validators.required]));
+    this.materialForm.addControl('sellingPrice' + index, new FormControl(material.sellingPrice, [Validators.maxLength(10), Validators.required]));
+
+  }
+  onChanges(e) {
+    if (this.newMaterial) {
+      this.category = e[0]['name']
+      this.categoryNum = e[0]['id']
+      this.brand = e[1]['name']
+      this.brandNum = e[1]['id']
+    } else {
+      this.category = e[0]
+      this.brand = e[1]
+    }
+  }
+
+  handleCancel() {
+    history.back()
+  }
+  save(i) {
+    if (!this.materialSaleList[i]['unit']) {
+      this.warn.onWarn('请确认单位为1~30位的字符')
+      return
+    }
+
+    if (!this.materialSaleList[i]['supplyPrice']) {
+      this.warn.onWarn('请确认供货价为1~10位的数字')
+      return
+    }
+    // if(!this.newMaterial && this.materialSaleList[i]['image']){
+    //   this.setDefault(i,this.materialSaleList[i])
+    // }
+    this.materialSaleList[i]['edit'] = false;
+
+  }
+  //复制
+  copy(item, i) {
+    if (this.materialSaleList.length >= 20) {
+      this.warn.onWarn('最多可添加20行')
+      return
+    }
+    this.currentIndex += 1
+    let arr = this.resData(item);
+    arr['defaultImage'] = '';
+    arr['image'] = '';
+    arr['fileName'] = '';
+    arr['useDefaultImage'] = '';
+    arr['id'] = '';
+    arr['key'] = this.currentIndex;
+    arr['sku'] = '';
+    this.materialSaleList.push(arr);
+    this.receiveForm(item, this.currentIndex)
+    this.materialSaleList[this.currentIndex]['edit'] = true;
+    this.materialSaleList[this.currentIndex]['key'] = this.currentIndex
+    this.preLIst.push(this.resData(this.materialSaleList[this.currentIndex]));
+    console.log(this.preLIst)
+  }
+  edit(i) {
+    this.materialSaleList[i]['edit'] = true;
+    this.materialSaleList[i]['key'] = i
+    // this.preLIst.push(this.resData(this.materialSaleList[i]));
+
+  }
+  //取消
+  cancel(i, id) {
+    this.preLIst.forEach(v => {
+      console.log(v, i)
+      if (v['key'] == this.materialSaleList[i]['key']) {
+        this.materialSaleList[i] = v;
+        this.materialSaleList[i]['edit'] = false;
+        this.materialSaleList[i]['defaultImage'] = '';
+        this.materialSaleList[i]['image'] = '';
+        this.materialSaleList[i]['sku'] = '';
+        this.materialSaleList[i]['id'] = '';
+      }
+    });
+
+  }
+  setDefault(i, material) {
+    //创建材料时
+    if (this.newMaterial) {
+      this.materialSaleList.forEach(v => {
+        v['defaultImage'] = '';
+        v['useDefaultImage'] = '';
+      });
+      this.materialSaleList[i]['defaultImage'] = this.materialSaleList[i]['image'];
+      this.materialSaleList[i]['useDefaultImage'] =1;
+    } else {
+      //编辑材料
+      this.req.doPost({
+        url: 'materialSupplierListByDefault',
+        data: {
+          spu: material.spu,
+          defaultImage: material.image,
+          id: material.id,
+          supplierId: this.supplierId
+        }, success: res => {
+          if (res && res.code == 200) {
+            this.materialSaleList.forEach(v => {
+              v['defaultImage'] = '';
+              v['useDefaultImage'] = null
+            });
+            this.materialSaleList[i]['useDefaultImage'] = 1
+            this.materialSaleList[i]['defaultImage'] = this.materialSaleList[i]['image'] ? this.materialSaleList[i]['image'] : this.materialSaleList[i]['defaultImage'];
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    }
+  }
+
+  //深拷贝
+  resData(data) {
+    let arr;
+    arr = JSON.stringify(data)
+    return JSON.parse(arr)
+  }
+
+  //删除
+  del(i,material) {
+    console.log(material)
+    if(material.id){
+      this.req.doPost({
+        url:"deletMarterial",
+        data:{
+          spu: material.spu,
+          userDefaultImage: material.useDefaultImage?material.useDefaultImage:'',
+          id: material.id,
+          supplierId: this.supplierId
+        },
+        success:res=>{
+          if (res && res.code == 200) {
+            this.currentIndex -= 1
+            this.preLIst.forEach((v, index) => {
+              if (v['key'] == this.materialSaleList[i]['key']) {
+                this.preLIst.splice(index, 1)
+                this.materialSaleList.splice(i, 1)
+              }
+            });
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    }else{
+      this.currentIndex -= 1
+      this.preLIst.forEach((v, index) => {
+        if (v['key'] == this.materialSaleList[i]['key']) {
+          this.preLIst.splice(index, 1)
+          this.materialSaleList.splice(i, 1)
+        }
+      });
+    }
+  }
+
+  //删除图片
+  delImg(i) {
+    this.materialSaleList[i]['fileName'] = '';
+    this.materialSaleList[i]['defaultImage'] = '';
+    this.materialSaleList[i]['image'] = '';
+    this.materialSaleList[i]['default'] = false;
+  }
+
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+  }
+}

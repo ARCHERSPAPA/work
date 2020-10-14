@@ -1,0 +1,135 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router, ActivatedRoute } from '@angular/router';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+@Component({
+  selector: 'rev-supplier-material-edit',
+  templateUrl: './supplier-material-edit.component.html',
+  styleUrls: ['./supplier-material-edit.component.scss']
+})
+export class SupplierMaterialEditComponent implements OnInit {
+  public materialForm;
+  public modalList = [{ projectName:123,univalent: 123, edit: true, name: '', brand: '', place: '', fileName: '' }]
+  public materialSaleList;
+  public brand;
+  public currentIndex = 0;
+  public preLIst;
+  public _albums = [];
+  public index = 0;
+  public newMaterial: boolean=false;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['newMaterial']) {
+        this.newMaterial = params['newMaterial'];
+      }
+    });
+    this.materialSaleList = this.modalList;
+    this.materialForm = this.fb.group({
+      brand: [this.brand, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+    });
+    this.receiveForm(this.materialSaleList[0], 0)
+  }
+  handleOk($event) {
+
+  }
+  checkMaterial() {
+
+  }
+  uploadImg(i) {
+    let that = this
+    console.log(this.materialForm)
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = '新增证书';
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.componentInstance.hasCut = false;
+    modalRef.result.then((result) => {
+      that.materialSaleList[i].fileName = result.fileName.substr(0, 6) + '...';
+      that.materialSaleList[i].img = result.image;
+      console.log(result)
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+
+  receiveForm(material: any, index) {
+    this.materialForm.addControl('brand' + index, new FormControl(material.brand, [Validators.maxLength(30)]));
+    this.materialForm.addControl('name' + index, new FormControl(material.name, [Validators.maxLength(30)]));
+    this.materialForm.addControl('place' + index, new FormControl(material.place, [Validators.maxLength(30)]));
+  }
+  handleCancel() {
+    history.back()
+  }
+  save(i) {
+    this.materialSaleList[i]['edit'] = false;
+    console.log(this.materialSaleList)
+  }
+  copy(item, i) {
+    console.log(i)
+    this.currentIndex += 1
+    let arr = this.resData(item);
+    arr['default'] = false;
+    this.materialSaleList.push(arr);
+    this.receiveForm(item, this.currentIndex)
+  }
+  edit(i) {
+    console.log(i)
+    this.materialSaleList[i]['edit'] = true;
+    this.preLIst = this.resData(this.materialSaleList[i]);
+    console.log(this.preLIst)
+  }
+  setDefault(i) {
+    console.log(i)
+    this.materialSaleList.forEach(v => {
+      v['default'] = false;
+    });
+    this.materialSaleList[i]['default'] = true;
+  }
+  resData(data) {
+    let arr;
+    arr = JSON.stringify(data)
+    return JSON.parse(arr)
+  }
+  del(i) {
+    console.log()
+    this.materialSaleList.splice(i, 1)
+    this.currentIndex -= 1
+  }
+  cancel(i) {
+    if (this.materialSaleList.length > 1) {
+      this.materialSaleList[i] = this.preLIst;
+    }
+    this.materialSaleList[i]['edit'] = false;
+  }
+  ngDoCheck() {
+    // console.log(this.preLIst)
+  }
+  delImg(i) {
+    this.materialSaleList[i]['fileName'] = '';
+    this.materialSaleList[i]['default'] = false;
+  }
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+
+  }
+}

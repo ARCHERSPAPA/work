@@ -1,0 +1,54 @@
+import { Component, OnInit } from '@angular/core';
+import { Messages } from '../../../../model/msg';
+import { FormBuilder, Validators } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { WarningService } from '../../../../service/warning.service';
+import { RequestService } from '../../../../service/request.service';
+@Component({
+  selector: 'rev-temp-lib-edit',
+  templateUrl: './temp-lib-edit.component.html',
+  styleUrls: ['./temp-lib-edit.component.scss']
+})
+export class TempLibEditComponent implements OnInit {
+
+  public title;
+  public baseForm;
+  public category;
+  public categoryLsit;
+  public Units;
+  public univalence;
+  public remark;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+  ) {
+  }
+
+  ngOnInit() {
+    this.title = '创建材料'
+    this.baseForm = this.fb.group({
+      category: [this.category, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+      Units: [this.Units, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+      univalence: [this.univalence, [
+        Validators.required,
+        Validators.minLength(18),
+      ]],
+    });
+  }
+  handleCancel() {
+    history.back();
+  }
+  checkAdd() {
+
+  }
+  handleOk() {
+
+  }
+}

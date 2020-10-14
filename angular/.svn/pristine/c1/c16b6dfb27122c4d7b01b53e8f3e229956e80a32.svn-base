@@ -1,0 +1,52 @@
+<div class="supplier-materialList">
+    <div class="supplier-materialList-head">
+        <radio-switch [radioSwitch]='radioSwitch' (handleSwitch)="handleSwitch($event)"></radio-switch>
+        <div>
+            <input type="text" nz-input>
+            <button nz-button nzType='primary'>查询</button>
+        </div>
+    </div>
+    <div class="supplier-materialList-list">
+        <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false"
+            [nzShowPagination]="false" nzSize="middle">
+            <thead nz-thead>
+                <tr>
+                    <th nz-th><span>账号</span></th>
+                    <th nz-th><span>材料商</span></th>
+                    <th nz-th><span>社会信用代码</span></th>
+                    <th nz-th><span>法人</span></th>
+                    <th nz-th><span>身份证</span></th>
+                    <th nz-th><span>手机号</span></th>
+                    <th nz-th><span>时间</span></th>
+                    <th nz-th><span>编辑人</span></th>
+                    <th nz-th *ngIf='pageType!=3'><span>操作</span></th>
+                </tr>
+            </thead>
+            <tbody nz-tbody style="font-size: 12px">
+                <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+                    <td nz-td [title]="material.projectName">
+                        {{material.projectName?material.projectName:'--'}}
+                    </td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td>{{material.univalent?(material.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td *ngIf='pageType!=3'>
+                        <a href="javascript:void(0)" class="work_a" *ngIf='pageType==2'
+                            nz-popconfirm nzTitle="确定创建并申请该材料商合作吗？" nzOkText="创建" nzCancelText="取消"
+                            (nzOnConfirm)="create()">添加</a>
+                        <a [routerLink]="['./../info']" [queryParams]="{name:btoa('haha')}" *ngIf='pageType==4'>
+                            详情
+                        </a>
+
+                        <a href="javascript:void(0)" class="work_a" *ngIf='pageType==5' nz-popconfirm
+                            nzTitle="确定向该合作商申请合作吗？" nzOkText="申请" nzCancelText="取消" (nzOnConfirm)="create()">添加</a>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>

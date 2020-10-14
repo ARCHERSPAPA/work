@@ -1,0 +1,149 @@
+import { Component, OnInit } from '@angular/core';
+import { QuoteService } from '../../../../service/quote.service';
+import { Router, NavigationStart, NavigationEnd, NavigationCancel, ActivatedRoute } from '@angular/router';
+import { RequestService } from '../../../../service/request.service';
+import { Default } from '../../../../model/constant';
+import { getIndexByUrl } from '../../../../model/methods';
+import { HeaderService } from '../../../../service/header.service';
+import { BufferService } from '../../../../service/buffer.service';
+
+@Component({
+    selector: 'rev-offer-detail',
+    templateUrl: './offer-detail.component.html',
+    styleUrls: ['./../../offer.component.scss', './../../../detail/tab.scss']
+})
+export class OfferDetailComponent implements OnInit {
+    public loading = false;
+    public mid: number;
+    public cid: string;
+    public aid: string;
+    public isNewQuote=1;
+    public tabs: Array<any> = [];
+    public state = 1;
+    public id: number;
+    public index = 0;
+
+    // public offState: number;//项目状态-2和8为已关闭
+
+    constructor(private quote: QuoteService,
+        private router: Router,
+        private req: RequestService,
+        private activatedRoute: ActivatedRoute,
+        private header: HeaderService,
+        private buffer: BufferService) {
+    }
+
+    ngOnInit() {
+
+
+        this.state = (this.activatedRoute.snapshot.children && this.activatedRoute.snapshot.children.length > 0) ? parseInt(this.activatedRoute.snapshot.children[0].params['state']) : 1;
+
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['isNewQuote']) {
+                this.isNewQuote = params['isNewQuote'];
+            }
+            if (params && params['cid']) {
+                this.cid = params['cid'];
+                
+                /**
+                 * 清除buffer
+                 */
+                this.buffer.clearBuffer(this.buffer.getRandKey(this.cid, 2));
+                this.buffer.clearBuffer(this.buffer.getRandKey(this.cid, 3));
+                this.buffer.clearBuffer(this.buffer.getRandKey(this.cid, 4));
+                this.buffer.clearBuffer(this.buffer.getRandKey(this.cid, 5));
+            }
+            if (params && params['aid']) {
+                this.aid = params['aid'];
+            }
+        });
+        this.tabs = [
+            {
+                name: '预算',
+                url: 'price',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            },
+            {
+                name: '材料清单',
+                url: 'making',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            },
+            // {
+            //     name: '材料清单',
+            //     url: 'newmaking',
+            //     params: {
+            //         cid: this.cid,
+            //         aid: this.aid
+            //     }
+            // },
+            {
+                name: '合同',
+                url: 'contract',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            },
+            {
+                name: '设计图纸',
+                url: 'graph',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            },
+            {
+                name: '附件',
+                url: 'uploaderFile',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            }
+        ];
+        if (this.isNewQuote == 1) {
+            this.tabs.splice(1, 1, {
+                name: '材料清单',
+                url: 'newmaking',
+                params: {
+                    cid: this.cid,
+                    aid: this.aid
+                }
+            })
+        }
+        //判断当前url
+        const url = this.router.url.split('detail');
+        this.index = getIndexByUrl(url[1], this.tabs);
+
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationStart) {
+                this.loading = true;
+            } else if (event instanceof NavigationEnd) {
+                setTimeout(() => {
+                    this.loading = false;
+                }, 1000);
+            } else if (event instanceof NavigationCancel) {
+                this.loading = false;
+            }
+        });
+
+    }
+
+    tabClick(url, params) {
+        this.quote.setTypeByParam('head', true);
+        this.router.navigate(['./' + url + '', Default.STATE.ITEM_1], {
+            queryParams: params,
+            relativeTo: this.activatedRoute
+        });
+
+    }
+
+
+}

@@ -1,0 +1,25 @@
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { MasterPromotionDetailComponent } from './master-promotion-detail.component';
+
+describe('MasterPromotionDetailComponent', () => {
+  let component: MasterPromotionDetailComponent;
+  let fixture: ComponentFixture<MasterPromotionDetailComponent>;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ MasterPromotionDetailComponent ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(MasterPromotionDetailComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

@@ -1,0 +1,24 @@
+@import "./../../../../../assets/scss/mixin";
+.supplier-materialList {
+    &-head {
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+    }
+    &-list{
+        margin-top: 16px;
+        .list-remark{
+            width: 118px;
+            @include compatibility(word-break, break-word);
+        }
+        tr th,tr td{
+            font-size: 14px;
+            max-width:100px;
+            vertical-align: middle;
+            a{
+                padding-right: 4px;
+            }
+            @include ellipsis();
+           }
+    }
+}

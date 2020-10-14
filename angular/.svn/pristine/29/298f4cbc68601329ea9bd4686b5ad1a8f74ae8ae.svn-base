@@ -1,0 +1,113 @@
+<router-outlet></router-outlet>
+<div class="cost-base">
+  <rev-title [title]="title" [isNewPage]='false' [buttons]="buttons" [show]="showBtn" (handleName)="handleName($event)">
+  </rev-title>
+  <input type='file' #uploadFile accept=".xlsx, .xls" id="import" style="visibility: hidden;height:0;" ngModel
+    (change)="handleFileChange($event)">
+  <div class="cost-base-list">
+    <div class="serch">
+      <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" nzPlaceHolder='请选择类别' class="serchs"
+        [(ngModel)]="baseType" [ngModelOptions]="{standalone: true}" (ngModelChange)="swichType($event)">
+        <nz-option *ngFor="let audit of baseTypes" [nzValue]="audit.id" [nzLabel]="audit.name">
+        </nz-option>
+      </nz-select>
+      <nz-select style="width: 160px; margin-right: 6px" nzAllowClear="false" class="serchs" [(ngModel)]="queryType"
+        (ngModelChange)="swichQurey($event)" [ngModelOptions]="{standalone: true}">
+        <nz-option *ngFor="let audit of queryList" [nzValue]="audit.key" [nzLabel]="audit.text">
+        </nz-option>
+      </nz-select>
+      <input type="text" nz-input [(ngModel)]="query" placeholder='名称/品牌/规格/型号/编号'>
+      <button nz-button nzType='primary' (click)='changePage(1)'>查询</button>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <button nz-button [nzType]="'primary'" [disabled]="!checkSubmit()" nz-popconfirm nzTitle="确定删除该项目吗？" nzOkText="删除"
+        nzCancelText="取消" (nzOnConfirm)="del(false)">
+        删除
+      </button>
+    </div>
+    <nz-table #nzTable [nzData]="baseList" [nzBordered]="true" [nzFrontPagination]="false" [(nzPageIndex)]="pageNo"
+      [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changePage()' nzSize="middle"
+      [nzShowPagination]="true" nzSize="middle">
+      <thead nz-thead>
+        <tr>
+          <th nzLeft="0px" nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+            (nzCheckedChange)="checkAll($event)"></th>
+          <th nz-th><span>编号</span></th>
+          <th nz-th><span>类别</span></th>
+          <th nz-th><span>名称</span></th>
+          <th nz-th><span>品牌</span></th>
+          <th nz-th><span>规格</span></th>
+          <th nz-th><span>型号</span></th>
+          <th nz-th><span>单位</span></th>
+          <th nz-th><span>材料单价</span></th>
+          <th nz-th><span>材料损耗</span></th>
+          <th nz-th><span>木工</span></th>
+          <th nz-th><span>泥工</span></th>
+          <th nz-th><span>漆工</span></th>
+          <th nz-th><span>水电</span></th>
+          <th nz-th><span>销售价</span></th>
+          <th nz-th><span>操作</span></th>
+        </tr>
+      </thead>
+      <tbody nz-tbody style="font-size: 12px">
+        <tr nz-tbody-tr *ngFor="let base of nzTable.data">
+          <td nzShowCheckbox nzLeft="0px" [(nzChecked)]="base.checked" (nzCheckedChange)="refreshStatus()"></td>
+          <td nz-td [title]="base.code" style="position: relative;">
+            {{base.code?base.code:'--'}}
+            <span *ngIf="base.remark" [nzTitle]="base.remark" style="position: absolute;
+                    right: 5px; top: 13px;" nzPlacement="top" nz-tooltip>
+              <i nz-icon type="info-circle" style="position: relative;top: -2px;"></i>
+            </span>
+          </td>
+          <td nz-td [title]="base.categoryName?base.categoryName:'--'">
+            {{base.categoryName?base.categoryName:'--'}}
+          </td>
+          <td nz-td [title]="base.name?base.name:'--'">
+            {{base.name?base.name:'--'}}
+          </td>
+          <td nz-td [title]="base.brand?base.brand:'--' ">
+            {{base.brand?base.brand:'--'}}
+          </td>
+          <td nz-td [title]="base.spec?base.spec:'--'">
+            {{base.spec?base.spec:'--'}}
+          </td>
+
+          <td nz-td [title]="base.model?base.model:'--'">
+            {{base.model?base.model:'--'}}
+          </td>
+          <td nz-td [title]="base.unit?base.unit:'--'">
+            {{base.unit?base.unit:'--'}}
+          </td>
+          <td nz-td [title]="(base.unitPrice || base.unitPrice===0)?base.unitPrice:'--'">
+            {{(base.unitPrice || base.unitPrice===0)?base.unitPrice:'--'}}
+          </td>
+          <td nz-td [title]="(base.wastageRate || base.wastageRate===0 )?base.wastageRate:'--'">
+            {{(base.wastageRate || base.wastageRate===0 )?base.wastageRate:'--'}}
+          </td>
+          <td nz-td [title]="(base.carpenterPrice || base.carpenterPrice===0)?base.carpenterPrice:'--'">
+            {{(base.carpenterPrice || base.carpenterPrice===0)?base.carpenterPrice:'--'}}
+          </td>
+          <td nz-td [title]="(base.masonPrice || base.masonPrice===0 )?base.masonPrice:'--'">
+            {{(base.masonPrice || base.masonPrice===0 )?base.masonPrice:'--'}}
+          </td>
+          <td nz-td [title]="(base.japannerPrice || base.japannerPrice===0 )?base.japannerPrice:'--'">
+            {{(base.japannerPrice || base.japannerPrice===0 )?base.japannerPrice:'--'}}
+          </td>
+          <td nz-td [title]="(base.utilityCharge || base.utilityCharge===0 )?base.utilityCharge:'--'">
+            {{(base.utilityCharge || base.utilityCharge===0 )?base.utilityCharge:'--'}}
+          </td>
+          <td nz-td [title]="(base.sellPrice || base.sellPrice===0 )?base.sellPrice:'--'">
+            {{(base.sellPrice || base.sellPrice===0 )?base.sellPrice:'--'}}
+          </td>
+          <td nz-td>
+            <a href="javascript:void(0)" class="work_a" nz-popconfirm nzTitle="确定删除该项目吗？" nzOkText="删除"
+              nzCancelText="取消" (nzOnConfirm)="del(base.id)">删除</a>
+            <a [routerLink]="['./../edit']" [queryParams]="{id:btoa(base.id)}">
+              编辑
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+<div class="cost">
+    <div class="cost-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+
+    <div nz-row class="mt-16">
+        <div nz-col nzSpan="8">
+            <radio-switch [radioSwitch]="radioSwitch"
+                          (handleSwitch)="handleSwitch($event)"></radio-switch>
+        </div>
+        <div nz-col nzSpan="16" class="text-right">
+            <button nz-button [nzType]="'primary'" type="button" (click)="openModal()">新建</button>
+        </div>
+    </div>
+
+    <div nz-row class="mt-16">
+        <div nz-col nzSpan="24">
+            <nz-table #nzTable [nzData]="designList" [nzBordered]="true" [nzFrontPagination]="false"
+                      [nzShowPagination]="false" nzSize="middle">
+                <thead nz-thead>
+                <tr>
+                    <th nz-th><span>名称</span></th>
+                    <th nz-th><span>单价</span></th>
+                    <th nz-th><span>操作</span></th>
+                </tr>
+                </thead>
+                <tbody nz-tbody style="font-size: 12px">
+                <tr nz-tbody-tr *ngFor="let design of nzTable.data">
+                    <td nz-td [title]="design.projectName">
+                        {{design.projectName?design.projectName:'--'}}
+                    </td>
+                    <td nz-td>{{design.univalent?(design.univalent|number:'1.2'):'--'}}</td>
+                    <td nz-td><a href="javascript:void(0)" (click)="editDesign(design)">
+                        编辑
+                    </a>
+                        <a href="javascript:void(0)" class="del" nz-popconfirm [nzTitle]="'确定删除该数据吗?'"
+                           nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="delDesign(design.id)">
+                            删除
+                        </a></td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+
+</div>
+
+<!---增减项目提示--->
+<nz-modal [(nzVisible)]="designVisible"
+          [nzTitle]="designTitle"
+          [nzFooter]="null"
+          (nzOnCancel)="designCancel()">
+    <div class="modify">
+        <form nz-form [formGroup]="designForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>名称</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <input nz-input type="text" class="text" formControlName="designName"
+                           name="designName" [(ngModel)]="designName" maxlength="10" autocomplete="off"
+                           onkeyup="this.value = this.value.replace(/\s/g,'')"/>
+                    <nz-form-explain
+                            *ngIf="designForm.get('designName').dirty && designForm.get('designName').errors">
+                        <ng-container *ngIf="designForm.get('designName').hasError('required')">
+                            必填选项
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>单价</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <input nz-input type="text" class="text" formControlName="designPrice"
+                           name="designPrice" [(ngModel)]="designPrice" maxlength="10"
+                           autocomplete="off"
+                           onkeyup="this.value = this.value.replace(/\s/g,'')"/>
+                    <nz-form-explain
+                            *ngIf="designForm.get('designPrice').dirty && designForm.get('designPrice').errors">
+                        <ng-container *ngIf="designForm.get('designPrice').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="designForm.get('designPrice').hasError('decimal')">
+                            &nbsp;&nbsp;输入格式错误
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-control [nzSpan]="12" [nzOffset]="10">
+                    <button nz-button nzType="default" type="submit" (click)="designCancel()">取消
+                    </button>
+                    <button nz-button nzType="primary" type="submit" (click)="designOk()" class="ml-32"
+                            [disabled]="!designForm.valid">确认
+                    </button>
+                </nz-form-control>
+            </nz-form-item>
+
+        </form>
+    </div>
+</nz-modal>

@@ -1,0 +1,179 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{getTitle(type)}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="ant-modal-body">
+    <div nz-row class="mb-16" style="text-align: right;">
+        <div nz-col nzSpan="5" nzOffset="12">
+            <nz-select style="width: 100%;" [(ngModel)]="category" nzAllowClear nzPlaceHolder="请选择类别"
+                       (ngModelChange)="modelChangeCategory($event)" [compareWith]="compareFn">
+                <nz-option [nzValue]="cate" [nzLabel]="cate.categoryName" *ngFor="let cate of categories"></nz-option>
+            </nz-select>
+        </div>
+        <div nz-col nzSpan="4" class="ml-8">
+            <input nz-input placeholder="请输入需要查询的内容" [(ngModel)]="info"/>
+        </div>
+        <div nz-col nzSpan="2" class="ml-8">
+            <button nz-button nzType="primary">查询</button>
+        </div>
+    </div>
+    <div nz-row class="item-basic">
+        <nz-table [nzData]="dataSet" #ajaxTable nzSize="small" [nzScroll]="{ y: '300px' }"
+                  [nzLoading]="loading" [nzFrontPagination]="false" [nzShowPagination]="true"
+                  [nzTotal]="total" [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize"
+                  (nzPageIndexChange)="changeData()">
+            <thead>
+            <tr>
+                <th width="5%">编号</th>
+                <th width="10%">类别</th>
+                <th width="8%">名称</th>
+                <th width="5%">品牌</th>
+                <th width="8%">规格</th>
+                <th width="5%">型号</th>
+                <th width="5%">单位</th>
+                <th width="10%">材料单价</th>
+                <th width="10%">材料损耗</th>
+                <th width="5%">木工</th>
+                <th width="5%">泥工</th>
+                <th width="5%">漆工</th>
+                <th width="8%">水电工</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of ajaxTable.data; let i = index">
+                <td width="5%">{{(pageNo - 1)*pageSize + (i+1)}}</td>
+                <td [nzTitle]="data.categoryName?data.categoryName:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.categoryName?data.categoryName:'--'}}
+                </td>
+                <td [nzTitle]="data.name?data.name:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.name?data.name:'--'}}
+                </td>
+                <td [nzTitle]="data.brand?data.brand:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.brand?data.brand:'--'}}
+                </td>
+                <td [nzTitle]="data.spec?data.spec:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.spec?data.spec:'--'}}
+                </td>
+                <td [nzTitle]="data.model?data.model:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.model?data.model:'--'}}
+                </td>
+                <td [nzTitle]="data.unit?data.unit:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.unit?data.unit:'--'}}
+                </td>
+                <td [nzTitle]="data.unitPrice?data.unitPrice:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.unitPrice?data.unitPrice:'--'}}
+                </td>
+                <td [title]="data.wastageRate?data.wastageRate:''" width="10%">
+                    {{data.wastageRate?data.wastageRate:'--'}}
+                </td>
+                <td [nzTitle]="data.carpentryNum?data.carpentryNum:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.carpenterPrice?data.carpenterPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.masonPrice?data.masonPrice:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.masonPrice?data.masonPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.japannerPrice?data.japannerPrice:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.japannerPrice?data.japannerPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.utilityCharge?data.utilityCharge:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.utilityCharge?data.utilityCharge:'--'}}
+                </td>
+                <td>
+                    <a href="javascript:void(0)" (click)="addItem($event,data)">添加</a>
+                    <a href="javascript:void(0)" (click)="removeItem($event,data.id)"
+                       class="delete ml-8" [hidden]="!exist(data.id)">删除({{itemsSize(data.id)}})</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+
+
+    <!---选中展示数据列表---->
+    <div nz-row class="ml-8" *ngIf="selectItems && selectItems.length > 0">
+        <div nz-col (click)="toggleClick($event)" style="cursor: pointer">已选<span>（{{selectItems.length}}）</span>
+            <span><i nz-icon [type]="toggleType" theme="outline"></i></span>
+        </div>
+    </div>
+    <div class="item-basic" *ngIf="selectItems && selectItems.length > 0">
+        <nz-table #selectTable [hidden]="!toggle" [nzData]="selectItems" nzSize="small" [nzTitle]="titleTemp"
+                  [nzFrontPagination]="false" [nzShowPagination]="false" [nzScroll]="{y: 300}">
+            <thead>
+            <tr>
+                <th nzWidth="62px" nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"></th>
+                <th width="10%">类别</th>
+                <th width="8%">名称</th>
+                <th width="5%">品牌</th>
+                <th width="8%">规格</th>
+                <th width="5%">型号</th>
+                <th width="5%">单位</th>
+                <th width="10%">材料单价</th>
+                <th width="10%">材料损耗</th>
+                <th width="5%">木工</th>
+                <th width="5%">泥工</th>
+                <th width="5%">漆工</th>
+                <th width="8%">水电工</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of selectTable.data;let i = index">
+                <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()"></td>
+                <td [nzTitle]="data.categoryName?data.categoryName:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.categoryName?data.categoryName:'--'}}
+                </td>
+                <td [nzTitle]="data.name?data.name:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.name?data.name:'--'}}
+                </td>
+                <td [nzTitle]="data.brand?data.brand:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.brand?data.brand:'--'}}
+                </td>
+                <td [nzTitle]="data.spec?data.spec:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.spec?data.spec:'--'}}
+                </td>
+                <td [nzTitle]="data.model?data.model:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.model?data.model:'--'}}
+                </td>
+                <td [nzTitle]="data.unit?data.unit:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.unit?data.unit:'--'}}
+                </td>
+                <td [nzTitle]="data.unitPrice?data.unitPrice:''" nzPlacement="topLeft" nz-tooltip width="10%">
+                    {{data.unitPrice?data.unitPrice:'--'}}
+                </td>
+                <td [title]="data.wastageRate?data.wastageRate:''" width="10%">
+                    {{data.wastageRate?data.wastageRate:'--'}}
+                </td>
+                <td [nzTitle]="data.carpentryNum?data.carpentryNum:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.carpenterPrice?data.carpenterPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.masonPrice?data.masonPrice:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.masonPrice?data.masonPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.japannerPrice?data.japannerPrice:''" nzPlacement="topLeft" nz-tooltip width="5%">
+                    {{data.japannerPrice?data.japannerPrice:'--'}}
+                </td>
+                <td [nzTitle]="data.utilityCharge?data.utilityCharge:''" nzPlacement="topLeft" nz-tooltip width="8%">
+                    {{data.utilityCharge?data.utilityCharge:'--'}}
+                </td>
+                <td>
+                    <a href="javascript:void(0)" (click)="removeItem($event,data.id)" class="delete">删除</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+
+</div>
+
+<div class="ant-modal-footer">
+    <button nz-button nzType="default" (click)="cancelModal()">取消</button>
+    <button nz-button nzType="primary" [disabled]="selectItems.length === 0" (click)="confirmModal($event)">确定</button>
+</div>
+
+
+<ng-template #titleTemp>
+    <button nz-button nzType="danger" [disabled]="getNumByChecked() === 0" (click)="batchRemoveItems($event)">删除<span *ngIf="getNumByChecked() > 0">（{{getNumByChecked()}}）</span></button>
+</ng-template>

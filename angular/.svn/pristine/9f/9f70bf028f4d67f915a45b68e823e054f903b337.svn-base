@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-settle-material-order',
+  templateUrl: './settle-material-order.component.html',
+  styleUrls: ['./settle-material-order.component.scss']
+})
+export class SettleMaterialOrderComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

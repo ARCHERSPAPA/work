@@ -1,0 +1,79 @@
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+
+@Component({
+    selector: 'rev-supplier-material',
+    templateUrl: './supplier-material.component.html',
+    styleUrls: ['./supplier-material.component.scss']
+})
+export class SupplierMaterialComponent implements OnInit {
+    public title: string;
+    public buttons: Array<any>;
+    public showBtn = true;
+    public showTitle = true;
+    public url;
+    public isInfo = false; //区别了详情里面的TITLE组件
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute) {
+    }
+
+    ngOnInit() {
+        this.buttons = [{
+            name: '创建合作商',
+            link: '/rev/supplier/material/add'
+        }];
+    }
+
+    //获取button的名称
+    handleName(name: string) {
+        console.log(name)
+        switch (name) {
+            case '创建合作商':
+                this.router.navigate(['./add'], {relativeTo: this.activatedRoute});
+                break;
+            default:
+                this.router.navigate(['./list'], {relativeTo: this.activatedRoute});
+                break;
+        }
+    }
+
+    ngDoCheck() {
+        this.title = this.getTitle();
+        this.url = this.activatedRoute.snapshot['_routerState'].url.toString();
+        if (this.url.indexOf('list') >= 0) {
+            this.showBtn = true;
+        } else {
+            this.showBtn = false;
+        }
+        if (this.url.indexOf('info') >= 0  && this.url.indexOf('edit')<0) {
+            this.isInfo = true;
+        } else {
+            this.isInfo = false;
+        }
+        this.showBtn = this.url.indexOf("list") > -1;
+    }
+
+//获取标题
+    getTitle() {
+        const url = this.router.url.match(/supplier\/material\/[a-z]+/g);
+        if (url && url.length > 0 && url[0].includes('add')) {
+            return '创建合作商';
+        } else if (url && url.length > 0 && this.router.url.includes('edit')) {
+   
+            if (this.router.url.includes('type=0')) {
+                return '编辑材料'
+            } else if(this.router.url.includes('type=2')){
+                return '修改材料';
+            }
+            else if(this.router.url.includes('newMaterial')){
+                return '创建材料';
+            }
+            else if(this.router.url.includes('type=3')){
+                return '编辑材料';
+            }
+
+        } else if (url && url.length > 0 && url[0].includes('list')) {
+            return '材料商管理'
+        }
+    }
+}

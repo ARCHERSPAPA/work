@@ -1,0 +1,28 @@
+.cost-add {
+    .form {
+        display: inline-block;
+        width: 696px;
+        margin-top: 48px;
+    }
+    .layout {
+        margin-top: 16px;
+    }
+    .inputCompact {
+        width: 50%;
+        display: inline-flex;
+      
+    }
+    .count{
+        position: absolute;
+        bottom: -21px;
+        right: 8px;
+    }
+    .infoCli{
+        width: 580px;
+        display: inline-block;
+        position: absolute;
+        height: 39px;
+        z-index: 300;
+    }
+
+}

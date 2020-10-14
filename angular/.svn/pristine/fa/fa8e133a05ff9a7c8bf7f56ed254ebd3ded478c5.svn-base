@@ -1,0 +1,9 @@
+@charset "utf8";
+.item-basic .ant-table-tbody>tr>td{
+  max-width: 80px;
+  font-size: 14px;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

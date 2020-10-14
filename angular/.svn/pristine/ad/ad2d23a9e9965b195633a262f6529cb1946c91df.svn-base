@@ -1,0 +1,373 @@
+import { Component, OnInit ,ViewChild } from '@angular/core';
+import { atob } from '../../../../model/methods';
+import { Router, ActivatedRoute } from '@angular/router';
+import { auditStatus, Default } from './../../../../model/constant';
+import { HttpHeaders, HttpParams, HttpClient } from '@angular/common/http';
+import { ApiService } from '../../../../service/api.service';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { btoa } from '../../../../model/methods';
+import { ThrowStmt } from '@angular/compiler';
+import { data } from 'jquery';
+@Component({
+  selector: 'rev-supplier-material-info',
+  templateUrl: './supplier-material-info.component.html',
+  styleUrls: ['./supplier-material-info.component.scss']
+})
+export class SupplierMaterialInfoComponent implements OnInit {
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private httpClient: HttpClient,
+    private apiService: ApiService,
+    private req: RequestService,
+    private warn: WarningService,
+  ) { }
+
+  public pageNo: number = Default.PAGE.PAGE_NO;
+  public pageSize: number = Default.PAGE.PAGE_SIZE;
+  public total: number = Default.PAGE.PAGE_TOTAL;
+  public title: string = '材料';
+  public buttons: Array<any>;
+  public showBtn = true;
+  public showTitle = true;
+  public pageType = 0;
+  public brand = []; //品牌
+  public serchs = {};//搜索
+
+  //图片
+  public _albums = [];
+  public index = 0;
+  public brandType = [{ id: 1, content: '全部数据' }];
+  public type;
+  public id;  //材料商ID
+  public ids = [];  //材料ID租
+  public checkedNumber; //已选数量
+  public materialType;
+  public httpOptions = {
+    withCredentials: true
+  };
+  @ViewChild('uploadFile') uploadFile: any;
+  //查询相关
+  public isAllDisplayDataChecked: boolean;
+  public indeterminate = false;
+  public radioSwitch = [
+    {
+      key: 0,
+      text: '已创建'
+    },
+    {
+      key: 1,
+      text: '审核中'
+    },
+    {
+      key: 2,
+      text: '已通过'
+    },
+    {
+      key: 3,
+      text: '未通过'
+    },
+  ];
+  public materialList = [];
+  public defaultPage ;
+  public downExcel;
+  ngOnInit() {
+    this.materialType = auditStatus;
+    this.buttons = [{
+      name: '模板下载',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '新建导入',
+      link: '/rev/supplier/material/add',
+      type: 'default'
+    },
+    {
+      name: '创建材料',
+    }];
+    this.activatedRoute.queryParams.subscribe(params => {
+     
+      if (params && params['name']) {
+        this.title = params['name'];
+   
+      }
+      if (params && params['pageType']) {
+        this.pageType = params['pageType'];
+      }
+      if (params && params['id']) {
+        this.id = atob(params['id']);
+      }
+    });
+    if (this.pageType == 0) {
+      this.defaultPage = this.radioSwitch[0]
+    } else if (this.pageType == 1) {
+      this.defaultPage = this.radioSwitch[1]
+    }
+    else if (this.pageType == 2) {
+      this.defaultPage = this.radioSwitch[2]
+    }
+    else if (this.pageType == 3) {
+      this.defaultPage = this.radioSwitch[3]
+    }
+    this.changeData();
+    this.getDownLoadExcel();
+  }
+
+  btoa(id: string) {
+    return btoa(id);
+  }
+//下载模板
+getDownLoadExcel(){
+  this.req.doPost({
+    url:'downloadExcel',
+    success:res=>{
+      if (res.code === 200) {
+        this.downExcel=res.data;
+        // this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+        // that.loadData();
+      } else {
+        this.warn.onError(res.msg || Messages.FAIL.DATA);
+      }
+  
+    }
+  })
+}
+
+ //上传文件
+  handleFileChange(e) {
+    const that = this;
+    const files = e.target.files;
+    const file = files[0];
+    // files[0]['uploadString'] = Date.now();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('versionType', '1');
+    // formData.append('supplierId', this.id);
+
+    let httpParams = new HttpParams();
+    httpParams.set('supplierId',this.id);
+    this.httpOptions['params']={'supplierId':this.id+''}
+    this.httpClient.post(this.apiService.getUrl('materialImportExcel'), formData,this.httpOptions)
+      .subscribe(
+        (res: any) => {
+          if (res.code === 200) {
+            this.changeData();
+            that.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+            // that.loadData();
+          } else {
+            that.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        },
+        error => {
+          that.warn.onWarn('请求失败');
+        }
+      );
+    this.uploadFile.nativeElement.value = '';
+  }
+
+  //搜索相关返回
+  handleCategory(e) {
+    this.type = e['categoryName']
+    this.brand = [];
+    this.changeData()
+  }
+  handleBrand(e) {
+    this.brand = e;
+    this.changeData()
+  }
+  handleSearch(e) {
+    this.serchs = e;
+    this.changeData()
+  }
+  checkSubmit() {
+    return this.materialList.some(v => {
+      return v['checked']
+    })
+  }
+  changeIpt(e) {
+    this.serchs = e;
+  }
+  //切换
+  handleName(e) {
+    switch (e) {
+      case '创建材料': this.router.navigate(['./../edit'], { queryParams: { newMaterial: true, supplierId: btoa(this.id) }, relativeTo: this.activatedRoute });
+        break;
+      case '新建导入':
+      document.getElementById('import').click();
+        break;
+        case '模板下载':
+          const a = document.createElement('a');
+          a.href = this.downExcel;
+          a.click();
+            break;
+      default:
+        break;
+    }
+  }
+  //切换RADIO
+  handleSwitch(e) {
+    this.pageType = e;
+    this.router.navigate(['./'], { queryParams: { pageType:this.pageType,id:btoa(this.id),name:this.title }, relativeTo: this.activatedRoute });
+    this.changeData();
+  }
+  //审核撤回
+  apply(id) {
+    let url
+
+    if (this.pageType == 0 || this.pageType == 3) {
+      url = 'submitMaterDetial'
+    } else {
+      url = 'submitMaterialRecall'
+    }
+    if (id) {
+      this.ids.push(id)
+    } else {
+      this.materialList.forEach(v => {
+        console.log(v)
+        if (v['checked']) {
+          this.ids.push(v['id']);
+        }
+      })
+    }
+    console.log(this.ids)
+    this.req.doPost({
+      url: url,
+      data: {
+        materialList: this.ids,
+        supplierId:this.id
+      },
+      success: res => {
+        if (res.code === 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          this.changeData();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+
+      }
+    })
+  }
+//合并SPU等列
+  getNums(index) {
+    let current = this.materialList[index];
+    let next = this.materialList[index + 1];
+    if (next) {
+      if (current.spu === next.spu) {
+        if (current["rows"]) {
+          current["rows"] = current["rows"] + 1;
+        } else {
+          current["rows"] = 2;
+        }
+        next["rows"] = current["rows"];
+        current["rows"] = 0;
+      } else {
+        if (!current["rows"]) {
+          current["rows"] = 1;
+        }
+        if (!next["rows"]) {
+          next["rows"] = 1;
+        }
+      }
+    }
+  }
+  //获取已选的条数
+  getNum() {
+    this.checkedNumber = 0;
+    this.materialList.forEach(v => {
+      if (v['checked']) {
+        this.checkedNumber += 1
+      }
+    })
+  }
+  //单选
+  refreshStatus() {
+    const allChecked = this.materialList.every(value => value.checked === true);
+    const allUnChecked = this.materialList.every(value => !value.checked);
+    this.isAllDisplayDataChecked = allChecked;
+    this.indeterminate = (!allChecked) && (!allUnChecked);
+    this.getNum();
+  }
+
+  appPermission(data) {
+
+  }
+  //全选
+  checkAll(event) {
+    if (event) {
+      this.materialList.filter((item, i) => {
+        item['checked'] = true;
+      });
+    } else {
+      this.materialList.filter(item => {
+        item['checked'] = false;
+      });
+    }
+    this.indeterminate = false;
+    this.getNum()
+  }
+
+  changeData(...arr) {
+    let parm = { supplierId: this.id, pageSize: this.pageSize, pageNum: this.pageNo, status: this.pageType }
+    if (this.serchs) {
+      if (this.serchs['spu']) {
+        parm['spu'] = this.serchs['spu'];
+      }
+      if (this.serchs['sku']) {
+        parm['sku'] = this.serchs['sku'];
+      }
+      if (this.serchs['name']) {
+        parm['name'] = this.serchs['name'];
+      }
+      if (this.serchs['spec']) {
+        parm['spec'] = this.serchs['spec'];
+      }
+      if (this.serchs['model']) {
+        parm['model'] = this.serchs['model'];
+      }
+    }
+
+    let i = this.brand.indexOf(1)
+    if (i > 0 || this.brand[0] == 1) {
+      this.brand.splice(i, 1)
+    }
+    if (this.brand && this.brand.length > 0) {
+      parm['brand'] = this.brand;
+    }
+
+    if (this.type && this.type != 1) {
+      parm['category'] = this.type;
+    }
+    this.req.doPost({
+      url: 'detailMaterialList',
+      data: parm,
+      success: res => {
+        if (res.code === 200) {
+          this.materialList = res.data.list;
+          this.materialList.filter((v, i) => {
+            v['checked'] = false;
+            v["rows"] = 1;
+          })
+          this.materialList.reverse().forEach((v, i) => {
+            this.getNums(i);
+          })
+          this.checkedNumber = ''
+          this.total = res.data.total;
+          this.indeterminate=false;
+          this.ids=[]
+          this.isAllDisplayDataChecked=false;
+          this.materialList = this.materialList.reverse();
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+  }
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+  }
+}

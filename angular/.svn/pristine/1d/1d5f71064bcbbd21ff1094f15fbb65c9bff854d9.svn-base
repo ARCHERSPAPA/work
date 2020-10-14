@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-cost-base-detail',
+  templateUrl: './cost-base-detail.component.html',
+  styleUrls: ['./cost-base-detail.component.scss']
+})
+export class CostBaseDetailComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

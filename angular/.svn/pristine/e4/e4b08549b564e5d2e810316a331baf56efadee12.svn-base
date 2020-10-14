@@ -1,0 +1,289 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Default } from '../../../../model/constant';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { Messages } from '../../../../model/msg';
+import { btoa } from '../../../../model/methods';
+import {compiledTplId} from '../../../../model/methods';
+import { UserService } from '../../../../service/user.service';
+import { FormBuilder, FormGroup, FormControlName, Validators, FormControl } from '@angular/forms';
+
+@Component({
+  selector: 'rev-temp-pack-list',
+  templateUrl: './temp-pack-list.component.html',
+  styleUrls: ['./temp-pack-list.component.scss','./../../temp-basic/temp-basic-list/temp-basic-list.component.scss','./../../template.component.scss']
+})
+export class TempPackListComponent implements OnInit {
+
+  	public title: string;
+    public buttons;
+    
+    public wholeForm: FormGroup;
+    public isVisible = false;
+    public packageName: string;
+    public remark: string;
+
+	public radioSwitch = [
+        {
+			key: 1,
+			text: '已上架'
+		},
+		{
+			key: 0,
+			text: '未上架'
+		}
+	];
+	public state = 1; // 0未上架 1已上架
+	public defaultRadio: any; // 默认选中的单选框
+
+	public checkedNumber:Array<any> = []; //选中的数据
+
+	public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+	public total: number = Default.PAGE.PAGE_TOTAL;
+	public saleList:Array<any> = []; // 表格数据
+	public isAllDisplayDataChecked: boolean;
+	public indeterminate = false;
+
+	constructor(
+		private router: Router,
+		private activatedRoute: ActivatedRoute,
+		private request: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder,
+        private user: UserService
+	) { }
+
+	ngOnInit() {
+		this.title = '整装管理';
+		this.buttons = [{
+			color: 'btn-primary',
+			name: '创建'
+        }];
+
+        this.wholeForm = this.fb.group({
+            packageName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]],
+            remark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+
+		this.activatedRoute.queryParams.subscribe((params) => {
+            if (params) {
+				this.state = params["state"]?Number(params["state"]):1;
+                this.defaultRadio = this.state > 0? this.radioSwitch[0]:this.radioSwitch[1];
+                if (params["page"]) {
+                    this.pageNo = params["page"] > 0 ? params["page"] : Default.PAGE.PAGE_NO;
+                }
+				this.changeData();
+            }
+        })
+
+	}
+	// 创建
+	handleName(e) {
+		if (e === this.buttons[0].name) {
+            this.showModal();
+        }
+    } 
+    
+    showModal() {
+        this.wholeForm.reset();
+        this.isVisible = true;
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+    }
+
+    //创建整装
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        if (that.wholeForm.valid) {
+            const params = that.wholeForm.value;
+            params['packageType'] = 2;
+            that.request.doPost({
+                url: 'addPackage',
+                data: params,
+                success: (res => {
+                    that.handleCancel();
+                    if (res && res.code == 200) {
+                        that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.changeData();
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    /* 已上架-未上架
+     * @param 1已上架 0未上架
+     */
+	handleSwitch(e) {
+        this.state = e;
+        this.resetData();
+	}
+
+	changeData(...args) {
+        const that = this;
+        if (args && args.length > 0) {
+            this.pageNo = Default.PAGE.PAGE_NO;
+        }
+        const params = {
+            pageNo: this.pageNo,
+            packageType: 2,
+            state:this.state      
+        };
+        this.request.doPost({
+            url: 'versionPackageList',
+            data: params,
+            success: (res => {
+                if (res && res.code == 200) {
+                    that.saleList =res.data.list;
+                    this.isAllDisplayDataChecked = false;
+                    this.indeterminate = false;
+                    if(that.saleList && that.saleList.length > 0){
+                        that.saleList.filter(v => {
+                            v['checked'] = false;
+                        });
+                    }
+                    that.total = res.data.total;
+                } else {
+                    that.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    //数据置为原始值域
+    resetData(){
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.indeterminate = false;
+        this.isAllDisplayDataChecked = false;
+        this.changePage();
+    }
+    
+    //编译id
+    getCompileById(id: number) {
+        return compiledTplId(id);
+    }
+
+	//全选
+	checkAll(e) {
+        this.isAllDisplayDataChecked = e;
+        this.saleList.forEach(item =>{
+            item.checked = this.isAllDisplayDataChecked;
+        })
+        this.refreshStatus();
+	}
+	
+	//单个选择
+    refreshStatus() {
+        const allChecked = this.saleList.every(value => value.checked === true);
+        const allUnChecked = this.saleList.every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+		this.indeterminate = (!allChecked) && (!allUnChecked);
+		this.checkedNumber = this.saleList.filter(value => value.checked);
+	}
+	// 翻页
+	changePage(){
+        this.checkedNumber = [];
+		this.router.navigate(['./'], {
+            queryParams: {
+				page: this.pageNo,
+				state: this.state
+            }, relativeTo: this.activatedRoute
+        });
+    }
+    //批量上下架
+    versionShelve(str){
+        const that = this;
+        const param = {};
+        let ids = [];
+        this.checkedNumber.forEach(item=>{
+            ids.push(item.id)
+        })
+        param['ids'] = ids;
+        switch (str){
+            case 'on':
+                param['type'] = 1;
+                break;
+            case 'off':
+                param['type'] = 2;
+                break;
+            case 'del':
+                param['type'] = 3;
+                break;
+        }
+        that.request.doPost({
+            url: 'operationPackage',
+            data: param,
+            success: function (res) {
+                if (res && res.code === 200) {
+                    that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.checkedNumber = []
+                    that.changeData();
+                } else {
+                    that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        });
+    }
+
+	// 表格操作
+	handleOperate(str, item){
+		const that = this;
+        const param = {};
+        let url = '';
+        switch (str) {
+            case 'del':
+                url = 'operationPackage';
+                param['type'] = 3;
+                param['ids'] = [item.id];
+                break;
+            case 'copy':
+                url = 'copyPackage';
+                param['id'] = item.id;
+                break;
+            case 'on':
+                url = 'operationPackage';
+                param['type'] = 1;
+                param['ids'] = [item.id];
+                break;
+            case 'off':
+                url = 'operationPackage';
+                param['type'] = 2;
+                param['ids'] = [item.id];
+                break;
+        }
+
+        that.request.doPost({
+            url: url,
+            data: param,
+            success: function (res) {
+                if (res && res.code === 200) {
+                    that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    that.checkedNumber = [];
+                    that.changeData();
+                } else {
+                    that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            }
+        });
+	}
+	
+
+	btoa(id: string) {
+		return btoa(id);
+	}
+
+}

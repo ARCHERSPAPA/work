@@ -1,0 +1,612 @@
+import {Component, OnInit} from '@angular/core';
+import * as UserValidate from '../../../../validate/user-validate';
+import {Messages} from '../../../../model/msg';
+import {ItemPublishComponent} from '../../../../plugins/item-publish/item-publish.component';
+import {RequestService} from '../../../../service/request.service';
+import {WarningService} from '../../../../service/warning.service';
+import {UpfileComponent} from '../../../../plugins/upfile/upfile.component';
+import {QuoteService} from '../../../../service/quote.service';
+import {UserService} from '../../../../service/user.service';
+import {Router, ActivatedRoute, NavigationStart, NavigationEnd, NavigationCancel} from '@angular/router';
+import {FormBuilder, Validators, FormGroup} from '@angular/forms';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {HeaderService} from '../../../../service/header.service';
+
+import * as DataSet from '@antv/data-set';
+import {atob, toInteger} from '../../../../model/methods';
+import {CostDetailService} from "../cost-detail.service";
+
+@Component({
+    selector: 'rev-cost-detail-contract',
+    templateUrl: './cost-detail-contract.component.html',
+    styleUrls: ['./../../cost.component.scss', './../../../detail/detail.scss', './../cost-detail.component.scss'],
+    providers: [CostDetailService]
+})
+export class CostDetailContractComponent implements OnInit {
+
+    public msg: string;
+    public cid: string;
+    //成本id
+    public pid: string;
+
+    public costForm: FormGroup;
+
+    //工程总价
+    public finalPrice: number;
+    //材料费用
+    public materialCost: number;
+    //工程成本费
+    public finalCost: number;
+    //人工费
+    public laborCost: number;
+    //木工费
+    public carpentryCost: number;
+    //泥工费
+    public masonCost: number;
+    //漆工费
+    public paintCost: number;
+    //水电工费
+    public electricianCost: number;
+
+    public materialPercentage = '';
+    public pauseCompleted: boolean;
+    public lockState: boolean;
+    public laborPercentage = '';
+    public profit: number;
+    public profitPercentage = '';
+    public costUrl = '';
+
+    //上传状态
+    public state = 0;
+
+    /**
+     * 批注列表信息
+     */
+    public notices: Array<any>;
+
+    /**
+     * 图片放大
+     * @type {boolean}
+     */
+    public visibleImg = false;
+    public largeImg: string;
+
+    //切换按钮控制
+    public radioSwitch = [{
+        key: 1,
+        text: '预算'
+    }, {
+        key: 0,
+        text: '成本'
+    }];
+
+
+    public data: any;
+    public tooltip: any;
+    public color: any;
+    public itemTpl: any;
+    public baseQuote: any;
+
+    constructor(private quote: QuoteService,
+                private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private warn: WarningService,
+                private fb: FormBuilder,
+                private user: UserService,
+                private modal: NgbModal,
+                private header: HeaderService,
+                private costDetail:CostDetailService) {
+
+    }
+
+    ngOnInit() {
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['cid']) {
+                this.cid = atob(params['cid']);
+            }
+            if (params && params['pid']) {
+                this.pid = atob(params['pid']);
+                this.renderDetail(this.pid);
+                this.loadNotice(this.pid);
+            }
+        });
+
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationStart) {
+                this.msg = Messages.LOADING;
+            } else if (event instanceof NavigationEnd) {
+                setTimeout(() => {
+                    this.msg = null;
+                }, 1000);
+            } else if (event instanceof NavigationCancel) {
+                this.msg = null;
+            }
+        });
+
+        this.costForm = this.fb.group({
+            materialCost: [this.materialCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            laborCost: [this.laborCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            carpentryCost: [this.carpentryCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            masonCost: [this.masonCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            paintCost: [this.paintCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            electricianCost: [this.electricianCost, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]],
+            finalPrice: [this.finalPrice, [
+                Validators.required,
+                UserValidate.ValidatePrice
+            ]]
+        });
+    }
+
+    /**
+     * 渲染chart
+     * @param total 工程总额
+     * @param cost 成本费用
+     */
+    renderChart(total, cost) {
+
+        const sourceData = [
+            {type: '成本', count: cost ? cost : 0},
+            {type: '毛利', count: total - (cost ? cost : 0)}
+        ];
+
+
+        const dv = new DataSet.View().source(sourceData);
+        dv.transform({
+            type: 'percent',
+            field: 'count',
+            dimension: 'type',
+            as: 'percent'
+        });
+
+        const data = dv.rows;
+        this.data = data;
+
+        this.tooltip = ['type*count', (type, count) => {
+            return {
+                name: type,
+                value: count
+            };
+
+        }];
+        this.color = ['type', ['#69C0FF', '#1890FF']];
+
+        this.itemTpl = '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>';
+
+    }
+
+    ngDoCheck() {
+        if (this.header.getHeaderInfo() && this.header.getHeadBool()) {
+            // this.header.setHeadBool(false);
+            this.baseQuote = this.header.getHeaderInfo()['quoteBase'];
+        }
+    }
+
+    changeData() {
+        this.renderData();
+        this.renderChart(this.finalPrice, this.finalCost);
+    }
+
+    renderData() {
+        // if(this.costForm.valid){
+        this.finalCost = Number(this.materialCost) + Number(this.laborCost);
+
+        if (!isNaN(this.materialCost) && !isNaN(this.finalPrice) && this.finalPrice != 0) {
+            this.materialPercentage = ((Number(this.materialCost) / Number(this.finalPrice)) * 100).toFixed(2) + '%';
+        }
+
+        if (!isNaN(this.laborCost) && !isNaN(this.finalPrice) && this.finalPrice != 0) {
+            this.laborPercentage = ((Number(this.laborCost) / Number(this.finalPrice)) * 100).toFixed(2) + '%';
+        }
+
+        this.profit = (toInteger(this.finalPrice, 2) - toInteger(this.finalCost, 2)) / Math.pow(10, 2);
+
+        if (!isNaN(this.profit) && !isNaN(this.finalPrice) && this.finalPrice != 0) {
+            this.profitPercentage = ((Number(this.profit) / Number(this.finalPrice)) * 100).toFixed(2) + '%';
+        }
+        // }
+    }
+
+    //提交到工长
+    sendCost(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.costForm.valid) {
+            this.req.doPost({
+                url: 'sendCost',
+                data: {
+                    id: this.pid,
+                    laborCost: this.laborCost,
+                    materialCost: this.materialCost,
+                    carpentryCost: this.carpentryCost,
+                    masonCost: this.masonCost,
+                    paintCost: this.paintCost,
+                    electricianCost: this.electricianCost,
+                    finalPrice: this.finalPrice
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.renderDetail(this.pid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    //导入成本表
+    importCost(...args) {
+        const that = this;
+        const item = that.modal.open(UpfileComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: 'static'
+        });
+
+        item.result.then((res) => {
+            if (res) {
+                that.req.doPost({
+                    url: 'importCost',
+                    data: {
+                        id: this.pid,
+                        url: res
+                    },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                            this.renderDetail(this.pid);
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+        }, (rea) => {
+            if (rea) {
+                that.warn.onMsgError(rea);
+            }
+        });
+    }
+
+    /**
+     * 渲染chart 拉取详情
+     * @param pid
+     */
+    renderDetail(pid) {
+        this.costDetail.getCostDetail(pid).then(data => {
+            this.lockState = data.lockBudget ? true : false;
+            this.pauseCompleted = data.pauseCompleted;
+            this.setCost(data.cost);
+            this.changeData();
+            this.renderChart(this.finalPrice, this.finalCost);
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+    }
+
+    /**
+     * v2.1.6去除工长异议改为批注发布
+     * @param cost
+     */
+    // loadDetail(pid): Promise<any> {
+    //     return new Promise((resolve, reject) => {
+    //         if (pid) {
+    //             this.req.doPost({
+    //                 url: 'detailCost',
+    //                 data: { id: pid },
+    //                 success: (res => {
+    //                     if (res && res.code == 200) {
+    //                         this.lockState = res.data.lockBudget ? true : false;
+    //                         this.pauseCompleted = res.data.pauseCompleted;
+    //                         resolve(res.data.cost);
+    //                     } else {
+    //                         reject(res.msg || Messages.FAIL.DATA);
+    //                     }
+    //                 })
+    //             });
+    //         } else {
+    //             reject(Messages.PARAM_EMPTY);
+    //         }
+    //     });
+    //
+    // }
+
+    showTitle() {
+        // console.log(this.pauseCompleted)
+        if (this.baseQuote && this.baseQuote.confirmState !== 2 && !this.pauseCompleted) {
+            return '客户尚未确认预算，且正在在进行增减项，是否继续锁定';
+        } else if (this.baseQuote && this.baseQuote.confirmState !== 2) {
+            return '客户尚未确认预算，是否继续锁定';
+        } else if (!this.pauseCompleted) {
+            return '预算正在进行增减项，是否锁定预算';
+        } else {
+            return '锁定预算后，设计师将无法编辑预算';
+        }
+    }
+
+    /***
+     * 锁定解锁功能
+     */
+    lockContract(type: string) {
+        this.req.doPost({
+            url: 'lockContract',
+            data: {
+                quoteId: this.cid,
+                lockingBudget: type == 'lock' ? 1 : 0
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.renderDetail(this.pid);
+                    this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    showText() {
+        if (this.baseQuote && this.baseQuote.confirmState !== 2 && !this.pauseCompleted) {
+            return '锁定';
+        } else if (this.baseQuote && this.baseQuote.confirmState !== 2) {
+            return '锁定';
+        } else if (!this.pauseCompleted) {
+            return '锁定';
+        } else {
+            return '确定';
+        }
+    }
+
+    setCost(cost) {
+        this.state = cost.state;
+        this.finalPrice = cost.finalPrice ? cost.finalPrice : 0;
+        this.finalCost = cost.finalCost ? cost.finalCost : 0;
+        this.materialCost = typeof cost.materialCost != 'undefined' ? cost.materialCost : (this.materialCost ? this.materialCost : '');
+        this.laborCost = typeof cost.laborCost != 'undefined' ? cost.laborCost : (this.laborCost ? this.laborCost : '');
+        this.materialPercentage = cost.materialPercentage ? cost.materialPercentage : '';
+        this.laborPercentage = cost.laborPercentage ? cost.laborPercentage : '';
+        this.profit = cost.profit ? cost.profit : 0;
+        this.profitPercentage = cost.profitPercentage ? cost.profitPercentage : '';
+        this.costUrl = cost.costUrl ? cost.costUrl : '';
+        this.carpentryCost = typeof cost.carpentryCost != 'undefined' ? cost.carpentryCost : (this.carpentryCost ? this.carpentryCost : '');
+        this.masonCost = typeof cost.masonCost != 'undefined' ? cost.masonCost : (this.masonCost ? this.masonCost : '');
+        this.paintCost = typeof cost.paintCost != 'undefined' ? cost.paintCost : (this.paintCost ? this.paintCost : '');
+        this.electricianCost = typeof cost.electricianCost != 'undefined' ? cost.electricianCost : (this.electricianCost ? this.electricianCost : '');
+    }
+
+    /**
+     * 预览成本表
+     */
+    viewCost() {
+        this.req.doPostApp({
+            url: 'down',
+            data: 'url=' + this.costUrl,
+            success: (res => {
+                if (res && res.code == 200) {
+                    window.location.href = res.data;
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    /**
+     * 保存当前数据信息
+     * @param e
+     */
+    saveCost(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.costForm.valid) {
+            this.req.doPost({
+                url: 'saveCost',
+                data: {
+                    id: this.pid,
+                    laborCost: this.laborCost,
+                    materialCost: this.materialCost,
+                    carpentryCost: this.carpentryCost,
+                    masonCost: this.masonCost,
+                    paintCost: this.paintCost,
+                    electricianCost: this.electricianCost,
+                    finalPrice: this.finalPrice
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.renderDetail(this.pid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+
+    }
+
+    /**
+     * 是否显示预览
+     * @returns {number}
+     */
+    showViewByState() {
+        return this.state !== 0 && this.user.getChild();
+    }
+
+    /**
+     * 是否显示导入
+     * @returns {number}
+     */
+    showImportByState() {
+        return (this.state === 0 || this.state === 1 || this.state === 2) && this.user.getChild();
+    }
+
+    /**
+     * 与导入成本表状态保持一致 2019-08-30(原來是state === 1:只有未提交時)
+     * 2019-09-20 修改为在未确认合同之前均可修改
+     * @returns {number}
+     */
+    showSendByState() {
+        return (this.state === 1 || this.state === 2) && this.user.getChild();
+    }
+
+    /**
+     * 是否显示保存
+     * @returns {number}
+     */
+    showSaveByState() {
+        return (this.state === 0 || this.state === 1) && this.user.getChild();
+    }
+
+    /**
+     * 发布
+     */
+    publish() {
+        const p = this.modal.open(ItemPublishComponent, {
+            centered: true,
+            keyboard: true,
+            backdrop: 'static'
+        });
+        p.componentInstance.type = 1;
+        p.componentInstance.content = '';
+        p.componentInstance.cid = this.pid;
+        p.result.then((res) => {
+            if (res) {
+                this.req.doPost({
+                    url: 'publishNoticeCost',
+                    data: {
+                        costId: this.pid,
+                        empIds: res.empIds,
+                        content: res.content
+                    },
+                    success: (result => {
+                        if (result && result.code == 200) {
+                            this.warn.onMsgSuccess(result.msg || Messages.SUCCESS.DATA);
+                            this.loadNotice(this.pid);
+                        } else {
+                            this.warn.onMsgError(result.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+            }
+        }, (rea) => {
+            console.log(rea);
+        });
+    }
+
+    showLargeImg(src) {
+        this.visibleImg = true;
+        this.largeImg = src;
+    }
+
+    handleCancel() {
+        this.visibleImg = false;
+        this.largeImg = null;
+    }
+
+    /**
+     * 拉取批注通知列表
+     * @param id
+     */
+    loadNotice(id) {
+        if (id) {
+            this.req.doPost({
+                url: 'viewNoticeCost',
+                data: {costId: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.notices = res.data;
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    /**
+     * 转义img urls成一个array
+     */
+    transImgUrls(urls) {
+        if (urls) {
+            return JSON.parse(urls);
+        }
+        return false;
+    }
+
+    /**
+     * 获取通知人员名单
+     * @param ps 人员
+     * @returns {any}
+     */
+    getNoticeInfo(ps) {
+        const item = [];
+        if (ps && ps.length > 0) {
+            ps.forEach(p => {
+                item.push(p.positionName ? p.realName + '（' + p.positionName + '）' : p.realName);
+            });
+        }
+        return item.join('、');
+    }
+
+    /**
+     * 判定是否为自建
+     */
+    justBuildBySelf(id) {
+        return this.user.getId() === id;
+    }
+
+    delNotice(id) {
+        if (id && this.pid) {
+            this.req.doPost({
+                url: 'delNoticeCost',
+                data: {
+                    costId: this.pid,
+                    modifyId: id
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadNotice(this.pid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    hiddenNotice(notices) {
+        let flag = false;
+        if (notices && notices.length > 0) {
+            notices.forEach(n => {
+                if (!n.state) {
+                    flag = true;
+                    return;
+                }
+            });
+        }
+        return flag;
+    }
+
+
+}

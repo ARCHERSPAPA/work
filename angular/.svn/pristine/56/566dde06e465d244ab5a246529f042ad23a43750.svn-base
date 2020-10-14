@@ -1,0 +1,4 @@
+<p>
+  settle-material-wage works!
+</p>
+<a [routerLink]="['./../detail']">到详情去</a>

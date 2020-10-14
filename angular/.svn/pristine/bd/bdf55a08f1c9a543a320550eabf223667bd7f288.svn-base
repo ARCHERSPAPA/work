@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-temp-pack-edit',
+  templateUrl: './temp-pack-edit.component.html',
+  styleUrls: ['./temp-pack-edit.component.scss']
+})
+export class TempPackEditComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

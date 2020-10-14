@@ -1,0 +1,384 @@
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {RequestService} from '../../../../service/request.service';
+import {FormGroup, FormBuilder, Validators, FormControl} from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {atob} from '../../../../model/methods';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ItemBasicComponent} from "../../../../plugins/item-basic/item-basic.component";
+
+@Component({
+  selector: 'rev-temp-suit-edit',
+  templateUrl: './temp-suit-edit.component.html',
+  styleUrls: ['./temp-suit-edit.component.scss','./../../template.component.scss',]
+})
+export class TempSuitEditComponent implements OnInit {
+
+    public mealForm: FormGroup;
+    public pState:number;
+    public sid: string;
+    public companyId: number;
+    //主要内容修改(参数)
+    public isVisible = false;
+    public mealName: string;
+    public price: number;
+    public areaStart: number;
+    public areaEnd: number;
+    public remark: string;
+    public hxArray: Array<any> = [];
+
+    public pkg: any;
+    //说明
+    public info: string;
+
+    //数据列表
+    public dataSource: Array<any> = [];
+
+    //大项的添加或者修改
+    public isBranchVisible = false;
+    public branchForm: FormGroup;
+    public branchName: string;
+    public branchTitle: string;
+    public branchItem: any;
+
+
+    constructor(private activatedRoute: ActivatedRoute,
+                private req: RequestService,
+                private fb: FormBuilder,
+                private warn: WarningService,
+                private modalService:NgbModal,) {
+    }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['sid']) {
+                this.sid = atob(params['sid']);
+                this.pState = params['pState']
+                this.loadData(this.sid);
+            }
+        });
+
+        //套餐参数设置
+        this.mealForm = this.fb.group({
+            mealName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]
+            ],
+            price: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice,
+            ]
+            ],
+            areaStart: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            areaEnd: ['', [
+                Validators.required,
+                UserValidate.ValidatePrice]
+            ],
+            remark: ['', [
+                Validators.maxLength(300)
+            ]]
+        });
+        
+        //添加或者修改大项名称
+        this.branchForm = this.fb.group({
+            branchName: ['', [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+    }
+
+
+    /**
+     * 加载头部基础数据
+     * @param sid
+     */
+    loadData(sid) {
+        const that = this;
+        if (sid) {
+            that.req.doPost({
+                url: 'packageInfoList',
+                data: {id: sid},
+                success: (res => {
+                    if (res && res.code === 200) {
+                        res.data.package.roomType = JSON.parse(res.data.package.roomType);
+                        that.pkg = res.data.package;
+                        if (res.data && res.data.package && res.data.package.offerExplain) {
+                            that.info = res.data.package.offerExplain;
+                        }
+                        if (res.data && res.data.infoVoList && res.data.infoVoList.length > 0) {
+                            that.dataSource = res.data.infoVoList;
+                        } else {
+                            that.dataSource = [];
+                        }
+                        that.setTitleParams(res.data.package);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+
+    }
+
+    showModal(data) {
+        this.isVisible = true;
+        this.setTitleParams(data);
+    }
+
+    setTitleParams(data) {
+        this.price = data.price;
+        this.mealName = data.packageName;
+        this.areaStart = data.houseArea.split('-')[0].split('㎡')[0];
+        this.areaEnd = data.houseArea.split('-')[1].split('㎡')[0];
+        this.remark = data.remark;
+        this.hxArray = [];
+        this.getHxArray(data.roomTypeList);
+    }
+
+    getHxArray(roomList) {
+        if (roomList && roomList.length > 0) {
+            for (let i = 0; i < roomList.length; i++) {
+                const control = {id:i, room: `room${i}`, bath: `bath${i}`};
+                const index = this.hxArray.push(control);
+                this.mealForm.addControl(this.hxArray[index - 1].room, new FormControl(roomList[i].room, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+                this.mealForm.addControl(this.hxArray[index - 1].bath, new FormControl(roomList[i].toilet, [
+                    Validators.required,
+                    Validators.max(99)
+                ]));
+            }
+        } else {
+            this.addHx();
+        }
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        // this.mealForm.reset();
+    }
+
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        if (that.mealForm.valid && that.sid) {
+            if (Number(that.areaStart) < Number(that.areaEnd)) {
+                // const companyId = this.user.getCompanyId();
+                const params = {
+                    packageType: 1,
+                    packageName: that.mealName,
+                    price: that.price,
+                    houseArea: that.areaStart + '㎡-' + this.areaEnd + '㎡',
+                    roomType: that.getHxByParams(this.mealForm.value),
+                    remark: that.remark,
+                    id: that.sid
+                };
+                that.req.doPost({
+                    url: 'addPackage',
+                    data: params,
+                    success: (res => {
+                        that.handleCancel();
+                        if (res && res.code == 200) {
+                            that.warn.onMsgSuccess(res.msg);
+                            that.loadData(that.sid);
+                        } else {
+                            that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                });
+
+            } else {
+                that.warn.onMsgWarn(Messages.AREAS);
+            }
+        }
+
+    }
+
+    /**
+     * 新增户型单元
+     */
+    addHx() {
+        console.log(this.hxArray)
+        const id = (this.hxArray.length > 0) ? this.hxArray[this.hxArray.length - 1].id + 1 : 0;
+        const control = {id, room: `room${id}`, bath: `bath${id}`};
+        const index = this.hxArray.push(control);
+        this.mealForm.addControl(this.hxArray[index - 1].room, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+        this.mealForm.addControl(this.hxArray[index - 1].bath, new FormControl(null, [
+            Validators.required,
+            Validators.max(99)
+        ]));
+    }
+
+    /**
+     * 删除户型
+     * @param {number} index
+     */
+    delHx(control: any, index: number, e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.hxArray.length > 1) {
+            this.mealForm.removeControl(control.room);
+            this.mealForm.removeControl(control.bath);
+            this.hxArray.splice(index, 1);
+        }
+    }
+
+    /**
+     * 获取当前数组对象信息
+     * @param values
+     * @returns {any[]}
+     */
+    getHxByParams(values) {
+        const arr = [];
+        if (values) {
+            this.hxArray.forEach(item => {
+                console.log(item.room)
+                console.log(item.bath)
+                arr.push(values[item.room] + '室' + values[item.bath] + '卫');
+            });
+        }
+        return arr;
+    }
+
+    /**
+     * 添加或者修改大类（type=>1:添加，2：修改）
+     * @param {number} type
+     */
+    showBranchModal(type: number = 1, ...args) {
+        this.isBranchVisible = true;
+        this.branchTitle = (type === 1) ? '添加大类' : '修改大类';
+        if (args && args.length > 0) {
+            this.branchItem = args[0];
+            this.branchName = this.branchItem.packageName;
+        } else {
+            this.branchItem = null;
+        }
+
+    }
+
+    handleBranchOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        if (that.branchForm.valid) {
+            let params = {};
+            if (that.branchItem && that.branchItem.id) {
+                 params = {
+                     id: that.branchItem.id,
+                     packageName: that.branchForm.value.branchName
+                 };
+            } else {
+                params = {
+                    packageName: that.branchForm.value.branchName,
+                    id: that.sid
+                };
+            }
+            that.req.doPost({
+                url: (that.branchItem && that.branchItem.id > 0) ? 'updatePackageInfo' : 'addPackageInfo',
+                data: params,
+                success: (res => {
+                    that.handleBranchCancel();
+                    if (res && res.code == 200) {
+                        that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        that.loadData(that.sid);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+
+        }
+    }
+
+    handleBranchCancel() {
+        this.isBranchVisible = false;
+        this.branchForm.reset();
+    }
+
+
+    delBranchItem(id: number) {
+        if (id) {
+            this.req.doPost({
+                url: 'versionDeletePackageInfo',
+                data: {id: id},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadData(this.sid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+    // 添加小项
+    openItem(type:number = 1,...data){
+        const modal =  this.modalService.open(ItemBasicComponent,
+            {
+                centered: true,
+                keyboard: true,
+                size:"lg"
+            });
+        modal.componentInstance.type = type;
+        modal.result.then(res =>{
+            console.log(res);
+            let ids = [];
+            res.forEach(item=>{
+                ids.push(item.id)
+            })
+            this.req.doPost({
+                url: 'addsuiteBase',
+                data: {
+                    packageId:this.sid,
+                    parentId: data[0].id,
+                    ids
+                },
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.loadData(this.sid);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        },(err) =>{
+            console.log(err);
+        })
+
+    }
+
+    //保存说明
+    handleSaveExplain() {
+        const that = this;
+        if (that.sid) {
+            that.req.doPost({
+                url: 'addPackage',
+                data: {id: that.sid, offerExplain: that.info.trim()},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        that.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                    } else {
+                        that.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+
+}

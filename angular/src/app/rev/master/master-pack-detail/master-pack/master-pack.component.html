@@ -1,0 +1,250 @@
+<div class="master">
+  <div class="master-head">
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+  </div>
+
+  <div class="master-warp">
+    <div nz-row class="mt-24">
+      <div nz-col nzSpan="8">
+        <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+      </div>
+      <div nz-col nzSpan="12" nzOffset="4">
+        <div nz-row nzType="flex" nzJustify="end">
+            <nz-select class="select-combos" [nzPlaceHolder]="'请选择套系'" nzAllowClear nzMode="multiple"
+                       (ngModelChange)="modelComboChange($event)" [ngModel]="comboIds">
+              <nz-option [nzValue]="c" [nzLabel]="c.comboName" *ngFor="let c of combos"></nz-option>
+            </nz-select>
+
+            <nz-select style="width: 160px;margin-right: 8px;" [nzPlaceHolder]="'请选择材料商'" nzAllowClear
+                       (ngModelChange)="modelCompanyChange($event)" [ngModel]="supplier">
+              <nz-option [nzValue]="c" [nzLabel]="c.companyName"
+                         *ngFor="let c of companys"></nz-option>
+            </nz-select>
+
+            <input style="width: 168px;margin-right: 8px;" nz-input placeholder="请输入套餐名称"
+                   [(ngModel)]="name">
+
+            <button nz-button nzType="primary" (click)="searchData()">查询</button>
+
+        </div>
+      </div>
+    </div>
+
+    <div nz-row class="mt-16">
+      <nz-table [nzData]="packs" nzSize="middle" [nzTotal]="total" [nzTitle]="header"
+                [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzFrontPagination]="false"
+                (nzPageIndexChange)="changeData()" [nzShowPagination]="true"
+                #packTable>
+          <thead>
+            <tr>
+              <th nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                  (nzCheckedChange)="checkAll($event)"></th>
+              <th>编号</th>
+              <th>套餐名称</th>
+              <th>材料商</th>
+              <th>单位</th>
+              <th>销售价</th>
+              <th>供货价</th>
+              <th>套系</th>
+              <th *ngIf="getStateIsTrue(2)">状态</th>
+              <th>编辑时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of packTable.data" >
+				<td [(nzChecked)]="p.checked"  nzShowCheckbox (nzCheckedChange)="refreshStatus()"></td>
+				<td><span>{{p.id}}</span></td>
+				<td [nzTitle]="p.name?p.name:''" nzPlacement="topLeft" nz-tooltip><span>{{p.name}}</span></td>
+				<td [nzTitle]="getCompanyName(p.supplierId)?getCompanyName(p.supplierId):''"
+					nzPlacement="topLeft" nz-tooltip>
+					<span>{{getCompanyName(p.supplierId)?getCompanyName(p.supplierId):'--'}}</span></td>
+				<td [title]="p.unit?p.unit:''"><span>{{p.unit?p.unit:'--'}}</span></td>
+				<td [title]="p.sellingPrice?p.sellingPrice:0">
+					<span>{{(p.sellingPrice?p.sellingPrice:0)| number:'1.2'}}</span></td>
+				<td [title]="p.supplyPrice?p.supplyPrice:0">
+					<span>{{(p.supplyPrice?p.supplyPrice:0) | number:'1.2'}}</span></td>
+				<td [nzTitle]="p.comboName?p.comboName:''" nzPlacement="topLeft" nz-tooltip>
+					<span>{{p.comboName?p.comboName:'--'}}</span>
+				</td>
+              <!-- <td [nzTitle]="getComboNames(p.combos)?getComboNames(p.combos):''"
+                  nzPlacement="topLeft" nz-tooltip>
+                <span>{{getComboNames(p.combos)?getComboNames(p.combos):'--'}}</span></td> -->
+				<td *ngIf="getStateIsTrue(2)"><span>{{getState(p.putaway)}}</span></td>
+				<td><span>{{p.modifyTime | date:'yy-MM-dd HH:mm'}}</span></td>
+				<td>
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(0,3)"
+					nz-popconfirm nzTitle="确认提交该套餐吗?" nzOkText="提交"
+					(nzOnConfirm)="submitItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">提交审核</a>
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(0,3)"
+					(click)="toDetail(p)">编辑</a>
+
+
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(1)"
+					nz-popconfirm nzTitle="确定撤回该套餐审核申请吗?" nzOkText="撤回"
+					(nzOnConfirm)="recallItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">撤回</a>
+
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(2)"
+					nz-popconfirm [nzTitle]="getShelfTitle(p.putaway)" [nzOkText]="p.putaway?'下架':'上架'"
+					(nzOnConfirm)="shelfItem(p.id,p.putaway?0:1)" (nzOnCancel)="cancel()"
+					nzPlacement="topLeft">{{p.putaway?'下架':'上架'}}</a>
+
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(0,2,3)"
+					nz-popconfirm nzTitle="确定删除套餐吗?" nzOkText="删除"
+					(nzOnConfirm)="deleteItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">删除</a>
+
+					<a href="javascript:void(0)" class="mr-8" *ngIf="getStateIsTrue(1,2)"
+					(click)="toDetail(p)">详情</a>
+
+				</td>
+            </tr>
+          </tbody>
+      </nz-table>
+    </div>
+
+
+
+  </div>
+
+
+
+</div>
+
+<!--table header 设置-->
+<ng-template #header>
+  <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(0,3)"
+          nz-popconfirm nzTitle="确认提交该套餐吗?" nzOkText="提交"
+          (nzOnConfirm)="submitItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">提交审核</button>
+
+  <button nz-button nzType="danger" class="ml-8"
+          [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(0,3)"
+          nz-popconfirm nzTitle="确定删除套餐吗?" nzOkText="删除"
+          (nzOnConfirm)="deleteItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">删除</button>
+
+  <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(1)"
+          nz-popconfirm nzTitle="确定撤回该套餐审核申请吗?" nzOkText="撤回"
+          (nzOnConfirm)="recallItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">撤回</button>
+
+  <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(2)"
+          nz-popconfirm nzTitle="确定下架该套餐吗?" nzOkText="下架"
+          (nzOnConfirm)="shelfItems(0)" (nzOnCancel)="cancel()" nzPlacement="topLeft">下架</button>
+
+  <button nz-button nzType="primary" class="ml-8"
+          [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(2)"
+          nz-popconfirm nzTitle="确定上架该套餐吗?" nzOkText="上架"
+          (nzOnConfirm)="shelfItems(1)" (nzOnCancel)="cancel()" nzPlacement="topLeft">上架</button>
+
+  <span class="ml-8" *ngIf="selectItems.length > 0">已选{{selectItems.length}}项</span>
+</ng-template>
+
+
+
+<!--弹出框-->
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="packTitle"
+          (nzOnCancel)="handleCancel()" [nzFooter]="footer">
+  <form nz-form [formGroup]="validateForm">
+    <!--套餐名称-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">套餐名称</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="packName" id="packName" placeholder="请输入套餐名称"
+               maxlength="30" [(ngModel)]="packName"/>
+        <nz-form-explain *ngIf="validateForm.get('packName').dirty && validateForm.get('packName').errors">
+          <ng-container *ngIf="validateForm.get('packName').hasError('required')">
+            请填写1~30位字符
+          </ng-container>
+          <ng-container *ngIf="validateForm.get('packName').hasError('minlength')">
+            请填写1~30位字符
+          </ng-container>
+          <ng-container *ngIf="validateForm.get('packName').hasError('maxlength')">
+            请填写1~30位字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <!--材料商选择-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="company">参与公司</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-select id="packSupplyId" nzShowSearch formControlName="packSupplyId" nzPlaceHolder="请选择参与公司"
+                   [(ngModel)]="packSupplyId">
+          <nz-option [nzValue]="c.id" [nzLabel]="c.companyName" *ngFor="let c of companys"></nz-option>
+        </nz-select>
+        <nz-form-explain *ngIf="validateForm.get('packCombos').dirty && validateForm.get('packCombos').errors">
+          <ng-container *ngIf="validateForm.get('packCombos').hasError('required')">
+            项目必选
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--套系选择-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="company">适用套系</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-select id="packCombos" formControlName="packCombos" nzPlaceHolder="请选择适用套系"
+                   [(ngModel)]="packCombos" nzMode="multiple">
+          <nz-option [nzValue]="c" [nzLabel]="c.comboName" *ngFor="let c of combos"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--单位-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="company">单位</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="packUnit" id="packUnit" placeholder="请输入套餐单位"
+               maxlength="10" [(ngModel)]="packUnit"/>
+        <nz-form-explain *ngIf="validateForm.get('packUnit').dirty && validateForm.get('packUnit').errors">
+          <ng-container *ngIf="validateForm.get('packUnit').hasError('maxlength')">
+            请填写10位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--销售价格-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="company">销售价</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-number [(ngModel)]="packSalePrice" id="packSalePrice" formControlName="packSalePrice"
+                         [nzMin]="0" [nzMax]="999999" [nzStep]="0.01" [nzPlaceHolder]="'请输入销售价'"
+                         style="width:100%;" [nzPrecision]="2"></nz-input-number>
+      </nz-form-control>
+    </nz-form-item>
+    <!--供货价-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="company">供货价</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-number [(ngModel)]="packSupplyPrice" id="packSupplyPrice" formControlName="packSupplyPrice"
+                         [nzMin]="0" [nzMax]="999999" [nzStep]="0.01" [nzPlaceHolder]="'请输入销售价'"
+                         style="width:100%;" [nzPrecision]="2"></nz-input-number>
+        <nz-form-explain *ngIf="validateForm.get('packSupplyPrice').dirty && validateForm.get('packSupplyPrice').errors">
+          <ng-container *ngIf="validateForm.get('packSupplyPrice').hasError('required')">
+            项目必填
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <!--备注-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="company">备注</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <textarea formControlName="packRemark" nz-input rows="4" [(ngModel)]="packRemark"
+                  placeholder="请输入300字以内的备注" maxlength="300"></textarea>
+        <nz-form-explain *ngIf="validateForm.get('packRemark').dirty && validateForm.get('packRemark').errors">
+          <ng-container *ngIf="validateForm.get('packRemark').hasError('maxLength')">
+            请填写300位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
+<ng-template #footer>
+  <div nz-row>
+    <button nz-button nzType="default" (click)="handleCancel()">取消</button>
+    <button nz-button nzType="primary" [disabled]="!validateForm.valid" (click)="handleOk()"
+            [nzLoading]="isOkLoading">提交</button>
+  </div>
+</ng-template>

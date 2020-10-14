@@ -1,0 +1,121 @@
+<div class="master-sale-add">
+	<div class="sale-head">
+		<rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+	</div>
+	<div class="sale-title mt-24">
+		<div>{{versionName?versionName:'请填写版本名称'}}</div>
+		<a href="javascript:void(0)" (click)="showModal(versionName)">修改</a>
+	</div>
+   	<div class="clearance"></div>
+	<div class="sale-add-search">
+		<div>
+			<radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+		</div>
+		<div class="search-bar">
+			<form method="post" [formGroup]="searchForm">
+				<nz-select *ngIf="state === 1" style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="全部材料" [(ngModel)]="material" [ngModelOptions]="{standalone: true}">
+					<nz-option nzValue="0" nzLabel="全部材料"></nz-option>
+					<nz-option nzValue="1" nzLabel="已通过活动"></nz-option>
+				</nz-select>
+				<nz-select style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="请选择公司" [(ngModel)]="componey" [ngModelOptions]="{standalone: true}">
+					<nz-option *ngFor="let componey of componeyStatus" [nzValue]="componey.id" [nzLabel]="componey.content"></nz-option>
+				</nz-select>
+				<nz-select style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="品牌" [(ngModel)]="brand" [ngModelOptions]="{standalone: true}">
+					<nz-option *ngFor="let brand of brandStatus" [nzValue]="brand.id" [nzLabel]="brand.content"></nz-option>
+				</nz-select>
+				<nz-select style="width: 120px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="类别" [(ngModel)]="category" [ngModelOptions]="{standalone: true}">
+					<nz-option *ngFor="let category of categoryStatus" [nzValue]="category.id" [nzLabel]="category.content"></nz-option>
+				</nz-select>
+				<input style="width: 240px; margin-right: 8px" nz-input type="text" class="text" placeholder="SPU/SKU/名称/规格/型号" formControlName="info" name="info" autocomplete="off" [(ngModel)]="info"/>
+				<button nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid" (click)="changeData(true)">查询</button>
+			</form>
+		</div>
+	</div>
+	<div class="table-head mt-24 mb-16">
+		<div class="operate">
+			<button nz-button nzType="primary" *ngIf="state === 0" [disabled]='showDel()'>删除</button>
+			<button nz-button nzType="primary" *ngIf="state === 1">添加</button>
+        	<span>已选{{checkedNumber}}项</span>
+		</div>
+		<div *ngIf="state === 0" class="upload">
+			<button nz-button nzType="default" (click)="import()">导入</button>
+			<button nz-button nzType="primary" (click)="upload()">下载</button>
+			<input type='file' #uploadFile accept=".xlsx, .xls" id="import" style="display: none;height:0;" ngModel (change)="handleFileChange($event)">
+		</div>
+	</div>
+	<nz-table 
+        #nzTable 
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+		(nzPageIndexChange)="changeDate()"
+        [nzShowPagination]='true'
+		[nzData]="materialList"
+		[nzScroll]="{x:'1300px'}"
+    >
+        <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+            	(nzCheckedChange)="checkAll($event)" nzWidth="100px" nzLeft="0px"></th>
+                <th>SPU编号</th>
+                <th>图片</th>
+                <th>品牌</th>
+                <th>类别</th>
+                <th>名称</th>
+                <th>SKU编号</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>材质</th>
+                <th>颜色</th>
+                <th>产地</th>
+                <th>单位</th>
+                <th>供货价</th>
+                <th>活动价</th>
+                <th>活动时间</th>
+                <th>材料商</th>
+                <th>销售价</th>
+                <th nzWidth="100px" nzRight="0px">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr *ngFor="let data of nzTable.data">
+                <td nzLeft="0px" [(nzChecked)]="data.checked" nzShowCheckbox (nzCheckedChange)="refreshStatus()"></td>
+                <td nzRight="0px">
+                    <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该材料吗？"
+                       nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)" class="ml-8">删除</a>
+                </td>
+            </tr> -->
+        </tbody>    
+	</nz-table>
+	<div class="shelf">
+		<button nz-button nzType="primary" (click)="shelfOn()">上架</button>
+	</div>
+</div>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="编辑版本名称" [nzFooter]="null" (nzOnCancel)="handleItemCancel()" >
+	<form nz-form [formGroup]="editionForm">
+		<nz-form-item>
+			<nz-form-label [nzSpan]="2">名称</nz-form-label>
+			<nz-form-control [nzSpan]="22">
+				<input nz-input [(ngModel)]="editionName" formControlName="editionName" (blur)="editionName=trims(editionName)" maxlength='30' minlength='1'/>
+				<nz-form-explain *ngIf="editionForm.get('editionName').dirty && editionForm.get('editionName').errors">
+					<ng-container *ngIf="editionForm.get('editionName').hasError('required')">
+						名称必填
+					</ng-container>
+					<ng-container *ngIf="editionForm.get('editionName').hasError('minlength')">
+						至少输入1位字符
+					</ng-container>
+					<ng-container *ngIf="editionForm.get('editionName').hasError('maxlength')">
+						至多输入30位字符
+					</ng-container>
+				</nz-form-explain>
+			<br>
+			</nz-form-control>
+		</nz-form-item>
+		<div class="btns">
+			<button nz-button nzType="default" (click)="handleItemCancel()">关闭</button>
+			<button nz-button nzType="primary" [disabled]="!editionForm.valid" (click)="handleItemOk()">修改
+			</button>
+		</div>
+	</form>
+</nz-modal>

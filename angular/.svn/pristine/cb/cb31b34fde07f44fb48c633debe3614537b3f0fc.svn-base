@@ -1,0 +1,132 @@
+<div class="master-sale-add">
+	<div class="sale-head">
+		<rev-title [title]="title" [show]="true"></rev-title>
+	</div>
+	<div class="sale-title mt-24">
+		<div>{{versionName?versionName:'请填写版本名称'}}</div>
+		<a href="javascript:void(0)" (click)="showModal(versionName)" *ngIf="detailState != 1">修改</a>
+	</div>
+   	<div class="clearance"></div>
+	<div class="sale-add-search mb-24" nz-row nzType="flex" nzJustify="space-between" nzAlign="top">
+		<div nz-col nzSpan="4">
+			<radio-switch *ngIf="detailState != 1" [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+		</div>
+		<div nz-col nzSpan="20">
+			<select-brand [showActivity]="state == 0 || detailState == 1" [showMaterial]="true" (handleCategory)="handleCategory($event)" (handleBrand)="handleBrand($event)" (handleMaterialSupplier)="handleMaterialSupplier($event)" (handleActivity)="handleActivity($event)" (handleSearch)="handleSearch($event)" (handleInput)="handleInput($event)" #resetData></select-brand>
+		</div>
+	</div>
+	<div class="table-head mb-16" *ngIf="detailState != 1">
+		<div class="operate">
+			<button nz-button nzType="primary" *ngIf="state === 1" [disabled]='checkedNumber.length == 0' (nzOnConfirm)="opreateMaterial('del')" nz-popconfirm nzTitle="确定删除该材料吗？" nzOkText="删除" >删除</button>
+			<button nz-button nzType="primary" *ngIf="state === 0" [disabled]='checkedNumber.length == 0' (click)="opreateMaterial('add')">添加</button>
+        	<span *ngIf="checkedNumber.length > 0">已选{{checkedNumber.length}}项</span>
+		</div>
+	</div>
+	<nz-table 
+        #nzTable 
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+		(nzPageIndexChange)="changePage()"
+        [nzShowPagination]='true'
+		[nzData]="materialList"
+		[nzBordered]="true"
+		[nzScroll]="{x:'150%'}"
+    >
+        <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+            	(nzCheckedChange)="checkAll($event)" nzWidth="100px" nzLeft="0px"></th>
+                <th>SPU编号</th>
+                <th>图片</th>
+                <th>品牌</th>
+                <th>类别</th>
+                <th>名称</th>
+                <th>SKU编号</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>材质</th>
+                <th>颜色</th>
+                <th>产地</th>
+                <th>单位</th>
+                <th>供货价</th>
+                <th>活动价</th>
+                <th>活动时间</th>
+                <th>材料商</th>
+                <th>销售价</th>
+                <th nzWidth="100px" nzRight="0px" *ngIf="detailState != 1">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of nzTable.data; let i = index;">
+				<td nzLeft="0px" [(nzChecked)]="data.checked" nzShowCheckbox (nzCheckedChange)="refreshStatus()"></td>
+				<td [attr.rowspan]="data.rows" *ngIf="data.rows!==0" [title]="data.spu?data.spu:''">{{data.spu}}</td>
+				<td [attr.rowspan]="data.rows" *ngIf="data.rows!==0">
+					<a href="javascript:void(0)" *ngIf="data.defaultImage" (click)="openBigImg(data.defaultImage)" >[图片]</a>
+					<!-- <img *ngIf="data.defaultImage" [src]="data.defaultImage" width="50" height="50" alt=""> -->
+					<span *ngIf="!data.defaultImage">--</span>	
+				</td>
+				<td [attr.rowspan]="data.rows" *ngIf="data.rows!==0" [title]="data.brand?data.brand:''">{{data.brand?data.brand:'--'}}</td>
+				<td [attr.rowspan]="data.rows" *ngIf="data.rows!==0" [title]="data.category?data.category:''">{{data.category?data.category:'--'}}</td>
+				<td [title]="data.name?data.name:''">{{data.name?data.name:'--'}}</td>
+				<td [title]="data.sku?data.sku:''">
+					<span class="sku">{{data.sku?data.sku:'--'}}</span>
+					<span *ngIf="data.remark" [nzTitle]="data.remark" nzPlacement="top" nz-tooltip>
+						<i nz-icon type="info-circle" style="position: relative;top: -6px;"></i>
+					</span>
+				</td>
+				<td [title]="data.spec?data.spec:''">{{data.spec?data.spec:'--'}}</td>
+				<td [title]="data.model?data.model:''">{{data.model?data.model:'--'}}</td>
+				<td [title]="data.material?data.material:''">{{data.material?data.material:'--'}}</td>
+				<td [title]="data.color?data.color:''">{{data.color?data.color:'--'}}</td>
+				<td [title]="data.origin?data.origin:''">{{data.origin?data.origin:'--'}}</td>
+				<td [title]="data.unit?data.unit:''">{{data.unit?data.unit:'--'}}</td>
+				<td [title]="data.supplyPrice?data.supplyPrice:''">{{data.supplyPrice?(data.supplyPrice|number:'1.2'):'--'}}</td>
+				<td [title]="data.activityPrice?data.activityPrice:''">{{data.activityPrice?(data.activityPrice|number:'1.2'):'--'}}</td>
+				<td>{{data.startTime ? (data.startTime | date:'MM-dd') + '~' + (data.endTime ? (data.endTime | date:'MM-dd'):''):'--'}}</td>
+				<td [title]="data.companyName?data.companyName:''">{{data.companyName?data.companyName:'--'}}</td>
+				<td [title]="data.sellingPrice?data.sellingPrice:''">{{data.sellingPrice?(data.sellingPrice|number:'1.2'):'--'}}</td>
+                <td nzRight="0px" *ngIf="detailState != 1">
+                    <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该材料吗？" nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)" *ngIf="state === 1">删除</a>
+					<a href="javascript:void(0)" (click)="handleOperate('add',data)" *ngIf="state === 0">添加</a>
+                </td>
+			</tr>
+        </tbody>    
+	</nz-table>
+	<div class="shelf" *ngIf="state === 1 && detailState != 1">
+		<button nz-button nzType="primary" nz-popconfirm nzTitle="确定上架该版本吗？" nzOkText="上架" (nzOnConfirm)="shelfOn('on')">上架</button>
+	</div>
+	<div class="shelf" *ngIf="detailState == 1">
+		<button nz-button nzType="primary" nz-popconfirm nzTitle="下架后设计师将无法选择该版本材料？" nzOkText="下架" (nzOnConfirm)="shelfOn('off')">下架</button>
+	</div>
+</div>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="编辑版本名称" [nzFooter]="null" (nzOnCancel)="handleItemCancel()" >
+	<form nz-form [formGroup]="editionForm">
+		<nz-form-item>
+			<nz-form-label [nzSpan]="2">名称</nz-form-label>
+			<nz-form-control [nzSpan]="22">
+				<input nz-input [(ngModel)]="editionName" formControlName="editionName" (blur)="editionName=editionName.trim()" maxlength='30' minlength='1'/>
+				<nz-form-explain *ngIf="editionForm.get('editionName').dirty && editionForm.get('editionName').errors">
+					<ng-container *ngIf="editionForm.get('editionName').hasError('required')">
+						名称必填
+					</ng-container>
+					<ng-container *ngIf="editionForm.get('editionName').hasError('minlength')">
+						至少输入1位字符
+					</ng-container>
+					<ng-container *ngIf="editionForm.get('editionName').hasError('maxlength')">
+						至多输入30位字符
+					</ng-container>
+				</nz-form-explain>
+			<br>
+			</nz-form-control>
+		</nz-form-item>
+		<div class="btns">
+			<button nz-button nzType="default" (click)="handleItemCancel()">关闭</button>
+			<button nz-button nzType="primary" [disabled]="!editionForm.valid" (click)="handleItemOk($event)">修改
+			</button>
+		</div>
+	</form>
+</nz-modal>
+<!-- 查看大图 -->
+<rev-imgview [album]="imgsArr" [index]="index" *ngIf="imgsArr.length>0"></rev-imgview>

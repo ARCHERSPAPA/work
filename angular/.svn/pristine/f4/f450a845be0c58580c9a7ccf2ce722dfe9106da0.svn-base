@@ -1,0 +1,16 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {SupplierRoutingModule} from "./supplier-routing.module";
+import { SupplierMaterialComponent } from './supplier-material/supplier-material.component';
+import { SupplierMaterialListComponent } from './supplier-material/supplier-material-list/supplier-material-list.component';
+import { SupplierMaterialDetailComponent } from './supplier-material/supplier-material-detail/supplier-material-detail.component';
+
+@NgModule({
+    declarations: [SupplierMaterialComponent, SupplierMaterialListComponent, SupplierMaterialDetailComponent],
+    imports: [
+        CommonModule,
+        SupplierRoutingModule
+    ]
+})
+export class SupplierModule {
+}

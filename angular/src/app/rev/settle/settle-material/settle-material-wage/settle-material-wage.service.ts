@@ -1,0 +1,93 @@
+import { Injectable } from '@angular/core';
+import {RequestService} from "../../../../service/request.service";
+import {Messages} from "../../../../model/msg";
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SettleMaterialWageService {
+
+  constructor(private req:RequestService) { }
+
+    /**
+     * 所有的材料商
+     */
+    // 
+    getMaterialSupplierList(){
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url:"materialSupplierListBySelect",
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.data);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 结算列表
+     * @param params
+     * @returns {Promise<any>}
+     */
+    getSettleList(params:any):Promise<any>{
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url:"settlementList",
+                data: params,
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.data);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 结算操作
+     * @param params
+     * @returns {Promise<any>}
+     */
+    operateSettle(params:any):Promise<any>{
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url:"settlementOrder",
+                data: params,
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.msg);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    /**
+     * 银行账户列表
+     * @param params
+     * @returns {Promise<any>}
+     */
+    getAccountList(params:any):Promise<any>{
+        return new Promise((resolve,reject) =>{
+            this.req.doPost({
+                url:"accountList",
+                data: params,
+                success:(res =>{
+                    if(res && res.code == 200){
+                        resolve(res.data);
+                    }else{
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+}

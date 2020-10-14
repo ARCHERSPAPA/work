@@ -1,0 +1,572 @@
+import {Component, OnInit} from '@angular/core';
+import {getComboNames, getIdsBySelectedByField, getRows, showTitleBySurvival} from "../../../../model/methods";
+import {WarningService} from "../../../../service/warning.service";
+import {RequestService} from "../../../../service/request.service";
+import {Default} from "../../../../model/constant";
+import {ActivatedRoute, Router} from '@angular/router';
+import {MasterService} from "../../master.service";
+import {MasterComboService} from "../../master-combo-detail/master-combo.service";
+import {MasterPackService} from "../master-pack.service";
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {Messages} from "../../../../model/msg";
+
+@Component({
+    selector: 'rev-master-pack-masterials',
+    templateUrl: './master-pack-masterials.component.html',
+    styleUrls: ['./../../master-promotion-detail/master-promotion-detail.component.scss',
+        './../../master-promotion-detail/master-promotion-materials/master-promotion-materials.component.scss',
+        './master-pack-masterials.component.scss'],
+    providers:[MasterService,MasterComboService,MasterPackService]
+})
+export class MasterPackMasterialsComponent implements OnInit {
+    //显示详情
+    public title: string;
+    //显示当前详情标题
+    public name: string;
+    //当前的关联材料商信息
+    public supplierId:number;
+    //备注
+    public remark:string;
+    //套系
+    public comboName:any;
+    public comboIds:any;
+    
+    //销售价
+    public sellingPrice:number = 0;
+    //供货价
+    public supplyPrice:number = 0;
+    //单位
+    public unit:string;
+    //套餐id
+    public pid:number;
+
+    //tab切换时
+    public radioSwitch:Array<any>;
+    //切换时的数据记录(默认为已添加显示，默认为1)
+    public radio:number = 1;
+    //查看图片
+    public _albums:Array<any> = [];
+
+    //材料详情数据
+    public materials:any;
+    //全选
+    public allChecked:boolean = false;
+    //全选时的中间状态
+    public indeterminate:boolean = false;
+    //选中时的所有选项集合
+    public selectItems:Array<any> = [];
+    //展示已添加的数据量
+    public masterTotal:number = 0;
+    //加载数据时
+    public loading:boolean = false;
+
+    //上下架(默认为上架)
+    public shelf:number = 1;
+
+    //审核类别
+    public status:number = 0;
+    //记录所有供应商信息
+    public companys:any;
+    //记录所有的套系数据
+    public combos:any;
+
+    //弹出框显示
+    public packTitle:string;
+    public isVisible:boolean = false;
+    public validateForm:FormGroup;
+    public isOkLoading:boolean = false;
+
+    //分页查询
+    public pageNo:number = Default.PAGE.PAGE_NO;
+    public pageSize:number = Default.PAGE.PAGE_SIZE;
+    public total:number = Default.PAGE.PAGE_TOTAL;
+    //类别
+    public category:any;
+    //品牌
+    public brands:any;
+    //其实
+    public info:any;
+
+
+    constructor(private warn:WarningService,
+                private req:RequestService,
+                private router:Router,
+                private activatedRoute:ActivatedRoute,
+                private master:MasterService,
+                private masterCombo:MasterComboService,
+                private masterPack:MasterPackService,
+                private fb:FormBuilder) {
+    }
+
+    ngOnInit() {
+        this.title = "套餐详情";
+
+        this.radioSwitch = [{
+            key:1,
+            text:"已添加"
+        },{
+            key: 0,
+            text:"未添加"
+        }];
+
+        //拉取供应商所有数据
+        this.getCompanys();
+
+        this.activatedRoute.queryParams.subscribe(params =>{
+            if(params && params.pack){
+                const pack = JSON.parse(params.pack);
+                this.pid = pack.id;
+                this.name = pack.name;
+                this.remark = pack.remark;
+                let comboIds = [];
+                if(pack && pack.newComboNameId && pack.newComboNameId.length > 0){
+                    pack.newComboNameId.split(',').forEach(combo=>{
+                        comboIds.push({id:combo})
+                    })
+                }
+                this.comboIds = comboIds;
+                this.comboName = pack.comboName;
+                this.supplyPrice = pack.supplyPrice;
+                this.sellingPrice = pack.sellingPrice;
+                this.supplierId = pack.supplierId;
+                this.unit = pack.unit;
+                this.shelf = pack.putaway;
+                this.status = Number(pack.status);
+
+            }
+        });
+
+
+        this.validateForm = this.fb.group({
+            packName:['',[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30),
+            ]],
+            packSupplyId:['',[
+                Validators.required
+            ]],
+            packCombos:['',[]],
+            packUnit:['',[
+                Validators.maxLength(10)
+            ]],
+            packSalePrice:['',[
+                Validators.min(0)
+            ]],
+            packSupplyPrice:['',[
+                Validators.min(0)
+            ]],
+            packRemark:['',[
+                Validators.maxLength(300)
+            ]]
+        });
+
+        //拉取套系所有数据
+        this.getCombos();
+
+        //拉取材料详情数据
+        this.changeData();
+
+    }
+
+    /**
+     * 根据当前状态显示编辑
+     * @returns {boolean}
+     */
+    showBtnByStatus() {
+        switch(this.status){
+            case 0: return true;
+            case 3: return true;
+            default: return false;
+        }
+    }
+
+    /**
+     * 根据当前选中的套系显示其套系所有名称
+     * @returns {any}
+     */
+    getComboNames(comboIds){
+        return getComboNames(comboIds);
+    }
+
+    /**
+     * 根据当前的供应商id显示其供应商名称
+     */
+    getCompanyName(){
+        if(this.companys && this.companys.length > 0 && this.supplierId){
+            let find = this.companys.filter(c => c.id === this.supplierId);
+            if(find && find.length > 0){
+                return find[0]["companyName"]?find[0]["companyName"]:null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 根据是否上下架显示其对立标示
+     * @param {number} shelf： 0 未上架或者下架，1：上架
+     * @returns {string}
+     */
+    getTitleByShelf(shelf:number){
+        return shelf?'确定下架该套餐吗?':'确定上架该套餐吗?'
+    }
+
+    /**
+     * 拉取所有供应商的数据
+     */
+    getCompanys(){
+        this.master.getCompanys().then(data =>{
+            this.companys = data;
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 拉取所有的套系数据
+     */
+    getCombos(){
+        this.masterCombo.getCombos().then(data =>{
+            this.combos = data;
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //tab 切换显示其添加数量
+    handleSwitch(tab:number){
+        this.radio = tab;
+        this.info = null;
+        this.category = null;
+        this.brands = null;
+        this.resetData();
+    }
+
+
+    handleCategory(cate:any){
+        this.category = cate;
+        this.resetData();
+    }
+
+
+    handleBrand(brands:any){
+        this.brands = brands;
+        this.resetData();
+    }
+
+    handleSearch(search:any){
+        this.info = search;
+        this.changeData();
+    }
+
+
+    resetData(){
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.selectItems = [];
+        this.allChecked = false;
+        this.indeterminate = false;
+        this.changeData();
+    }
+
+    //加载数据
+    changeData(){
+        const params = {
+            pageNum: this.pageNo,
+            pageSize: this.pageSize,
+            type: this.radio,
+            supplierId: this.supplierId,
+            planId: this.pid
+        };
+
+        if(this.category && this.category.id){
+            params["category"] = this.category.categoryName;
+        }
+        if(this.brands &&  this.brands.length > 0){
+            params["brand"] = this.brands;
+        }
+
+        if(this.info){
+            if(this.info.spu){
+                params["spu"] = this.info.spu.trim();
+            }
+            if(this.info.sku){
+                params["sku"] = this.info.sku.trim();
+            }
+            if(this.info.model){
+                params["model"] = this.info.model.trim();
+            }
+            if(this.info.spec){
+                params["spec"] = this.info.spec.trim();
+            }
+            if(this.info.name){
+                params["name"] = this.info.name.trim();
+            }
+        }
+
+        this.loading = true;
+        this.masterPack.getMaterialList(params).then(data =>{
+            this.loading = false;
+            // this.materials = data && data.list?data.list:null;
+            this.materials = this.renderData(data && data.list?data.list:null);
+
+            this.total = data && data.total?data.total:Default.PAGE.PAGE_TOTAL;
+            if(this.radio === 1){
+                this.masterTotal = this.total;
+            }
+            this.refreshStatus();
+        }).catch(err =>{
+            this.loading = false;
+            this.warn.onMsgError(err);
+        })
+    }
+
+
+    /**
+     * 合并单元格
+     * @param data
+     * @returns {any}
+     */
+    renderData(data){
+        if(data && data.length > 0){
+            const d = data.reverse();
+            d.forEach((v, i,arr) => {
+                getRows(arr,i);
+            })
+            return d.reverse();
+        }
+        return data;
+    }
+
+
+    /**
+     * 添加材料
+     * @param {number} pid 套餐id
+     * @param ids 材料ids
+     */
+    packDetailAddMaterials(pid:number,...ids){
+        if(pid){
+            this.masterPack.addMaterials(pid,ids).then(msg =>{
+                this.warn.onMsgSuccess(msg[1]);
+                this.masterTotal = this.masterTotal + ids.length;
+                this.sellingPrice  = msg[0].sellingPrice
+                this.resetData();
+            }).catch(err =>{
+                this.warn.onMsgError(err);
+            })
+        }else{
+            this.warn.onMsgWarn(Messages.PARAM_EMPTY);
+        }
+    }
+
+    //单个添加材料
+    addItem(id:number){
+        this.packDetailAddMaterials(this.pid,id);
+    }
+    //批量添加
+    addItems(){
+        let ids = getIdsBySelectedByField(this.selectItems);
+        this.packDetailAddMaterials(this.pid,...ids);
+    }
+
+    /**
+     * 删除材料
+     * @param {number} pid
+     * @param ids
+     */
+    packDetailDelMaterials(pid:number,...ids){
+        if(pid){
+            this.masterPack.delMaterials(pid,ids).then(msg =>{
+                this.warn.onMsgSuccess(msg[1]);
+                this.masterTotal = this.masterTotal - ids.length;
+                this.sellingPrice  = msg[0].sellingPrice
+                this.resetData();
+            }).catch(err =>{
+                this.warn.onMsgError(err);
+            })
+        }else{
+            this.warn.onMsgWarn(Messages.PARAM_EMPTY);
+        }
+    }
+
+    //单个删除材料
+    deleteItem(id:number){
+        this.packDetailDelMaterials(this.pid,id);
+    }
+    //批量删除
+    deleteItems(){
+        let ids = getIdsBySelectedByField(this.selectItems);
+        this.packDetailDelMaterials(this.pid,...ids);
+    }
+
+    //全选
+    checkAll(bool: boolean) {
+        this.allChecked = bool;
+        this.materials.forEach(m => {
+            m["checked"] = this.allChecked;
+        });
+        this.refreshStatus();
+    }
+
+    //选择某一项
+    refreshStatus() {
+        let allChecked = false,
+            allUnChecked = false;
+
+        if (this.materials && this.materials.length > 0) {
+            allChecked = this.materials.every(m => m.checked === true);
+            allUnChecked = this.materials.every(m => !m.checked);
+            this.allChecked = allChecked;
+            this.indeterminate = (!allChecked) && (!allUnChecked);
+            this.selectItems = this.materials.filter(m => m.checked === true);
+        } else {
+            this.allChecked = allUnChecked;
+        }
+
+        this.radioSwitch[0].text = `已添加${this.masterTotal > 0 ? '（' + this.masterTotal + '）' : ''}`;
+
+    }
+
+
+    /**
+     * 根据是否失效显示文案
+     * @param data
+     * @param survival
+     * @returns {string}
+     */
+    showTipOnTitle(data,survival){
+        return showTitleBySurvival(data,survival);
+    }
+
+    /**
+     * 查看图片放大
+     * @param {string} src
+     */
+    openLarge(src:string) {
+        this._albums = [];
+        this._albums.push({ src: src, thumb: src });
+    }
+
+    //编辑
+    openPack(){
+        let selectCombos = [];
+        if(this.combos && this.combos.length > 0 && this.comboIds && this.comboIds.length > 0){
+            this.comboIds.forEach(combo =>{
+                let find = this.combos.filter(c => c.id == combo.id);
+                if(find && find.length > 0){
+                    selectCombos = selectCombos.concat(find);
+                }
+            })
+        }
+        //修改值
+        this.validateForm.patchValue({packCombos:selectCombos});
+        this.validateForm.patchValue({packName:this.name});
+        this.validateForm.patchValue({packSupplyId:this.supplierId});
+        this.validateForm.patchValue({packUnit:this.unit});
+        this.validateForm.patchValue({packSalePrice:this.sellingPrice});
+        this.validateForm.patchValue({packSupplyPrice:this.supplyPrice});
+        this.validateForm.patchValue({packRemark:this.remark});
+        this.isVisible = true;
+        this.packTitle = "修改套餐";
+    }
+    //提交编辑
+    handleOk(){
+        this.isOkLoading =  true;
+        if(this.validateForm.valid){
+            const values = this.validateForm.value;
+            const params = {
+                id: this.pid,
+                comboIds: this.masterCombo.getComboIds(values.packCombos),
+                name: values.packName,
+                supplierId: values.packSupplyId
+            };
+            if(values.packUnit && values.packUnit.length > 0){
+                params["unit"] = values.packUnit.trim();
+            }
+            //供货价
+            params["supplyPrice"] = values["packSupplyPrice"]?values["packSupplyPrice"]:0,
+            //销售价
+            params["sellingPrice"] = values.packSalePrice?values.packSalePrice:0;
+            if(values.packRemark && values.packRemark.length > 0){
+                params["remark"] = values.packRemark;
+            }
+
+            this.masterPack.savePack(params).then(msg =>{
+                this.warn.onMsgSuccess(msg);
+                params["combos"] = values.packCombos;
+                this.evaluePackByParams(params);
+                this.handleCancel();
+
+            }).catch(err =>{
+                this.handleCancel();
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    handleCancel(){
+        this.isOkLoading =  false;
+        this.isVisible = false;
+        this.validateForm.reset();
+    }
+
+    /**
+     * 编辑成功后重新赋值
+     * @param params
+     */
+    evaluePackByParams(params:any){
+        this.name = params["name"];
+        this.remark = params["remark"];
+        this.supplyPrice = params["supplyPrice"];
+        this.sellingPrice = params["sellingPrice"];
+        this.supplierId = params["supplierId"];
+        this.comboName = this.getComboNames(params["combos"])
+        this.comboIds = params["combos"];
+        this.unit = params["unit"];
+    }
+
+
+    /**
+     * 提交审核
+     * @param {number} id
+     */
+    submitItem(id:number){
+        if(id){
+            this.masterPack.submitPacks([id]).then(msg =>{
+                this.warn.onMsgSuccess(msg);
+                this.router.navigate(["../list"],{relativeTo: this.activatedRoute});
+            }).catch(err =>{
+                this.warn.onMsgError(err);
+            })
+        }else{
+            this.warn.onMsgWarn(Messages.PARAM_EMPTY);
+        }
+    }
+
+    /**
+     * 撤回
+     * @param {number} id
+     */
+    recallItem(id:number){
+        this.masterPack.recallPacks([id]).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.router.navigate(["../list"],{relativeTo: this.activatedRoute});
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 上下架
+     * @param {number} id
+     * @param {number} shelf
+     */
+    shelfItem(id:number,shelf:number){
+        this.masterPack.shelfPacks([id],shelf).then(msg =>{
+            this.warn.onMsgSuccess(msg);
+            this.router.navigate(["../list"],{relativeTo: this.activatedRoute});
+        }).catch(err =>{
+            this.warn.onMsgError(err);
+        })
+    }
+}
+

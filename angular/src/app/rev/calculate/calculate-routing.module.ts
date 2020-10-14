@@ -1,0 +1,191 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Routes, RouterModule} from '@angular/router';
+import {GuardService} from '../../service/guard.service';
+import {CostBudgetComponent} from './cost-budget/cost-budget.component';
+import {PriceComponent} from '../detail/price/price.component';
+import {ContractComponent} from '../detail/contract/contract.component';
+import {CostDesignComponent} from './cost-design/cost-design.component';
+import {CostEngineerComponent} from './cost-engineer/cost-engineer.component';
+import {GraphComponent} from '../detail/graph/graph.component';
+import {CostAccessoryComponent} from './cost-accessory/cost-accessory.component';
+import {ContractDetailComponent} from '../detail/contract-detail/contract-detail.component';
+import {AccessoryListComponent} from './cost-accessory/accessory-list/accessory-list.component';
+import {CostBudgetListComponent} from './cost-budget/cost-budget-list/cost-budget-list.component';
+import {CostBudgetDetailComponent} from './cost-budget/cost-budget-detail/cost-budget-detail.component';
+import {CostDetailAnnotateComponent} from './cost-detail/cost-detail-annotate/cost-detail-annotate.component';
+import {CostDetailReceivablesComponent} from './cost-detail/cost-detail-receivables/cost-detail-receivables.component';
+import {CostDetailDiscloseComponent} from './cost-detail/cost-detail-disclose/cost-detail-disclose.component';
+import {CostDesignPercentComponent} from "./cost-design-percent/cost-design-percent.component";
+import {CostDetailAccountComponent} from "./cost-detail/cost-detail-account/cost-detail-account.component";
+import {CostDetailAuditComponent} from "./cost-detail/cost-detail-audit/cost-detail-audit.component";
+import {ItemMakingsComponent} from "../detail/item-makings/item-makings.component";
+const routes: Routes = [
+    {
+        path: '',
+        redirectTo: 'budget',
+        pathMatch: 'full'
+    },
+    {
+        path: 'budget',
+        component: CostBudgetComponent,
+        data: {
+            breadcrumb: '成本核算'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: CostBudgetListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '成本列表'
+                }
+            },
+            {
+                path: 'costing',
+                component: CostBudgetDetailComponent,
+                data: {
+                    breadcrumb: '成本详情'
+                },
+                children: [
+                    {
+                        path: '',
+                        redirectTo: 'contract',
+                        pathMatch: 'full'
+                    },
+                    {
+                        path: 'contract/:state',
+                        component: CostDetailAuditComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'disclose/:state',
+                        component: CostDetailDiscloseComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'receivables/:state',
+                        component: CostDetailReceivablesComponent,
+                        canActivate: [GuardService],
+                    },
+                    {
+                        path: 'annotate/:state',
+                        component: CostDetailAnnotateComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'account/:state',
+                        component: CostDetailAccountComponent,
+                        canActivate: [GuardService]
+                    },
+                ]
+            },
+            {
+                path: 'detail',
+                component: CostBudgetDetailComponent,
+                data: {
+                    breadcrumb: '成本详情'
+                },
+                children: [
+                    {
+                        path: '',
+                        redirectTo: 'price',
+                        pathMatch: 'full'
+                    },
+                    {
+                        path: 'price/:state',
+                        component: PriceComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'makings/:state',
+                        component: ItemMakingsComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'contract/:state',
+                        component: ContractComponent,
+                        canActivate: [GuardService]
+                    },
+                    {
+                        path: 'graph/:state',
+                        component: GraphComponent,
+                        canActivate: [GuardService]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path: 'dSetting',
+        component: CostDesignComponent,
+        canActivate: [GuardService],
+        data: {
+            breadcrumb: '设计费设置'
+        }
+    },
+    {
+        path: 'dPercent',
+        component: CostDesignPercentComponent,
+        canActivate: [GuardService],
+        data: {
+            breadcrumb: '设计费占比'
+        }
+    },
+    {
+        path: 'engineer',
+        component: CostEngineerComponent,
+        canActivate: [GuardService],
+        data: {
+            breadcrumb: '报价设置'
+        }
+    },
+    {
+        path: 'accessory',
+        component: CostAccessoryComponent,
+        data: {
+            breadcrumb: '合同附件'
+        },
+        children: [
+            {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full'
+            },
+            {
+                path: 'list',
+                component: AccessoryListComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '附件列表'
+                }
+            },
+            {
+                path: 'detail',
+                component: ContractDetailComponent,
+                canActivate: [GuardService],
+                data: {
+                    breadcrumb: '附件详情'
+                }
+            }
+        ]
+    }
+];
+
+
+@NgModule({
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class CalculateRoutingModule {
+}

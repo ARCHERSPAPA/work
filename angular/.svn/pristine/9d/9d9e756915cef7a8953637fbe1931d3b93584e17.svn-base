@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-supplier-material-list',
+  templateUrl: './supplier-material-list.component.html',
+  styleUrls: ['./supplier-material-list.component.scss']
+})
+export class SupplierMaterialListComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

@@ -1,0 +1,363 @@
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {Default} from '../../../../model/constant';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {btoa} from '../../../../model/methods';
+import {SettleMaterialWageService} from './settle-material-wage.service';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {getMaterialState} from '../../../../model/methods';
+
+@Component({
+    selector: 'rev-settle-material-wage',
+    templateUrl: './settle-material-wage.component.html',
+    styleUrls: ['./settle-material-wage.component.scss']
+})
+export class SettleMaterialWageComponent implements OnInit {
+
+    public title: string;
+    public radioSwitch = [{
+        key: 0,
+        text: '待结算'
+    }, {
+        key: 1,
+        text: '已结算'
+    }];
+    public wageState = 0; // 0-待结算  1-已结算
+    public defaultRadio: any; // 默认选中的单选框
+
+    // 查询
+    public company = '';
+    public companyList: Array<any> = [{id: '', companyName: '全部材料商'}];
+    public condition = 0;
+    public name;
+    public customerName;
+    public workName;
+    public orderNo;
+
+    // 分页
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public wageList: Array<any> = [];
+    public checkedNumber: Array<any> = []; //选中的数据
+    public isAllDisplayDataChecked: boolean;
+    public indeterminate = false;
+
+    // 结算
+    public wageForm: FormGroup;
+    public isVisible = false;
+    public account;
+    public accountStatus: Array<any> = [];
+
+    // 不通过
+    public auditForm: FormGroup;
+    public auditVisible = false;
+    public msg;
+    public orderId;
+
+    public lock = false;//避免打印时多次执行
+    public ids = [];
+
+    constructor(
+        private router: Router,
+        private fb: FormBuilder,
+        private activatedRoute: ActivatedRoute,
+        private warn: WarningService,
+        private settleMaterialWageService: SettleMaterialWageService,) {
+    }
+
+    ngOnInit() {
+        this.title = '材料结算';
+        this.wageForm = this.fb.group({
+            account: [this.account, [
+                Validators.required,
+                Validators.maxLength(30)
+            ]]
+        });
+        this.auditForm = this.fb.group({
+            msg: [this.msg, [
+                Validators.maxLength(300)
+            ]]
+        });
+        this.getMaterialList();
+        this.activatedRoute.queryParams.subscribe((params) => {
+            if (params) {
+                this.wageState = params['state'] ? Number(params['state']) : 0;
+                this.defaultRadio = this.wageState > 0 ? this.radioSwitch[1] : this.radioSwitch[0];
+                if (params['page']) {
+                    this.pageNo = params['page'] > 0 ? params['page'] : Default.PAGE.PAGE_NO;
+                }
+                if (params['company']) {
+                    this.company = params['company'] ? params['company'] : '';
+                }
+                if (params['condition']) {
+                    this.condition = params['condition'] ? Number(params['condition']) : 0;
+                }
+                if (params['name']) {
+                    this.name = params['name'];
+                }
+                if (params['customerName']) {
+                    this.customerName = params['customerName'];
+                }
+                if (params['workName']) {
+                    this.workName = params['workName'];
+                }
+                if (params['orderNo']) {
+                    this.orderNo = params['orderNo'];
+                }
+                this.changeData();
+            }
+        });
+    }
+
+    getMaterialList() {
+        this.settleMaterialWageService.getMaterialSupplierList().then((data: any) => {
+            this.companyList = data;
+            this.companyList.unshift({id: '', companyName: '全部材料商'});
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+    }
+
+    handleSwitch(state: number) {
+        this.wageState = state;
+        this.company = '';
+        this.condition = 0;
+        this.name = null;
+        this.customerName = null;
+        this.workName = null;
+        this.orderNo = null;
+        this.resetData();
+    }
+
+    //数据置为原始值域
+    resetData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.checkedNumber = [];
+        this.indeterminate = false;
+        this.isAllDisplayDataChecked = false;
+        this.changePage();
+    }
+
+    clearInput() {
+        this.name = null;
+        this.customerName = null;
+        this.workName = null;
+        this.orderNo = null;
+    }
+
+    searchData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changePage();
+    }
+
+    changeData() {
+        let params = {
+            state: this.wageState,
+            page: this.pageNo
+        };
+        if (this.company) {
+            params['materialId'] = this.company;
+        }
+        if (this.name) {
+            params['name'] = this.name.trim();
+        }
+        if (this.customerName) {
+            params['customerName'] = this.customerName.trim();
+        }
+        if (this.workName) {
+            params['workName'] = this.workName.trim();
+        }
+        if (this.orderNo) {
+            params['orderNo'] = this.orderNo.trim();
+        }
+        this.settleMaterialWageService.getSettleList(params).then((data: any) => {
+            this.wageList = data.list;
+            this.total = data.total;
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+    }
+
+    //全选
+    checkAll(e) {
+        this.isAllDisplayDataChecked = e;
+        this.wageList.forEach(item => {
+            item.checked = this.isAllDisplayDataChecked;
+        });
+        this.refreshStatus();
+    }
+
+    //单个选择
+    refreshStatus() {
+        const allChecked = this.wageList.every(value => value.checked === true);
+        const allUnChecked = this.wageList.every(value => !value.checked);
+        this.isAllDisplayDataChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+        this.checkedNumber = this.wageList.filter(value => value.checked);
+    }
+
+    // 翻页
+    changePage() {
+        this.checkedNumber = [];
+        this.router.navigate(['./'], {
+            queryParams: {
+                page: this.pageNo,
+                state: this.wageState,
+                company: this.company,
+                condition: this.condition,
+                name: this.name,
+                customerName: this.customerName,
+                workName: this.workName,
+                orderNo: this.orderNo
+            }, relativeTo: this.activatedRoute
+        });
+    }
+
+    // 展示结算弹窗
+    showModal(...args) {
+        const isSame = this.checkedNumber.every(value => value.materialId === this.checkedNumber[0].materialId);
+        if (isSame) {
+            let params = {};
+            if (args && args.length > 0) {
+                params['materialId'] = args[0];
+            } else {
+                params['materialId'] = this.checkedNumber[0].materialId;
+            }
+            this.loadAccountList(params);
+            this.orderId = args[1];
+            this.wageForm.reset();
+            this.isVisible = true;
+        } else {
+            this.warn.onModalInfo({
+                title: '提示',
+                content: '批量结算时仅能结算同一材料商的数据',
+                ok: () => {
+                    console.log('tips');
+                }
+            });
+            return;
+        }
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.orderId = '';
+    }
+
+    // 银行账户列表
+    loadAccountList(params) {
+        this.settleMaterialWageService.getAccountList(params).then(data => {
+            this.accountStatus = data;
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+    }
+
+    // 结算弹窗
+    handleOk(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const that = this;
+        if (that.wageForm.valid) {
+            let params = {};
+            params['state'] = 1;
+            if (this.orderId) {
+                params['orderIds'] = [this.orderId];
+            } else {
+                let ids = [];
+                this.checkedNumber.forEach(item => {
+                    ids.push(item.id);
+                });
+                params['orderIds'] = ids;
+            }
+            params['accountId'] = this.account;
+            this.settleMaterialWageService.operateSettle(params).then(data => {
+                that.changeData();
+                that.warn.onMsgSuccess(data || Messages.SUCCESS.DATA);
+                that.checkedNumber = [];
+                that.handleCancel();
+            }).catch(err => {
+                that.handleCancel();
+                this.warn.onMsgError(err);
+            });
+        }
+    }
+
+    // 展示不通过弹窗
+    showAudit(...args) {
+        if (args && args.length > 0) {
+            this.orderId = args[0];
+        }
+        this.auditForm.reset();
+        this.auditVisible = true;
+    }
+
+    auditCancel() {
+        this.auditVisible = false;
+        this.auditForm.reset();
+        this.msg = '';
+        this.orderId = '';
+    }
+
+    // 不通过弹窗
+    auditOk() {
+        const that = this;
+        const params = {};
+        params['state'] = 0;
+        if (that.msg) {
+            params['remark'] = that.msg;
+        }
+        if (this.orderId) {
+            params['orderIds'] = [that.orderId];
+        } else {
+            let ids = [];
+            this.checkedNumber.forEach(item => {
+                ids.push(item.id);
+            });
+            params['orderIds'] = ids;
+        }
+        this.settleMaterialWageService.operateSettle(params).then(data => {
+            that.changeData();
+            that.warn.onMsgSuccess(data || Messages.SUCCESS.DATA);
+            that.checkedNumber = [];
+            that.auditCancel();
+        }).catch(err => {
+            that.auditCancel();
+            this.warn.onMsgError(err);
+        });
+    }
+
+    // 打印
+    print() {
+        if (!this.lock) {
+            let iter = this.checkedNumber[Symbol.iterator]();
+            this.checkedNumber.forEach(v => {
+                this.ids.push(v['id']);
+                iter.next();
+            });
+            if (iter.next().done) {
+                setTimeout(() => {
+                    document.getElementById('print').click();
+                    this.ids = [];
+                    this.lock = false;
+                }, 400);
+            }
+        }
+    }
+
+    unlock() {
+        this.lock = true;
+    }
+
+    // 状态
+    getState(state: number) {
+        return getMaterialState(state);
+    }
+
+    btoa(id: string) {
+        return btoa(id);
+    }
+}

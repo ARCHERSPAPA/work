@@ -1,0 +1,114 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {PriceComponent} from '../rev/detail/price/price.component';
+import {HeadComponent} from '../rev/detail/head/head.component';
+import {ContractComponent} from '../rev/detail/contract/contract.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgZorroAntdModule} from 'ng-zorro-antd';
+import {BsDatepickerModule} from 'ngx-bootstrap';
+import { TimepickerModule } from 'ngx-bootstrap/timepicker';
+
+import { DragulaModule} from 'ng2-dragula';
+
+import {RequestService} from '../service/request.service';
+import {WarningService} from '../service/warning.service';
+import {QuoteService} from '../service/quote.service';
+import {DepartService} from '../service/depart.service';
+import {ConfigService} from '../service/config.service';
+import {NoticeComponent} from '../rev/detail/notice/notice.component';
+import {uploaderFileComponent} from '../rev/detail/uploader-file/uploader-file.component';
+import {DataComponent} from '../rev/detail/data/data.component';
+import {DynamicsComponent} from '../rev/detail/dynamics/dynamics.component';
+import {AssessmentComponent} from '../rev/detail/assessment/assessment.component';
+import {RegulationComponent} from '../rev/detail/regulation/regulation.component';
+import {MakingsComponent} from '../rev/detail/makings/makings.component';
+// import {InputDecimalDirective} from '../directive/input-decimal.directive';
+import {RegularService} from '../service/regular.service';
+import {GraphComponent} from '../rev/detail/graph/graph.component';
+import {RouterModule} from '@angular/router';
+import {LocateService} from '../service/locate.service';
+import {SettleService} from '../service/settle.service';
+import {SettleDetailAttendComponent} from '../rev/settle/settle-detail/settle-detail-attend/settle-detail-attend.component';
+import {ExamService} from '../service/exam.service';
+import {ProductLogComponent} from '../rev/detail/product-log/product-log.component';
+import {ContractDetailComponent} from '../rev/detail/contract-detail/contract-detail.component';
+import {DispatchComponent} from '../rev/detail/dispatch/dispatch.component';
+import {UploadModule} from './upload.module';
+import {ImgviewModule} from './../public/imgview.module';
+import {ViserModule} from 'viser-ng';
+import {HeaderService} from '../service/header.service';
+import {BufferService} from '../service/buffer.service';
+import {ItemQuantityComponent} from '../rev/detail/item-quantity/item-quantity.component';
+import {InputModule} from "./input.module";
+
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    ViserModule,
+    UploadModule,
+    ImgviewModule,
+    InputModule,
+    NgZorroAntdModule.forRoot(),
+    BsDatepickerModule.forRoot(),
+    TimepickerModule.forRoot(),
+      /**
+       *拖动模块引入
+      //  */
+      DragulaModule.forRoot()
+
+  ],
+  declarations: [
+      // InputDecimalDirective,
+      PriceComponent,
+      HeadComponent,
+      ContractComponent,
+      NoticeComponent,
+      DataComponent,
+      DynamicsComponent,
+      AssessmentComponent,
+      RegulationComponent,
+      MakingsComponent,
+      GraphComponent,
+      SettleDetailAttendComponent,
+      uploaderFileComponent,
+      ProductLogComponent,
+      ContractDetailComponent,
+      DispatchComponent,
+      ItemQuantityComponent
+  ],
+  exports: [
+      // InputDecimalDirective,
+      PriceComponent,
+      HeadComponent,
+      ContractComponent,
+      NoticeComponent,
+      DataComponent,
+      DynamicsComponent,
+      AssessmentComponent,
+      RegulationComponent,
+      MakingsComponent,
+      GraphComponent,
+      SettleDetailAttendComponent,
+      DispatchComponent,
+      ItemQuantityComponent,
+      ViserModule
+  ],
+  providers: [
+      RequestService,
+      WarningService,
+      QuoteService,
+      DepartService,
+      ConfigService,
+      RegularService,
+      LocateService,
+      SettleService,
+      ExamService,
+      HeaderService,
+      BufferService
+  ]
+})
+export class DetailModule { }

@@ -1,0 +1,404 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import * as UserValidate from '../../../../validate/user-validate';
+import { RequestService } from '../../../../service/request.service';
+import { WarningService } from '../../../../service/warning.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router, ActivatedRoute } from '@angular/router'
+import { atob } from '../../../../model/methods';
+import { Messages } from '../../../../model/msg';
+import { UploaderComponent } from '../../../../plugins/uploader/uploader.component';
+@Component({
+  selector: 'rev-supplier-material-edit',
+  templateUrl: './supplier-material-edit.component.html',
+  styleUrls: ['./supplier-material-edit.component.scss']
+})
+export class SupplierMaterialEditComponent implements OnInit {
+  public materialForm;
+  public materialBaseForm;
+  public brandType
+  public modalList = [{
+   spu:'', edit: true, name: '', brand: '', origin: '', fileName: '', unit: '', marketPrice: '', supplyPrice: '', spec: '', sellingPrice: '', image: '', color: '', material: ''
+  }]
+  public materialSaleList = [];
+  public brand;
+  public value = [];
+  public brandNum;
+  public name;
+  public model;
+  public category;
+  public categoryNum;
+  public currentIndex = 0;
+  public preLIst;
+  public _albums = [];
+  public index = 0;
+  public id;
+  public supplierId;
+
+  public isEdit = false;
+  public newMaterial: boolean = false;
+  constructor(
+    private fb: FormBuilder,
+    private req: RequestService,
+    private warn: WarningService,
+    private modalService: NgbModal,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
+
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params && params['newMaterial']) {
+        this.newMaterial = params['newMaterial'];
+
+      }
+      this.supplierId = atob(params['supplierId'])
+      if (params && params['id']) {
+        this.id = atob(params['id']);
+      }
+    });
+    if (!this.newMaterial) {
+      this.getEditList().then(res => {
+        this.getCategoryList().then(res => {
+          this.brandType.forEach(mat => {
+            if (mat['categoryName'] == this.category) {
+              this.getBrandList(mat['id']).then(res => {
+                this.value = [this.category, this.brand]
+
+              })
+            }
+          });
+        })
+      })
+    } else {
+      this.materialSaleList = this.modalList;
+      this.getCategoryList()
+    }
+    this, this.materialForm = this.fb.group({
+
+    });
+
+    this.materialBaseForm = this.fb.group({
+      brand: [this.brand, [
+        Validators.required,
+      ]],
+      name: [this.name, [
+        Validators.required,
+        Validators.maxLength(30),
+      ]],
+      model: [this.model, [
+        Validators.maxLength(30),
+      ]],
+
+    });
+
+    this.receiveForm(this.materialSaleList, 0)
+
+
+  }
+  // ngDoCheck(){
+
+  // }
+  getEditList() {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'editMaterialList',
+        data: {
+          id: this.id
+        },
+        success: res => {
+          if (res && res.code == 200) {
+            this.materialSaleList.push(res.data);
+            if (!this.newMaterial) {
+
+              // this.value = []
+              this.brand = res.data.brand;
+              this.category = res.data.category;
+              this.name = res.data.name;
+              resolve(res.data)
+            }
+
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    })
+  }
+  MaterialSubmit() {
+    if (!this.brand) {
+      this.warn.onWarn('请在基础信息中选择类别品牌')
+      return
+    }
+
+    if (!this.name) {
+      this.warn.onWarn('请在基础信息中填写名称')
+      return
+    }
+
+    if (this.materialSaleList.every(v => {
+      return v['edit']
+    })) {
+      this.warn.onWarn('请先保存销售信息中的数据')
+      return
+    }
+    let param = {};
+    param['supplierId'] = this.supplierId;
+    param['brand'] = this.brand ? this.brand : '';
+    param['name'] = this.name ? this.name : '';
+    param['model'] = this.model ? this.model : '';
+    param['brandNumber'] = this.brandNum ? this.brandNum : '';
+    param['category'] = this.category ? this.category : '';
+    param['categoryNumber'] = this.categoryNum ? this.categoryNum : '';
+    param['details'] = this.materialSaleList;
+    this.req.doPost({
+      url: "createMaterialSave",
+      data: param,
+      success: res => {
+        if (res && res.code == 200) {
+          this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+          history.back()
+        } else {
+          this.warn.onError(res.msg || Messages.FAIL.DATA);
+        }
+      }
+    })
+
+  }
+  checkMaterial() {
+
+  }
+  getCategoryList(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'getMarterialCategory',
+        success: res => {
+          if (res && res.code == 200) {
+            this.renderDorpList(res.data);
+            resolve(this.renderDorpList(res.data))
+          } else {
+            this.warn.onError(res.msg || Messages.FAIL.DATA);
+          }
+        }
+      })
+    })
+  }
+  renderDorpList(i) {
+
+    if (i && i.length > 0) {
+      this.brandType = new Array(i.length).fill({})
+      let arr = []
+      i.forEach((v, a) => {
+        if (this.newMaterial) {
+          v['value'] = { id: v['number'], name: v['categoryName'] };
+        } else {
+          v['value'] = v['categoryName']
+        }
+        v['label'] = v['categoryName'];
+        v['level'] = a;
+        v['children'] = [];
+        v["local"] = this;
+        // console.log(this.brandType)
+        arr.push(v)
+        // this.brandType[a]['children']=this.getBrandList(v['id'])
+      });
+      this.brandType = arr
+    }
+
+  }
+  getBrandList(id) {
+    return new Promise((resolve, reject) => {
+      this.req.doPost({
+        url: 'getMarterialBrand',
+        data: {
+          id: id
+        },
+        success: res => {
+          resolve(this.renderBrandList(res.data))
+        }
+      })
+    })
+  }
+  renderBrandList(i) {
+    let arr = i
+    arr.forEach(v => {
+      if (this.newMaterial) {
+        v['value'] = { id: v['number'], name: v['brandName'] };
+      } else {
+        v['value'] = v['brandName']
+      }
+      v['label'] = v['brandName']
+      v['isLeaf'] = true
+    });
+    return arr;
+  }
+  loadData(node: any, index: number): PromiseLike<any> {
+    let that = node.local
+    return new Promise((resolve) => {
+      that.req.doPost({
+        url: 'getMarterialBrand',
+        data: {
+          id: node.id
+        },
+        success: res => {
+          let arr = res.data
+          arr.forEach(v => {
+            if (that.newMaterial) {
+              v['value'] = { id: v['number'], name: v['brandName'] };
+            } else {
+              v['value'] = v['brandName']
+            }
+
+            v['label'] = v['brandName']
+            v['isLeaf'] = true
+          });
+          node['children'] = arr
+          resolve();
+        }
+      })
+
+
+
+      // console.log(node)
+    });
+  }
+
+  select(e) {
+
+    this.brand = e.value;
+    let that = this;
+    let id = e['option']['id'];
+    let index = e['option']['level'];
+    if (e.index == 0) {
+      this.getBrandList(id).then(res => {
+      })
+
+    }
+  }
+  uploadImg(i) {
+    let that = this
+    const modalRef = this.modalService.open(UploaderComponent, {
+      centered: true,
+      keyboard: false
+    });
+    modalRef.componentInstance.name = '新增照片';
+    modalRef.componentInstance.width = 10;
+    modalRef.componentInstance.height = 10;
+    modalRef.componentInstance.hasCut = false;
+    modalRef.result.then((result) => {
+      that.materialSaleList[i].fileName = result.fileName.substr(0, 6) + '...';
+      that.materialSaleList[i].image = result.image;
+    }, (reason) => {
+      console.log(reason);
+    });
+  }
+
+  receiveForm(material: any, index) {
+    this.materialForm.addControl('spec' + index, new FormControl(material.spec, [Validators.maxLength(30)]));
+    this.materialForm.addControl('brand' + index, new FormControl(material.brand, [Validators.maxLength(30)]));
+    this.materialForm.addControl('name' + index, new FormControl(material.name, [Validators.maxLength(30)]));
+    this.materialForm.addControl('material' + index, new FormControl(material.material, [Validators.maxLength(30)]));
+    this.materialForm.addControl('origin' + index, new FormControl(material.origin, [Validators.maxLength(30)]));
+    this.materialForm.addControl('color' + index, new FormControl(material.color, [Validators.maxLength(30)]));
+    this.materialForm.addControl('fileName' + index, new FormControl(material.fileName, []));
+    this.materialForm.addControl('unit' + index, new FormControl(material.unit, [Validators.maxLength(30), Validators.required,]));
+    this.materialForm.addControl('marketPrice' + index, new FormControl(material.marketPrice, [Validators.maxLength(10)]));
+    this.materialForm.addControl('supplyPrice' + index, new FormControl(material.supplyPrice, [Validators.maxLength(10), Validators.required]));
+    this.materialForm.addControl('sellingPrice' + index, new FormControl(material.sellingPrice, [Validators.maxLength(10), Validators.required]));
+
+  }
+  onChanges(e) {
+    if (this.newMaterial) {
+      this.category = e[0]['name']
+      this.categoryNum = e[0]['id']
+      this.brand = e[1]['name']
+      this.brandNum = e[1]['id']
+    } else {
+      this.category = e[0]
+      this.brand = e[1]
+    }
+  }
+
+  handleCancel() {
+    history.back()
+  }
+  save(i) {
+    if (!this.materialSaleList[i]['unit']) {
+      this.warn.onWarn('请确认单位为1~30位的字符')
+      return
+    }
+
+    if (!this.materialSaleList[i]['supplyPrice']) {
+      this.warn.onWarn('请确认供货价为1~10位的数字')
+      return
+    }
+    this.materialSaleList[i]['edit'] = false;
+  }
+  copy(item, i) {
+    if (this.materialSaleList.length >= 20) {
+      this.warn.onWarn('最多可添加20行')
+      return
+    }
+    this.currentIndex += 1
+    let arr = this.resData(item);
+    arr['defaultImage'] = '';
+    arr['sku'] = '';
+    this.materialSaleList.push(arr);
+    this.receiveForm(item, this.currentIndex)
+  }
+  edit(i) {
+    this.materialSaleList[i]['edit'] = true;
+    this.preLIst = this.resData(this.materialSaleList[i]);
+
+  }
+  setDefault(i, material) {
+    //创建材料时
+    if (this.newMaterial) {
+      this.materialSaleList.forEach(v => {
+        v['defaultImage'] = '';
+      });
+      this.materialSaleList[i]['defaultImage'] = this.materialSaleList[i]['image'];
+    } else {             //编辑材料
+      this.req.doPost({
+        url: 'materialSupplierListByDefault',
+        data: {
+          spu: material.spu,
+          defaultImage:material.defaultImage
+        }, success: res => {
+          console.log(res)
+        }
+      })
+    }
+  }
+  resData(data) {
+    let arr;
+    arr = JSON.stringify(data)
+    return JSON.parse(arr)
+  }
+  del(i) {
+    this.materialSaleList.splice(i, 1)
+    this.currentIndex -= 1
+  }
+  cancel(i) {
+    if (!this.materialSaleList[i]['Units'] || this.materialSaleList[i]['Units'].length > 10) {
+      this.warn.onWarn('请确认单位为1~30位的字符')
+      return
+    }
+    if (!this.materialSaleList[i]['supplyPrice'] || this.materialSaleList[i]['supplyPrice'].length > 10) {
+      this.warn.onWarn('请确认供货价为1~10位的数字')
+      return
+    }
+    this.materialSaleList[i] = this.preLIst;
+    this.materialSaleList[i]['edit'] = false;
+  }
+
+  delImg(i) {
+    this.materialSaleList[i]['fileName'] = '';
+    this.materialSaleList[i]['default'] = false;
+  }
+  openLarge(src) {
+    this._albums = [];
+    this._albums.push({ src: src, thumb: src });
+
+  }
+}

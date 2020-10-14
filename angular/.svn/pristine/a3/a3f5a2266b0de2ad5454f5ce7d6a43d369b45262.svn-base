@@ -1,0 +1,71 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin.scss";
+
+.viewMasterls {
+    text-align: center;
+    background-color: rgba(1, 1, 1, 0.85);
+    &-content {
+        display: inline-block;
+        width: 1200px;
+        height: auto;
+        background-color: white;
+        min-height: 100vh;
+        tr td {
+            max-width: 120px;
+            @include compatibility(word-break, break-word);
+            @include ellipsis();
+        }
+    }
+    ul {
+        text-align: left;
+        li {
+            margin: 10px;
+            text-align: left;
+            height: 270px;
+            display: inline-flex;
+            border: 2px solid rgba(221, 222, 222, 1);
+            width: calc(50% - 20px);
+            .qrcode {
+                font-size: 16px;
+                width: 260px;
+                p {
+                    display: inline-block;
+                    width: 166px;
+                    text-align: center;
+                    color: rgba(108, 108, 108, 1);
+                }
+            }
+        }
+        .info {
+            font-size: 20px;
+            word-break: break-all;
+            line-height: 26px;
+            width: 60%;
+            height: 170px;
+            p {
+                padding: 8px;
+                overflow: hidden;
+                &-title{
+                    color: #1A1311;
+                }
+                &-detail{
+                    color: #302D2C;
+                }
+            }
+            p:nth-child(2n-1) {
+                background-color: #dddede;
+            }
+        }
+    }
+}
+#printBTN {
+    position: fixed;
+    bottom: 10px;
+    right: 16%;
+}
+
+@media print {
+    #printBTN {
+        display: none;
+    }
+}

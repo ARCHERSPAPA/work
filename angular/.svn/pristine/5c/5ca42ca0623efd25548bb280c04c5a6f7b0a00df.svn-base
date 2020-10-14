@@ -1,0 +1,598 @@
+import {Component, OnInit} from '@angular/core';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {RequestService} from "../../../../service/request.service";
+import {WarningService} from "../../../../service/warning.service";
+import {getPromotionState, getPromotionStateName} from "../../../../model/methods";
+import {ActivatedRoute, Router} from '@angular/router';
+import {Messages} from "../../../../model/msg";
+import {Default} from "../../../../model/constant";
+
+@Component({
+    selector: 'rev-master-promotion-materials',
+    templateUrl: './master-promotion-materials.component.html',
+    styleUrls: ['./../master-promotion-detail.component.scss', './master-promotion-materials.component.scss']
+})
+export class MasterPromotionMaterialsComponent implements OnInit {
+
+    public title: string;
+
+    //当前活动id
+    public aid: string;
+
+    //活动名称
+    public name: string;
+    public status: number;
+    //活动关联公司
+    public company: string;
+    //供应商id
+    public materialId: number;
+    //活动开始时间
+    public startTime: Date;
+    //活动截止时间
+    public endTime: Date;
+    //记录原始数据
+    public initItem: any;
+
+    //公司列表select
+    public companyes: any;
+
+    //校验活动输入
+    public validateForm: FormGroup;
+    public isVisible: boolean = false;
+
+    //tab切换
+    public radioSwitch: Array<any>;
+    public radio: number = 1;
+
+    //选中项目
+    public selectItems: Array<any> = [];
+    //列表渲染数据
+    public materials: any;
+    //查询相关(类别、品牌、活动内容)
+    public categoryName: string;
+
+    //品牌多选
+    public brandName: Array<string> = [];
+
+    public info: any;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    public allChecked: boolean = false;
+    public indeterminate: boolean = false;
+
+    //已添加材料总和
+    public masterTotal:number = 0;
+
+    //审核状态
+    public auditType: number = 1;
+
+    //查看图片
+    public _albums:Array<any> = [];
+
+    constructor(private fb: FormBuilder,
+                private req: RequestService,
+                private warn: WarningService,
+                private activatedRoute: ActivatedRoute,
+                private router: Router) {
+    }
+
+    ngOnInit() {
+        this.title = "活动材料";
+        //加载所有相关联的公司数据
+        this.loadCompanys();
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["item"]) {
+                let item = JSON.parse(params["item"]);
+                console.log(item);
+                this.initItem = item;
+                this.aid = item.id;
+
+                this.name = item.activityName;
+                this.company = item.companyName;
+                this.materialId = item.materialId;
+                if (item.startTime) {
+                    this.startTime = new Date(item.startTime);
+                }
+                if (item.endTime) {
+                    this.endTime = new Date(item.endTime);
+                }
+
+                this.status = this.getPromotionStateByTime(item);
+
+                this.auditType = item.type;
+            }
+        })
+
+        this.validateForm = this.fb.group({
+            name: [this.name, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30)
+            ]],
+            materialId: [this.materialId, [
+                Validators.required
+            ]],
+            startTime: [this.startTime, [
+                Validators.required
+            ]],
+            endTime: [this.endTime, []]
+        })
+
+        this.radioSwitch = [
+            {
+                key: 1,
+                text: "活动材料"
+            },
+            {
+                key: 2,
+                text: "未添加"
+            }
+        ];
+
+        this.changeData();
+    }
+
+    //将日期转成时间戳
+    coverNumToDate(time: Date) {
+        return new Date(time).getTime();
+    }
+
+    //状态名称
+    getStatusName(status: number) {
+        return getPromotionStateName(status);
+    }
+
+    getPromotionStateByTime(m: any) {
+        return getPromotionState(m);
+    }
+
+    //拉取参与公司或者材料商
+    loadCompanys() {
+        this.req.doPost({
+            url: "supplierList",
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.companyes = res.data;
+                } else {
+                    this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        })
+
+    }
+
+    //选择公司
+    companyChange(e) {
+        this.materialId = e;
+    }
+
+    //编辑活动
+    editPromote() {
+        this.isVisible = true;
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.name = this.initItem.activityName;
+        this.company = this.initItem.companyName;
+        if (this.initItem.startTime) {
+            this.startTime = new Date(this.initItem.startTime);
+        }
+        if (this.initItem.endTime) {
+            this.endTime = new Date(this.initItem.endTime);
+        }else{
+            this.endTime = null;
+        }
+    }
+
+    handleOk() {
+        if (this.validateForm.valid) {
+            let values = this.validateForm.value;
+            let params = {};
+            params["id"] = this.aid;
+            params["materialId"] = values["materialId"];
+            params["activityName"] = values["name"];
+            params["startTime"] = new Date(values["startTime"]).getTime();
+            if (values["endTime"]) {
+                params["endTime"] = new Date(values["endTime"]).getTime();
+            } else {
+                params["endTime"] = "";
+            }
+            this.req.doPost({
+                url: "promotionEdit",
+                data: params,
+                success: (res => {
+                    console.log(res);
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.isVisible = false;
+                        this.name = params["activityName"];
+                        let cp = this.companyes.filter(c => c.id === params["materialId"])
+                        if (cp && cp.length === 1) {
+                            this.company = cp[0]["companyName"];
+                        }
+                        this.startTime = new Date(params["startTime"]);
+                        if (params["endTime"]) {
+                            this.endTime = new Date(params["endTime"]);
+                        } else {
+                            this.endTime = null;
+                        }
+                        this.status = this.getPromotionStateByTime({startTime: this.startTime, endTime: this.endTime});
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                        this.handleCancel();
+                    }
+                })
+            })
+        }
+
+    }
+
+
+    initData(){
+        this.loadData().then(data =>{
+            this.materials = data["list"];
+            if(this.radio === 1){
+                this.masterTotal = data["total"]?data["total"]:0;
+
+            }
+            this.total = data["total"];
+            this.selectItems = [];
+            this.refreshStatus();
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //异步加载
+    changeData() {
+        this.loadData().then(data => {
+            this.materials = data["list"];
+            if(this.materials && this.materials.length > 0){
+                this.materials.reverse().forEach((order, index) => {
+                    this.getNum(this.materials,index);
+                })
+                this.materials.reverse();
+            }
+            if(this.radio === 1){
+                this.masterTotal = data["total"]?data["total"]:0;
+            }
+            this.total = data["total"];
+            this.selectItems = [];
+            this.refreshStatus();
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //拉取数据
+    loadData() {
+        return new Promise((resolve, reject) => {
+            if (this.aid) {
+                let params = {}, reqUrl;
+                params["pageNo"] = this.pageNo;
+                params["pageSize"] = this.pageSize;
+                if (this.categoryName) {
+                    params["categoryName"] = this.categoryName.trim();
+                }
+                if (this.brandName && this.brandName.length > 0) {
+                    params["brandName"] = this.brandName
+                }
+                if (this.info) {
+                    let infos = this.info;
+                    for (let key in infos){
+                        if(infos[key]){
+                            params[key] = infos[key].trim();
+                        }
+                    }
+                }
+                if (this.radio === 1) {
+                    reqUrl = "activityMasterListIn";
+                    params["id"] = this.aid;
+                } else {
+                    reqUrl = "activityMasterListNo";
+                    params["id"] = this.aid;
+                    params["materialId"] = this.materialId;
+                }
+
+                this.req.doPost({
+                    url: reqUrl,
+                    data: params,
+                    success: (res => {
+                        console.log(res);
+                        if (res && res.code == 200) {
+                            resolve(res.data);
+                        } else {
+                            reject(res.msg || Messages.FAIL.DATA);
+                        }
+                    })
+                })
+            }
+        })
+    }
+
+    //按类别搜索
+    handleCategory(e: any) {
+        this.categoryName = e.categoryName;
+        this.brandName = [];
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+    //按品牌搜索
+    handleBrand(e:any){
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.brandName = e;
+        this.changeData();
+    }
+
+    //按指定标准搜索
+    handleSearch(e:any){
+        this.info = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    /**
+     * 添加材料到活动项目中去
+     * @param aid 活动id
+     * @param ap 活动价格
+     * @param ids 添加的ids
+     */
+    addMaterial(aid,ids) {
+        if (aid && ids.length > 0) {
+            let params = {
+                activityId: aid,
+                materialAndPriceForm: ids
+            };
+            this.req.doPost({
+                url: "addMasterToActivity",
+                data: params,
+                success: (res => {
+                    console.log(res);
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.resetLoadData(ids, this.materials);
+                        this.masterTotal = this.masterTotal + ids.length;
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+
+    }
+
+    //删除或者添加时重新拉取数据
+    resetLoadData(ids, materials) {
+        if (ids && materials && ids.length === materials.length) {
+            this.pageNo = this.pageNo - 1;
+            if (this.pageNo < Default.PAGE.PAGE_NO) {
+                this.pageNo = Default.PAGE.PAGE_NO;
+            }
+            this.changeData();
+        } else {
+            this.changeData();
+        }
+    }
+
+
+    //tab 切换
+    handleSwitch(e: any) {
+        this.radio = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.changeData();
+    }
+
+
+    //全选
+    checkAll(e) {
+        this.allChecked = e;
+        this.materials.forEach(m => {
+            m["checked"] = this.allChecked;
+        });
+        this.refreshStatus();
+    }
+
+    //选择某一项
+    refreshStatus() {
+        let allChecked = false,
+            allUnChecked = false;
+
+        if (this.materials && this.materials.length > 0) {
+            allChecked = this.materials.every(m => m.checked === true);
+            allUnChecked = this.materials.every(m => !m.checked);
+            this.allChecked = allChecked;
+            this.indeterminate = (!allChecked) && (!allUnChecked);
+            this.selectItems = this.materials.filter(m => m.checked === true);
+        } else {
+            this.allChecked = allUnChecked;
+        }
+
+        this.radioSwitch[0].text = `活动材料${this.masterTotal > 0 ? '（' + this.masterTotal + '）' : ''}`;
+
+    }
+
+    //提交确认
+    confirm() {
+        let ids = [this.aid];
+        this.submitMaster(...ids);
+    }
+
+    //删除活动材料
+    deleteMaster(...ids) {
+        if (ids && ids.length > 0) {
+            this.req.doPost({
+                url: "activityMasterDel",
+                data: {ids: ids},
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.resetLoadData(ids, this.materials);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        }
+    }
+
+    //提交审核
+    submitMaster(...ids){
+        if(ids && ids.length > 0){
+            this.req.doPost({
+                url:"auditMasterInActivity",
+                data:{
+                    largeActivity: [{
+                        id: this.aid,
+                        materialId: this.materialId
+                    }]
+                },
+                success:(res =>{
+                    if(res && res.code == 200){
+                        this.auditType = 2;
+                        this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+                        this.resetLoadData(ids,this.materials);
+                    }else{
+                        this.warn.onModalInfo({
+                            title:"温馨提示",
+                            content:res.msg || Messages.FAIL.DATA,
+                            ok:()=>{
+                                console.log("confirm");
+                            }
+                        });
+                    }
+                })
+            })
+        }
+    }
+
+
+    //单个删除项目
+    deleteItem(id: number) {
+       this.deleteMaster(id);
+    }
+
+    //批量删除
+    deleteItems() {
+        let ids = this.getSelectItemById();
+        this.deleteMaster(...ids);
+    }
+
+
+    //添加
+    addItem(id: number, price: string) {
+        this.addMaterial(this.aid,[{id:id,activityPrice:price}]);
+    }
+
+    //批量添加
+    addItems() {
+        let ids = this.getSelectItemByIdAndPrice();
+        this.addMaterial(this.aid,ids);
+    }
+
+
+    getSelectItemById() {
+        let ids = [];
+        if (this.selectItems && this.selectItems.length > 0) {
+            this.selectItems.forEach(s => {
+                ids.push(s.id);
+            })
+        }
+        return ids;
+    }
+
+    getSelectItemByIdAndPrice(){
+        let ids = [];
+        if (this.selectItems && this.selectItems.length > 0) {
+            this.selectItems.forEach(s => {
+                ids.push({
+                    id: s.id,
+                    activityPrice: s.activityPrice
+                });
+            })
+        }
+        return ids;
+    }
+
+    changeValue(e, m) {
+        console.log(e);
+        console.log("current model is", m);
+    }
+
+    // 表格数据合并
+    getNum(materials,index) {
+        let current = materials[index];
+        let next = materials[index + 1];
+        if (next) {
+            if (current.spu == next.spu) {
+                if (current["rows"]) {
+                    current["rows"] = current["rows"] + 1;
+                } else {
+                    current["rows"] = 2;
+                }
+                next["rows"] = current["rows"];
+                current["rows"] = 0;
+            } else {
+                if (!current["rows"]) {
+                    current["rows"] = 1;
+                }
+                if (!next["rows"]) {
+                    next["rows"] = 1;
+                }
+            }
+        }
+    }
+
+    /**
+     * 根据审核状态是否可编辑
+     * @returns {boolean}
+     */
+    getEditByType(){
+        return this.auditType === 1 || this.auditType === 4;
+    }
+
+    openLarge(src:string) {
+        console.log(src);
+        this._albums = [];
+        this._albums.push({ src: src, thumb: src });
+    }
+
+
+    disabledStartDate = (st:Date):boolean =>{
+        if(!st) return false;
+        return st.getTime() <= new Date(new Date().toLocaleDateString()).getTime() - 1;
+    }
+
+    disabledEndDate = (et:Date):boolean =>{
+        if(!et) return false;
+        return et.getTime() <= new Date(new Date().toLocaleDateString()).getTime() - 1;
+    }
+
+    modelChangeStartTime(e:Date){
+        let st = new Date(e).getTime();
+        if(this.endTime){
+            let et = new Date(this.endTime).getTime();
+            if(st > et){
+                this.startTime = null;
+                this.warn.onMsgWarn("最早可选择到当前时间，且早于结束时间")
+            }
+        }
+    }
+
+    modelChangeEndTime(e:Date){
+        let et = new Date(e).getTime();
+        if(this.startTime){
+            let st = new Date(this.startTime).getTime();
+            if(st > et){
+                this.endTime = null;
+                this.warn.onMsgWarn("开始时间必须晚于结束时间");
+            }
+        }
+    }
+}

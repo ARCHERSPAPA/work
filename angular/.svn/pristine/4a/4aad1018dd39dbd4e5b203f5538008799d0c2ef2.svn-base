@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-temp-basic-edit',
+  templateUrl: './temp-basic-edit.component.html',
+  styleUrls: ['./temp-basic-edit.component.scss']
+})
+export class TempBasicEditComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

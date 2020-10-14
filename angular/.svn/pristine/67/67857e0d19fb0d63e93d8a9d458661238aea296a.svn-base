@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-temp-lib-list',
+  templateUrl: './temp-lib-list.component.html',
+  styleUrls: ['./temp-lib-list.component.scss']
+})
+export class TempLibListComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
