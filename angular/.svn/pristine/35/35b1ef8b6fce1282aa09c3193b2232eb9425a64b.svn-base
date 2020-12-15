@@ -1,0 +1,111 @@
+import {Component, OnInit} from '@angular/core';
+import {Default} from "../../../model/constant";
+import {Router, ActivatedRoute} from '@angular/router';
+import {WarningService} from "../../../service/warning.service";
+import {ArticleExceptionService} from "./article-exception.service";
+
+@Component({
+    selector: 'rev-article-exception',
+    templateUrl: './article-exception.component.html',
+    styleUrls: ['./article-exception.component.scss']
+})
+export class ArticleExceptionComponent implements OnInit {
+
+    public title: string;
+    public radioSwitch: Array<any> = [
+        {
+            key: 0,
+            text: '待审核'
+        },
+        {
+            key: 1,
+            text: '已审核'
+        }
+    ];
+    //初始化查询条件
+    public forms: Array<any> = [
+        {
+            type: "select",
+            name: "state",
+            placeholder: "请选择订单状态",
+            data: [
+                {id: 1, content: "未开始"},
+                {id: 2, content: "已开始"},
+                {id: 3, content: "已结束"}
+            ],
+            cols: 4,
+            value: null
+        },
+        {
+            type: "text",
+            name: "name",
+            placeholder: "请输入查询楼盘名称/工长/客户/材料订单号",
+            cols: 6,
+            value: null
+        },
+        {
+            type: "button",
+            text: "查询",
+            name: "search",
+            cols: 1
+        }
+    ];
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public loading: boolean = false;
+
+    public excepts: any;
+
+    constructor(private router: Router,
+                private activatedRoute: ActivatedRoute,
+                private warn: WarningService,
+                private articleExpService: ArticleExceptionService) {
+    }
+
+    ngOnInit() {
+        this.title = "异常审核";
+        this.forms[0].value = this.forms[0].data[1];
+        this.changeData();
+    }
+
+
+    handleSwitch(e) {
+        console.log(e);
+    }
+
+    handleForm(maps: any) {
+        console.log("e size is", maps.entries());
+        if (maps && maps.size > 0) {
+            maps.forEach((map, key) => {
+                console.log("map:", map);
+                console.log("key: ", key);
+            })
+        }
+    }
+
+    handleSelect(e: any, name: string) {
+        console.log("select value is", e);
+        console.log("select name is", name);
+    }
+
+    changeData() {
+        let params = {
+            page: this.pageNo,
+            pageSize: this.pageSize
+        };
+
+
+        this.articleExpService.getExpList(params)
+            .then(data => {
+                this.excepts = data;
+            })
+            .catch(err => {
+                this.warn.onMsgError(err);
+            })
+
+
+    }
+
+}

@@ -1,0 +1,79 @@
+@import "./../../../../assets/scss/mixin";
+.new-making {
+    .head-making-list {
+        border: 1px solid #e8e8e8;
+        border-right: none;
+        p {
+            margin-left: 558px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.45);
+        }
+        .categoryName {
+            vertical-align: middle;
+            border: 1px solid #e8e8e8;
+            border-left: none;
+            border-top: none;
+            padding-right: 88px;
+            line-height: 45px;
+        }
+    }
+    .head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        font-size: 14px;
+        .head-info {
+            font-family: PingFangSC;
+            font-weight: 400;
+            line-height: 22px;
+            color: rgba(0, 0, 0, 0.45);
+        }
+        .head-btn {
+            a {
+                margin-left: 24px;
+            }
+        }
+    }
+    tr th,
+    tr td {
+        font-size: 14px;
+        max-width: 45px;
+        width: 139px;
+        border: 1px solid #e8e8e8;
+        border-left: none;
+        vertical-align: middle;
+        a {
+            padding-right: 4px;
+        }
+        @include ellipsis();
+    }
+}
+.newMaking-btn-fix {
+    position: fixed;
+    bottom: 0px;
+    /* left: 242px; */
+    /* width: 1379px; */
+    right: 0px;
+    width: calc(100% - 200px);
+    height: 64px;
+    background: #ffffff;
+    box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.15);
+}
+.commBo {
+    vertical-align: middle;
+    border-right: 0;
+    line-height: 45px;
+    display: flex;
+    justify-content: center;
+    .commBo-btn {
+        position: absolute;
+        right: 42px;
+    }
+    > div {
+        span {
+            line-height: 18px;
+            vertical-align: text-top;
+            margin-left: 8px;
+        }
+    }
+}

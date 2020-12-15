@@ -1,0 +1,8 @@
+@charset "utf-8";
+.search-bar{
+  display: flex;
+  &-side{
+    flex: 1;
+    margin-left: 8px;
+  }
+}

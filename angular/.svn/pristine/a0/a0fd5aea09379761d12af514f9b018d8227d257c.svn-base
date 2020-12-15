@@ -1,0 +1,157 @@
+import { Component, OnInit } from '@angular/core';
+import { RequestService } from '../../../../service/request.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { PersonnelExamineService } from "../personnel-examine.service";
+import { WarningService } from "../../../../service/warning.service";
+import { toFixed } from 'core-js/fn/number/epsilon';
+
+@Component({
+    selector: 'app-examine-list',
+    templateUrl: './examine-list.component.html',
+    styleUrls: ['./../../personnel.component.scss', './examine-list.component.scss'],
+    providers: [PersonnelExamineService]
+})
+export class ExamineListComponent implements OnInit {
+    public title: string;
+    public examineList: Array<any>;
+
+
+    //弹出框
+    public isVisible: boolean = false;
+    public isOkLoading: boolean = false;
+
+    //需要审核
+    public itemId: number;
+    public audit: boolean = true;
+    public date ;
+    public isAutoVisible: boolean = false;
+    public costState:boolean = true;
+    public materialState :boolean = true;
+    public watermark: boolean = true;
+
+
+    constructor(private request: RequestService,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+        private personnelExamine: PersonnelExamineService,
+        private warn: WarningService) { }
+
+    ngOnInit() {
+        this.title = '审批流程';
+
+        this.loadExamineList();
+    }
+
+    loadExamineList() {
+        // todo 4.审批流程增加退单
+        const self = this;
+        this.request.doPost({
+            url: 'examineList',
+            data: {
+            }, success: res => {
+                self.examineList = res.data;
+            }
+        });
+    }
+
+    /**
+     * 根据不同类和参数渲染文案
+     * @param type
+     * @param args
+     * @returns {string}
+     */
+    getRenderName(type, ...args) {
+        switch (type) {
+            case 1:
+                return (args.length > 0 && args[0] === 1 ? '设计师' : '工长') + '增项';
+            case 2:
+                return (args.length > 0 && args[0] === 1 ? '设计师' : '工长') + '减项';
+            case 3:
+                return '客户退款';
+            case 4:
+                return '材料审核流程';
+            case 5:
+                return '自动确认设置';
+            default:
+                return '其它审核流程';
+        }
+    }
+
+    /**
+     *  [routerLink]="['../add']" [queryParams]="{examineId:data.id,examineName:(data.workName === 1?'设计师':'工长') + (data.type === 1?'增项':'减项')}"
+     * @param data
+     */
+    editItem(data) {
+        this.router.navigate(['./../add'], {
+            queryParams: {
+                examineId: data.id,
+                examineName: this.getRenderName(data.type, data.workName)
+            },
+            relativeTo: this.activatedRoute,
+            skipLocationChange: true
+        });
+    }
+    /**
+     * 自动设置的弹窗
+     */
+    openAutoSet() {
+        this.isAutoVisible = true;
+    }
+    
+    openItem(item) {
+        this.itemId = item.id;
+        this.personnelExamine.getExamineSelected(item.id).then(data => {
+            if (item.type == 4) {
+                this.audit = data.material && data.material[0].audit ? true : false;
+                this.watermark = data.material && data.material[0].waterPicture ? true : false;
+                this.isVisible = true;
+            } else if (item.type == 5) {
+                this.date=Math.floor( data.confirm[0].time/24/60)
+                this.materialState = data.confirm && data.confirm[0].materialState ? true : false;
+                this.costState = data.confirm && data.confirm[0].costState ? true : false;
+                this.isAutoVisible = true;
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.isOkLoading = false;
+        this.isAutoVisible = false;
+    }
+    /**
+     * 
+     * @param type 0审核流程1自动设置
+     */
+    handleOk(type) {
+        this.isOkLoading = true;
+        let params
+        if (type == 0) {
+            params = {
+                id: this.itemId,
+                audit: this.audit ? 1 : 0,
+                waterPicture: this.watermark ? 1 : 0
+            };
+        } else if (type == 1) {
+            params = {
+                id: this.itemId,
+                materialState: this.materialState ? 1 : 0,
+                costState: this.costState ? 1 : 0
+            };
+        }
+
+        this.personnelExamine.saveExamineAudit(params).then(msg => {
+            this.handleCancel();
+            this.warn.onMsgSuccess(msg);
+        }).catch(err => {
+            this.handleCancel();
+            this.warn.onMsgError(err);
+        })
+    }
+
+
+
+}

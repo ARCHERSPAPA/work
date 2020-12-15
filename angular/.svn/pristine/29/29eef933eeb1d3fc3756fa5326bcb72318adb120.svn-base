@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'rev-master-class-restrict',
+  templateUrl: './master-class-restrict.component.html',
+  styleUrls: ['./master-class-restrict.component.scss']
+})
+export class MasterClassRestrictComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

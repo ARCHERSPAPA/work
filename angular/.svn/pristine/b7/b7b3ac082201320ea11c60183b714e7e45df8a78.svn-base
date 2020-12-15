@@ -1,0 +1,173 @@
+<div class="master-sale-add">
+	<div class="sale-head">
+        <rev-title [title]="versionName || '暂无版本名称'"></rev-title>
+        <a class="head-fix" href="javascript:void(0)" (click)="showModal(versionName,remark,note)" *ngIf="detailState != 1">修改</a>
+	</div>
+	<div nz-row class="temp-dtl mt-16">
+        <div nz-col nzSpan="22">备注：{{remark?remark:'暂无备注'}}</div>
+        <div nz-col nzSpan="22" class="mt-8">说明：{{note?note:'暂无说明'}}</div>
+	</div>
+       <div class="clearance"></div>
+       <nz-tabset [nzSelectedIndex]="0">
+        <!---项目明细--->
+        <nz-tab nzTitle="项目明细">
+	<div class="sale-add-search mb-24" nz-row nzType="flex" nzJustify="space-between" nzAlign="top">
+		<div nz-col nzSpan="4">
+			<radio-switch *ngIf="detailState != 1" [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+		</div>
+		<div nz-col nzSpan="20">
+			<div nz-row style="width:500px;float: right;">
+                <div nz-col nzSpan="10">
+                    <nz-select style="width: 100%;" nzPlaceHolder="请选择类别" nzAllowClear [(ngModel)]="category"
+                        (ngModelChange)="changeData(true)">
+                        <nz-option *ngFor="let cate of categoryList" [nzValue]="cate.name" [nzLabel]="cate.name"></nz-option>
+                    </nz-select>
+                </div>
+                <div nz-col nzSpan="10" class="ml-8">
+                    <input nz-input type="text" placeholder="查询内容" [(ngModel)]="projectName">
+                </div>
+                <div nz-col nzSpan="2" class="ml-8">
+                    <button nz-button [nzType]="'primary'" (click)="changeData(true)">查询</button>
+                </div>
+            </div>
+		</div>
+	</div>
+	<div class="table-head mb-16" *ngIf="detailState != 1">
+		<div class="operate">
+			<button nz-button nzType="primary" *ngIf="state === 1" [disabled]='checkedNumber.length == 0' (nzOnConfirm)="opreateMaterial('del')" nz-popconfirm nzTitle="确定删除该项目吗？" nzOkText="删除" >删除</button>
+            <button nz-button nzType="primary" *ngIf="state === 2" [disabled]='checkedNumber.length == 0' (click)="opreateMaterial('add')">添加</button>
+            <button nz-button nzType="primary" *ngIf="state === 2" [disabled]='materialList && materialList.length === 0' class="ml-8" (nzOnConfirm)="addAll()" nz-popconfirm nzTitle="确定添加当前所有还未添加的项目吗？" nzOkText="添加">添加全部</button>
+        	<span *ngIf="checkedNumber.length > 0">已选{{checkedNumber.length}}项</span>
+		</div>
+	</div>
+	<nz-table 
+		#nzTable 
+		nzSize="middle"
+        [nzFrontPagination]="false"
+        [(nzPageIndex)]='pageNo' 
+        [(nzPageSize)]="pageSize" 
+        [nzTotal]="total"
+		(nzPageIndexChange)="changePage()"
+        [nzShowPagination]='true'
+		[nzData]="materialList"
+		[nzBordered]="true"
+    >
+        <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+            	(nzCheckedChange)="checkAll($event)" *ngIf="detailState != 1" [nzDisabled]="materialList.length === 0"></th>
+                <th>编号</th>
+                <th>类别</th>
+                <th>名称</th>
+                <th>品牌</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>单位</th>
+                <th>材料单价</th>
+                <th>材料耗损</th>
+                <th>木工</th>
+                <th>泥工</th>
+                <th>漆工</th>
+                <th>水电</th>
+                <th>销售价</th>
+                <th *ngIf="detailState != 1">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of nzTable.data; let i = index;" [ngClass]="{'del':data.state && data.state == 0}">
+                <td nzLeft="0px" [(nzChecked)]="data.checked" nzShowCheckbox (nzCheckedChange)="refreshStatus()" *ngIf="detailState != 1"></td>
+                <td  nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.code?data.code:''">{{data.code?data.code:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.categoryName?data.categoryName:''">{{data.categoryName?data.categoryName:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.name?data.name:''">{{data.name?data.name:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.brand?data.brand:''">{{data.brand?data.brand:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.spec?data.spec:''">{{data.spec?data.spec:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.model?data.model:''">{{data.model?data.model:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.unit?data.unit:''">{{data.unit?data.unit:'--'}}</td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.unitPrice || data.unitPrice == 0?data.unitPrice:''">
+                    {{data.unitPrice || data.unitPrice == 0?(data.unitPrice|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.wastageRate || data.wastageRate == 0?data.wastageRate:''">
+                    {{data.wastageRate || data.wastageRate == 0?(data.wastageRate|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.carpenterPrice || data.carpenterPrice?data.carpenterPrice:''">
+                    {{data.carpenterPrice || data.carpenterPrice == 0?(data.carpenterPrice|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.masonPrice || data.masonPrice == 0?data.masonPrice:''">
+                    {{data.masonPrice || data.masonPrice == 0?(data.masonPrice|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.japannerPrice || data.japannerPrice?data.japannerPrice:''">
+                    {{data.japannerPrice || data.japannerPrice == 0?(data.japannerPrice|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.utilityCharge || data.utilityCharge?data.utilityCharge:''">
+                    {{data.utilityCharge || data.utilityCharge == 0?(data.utilityCharge|number:'1.2'):'--'}}
+                </td>
+                <td nz-tooltip [nzTitle]="data.state && data.state == 0 ? '已失效':''" nzPlacement="topLeft" [title]="data.sellPrice || data.sellPrice == 0?data.sellPrice:''">
+                    {{data.sellPrice || data.sellPrice == 0?(data.sellPrice|number:'1.2'):'--'}}
+                </td>
+                <td nzRight="0px" *ngIf="detailState != 1">
+                    <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项目吗？" nzOkText="删除" (nzOnConfirm)="handleOperate('del',data)" *ngIf="state === 1">删除</a>
+                    <a href="javascript:void(0)" (click)="handleOperate('add',data)" *ngIf="state === 2">添加</a>
+                </td>
+            </tr>
+        </tbody>    
+	</nz-table>
+</nz-tab>
+<nz-tab nzTitle="附件">
+    <rev-uploader-file [type]='1'[state]='detailState'[costState]='4' [costId]='versionId'></rev-uploader-file>
+    </nz-tab>
+</nz-tabset>
+
+<!---修改title--->
+<nz-modal [(nzVisible)]="editVisible" nzTitle="编辑基装" [nzFooter]="null" (nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="editForm" class="temp-modal">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6">版本名称</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+                <input nz-input name="editName" formControlName="editName" [(ngModel)]="editName" maxlength="30"
+                    autocomplete="off" placeholder="请输入名称" />
+                <nz-form-explain *ngIf="editForm.get('editName').dirty && editForm.get('editName').errors">
+                    <ng-container *ngIf="editForm.get('editName').hasError('required')">
+                        至少输入1位字符
+                    </ng-container>
+                    <ng-container *ngIf="editForm.get('editName').hasError('maxLength')">
+                        至多输入30位字符
+                    </ng-container>
+
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6">备注</nz-form-label>
+            <nz-form-control [nzSpan]="16" class="textarea">
+                <textarea nz-input type="text" name="editRemark" [(ngModel)]="editRemark" formControlName="editRemark"
+                    maxlength="300" autocomplete="off" placeholder="请输入备注信息" rows="5"></textarea>
+                <span class="count"
+                    *ngIf="editRemark && editRemark.length > 0"><span>{{editRemark.length}}</span>/300</span>
+                <nz-form-explain *ngIf="editForm.get('editRemark').dirty && editForm.get('editRemark').errors">
+                    <ng-container *ngIf="editForm.get('editRemark').hasError('maxLength')">
+                        最多输入300个字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item style="margin-top: 8px;">
+            <nz-form-label [nzSpan]="6">说明</nz-form-label>
+            <nz-form-control [nzSpan]="16" class="textarea">
+                <textarea nz-input type="text" name="editNote" [(ngModel)]="editNote" formControlName="editNote"
+                    maxlength="5000" autocomplete="off" placeholder="请输入说明信息" rows="5"></textarea>
+                <span class="count"
+                    *ngIf="editNote && editNote.length > 0"><span>{{editNote.length}}</span>/5000</span>
+                <nz-form-explain *ngIf="editForm.get('editNote').dirty && editForm.get('editNote').errors">
+                    <ng-container *ngIf="editForm.get('editNote').hasError('maxLength')">
+                        最多输入5000个字符
+                    </ng-container>
+                </nz-form-explain>
+            </nz-form-control>
+        </nz-form-item>
+        <div class="btns">
+            <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleOk()" [disabled]="!editForm.valid">提交</button>
+        </div>
+    </form>
+</nz-modal>

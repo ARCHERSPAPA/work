@@ -1,0 +1,91 @@
+<div class="ant-modal-header">
+  <h4 class="ant-modal-title">选择套餐</h4>
+  <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+    <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+  </button>
+</div>
+<div class="ant-modal-body">
+  <div nz-row class="mb-16" >
+     <rev-select-bar (handleMaterialSupplier)="selectMaterialSupplier($event)"
+                     (handleCombos)="selectCbs($event)"
+                     (handleCategory)="selectCategory($event)"
+                     (handleBrands)="selectBrands($event)"
+                     (handleSearch)="selectSearch($event)"
+                     [tabAllowClear]="tab"
+                    (handleCompanies)="getCompanies($event)"></rev-select-bar>
+  </div>
+
+
+
+  <!---选中展示数据列表---->
+  <div nz-row class="ml-8" *ngIf="selectItems && selectItems.length > 0">
+
+  </div>
+  <div nz-row>
+    <nz-table [nzData]="packs" nzSize="middle" [nzTotal]="total"
+              [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzFrontPagination]="false"
+              (nzPageIndexChange)="changeData()" [nzShowPagination]="true" [nzScroll]="{ x:'130%'}"
+              #packTable [nzBordered]="true">
+      <thead>
+      <tr style="border-top: 1px solid #dedede;">
+        <th>品牌</th>
+        <th>类别</th>
+        <th>名称</th>
+        <th>规格</th>
+        <th>材质</th>
+        <th>颜色</th>
+        <th>产地</th>
+        <th>单位</th>
+        <th>数量</th>
+        <th>供货价</th>
+        <th>活动价</th>
+        <th>活动时间</th>
+        <th>销售价</th>
+        <th>材料商</th>
+        <th>套系</th>
+        <th nzRight="0px">操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let p of packTable.data">
+        <td [nzTitle]="p.brand?p.brand:''" nzPlacement="topLeft" nz-tooltip><span>{{p.brand?p.brand:'--'}}</span></td>
+        <td [nzTitle]="p.category?p.category:''" nzPlacement="topLeft" nz-tooltip><span>{{p.category?p.category:'--'}}</span></td>
+        <td [nzTitle]="p.name?p.name:''" nzPlacement="topLeft" nz-tooltip><span>{{p.name}}</span></td>
+        <td [nzTitle]="p.spec?p.spec:''" nzPlacement="topLeft" nz-tooltip><span>{{p.spec?p.spec:'--'}}</span></td>
+        <td [nzTitle]="p.material?p.material:''" nzPlacement="topLeft" nz-tooltip><span>{{p.material?p.material:'--'}}</span></td>
+        <td [nzTitle]="p.color?p.color:''" nzPlacement="topLeft" nz-tooltip><span>{{p.color?p.color:'--'}}</span></td>
+        <td [nzTitle]="p.origin?p.origin:''" nzPlacement="topLeft" nz-tooltip><span>{{p.origin?p.origin:'--'}}</span></td>
+        <td [title]="p.unit?p.unit:''"><span>{{p.unit?p.unit:'--'}}</span></td>
+        <td [title]="p.num?p.num:''"><span>{{p.num?p.num:'--'}}</span></td>
+        <td [title]="p.sellingPrice?p.sellingPrice:0">
+          <span>{{(p.sellingPrice?p.sellingPrice:0)| number:'1.2'}}</span></td>
+        <td [title]="p.supplyPrice?p.supplyPrice:0">
+          <span>{{(p.supplyPrice?p.supplyPrice:0) | number:'1.2'}}</span></td>
+        <td><span>{{p.date?(p.date|date:'yy-MM-dd'):'--'}}</span></td>
+        <td [title]="p.supplyPrice?p.supplyPrice:0">
+          <span>{{(p.supplyPrice?p.supplyPrice:0) | number:'1.2'}}</span></td>
+
+        <td [nzTitle]="getCompanyName(p.supplierId)?getCompanyName(p.supplierId):''"
+            nzPlacement="topLeft" nz-tooltip>
+          <span>{{getCompanyName(p.supplierId)?getCompanyName(p.supplierId):'--'}}</span></td>
+
+
+        <td [nzTitle]="p.comboName?p.comboName:''" nzPlacement="topLeft" nz-tooltip>
+          <span>{{p.comboName?p.comboName:'--'}}</span>
+        </td>
+
+        <td nzRight="0px">
+          <a href="javascript:void(0)" class="mr-8">添加</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+</div>
+
+<div class="ant-modal-footer">
+  <button nz-button nzType="default" (click)="cancelModal()">取消</button>
+  <button nz-button nzType="primary" [disabled]="selectItems && selectItems.length === 0"
+          (click)="confirmModal($event)">确定</button>
+</div>

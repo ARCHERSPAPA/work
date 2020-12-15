@@ -1,0 +1,271 @@
+<div class="new-making">
+    <div class="head">
+        <div class="head-info">
+            <!--<span *ngIf="material && material.versionId" class="ml-8"-->
+            <!--[nzTitle]="getCompiledId(material.versionId)"-->
+            <!--nzPlacement="topLeft" nz-tooltip>{{getCompiledId(data.versionId)}}</span>-->
+            <span *ngIf="materialInfo && materialInfo.submitedMaterialTime"
+                class="ml-8">上传时间：{{materialInfo.submitedMaterialTime|date:'yy-MM-dd HH:mm'}}</span>
+            <span *ngIf="materialInfo && materialInfo.customConfirmMaterialTime"
+                class="ml-8">确认时间：{{materialInfo.customConfirmMaterialTime|date:'yy-MM-dd HH:mm'}}</span>
+        </div>
+        <div class="head-btn">
+            <a href="javascript:void(0)" (click)="bubbleModalByCombo()" *ngIf="showBtnByState()">添加套餐</a>
+            <a href="javascript:void(0)" (click)="bubbleModalByBranch()" *ngIf="showBtnByState()">添加单品</a>
+        </div>
+    </div>
+    <div class="head-making-list">
+
+        <nz-table #sinTable [nzData]="material.infoMaps" [nzShowPagination]="false" nzSize="small" [nzNoResult]="' '"
+            nzBordered='true' [nzScroll]="{y:'640px'}">
+
+            <thead>
+                <th colspan="12" style="text-align: center;line-height: 45px;border-bottom:1px solid #e8e8e8;">大项名称</th>
+                <th nzRight="0px" [rowSpan]="2" style="vertical-align:middle; border:1px solid #e8e8e8;  border-top: none;  width: 324px;
+                padding-left: 10px;" *ngIf="showBtnByState()">操作</th>
+                <tr>
+                    <th>品牌</th>
+                    <th>名称</th>
+                    <th>类型</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>材质</th>
+                    <th width="10%">颜色</th>
+                    <th>单位</th>
+                    <th>产地</th>
+                    <!--<th>单价</th>-->
+                    <th>数量</th>
+                    <!--<th>合计</th>-->
+                    <th>说明</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-template ngFor let-data let-id="index" [ngForOf]="material.infoMaps" let-t="index">
+
+                    <td>
+                        <div style="margin-top: 10px;" *ngIf='data.infos.length>pageSize'>
+                            <nz-pagination [nzPageIndex]="data.pageNo" [nzTotal]="data.infos.length"
+                                style="position:absolute;" [nzPageSize]="pageSize" [nzShowTotal]="totalTemplate"
+                                [nzSize]="'small'" [nzHideOnSinglePage]="true"
+                                (nzPageIndexChange)="pageChange($event,data)">
+                            </nz-pagination>
+                        </div>
+
+
+                    </td>
+                    <td [colSpan]="11" align="center" *ngIf='data.infos && !data.planId && data.infos.length>0'
+                        class='categoryName'>
+                        {{data.categoryName}}
+                    </td>
+                    <td [colSpan]="11" align="center" *ngIf='data.infos && data.planId ' class='categoryName'>
+                        <div class="commBo">
+                            <div>
+                                套餐：{{data.infos[0].planName}}<span
+                                    *ngIf="data.infos[0].versionDetail">（{{renderversionDetail(data.infos[0].versionDetail)}}）</span>，材料商：{{data.infos[0].supplierName}}，数量：{{data.infos[0].planNum}}套
+                                <span *ngIf="data.infos[0].planExplainMsg" [nzTitle]="data.infos[0].planExplainMsg"
+                                    nzPlacement="top" nz-tooltip>
+                                    <i nz-icon type="info-circle" theme="outline"></i>
+                                </span>
+                                <span *ngIf="data.infos[0].planRemark" [nzTitle]="data.infos[0].planRemark"
+                                    nzPlacement="top" nz-tooltip>
+                                    <i nz-icon type="question-circle" theme="outline"></i>
+                                </span>
+                            </div>
+
+                            <div class="commBo-btn" *ngIf="showBtnByState()">
+                                <a href="javascript:void(0)" class="ml-8" title="修改数量" (click)="editNum(data)">修改数量</a>
+                                <a href="javascript:void(0)" class="ml-8" title="备注" (click)="editRemark(data)">备注</a>
+                                <a href="javascript:void(0)" class="ml-8" title="删除套餐" nz-popconfirm nzTitle="确定删除该套餐吗?"
+                                    nzOkText="确定" nzCancelText="
+                   取消" (nzOnConfirm)="delCombo(t)">删除套餐</a>
+                            </div>
+                        </div>
+
+
+                    </td>
+                    <ng-template ngFor let-inner let-i="index" let-last="last" [ngForOf]="computedBranchInfos(data)">
+                        <tr>
+                            <td [title]="inner.brand?inner.brand:''">{{inner.brand?inner.brand:'--'}}
+                            </td>
+                            <td [title]="inner.name?inner.name:(inner.projectName?inner.projectName:'')">
+                                {{inner.name?inner.name:(inner.projectName?inner.projectName:'--')}}
+                            </td>
+                            <td [title]="inner.category?inner.category:''">
+                                {{inner.category?inner.category:'--'}}
+                            </td>
+                            <td [title]="inner.spec?inner.spec:''">
+                                {{inner.spec?inner.spec:'--'}}
+                            </td>
+                            <td [title]="inner.model?inner.model:''">{{inner.model?inner.model:'--'}}
+                            </td>
+                            <td [title]="inner.material?inner.material:''">
+                                {{inner.material?inner.material:'--'}}
+                            </td>
+                            <td *ngIf="inner.color && inner.color.length > 0" width="10%" [title]="inner.color">
+                                {{inner.color}}
+                            </td>
+                            <td *ngIf="!inner.color " width="10%">--</td>
+                            <td [title]="inner.sellingUnit?inner.sellingUnit:(inner.unit?inner.unit:0)">
+                                {{inner.sellingUnit?inner.sellingUnit:(inner.unit?inner.unit:'--')}}</td>
+                            <td [title]="inner.origin?inner.origin:'--'">{{inner.origin?inner.origin:'--'}}</td>
+                            <!--<td [title]="inner.univalent?inner.univalent:0">-->
+                            <!--{{(inner.univalent?inner.univalent:0)|number:'1.2'}}-->
+                            <!--</td>-->
+                            <td [title]="inner.num?inner.num:0">
+                                <input nz-input [num]="inner.num" [formula]="inner.formula" *ngIf=" !data.planId"
+                                    [infoId]="inner.id" [id]="cid" role="10" tabindex="{{10000+(i+1)*100+t}}"
+                                    (changeValue)="changeValue($event,inner)" revInputDecimal
+                                    value="{{inner.formula?(inner.formula+'='+inner.num):inner.num}}" />
+                                <span *ngIf=" data.planId">{{inner.num?inner.num:'--'}}</span>
+                            </td>
+                            <td [nzTitle]="inner.offerExplain?inner.offerExplain:'暂无说明信息'" style="width: 146px;"
+                                nzPlacement="topLeft" nz-tooltip>{{inner.offerExplain?inner.offerExplain:'--'}}
+                                <a href="javascript:void(0)"></a></td>
+                            <td [nzTitle]="inner.remark?inner.remark:'暂无备注信息'" *ngIf=" !data.planId"
+                                style="width: 155px;" nzPlacement="topLeft" nz-tooltip>
+                                {{inner.remark?inner.remark:'--'}}
+                            </td>
+                            <td *ngIf=" data.planId" style="width: 150px;">
+                                --
+                            </td>
+                            <td *ngIf="showBtnByState() && data.planId" style="width: 340px;">
+                                -- -- -- --
+                            </td>
+                            <td *ngIf="showBtnByState() && !data.planId" style="width: 340px;">
+                                <nz-dropdown>
+                                    <a nz-dropdown href="javascript:void(0)">更多<i nz-icon type="down"></i></a>
+                                    <ul nz-menu>
+                                        <li nz-menu-item (click)="remarkItem(inner)">备注</li>
+                                        <li nz-menu-item
+                                            (click)="copyItem($event,inner,1,i+ (data.pageNo-1)*pageSize,t)">复制</li>
+                                    </ul>
+                                </nz-dropdown>
+
+
+                                <a href="javascript:void(0)" class="ml-8" title="上移"
+                                    *ngIf="showUp(data,i+ (data.pageNo-1)*pageSize) "
+                                    (click)="moveItemUp(data,i+ (data.pageNo-1)*pageSize)"><i nz-icon
+                                        type="arrow-up"></i></a>
+                                <a href="javascript:void(0)" class="ml-8" title="下移"
+                                    *ngIf="showDown(data,i+ (data.pageNo-1)*pageSize) "
+                                    (click)="moveItemDown(data,i+ (data.pageNo-1)*pageSize)"><i nz-icon
+                                        type="arrow-down"></i></a>
+                                <a href="javascript:void(0)" class="ml-8" title="置顶"
+                                    *ngIf="showTop(data,i+ (data.pageNo-1)*pageSize)"
+                                    (click)="moveItemTop(data,i+ (data.pageNo-1)*pageSize)"><i nz-icon
+                                        type="to-top"></i></a>
+
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项吗?" nzOkText="确定"
+                                    nzCancelText="
+
+                   取消" (nzOnConfirm)="delItem(i+ (data.pageNo-1)*pageSize,t)"><i nz-icon style="color: red;"
+                                        type="delete"></i></a>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                </ng-template>
+            </tbody>
+
+        </nz-table>
+        <p *ngIf='material.infoMaps && material.infoMaps.length==0'>暂无数据</p>
+    </div>
+</div>
+
+<ng-template #totalTemplate let-total>总条数：{{ total }}</ng-template>
+<nz-affix nzOffsetBottom="50">
+    <div nz-col nzSpan="10" nzOffset="14">
+        <!-- style="position:fixed;right:5%;bottom:50px;" -->
+        <div nz-row class="newMaking-btn-fix">
+            <div nz-col class="text-right">
+                <a class="ant-btn mr-16" target="_blank" style="margin-top: 16px;"
+                    *ngIf="material && material['infoMaps'] && material['infoMaps'].length > 0"
+                    [routerLink]="['/view/material']" [queryParams]="{cid:btoa(cid),type:5,isNewQuote:isNewQuote}"
+                    [title]="'只能预览已保存的数据信息'">预览</a>
+                <!--<button nz-button nzType="primary" *ngIf="showBtnByState()"-->
+                <!--(click)="doMaterial($event)" [disabled]="materialListener()">保存-->
+                <!--</button>-->
+                <button nz-button nzType="primary" *ngIf="showBtnByState()" style="margin: 16px 24px 0 0;"
+                    (click)="saveMaterial($event)">保存</button>
+            </div>
+        </div>
+    </div>
+</nz-affix>
+
+
+<!---添加备注--->
+<nz-modal [(nzVisible)]="markVisible" nzTitle="备注" nzOkText="确定" nzCancelText="取消" (nzOnCancel)="markCancel()"
+    (nzOnOk)="markOk()">
+    <div class="modify">
+        <form nz-form [formGroup]="markForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="5">备注</nz-form-label>
+                <nz-form-control [nzSpan]="16" class="textarea">
+                    <textarea nz-input type="text" placeholder="请输入备注信息" autocomplete="off" rows="5"
+                        [(ngModel)]="markInfo" formControlName="markInfo" name="markInfo" maxlength="500"></textarea>
+                    <span *ngIf="markInfo && markInfo.length > 0"
+                        class="count"><span>{{markInfo.length}}</span>/500</span>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>
+
+<!---添加数量--->
+<nz-modal [(nzVisible)]="numVisible" nzTitle="数量" nzOkText="确定" nzCancelText="取消" (nzOnCancel)="numCancel()"
+    (nzOnOk)="numOk()">
+    <div class="modify">
+        <form nz-form [formGroup]="markForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="5">数量</nz-form-label>
+                <nz-form-control [nzSpan]="16" class="textarea">
+                    <nz-input-number style="width: 100%;" [(ngModel)]="comboNum" formControlName="comboNum"
+                        name="comboNum"></nz-input-number>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>
+<!---添加大项--->
+<nz-modal [(nzVisible)]="branchVisible" [nzTitle]="branchTitle" nzOkText="确定" nzCancelText="取消" [nzFooter]="footerTemp"
+    (nzOnCancel)="branchCancel()">
+    <div class="modify">
+        <form nz-form [formGroup]="branchForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="5">项目名称</nz-form-label>
+                <nz-form-control [nzSpan]="16">
+                    <input nz-input [(ngModel)]="branchInfo" formControlName="branchInfo" name="branchInfo"
+                        maxlength="30" placeholder="请输入项目名称" autocomplete="off" />
+                    <nz-form-explain *ngIf="branchForm.get('branchInfo').dirty  && branchForm.get('branchInfo').errors">
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('minlength')">
+                            至少输入1个字符
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('maxlength')">
+                            至多输入30个字符
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('account')">
+                            输入格式错误
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>
+<ng-template #footerTemp>
+    <div nz-row>
+        <div nz-col class="text-right">
+            <button nz-button nzType="default" (click)="branchCancel()">取消</button>
+            <button nz-button nzType="primary" [disabled]="!branchForm.valid" (click)="branchOk()"
+                *ngIf="!branchEdit">确定
+            </button>
+            <button nz-button nzType="primary" [disabled]="!branchForm.valid" (click)="modifyBranchOk()"
+                *ngIf="branchEdit">修改
+            </button>
+        </div>
+    </div>
+</ng-template>

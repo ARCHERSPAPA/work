@@ -1,9 +1,9 @@
-import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Default} from '../../../model/constant';
-import {RequestService} from '../../../service/request.service';
-import {WarningService} from '../../../service/warning.service';
-import {Messages} from '../../../model/msg';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Default } from '../../../model/constant';
+import { RequestService } from '../../../service/request.service';
+import { WarningService } from '../../../service/warning.service';
+import { Messages } from '../../../model/msg';
 import {
     btoa,
     changeToDecimal,
@@ -12,12 +12,12 @@ import {
     showAddOrDelSubmitByState,
     showDetailByState, toInteger, showExamineState, showRecallByState
 } from '../../../model/methods';
-import {RegularService} from '../../../service/regular.service';
-import {FormGroup, FormBuilder, Validators} from '@angular/forms';
-import {QuoteService} from '../../../service/quote.service';
-import {Reg} from '../../../model/reg';
-import {HeaderService} from '../../../service/header.service';
-import {renderColors} from '../../../model/budget-method';
+import { RegularService } from '../../../service/regular.service';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { QuoteService } from '../../../service/quote.service';
+import { Reg } from '../../../model/reg';
+import { HeaderService } from '../../../service/header.service';
+import { renderColors } from '../../../model/budget-method';
 import { InfoComponent } from '../../../plugins/info/info.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -34,6 +34,7 @@ export class ReGularComponent implements OnInit {
     @Input() finalPrice: any;
 
     @Output() regularsEmitter: EventEmitter<any> = new EventEmitter<any>();
+    @Output() regularsHistoryEmitter: EventEmitter<any> = new EventEmitter<any>();
 
 
     public state: number = Default.STATE.ITEM_5;
@@ -41,7 +42,8 @@ export class ReGularComponent implements OnInit {
     //正在修改的增减项目
     public list: any;
     //已经审核过的增减项目
-    public regulars: Array<any> = [];
+    public regulars;//进场前
+    public afterRegulars;//进场后
     public quotePrice: string;
 
     //表示审核通过与否（type:0,type:1）;
@@ -49,6 +51,7 @@ export class ReGularComponent implements OnInit {
     public type: number;
     public auditVisible = false;
     public msg = '';
+    public pageSize = 5;
 
     public baseQuote: any;
     //单项备注信息添加和修改
@@ -57,15 +60,23 @@ export class ReGularComponent implements OnInit {
     public remarkId: string;
     public remarkString = '';
     public remarkDo: any;
+    public planId: any;
+    public isPlan: any;
+    public allData: any = [];//定制项，和增减项一起的数据
+    public specialList: any = [];
+    public pauseId: any;
+    public price = { //进场前后项目总额
+        afterPausePrice: '',
+        beforePausePrice: ''
+    };
 
     constructor(private activatedRoute: ActivatedRoute,
-                private req: RequestService,
-                private warn: WarningService,
-                private reg: RegularService,
-                private fb: FormBuilder,
-                private quote: QuoteService,
-                private header: HeaderService,
-                private modalService: NgbModal) {
+        private req: RequestService,
+        private warn: WarningService,
+        private reg: RegularService,
+        private fb: FormBuilder,
+        private header: HeaderService,
+        private modalService: NgbModal) {
     }
 
     ngOnInit() {
@@ -75,7 +86,17 @@ export class ReGularComponent implements OnInit {
             this.state = Default.STATE.ITEM_5;
         }
         if (this.cid) {
-            this.historyPause();
+            Promise.all([this.selcetSpecialList(), this.historyPause()]).then(res => {
+                if (this.regulars && this.regulars.length > 0) {
+                    this.allData.push(this.regulars)
+                }
+                if (this.afterRegulars && this.afterRegulars.length > 0) {
+                    this.allData.push(this.afterRegulars)
+                }
+                if (this.specialList && this.specialList.list && this.specialList.list.length > 0) {
+                    this.allData.push(this.specialList);
+                }
+            })
         }
         if (this.aid) {
             this.reloadDetail(this.aid);
@@ -151,7 +172,24 @@ export class ReGularComponent implements OnInit {
         }
         return total;
     }
-
+    //获取大项的名称
+    getName(type) {
+        if (type == 1) {
+            return '定制项'
+        } else if (type == 2) {
+            return '进场后增减项'
+        } else if (type == 0) {
+            return '进场前增减项'
+        }
+    }
+    //判断是否展示数据，数据为空不展示
+    showData(data) {
+        if (data.type == 1) {
+            return (data && data.list.length > 0)
+        } else {
+            return (data && data.length > 0)
+        }
+    }
     // submitItem() {
     //     if (this.aid) {
     //         let amount = this.getValueByParam("applyActualPrice");
@@ -219,42 +257,75 @@ export class ReGularComponent implements OnInit {
         }
         return null;
     }
-
+    renderList(list, data) {
+        list = data.filter(d => {
+            d['expand'] = false;
+            return !this.hideAuditFailureByState(d.state);
+        });
+        list.forEach(regular => {
+            regular.details.reverse().forEach((order, index) => {
+                this.getRows(regular.details, index);
+            })
+            regular.details.reverse();
+        })
+        return list
+    }
     /**
      * 拉取历史增减项目数据
      */
-    historyPause() {
-        if (this.cid) {
-            this.req.doPost({
-                url: 'historyPause',
-                data: {id: this.cid},
-                success: (res => {
-                    if (res && res.code == 200) {
-                        this.regulars = [];
-                        this.quotePrice = '';
-                        if (res.data && res.data.list.length > 0) {
-                            this.regulars = res.data.list.filter(d => {
-                                d['expand'] = false;
-                                return !this.hideAuditFailureByState(d.state);
-                            });
-                            this.quotePrice = res.data.quotePrice;
+    historyPause(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this.cid) {
+                this.req.doPost({
+                    url: 'historyPause',
+                    data: { id: this.cid },
+                    success: (res => {
+                        if (res && res.code == 200) {
+                            this.regulars = [];
+                            this.quotePrice = '';
+                            if (res.data && res.data.afterPause && res.data.afterPause.length > 0) {
+                                this.afterRegulars = this.renderList(this.afterRegulars, res.data.afterPause);
+                                this.afterRegulars.type = 2;
+                                this.price.afterPausePrice=res.data.afterPausePrice;
+                            }
+                            if (res.data && res.data.beforePause && res.data.beforePause.length > 0) {
+                                this.regulars = this.renderList(this.regulars, res.data.beforePause);
+                                this.regulars.type = 0;
+                                this.quotePrice = res.data.quotePrice;
+                                this.price.beforePausePrice=res.data.beforePausePrice;
+                                this.regularsHistoryEmitter.emit({ quotePrice: this.quotePrice });
+                            }
+                            resolve()
+                        } else {
+                            this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
                         }
-                    } else {
-                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
-                    }
-                })
-            });
-        }
-    }
+                    })
+                });
+            }
+        })
 
-    delItem(id) {
-        if (id && this.aid) {
+    }
+    getConut(num, pay) {
+        if (num && pay) {
+            return num * pay;
+        } else {
+            return '--';
+        }
+
+    }
+    delItem(inner) {
+        if (this.aid) {
+            let params = {
+                pauseId: this.aid
+            }
+            if (inner.planId && inner.splitPlan == 0) {
+                params['planId'] = inner.planId
+            } else {
+                params['infoId'] = inner.id
+            }
             this.req.doPost({
-                url: 'delPause',
-                data: {
-                    pauseId: this.aid,
-                    infoId: id
-                },
+                url: inner.planId && inner.splitPlan == 0 ? 'modifyDelPlan' : 'delPause',
+                data: params,
                 success: (res => {
                     if (res && res.code == 200) {
                         this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
@@ -328,7 +399,7 @@ export class ReGularComponent implements OnInit {
                     info.result.then((res) => {
                         this.historyPause();
                         this.reg.setTypeByParam('detail', true);
-                    }, (err) => {});
+                    }, (err) => { });
                 } else {
                     this.req.doPost({
                         url: 'auditPause',
@@ -353,6 +424,8 @@ export class ReGularComponent implements OnInit {
         if (this.list && this.baseQuote) {
             return getAddAndDelByStatus(this.baseQuote['state']) && showDetailByState(this.list.pause.state);
         }
+        console.log(this.baseQuote)
+        console.log(123)
         return false;
     }
 
@@ -386,24 +459,122 @@ export class ReGularComponent implements OnInit {
             });
         }
     }
-
+    showEditDetail(type){
+        if(this.afterRegulars && this.afterRegulars.length>0 && type==2){
+            return true;
+        }else if(!this.afterRegulars && type==0){
+            return true;
+        }else{
+            return false;
+        }
+    }
     renderPause(result: any) {
         if (result) {
             this.list = result;
+            this.list.details.reverse().forEach((order, index) => {
+                this.getRows(this.list.details, index);
+
+            })
+            this.list.details.reverse();
+            // this.allData[0] = this.list;
+            // console.log(this.allData)
             this.list['expand'] = true;
-            this.regularsEmitter.emit({list: result});
+            this.regularsEmitter.emit({ list: result });
         }
+
         // if(this.list && this.list.pause && !this.list.pause.applyActualPrice){
         //     this.list.pause.applyActualPrice = this.getTotal(this.list.details);
         // }
     }
+    // 套餐合并单元格
+    getRows(ms: Array<any>, index: number) {
 
+        let current = ms[index];
+        let next = ms[index + 1];
+        if (current.planId) {
+            if (next) {
+                if (current.planId === next.planId && current.splitPlan == 0) {
+                    if (current["rows"]) {
+                        current["rows"] = current["rows"] + 1;
+                    } else {
+                        current["rows"] = 2;
+                    }
+                    next["rows"] = current["rows"];
+                    current["rows"] = 0;
+                } else {
+                    if (!current["rows"]) {
+                        current["rows"] = 1;
+                    }
+                    if (!next["rows"]) {
+                        next["rows"] = 1;
+                    }
+                }
+            } else {
+                if (!current["rows"]) {
+                    current["rows"] = 1;
+                }
+            }
+        } else {
+            if (!current["rows"]) {
+                current["rows"] = 1;
+            }
+        }
+        return ms;
+    }
+    pageChange(e: any, branch: any) {
+        branch["pageNo"] = e;
+        this.computedData(this.specialList);
+    }
+    computedData(data) {
+        if (data.infoMaps && data.infoMaps.length > 0) {
+            let itemNum = 0, start = 0, end = 0;
+            for (let j = 0; j < data.infoMaps.length; j++) {
+                start = (data.infoMaps[j].pageNo - 1) * this.pageSize;
+                end = (data.infoMaps[j].pageNo) * this.pageSize;
+                itemNum += data.infoMaps[j].infos.slice(start, end).length + 2;
+                data.infoMaps[j]["cols"] = data.infoMaps[j].infos.length > 0 ? data.infoMaps[j].infos.slice(start, end).length : 1;
+            }
+        }
+        return data;
+    }
+    //查询定制项
+    selcetSpecialList(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'selectSpecialList',
+                data: {
+                    id: this.cid
+                },
+                success: res => {
+                    if (res && res.code == 200) {
+                        this.specialList = res.data;
+                        if (this.specialList && this.specialList.list && this.specialList.list.length > 0) {
+                            this.specialList.type = 1;
+                            this.specialList.list.forEach(item => {
+                                item['pageNo'] = 1;
+                            });
+                        }
+                        // this.specialList.list[0].infos.push(this.specialList.list[0].infos[1])
+                        // this.specialList.list[0].infos.push(this.specialList.list[0].infos[1])
+                        // this.specialList.list[0].infos.push(this.specialList.list[0].infos[1])
+                        // this.specialList.list.push(this.specialList.list[0])
+                        resolve(res.data);
+                    } else {
+                        this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+                    }
+                }
+            })
+        })
+    }
+    computedBranchInfos(branch) {
+        return branch.infos.slice((branch.pageNo - 1) * this.pageSize, branch.pageNo * this.pageSize);
+    }
 
     /**
      * 修改增减项目的颜色
      * @param {string} color
      */
-    selectColorChange(color: string, id: number, ) {
+    selectColorChange(color: string, id: number,) {
         if (color && id) {
             this.req.doPost({
                 url: 'modifyPauseColor',
@@ -479,11 +650,17 @@ export class ReGularComponent implements OnInit {
      *  展示备注弹窗
      */
     showRemark(m: any) {
-        console.log(m);
         this.remark = true;
         this.remarkId = m.id;
-        this.remarkString = m.remark;
         this.remarkDo = m;
+        this.isPlan = m.isPlan
+        if (this.isPlan && this.isPlan == 1 && m.splitPlan == 0) {
+            this.planId = m.planId;
+            this.pauseId = m.pauseId;
+            this.remarkString = m.planRemark;
+        } else {
+            this.remarkString = m.remark;
+        }
     }
 
     remarkCancel() {
@@ -496,22 +673,33 @@ export class ReGularComponent implements OnInit {
     remarkOk() {
         this.remark = false;
         if (this.remarkForm.valid) {
+            let params = {
+                remark: this.remarkString
+            }
+            if (this.isPlan && this.isPlan == 1 && this.remarkDo.splitPlan == 0) {
+                params['pauseId'] = this.pauseId;
+                params['planId'] = this.planId;
+            } else {
+                params['pauseDetailId'] = this.remarkId;
+            }
             this.req.doPost({
-                url: 'singleRemark',
-                data: {
-                    pauseDetailId: this.remarkId,
-                    remark: this.remarkString
-                },
+                url: this.isPlan && this.isPlan == 1 && this.remarkDo.splitPlan == 0 ? 'modifyPausePlan' : 'singleRemark',
+                data: params,
                 success: (res => {
                     if (res && res.code == 200) {
                         this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
-                        this.remarkDo.remark = this.remarkString;
+                        if (this.isPlan && this.isPlan == 1 && this.remarkDo.splitPlan == 0) {
+                            this.remarkDo.planRemark = this.remarkString;
+                        } else {
+                            this.remarkDo.remark = this.remarkString;
+                        }
                         this.remarkCancel();
                     } else {
                         this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
                     }
                 })
             });
+
         }
     }
 

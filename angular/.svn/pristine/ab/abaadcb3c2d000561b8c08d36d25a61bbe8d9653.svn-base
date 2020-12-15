@@ -1,0 +1,164 @@
+import {Component, OnInit} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {MasterPackService} from "../../rev/master/master-pack-detail/master-pack.service";
+import {Default} from "../../model/constant";
+import {getCompanyNameById} from "../../model/methods";
+
+@Component({
+    selector: 'rev-item-pack',
+    templateUrl: './item-pack.component.html',
+    styleUrls: ['./../../rev/master/master-promotion-detail/master-promotion-detail.component.scss','./item-pack.component.scss']
+})
+export class ItemPackComponent implements OnInit {
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE_5;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public packs:any;
+
+    //所有供应商数据
+    public companys:any;
+    //材料商id
+    public sid:number;
+    //套系数据id
+    public cbs:Array<number>;
+
+
+    //添加时的交互
+    public selectItems:Array<any> = [];
+    public toggleType = 'down';
+    public toggle = false;
+
+
+
+    constructor(public modal: NgbActiveModal,
+                private masterPack:MasterPackService) {
+    }
+
+    ngOnInit() {
+        this.changeData();
+    }
+
+
+
+
+    selectMaterialSupplier(ms: any) {
+        console.log("select ms is", ms);
+    }
+
+    selectCbs(cbs: any) {
+        console.log("Select combos is", cbs);
+        this.cbs = cbs;
+    }
+
+    selectCategory(cate: any) {
+        console.log("select category is", cate);
+    }
+
+    selectBrand(bs: any) {
+        console.log("brands all in here", bs);
+    }
+
+    selectSearch(info: any) {
+        console.log("select search info is", info);
+    }
+
+
+    cancelModal() {
+        this.modal.dismiss(null);
+    }
+
+    confirmModal(){
+        if(this.selectItems && this.selectItems.length > 0){
+            this.modal.close(this.selectItems);
+        }
+    }
+
+
+    changeData(){
+        const params = {
+            pageNum: this.pageNo,
+            pageSize: this.pageSize,
+            status: 2,
+            putaway: 1
+        };
+
+        if(this.cbs && this.cbs.length > 0){
+            params["combos"] = this.cbs;
+        }
+
+        this.masterPack.getPackList(params).then(data =>{
+            this.packs = this.masterPack.renderPacks(data && data.list?data.list:[],0);
+            console.log("this packs is:",this.packs);
+            this.total = data && data.total?data.total:Default.PAGE.PAGE_TOTAL;
+        })
+    }
+
+    /**
+     * 根据供应商id获取供应商简称
+     * @param {number} cid
+     * @returns {any}
+     */
+    getCompanyName(cid:number){
+        return getCompanyNameById(cid,this.companys);
+    }
+
+    //回调拉取的所有供应商数据
+    getCompanies(cps:any){
+        this.companys = cps;
+    }
+
+
+    /**
+     * 计算当前添加项目的个数
+     * @param {number} id
+     * @returns {any}
+     */
+    itemsSize(id:number){
+        if (this.selectItems && this.selectItems.length > 0) {
+            const size = this.selectItems.filter(m => m.id === id);
+            if (size && size.length > 0) {
+                return size.length;
+            }
+            return 0;
+        }
+        return 0;
+    }
+
+    /**
+     * 直接添加套餐
+     * @param item
+     */
+    addItem(item:any){
+        this.selectItems.push(item);
+        console.log("select items is",this.selectItems);
+    }
+
+    /**
+     * 根据当前id删除选中的套餐
+     * @param e
+     * @param {number} id
+     */
+    removeItem(e:any,id:number){
+        e.stopPropagation();
+        e.preventDefault();
+        if(this.selectItems && this.selectItems.length > 0){
+            let index = 0;
+            index = this.selectItems.findIndex(item => item.id === id);
+            console.log(index);
+            this.selectItems.splice(index,1);
+        }
+    }
+
+    /**
+     * 切换选中是否展示全部
+     * @param e
+     */
+    toggleClick(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.toggle = !this.toggle;
+        this.toggleType = this.toggle ? 'up' : 'down';
+    }
+
+}

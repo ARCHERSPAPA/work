@@ -1,0 +1,40 @@
+@charset "utf-8";
+@import "./../../../assets/scss/mixin";
+.modify {
+    .textarea {
+        position: relative;
+        .count {
+            position: absolute;
+            right: 0;
+            bottom: -20px;
+            > span {
+                color: #f92650;
+            }
+        }
+    }
+}
+.large-img{
+    width: 100%;
+    text-align: center;
+    > img{
+        max-width: 100%;
+        height: auto;
+    }
+}
+.tab-head-title{
+    display: inline-block;
+    padding:2px 8px;
+}
+.btns-fixed{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 9999;
+    line-height: 64px;
+    width: calc(100% - 200px);
+    height: 64px;
+    background: #FFFFFF;
+    box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.15);
+    padding-right: 40px;
+    box-sizing: border-box;
+}

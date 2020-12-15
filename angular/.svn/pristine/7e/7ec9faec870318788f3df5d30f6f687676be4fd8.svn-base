@@ -1,0 +1,50 @@
+<div class="quest">
+    <div class="head">
+        <rev-title [title]="title" [atags]="atags" [show]="true"></rev-title>
+    </div>
+    <div class="content" >
+        <div class="detail-list">
+            <div class="list-head">
+                <div class="search-bar">
+                    <form method="post" [formGroup]="searchForm">
+                        <div class="inp" style="width:100%;">
+                            <input nz-input type="text" class="text" placeholder="请输入查询标题"
+                                   formControlName="name" name="name" autocomplete="off" maxlength="32"
+                                   [(ngModel)]="name" style="width: 200px;"/>
+                            <button   nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid"
+                                    (click)="searchData()">查询
+                            </button>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+            <div class="list-group-rev">
+                    <nz-table #nzTable [nzData]="quests" [nzBordered]="true" [nzFrontPagination]="false"
+                    [(nzPageIndex)]="pageNo" [(nzPageSize)]="pageSize" [nzTotal]="total"
+                    (nzPageIndexChange)="changeData()" nzSize="middle" [nzShowPagination]="true"
+                    >
+            <thead nz-thead>
+            <tr>
+              <th class="w1">名称</th>
+              <th class="w2">题库数量</th>
+              <th>更新日期</th>
+              <th>操作</th>
+            </tr>
+            </thead>
+            <tbody nz-tbody >
+            <tr nz-tbody-tr *ngFor="let quest of nzTable.data">
+              <td [title]="quest.title?quest.title:''">{{quest.title?quest.title:''}}</td>
+              <td>{{quest.clozeNum + quest.choiceNum}}</td>
+              <td>{{quest.modifyTime?(quest.modifyTime|date:'yy-MM-dd HH:mm'):'--'}}</td>
+              <td>
+                    <a href="javascript:void(0)" target="_blank" [routerLink]="['./../detail']" [queryParams]="{qid:btoa(quest.id),isDetail:1}">详情</a>
+                    <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该题库吗?"
+                       nzOkText="确定" nzCancelText="取消" (nzOnConfirm)="deleteItem(quest.id)">删除</a></td>
+            </tr>
+            </tbody>
+          </nz-table>
+            </div>
+        </div>
+    </div>
+</div>

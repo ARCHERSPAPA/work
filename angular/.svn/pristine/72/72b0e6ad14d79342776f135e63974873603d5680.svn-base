@@ -1,0 +1,973 @@
+<h2 class="cost-account-title mb-16">
+    <span>项目成本表</span>
+    <a href="javascript:void(0)" (click)="open()" class="title-full-screen">
+        <i nz-icon type="fullscreen" theme="outline"></i>
+        <span>全屏</span>
+    </a>
+</h2>
+<div class="cost-detail-warp">
+    <nz-table #groupingTable [nzData]="listOfData" nzSize="middle" nzBordered
+              [nzFrontPagination]="false" [nzShowPagination]="false" [nzLoading]="loading"
+              [nzScroll]="{x:getWidthByTotal(1500)+'px',y:'600px'}">
+        <thead>
+        <tr style="border:1px solid #e8e8e8;">
+            <th nzLeft="0px" nzShowFilter [nzFilters]="filterName" (nzFilterChange)="filterChange($event)"
+                rowspan="2" style="vertical-align:middle;">名称
+            </th>
+            <th colspan="10">大项名称</th>
+            <th [colSpan]="10"></th>
+            <th nzRight="0px" [rowSpan]="2" style="vertical-align:middle;" class="control-btn">操作</th>
+        </tr>
+        <tr>
+            <th *ngIf="!itemBool[4].value">序号</th>
+            <th nzShowFilter [nzFilters]="itemNames"
+                (nzFilterChange)="filterItemChange($event)"
+                nzWidth="120">名称</th>
+            <th *ngIf="!itemBool[0].value">项目编号</th>
+            <th *ngIf="!itemBool[1].value">品牌</th>
+            <th *ngIf="!itemBool[2].value">规格</th>
+            <th *ngIf="!itemBool[3].value">型号</th>
+            <th>销售单位</th>
+            <th>销售数量</th>
+            <th>材料单价</th>
+            <th>材料合价</th>
+            <th>损耗</th>
+            <th>损耗合计</th>
+            <th>木工</th>
+            <th>木工合价</th>
+            <th>泥工</th>
+            <th>泥工合价</th>
+            <th>漆工</th>
+            <th>漆工合价</th>
+            <th>水电</th>
+            <th>水电合价</th>
+        </tr>
+        </thead>
+        <tbody>
+        <ng-template ngFor let-data let-id="index" [ngForOf]="listOfData">
+            <tr *ngIf="data.rows > 0"
+                style="vertical-align:middle;border-top:1px solid #e8e8e8;border-right:0;text-align: center">
+                <td [rowSpan]="data.rows" *ngIf="data.rows > 0" nzLeft="0px"
+                    style="vertical-align: middle;" [nzTitle]="data.name?data.name:''"
+                    nzPlacement="left" nz-tooltip>{{data.name}}
+                    <a [nzTitle]="data.infoRemark?data.infoRemark:''" nzPlacement="left"
+                       nz-tooltip href="javascript:void(0)" *ngIf="data.infoRemark && data.infoType === 1">
+                        <i nz-icon type="exclamation-circle" theme="outline"></i></a>
+                </td>
+            </tr>
+            <tr *ngIf="limitBranchByType(data.infoType) &&  disabledOperateByState()"
+                style="vertical-align:middle;border-top:1px solid #e8e8e8;
+                    border-right:0;text-align: center">
+                <td [colSpan]="getCloseByColume(10)" (click)="openBranch(id,data)" style="border-right:0">
+                    <a href="javascript:void(0)">添加大项</a></td>
+                <td [colSpan]="11"></td>
+            </tr>
+
+            <ng-container *ngIf="data.infoMaps && data.infoMaps.length === 0">
+                <tr style="vertical-align:middle;border-top:1px solid #e8e8e8;
+                    border-right:0;text-align: center">
+                    <td [colSpan]="getCloseByColume(10)" style="border-right: 0">暂无数据</td>
+                    <td [colSpan]="11"></td>
+                </tr>
+            </ng-container>
+
+            <ng-container *ngIf="data.infoMaps && data.infoMaps.length > 0">
+                <ng-template ngFor let-branch let-ib="index" [ngForOf]="data.infoMaps">
+                    <tr style="vertical-align:middle;border-top:1px solid #e8e8e8;border-right:0;text-align: center">
+                        <td [colSpan]="getCloseByColume(10)" style="vertical-align:middle;border-right:0;">
+                        <span *ngIf="branch && branch.planId">套餐：{{branch.name}}，小计：{{computedSingleTotal(branch.planNum,branch.planPrice)|number:'1.2'}}，（{{(branch.planPrice?branch.planPrice:0)}}x{{branch.planNum?branch.planNum:0}}{{branch.planUnit?branch.planUnit:'套'}}）
+                            <a [nzTitle]="branch && branch.planExplainMsg?branch.planExplainMsg:''" nzPlacement="left"
+                               nz-tooltip href="javascript:void(0)" *ngIf="branch && branch.planExplainMsg">
+                                <i nz-icon type="exclamation-circle" theme="outline" title="查看说明"></i></a>
+                            <a [nzTitle]="branch && branch.remark?branch.remark:''" nzPlacement="left"
+                               nz-tooltip href="javascript:void(0)" *ngIf="branch && branch.remark" class="ml-8">
+                                <i nz-icon type="question-circle" theme="outline" title="查看备注"></i></a>
+                        </span>
+                            <span *ngIf="branch && !branch.planId">{{branch.name}}</span>
+                        </td>
+                        <td [colSpan]="10" align="left"
+                            style="vertical-align:middle;border-top:1px solid #e8e8e8;">
+                            <nz-pagination [nzPageIndex]="branch.pageNo" [nzTotal]="branch.infos.length"
+                                           [nzPageSize]="pageSize" [nzShowTotal]="totalTemplate"
+                                           [nzSize]="'small'" [nzHideOnSinglePage]="true"
+                                           (nzPageIndexChange)="pageChange($event,branch)"></nz-pagination>
+
+                        </td>
+                        <td nzRight="0px" *ngIf="branch.cols > 0" style="text-align: left;">
+                            <a href="javascript:void(0)" class="mr-8"
+                               (click)="openBranch(id,data,branch)"
+                               *ngIf="limitBranchByType(data.infoType)  && disabledOperateByState()">修改名称</a>
+                            <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项目吗?"
+                               nzOkText="删除" nzCancelText="取消" class="ml-8"
+                               (nzOnConfirm)="confirmDeleteBranch(branch)"
+                               *ngIf="limitBranchByType(data.infoType) && disabledOperateByState()">删除</a>
+
+                            <a href="javascript:void(0)" class="mr-8"
+                               (click)="openPack(branch)"
+                               *ngIf="limitPackByType(data.infoType,branch)  && disabledOperateByState()">修改</a>
+                            <a href="javascript:void(0)" class="mr-8"
+                               (click)="insertItemByPack(data,branch)"
+                               *ngIf="addPackByType(data.infoType,branch)  && disabledOperateByState()">添加套餐</a>
+                            <a href="javascript:void(0)" class="mr-8"
+                               nz-popconfirm nzTitle="确定删除该项目吗?"
+                               nzOkText="删除" nzCancelText="取消" class="ml-8"
+                               (nzOnConfirm)="confirmDeletePack(branch)"
+                               *ngIf="limitPackByType(data.infoType,branch)  && disabledOperateByState()">删除</a>
+                        </td>
+                    </tr>
+
+                    <ng-template ngFor let-item let-i="index" let-last="last"
+                                 [ngForOf]="computedBranchInfos(branch)">
+                        <tr>
+                            <td *ngIf="!itemBool[4].value">{{item.sn}}</td>
+                            <td [title]="item.name?item.name:''">
+                                {{item.name?subItem(item.name,3):'--'}}
+                                <a [nzTitle]="item.remark?item.remark:''" nzPlacement="left"
+                                   nz-tooltip href="javascript:void(0)" *ngIf="item.remark">
+                                    <i nz-icon type="exclamation-circle" theme="outline"></i></a>
+                            </td>
+                            <td [nzTitle]="item.code?item.code:''" nzPlacement="topLeft" nz-tooltip
+							*ngIf="!itemBool[0].value">
+                                <span class="td-eclipse-100">{{item.code?item.code:'--'}}</span>
+                            </td>
+                            <td [title]="item.brand?item.brand:''" *ngIf="!itemBool[1].value">{{item.brand?item.brand:'--'}}</td>
+                            <td [title]="item.spec?item.spec:''" *ngIf="!itemBool[2].value">{{item.spec?item.spec:'--'}}</td>
+                            <td [title]="item.model?item.model:''" *ngIf="!itemBool[3].value">{{item.model?item.model:'--'}}</td>
+                            <td [title]="item.unit?item.unit:''">{{item.unit?item.unit:'--'}}</td>
+                            <ng-container *ngIf="showItemByPlan(item)">
+                                <td [title]="item.num">
+                                    <!--<nz-input-number [(ngModel)]="item.num" [nzSize]="'small'"-->
+                                    <!--[nzMax]="10000" [nzStep]="0.01" [nzPrecision]="2"-->
+                                    <!--(ngModelChange)="modelItemChange(item)"-->
+                                    <!--[disabled]="!disabledOperateByState()"-->
+                                    <!--style="width:100%"></nz-input-number>-->
+                                    <!---v2.3.3 可以填入公式计算--->
+                                    <input nz-input [disabled]="!disabledOperateByState()" [num]="item.num"
+                                           revInputDecimal role="16" nzSize="small" [formula]="item.numFormula"
+                                           [value]="item.num" placeholder="请输入销售数量"
+                                           (changeValue)="changeItemNum($event,item)"/>
+                                </td>
+                                <td [title]="item.unitPrice">
+                                    <!--<nz-input-number [(ngModel)]="item.unitPrice" [nzSize]="'small'"-->
+                                    <!--[nzStep]="0.01" [nzPrecision]="2"-->
+                                    <!--(ngModelChange)="modelPriceChange(item)"-->
+                                    <!--[disabled]="showItemByPlan(item) && !disabledOperateByState()"-->
+                                    <!--style="width:100%"></nz-input-number>-->
+                                    <!---v2.3.3 可以填入公式计算--->
+                                    <input nz-input [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                           [num]="item.unitPrice"
+                                           revInputDecimal role="17" nzSize="small" [formula]="item.unitPriceFormula"
+                                           [value]="item.unitPrice" placeholder="请输入销售单价"
+                                           (changeValue)="changeItemPrice($event,item)"/>
+                                </td>
+                                <td [title]="item && item.unitPrice && item.num?computedSingleTotal(item.num,item.unitPrice):0">
+                                    {{item && item.unitPrice &&
+                                    item.num?(computedSingleTotal(item.num,item.unitPrice)|number:'1.2'):'--'}}
+                                </td>
+                                <td>
+                                    <!--<nz-input-number [(ngModel)]="item.wastageRate" [nzSize]="'small'"-->
+                                    <!--[nzStep]="1" [nzPrecision]="0"-->
+                                    <!--[nzMin]="0" [nzMax]="99"-->
+                                    <!--[nzFormatter]="formatterPercent" [nzParser]="parserPercent"-->
+                                    <!--(ngModelChange)="modelWastageRateChange(item)"-->
+                                    <!--[disabled]="showItemByPlan(item) && !disabledOperateByState()"-->
+                                    <!--style="width:100%"></nz-input-number>-->
+                                    <input nz-input [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                           [num]="item.wastageRate"
+                                           revInputDecimal role="18" nzSize="small" [formula]="item.wastageRateFormula"
+                                           [value]="item.wastageRate" style="width:80%;" placeholder="请输入损耗占比"
+                                           (changeValue)="changeItemWastegeRate($event,item)"/>%
+                                </td>
+                                <td>{{(item && item.wastagePrice?item.wastagePrice:0)|number:'1.2'}}</td>
+                                <ng-container *ngIf="showPurchaseByType(item.infoType)">
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                </ng-container>
+                                <ng-container *ngIf="!showPurchaseByType(item.infoType)">
+                                    <td [title]="item.carpenterPrice?item.carpenterPrice:''">
+                                        <!--{{item.carpenterPrice?item.carpenterPrice:'&#45;&#45;'}}-->
+                                        <nz-input-number [(ngModel)]="item.carpenterPrice" [nzSize]="'small'"
+                                                         [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                         (ngModelChange)="modelLabourChange(item,'carpenter')"
+                                                         [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                         style="width:100%"></nz-input-number>
+                                    </td>
+                                    <td>{{item.carpenterPrice && item.num?((item.carpenterPrice *
+                                        item.num)|number:'1.2'):'0'}}
+                                    </td>
+                                    <td [title]="item.masonPrice?item.masonPrice:''">
+                                        <!--{{item.masonPrice?item.masonPrice:'&#45;&#45;'}}-->
+                                        <nz-input-number [(ngModel)]="item.masonPrice" [nzSize]="'small'"
+                                                         [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                         (ngModelChange)="modelLabourChange(item,'mason')"
+                                                         [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                         style="width:100%"></nz-input-number>
+                                    </td>
+                                    <td>{{item.masonPrice && item.num?((item.masonPrice * item.num)|number:'1.2'):'0'}}
+                                    </td>
+                                    <td>
+                                        <!--{{item.japannerPrice?item.japannerPrice:'&#45;&#45;'}}-->
+                                        <nz-input-number [(ngModel)]="item.japannerPrice" [nzSize]="'small'"
+                                                         [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                         (ngModelChange)="modelLabourChange(item,'japanner')"
+                                                         [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                         style="width:100%"></nz-input-number>
+                                    </td>
+                                    <td>{{item.japannerPrice && item.num?((item.japannerPrice *
+                                        item.num)|number:'1.2'):'0'}}
+                                    </td>
+                                    <td [title]="item.utilityCharge?item.utilityCharge:''">
+                                        <!--{{item.utilityCharge?item.utilityCharge:'&#45;&#45;'}}-->
+                                        <nz-input-number [(ngModel)]="item.utilityCharge" [nzSize]="'small'"
+                                                         [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                         (ngModelChange)="modelLabourChange(item,'utility')"
+                                                         [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                         style="width:100%"></nz-input-number>
+                                    </td>
+                                    <td>{{item.utilityCharge && item.num?((item.utilityCharge *
+                                        item.num)|number:'1.2'):'0'}}
+                                    </td>
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="!showItemByPlan(item)">
+                                <td>{{(item.num?item.num:0)|number:'1.2'}}</td>
+                                <td *ngIf="item['packFlag']"
+                                    [title]="item.unitPrice?item.unitPrice:0">{{item.unitPrice?item.unitPrice:0}}
+                                </td>
+                                <td *ngIf="item['packFlag']"
+                                    [title]="item.unitPrice && item.num?computedSingleTotal(item.num,item.unitPrice):0">
+                                    {{(item.unitPrice &&
+                                    item.num?computedSingleTotal(item.num,item.unitPrice):0)|number:'1.2'}}
+                                </td>
+                                <td *ngIf="!item['packFlag']">--</td>
+                                <td *ngIf="!item['packFlag']">--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                            </ng-container>
+
+                            <td nzRight="0px" style="border-top:1px solid #e8e8e8;" class="control-btn">
+                                <nz-dropdown
+                                        *ngIf="moveBranchByType(data.infoType) && showItemByPlan(item) && disabledOperateByState()">
+                                    <a nz-dropdown href="javascript:void(0)">移动到<i nz-icon type="down"></i></a>
+                                    <ul nz-menu>
+                                        <ng-container *ngFor="let menu of moveMenus">
+                                            <li nz-menu-item
+                                                *ngIf="menu.list && menu.list.length <= 0"
+                                                (click)="moveItem(item,menu)">{{menu.name}}
+                                            </li>
+                                            <li nz-submenu *ngIf="menu.list && menu.list.length > 0">
+                                                <span title>{{menu.name}}</span>
+                                                <ul>
+                                                    <li nz-menu-item *ngFor="let ml of menu.list"
+                                                        (click)="moveItem(item,menu,ml.id)">{{ml.name}}
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ng-container>
+                                    </ul>
+                                </nz-dropdown>
+                                <ng-container
+                                        *ngIf="showBranchInByType(data.infoType) && showItemByPlan(item) && disabledOperateByState()">
+                                    <nz-dropdown *ngIf="!showPurchaseByType(data.infoType)">
+                                        <a nz-dropdown href="javascript:void(0)"
+                                           class="ml-8" title="添加到下一项">插入<i nz-icon type="down"></i></a>
+                                        <ul nz-menu>
+                                            <li nz-menu-item *ngFor="let bi of branchItems"
+                                                (click)="insertItem(bi.value,branch,i,item)">{{bi.label}}
+                                            </li>
+                                        </ul>
+                                    </nz-dropdown>
+                                    <nz-dropdown *ngIf="showPurchaseByType(data.infoType)">
+                                        <a nz-dropdown href="javascript:void(0)"
+                                           class="ml-8" title="添加到下一项">插入<i nz-icon type="down"></i></a>
+                                        <ul nz-menu>
+                                            <li nz-menu-item *ngFor="let bi of getBranchItems(2,3)"
+                                                (click)="insertItem(bi.value,branch,i,item)">{{bi.label}}
+                                            </li>
+                                        </ul>
+                                    </nz-dropdown>
+                                </ng-container>
+                                <a href="javascript:void(0)" class="ml-8" title="上移"
+                                   *ngIf="(i + (branch.pageNo-1)*pageSize) != 0 && controlPosMove(item)"
+                                   (click)="moveItemUp(branch,(i+ (branch.pageNo-1)*pageSize ))"><i nz-icon
+                                                                                                    type="arrow-up"></i></a>
+                                <a href="javascript:void(0)" class="ml-8" title="下移"
+                                   *ngIf="(i+ (branch.pageNo-1)*pageSize) < (branch['infos'].length -1) && controlPosMove(item)"
+                                   (click)="moveItemDown(branch,(i+ (branch.pageNo-1)*pageSize ))"><i nz-icon
+                                                                                                      type="arrow-down"></i></a>
+                                <a href="javascript:void(0)" class="ml-8" title="置顶"
+                                   *ngIf="(i + (branch.pageNo-1)*pageSize ) != 0 && controlPosMove(item)igl"
+                                   (click)="moveItemTop(branch,(i+ (branch.pageNo-1)*pageSize))"><i nz-icon
+                                                                                                    type="to-top"></i></a>
+                                <a href="javascript:void(0)" class="ml-8" style="color: #F5222D;"
+                                   *ngIf="disabledOperateByState() && showItemByPlan(item)"
+                                   nz-popconfirm nzTitle="确定删除该项目吗?" nzOkText="删除" nzCancelText="取消"
+                                   (nzOnConfirm)="confirmDeleteItem(item)"><i nz-icon type="delete"></i></a>
+                                <span *ngIf="!showItemByPlan(item)">
+                                <a *ngIf="item['packFlag'] && disabledOperateByState()"
+                                   href="javascript:void(0)" (click)="openPack(item)">修改</a>
+                                <a *ngIf="item['packFlag'] && disabledOperateByState()" href="javascript:void(0)"
+                                   class="ml-8" nz-popconfirm nzTitle="确定删除该项目吗?"
+                                   nzOkText="删除" nzCancelText="取消" class="ml-8"
+                                   (nzOnConfirm)="confirmDeletePack(item)">删除</a>
+                                <a *ngIf="!item['packFlag']">--</a>
+                            </span>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <tr>
+                        <td>小计</td>
+                        <td [colSpan]="getCloseByColume(11)" align="right">
+                            <ng-container *ngIf="showComputedByType(data.infoType)">
+                                <span *ngIf="!branch['planId']">{{computedMaterialTotal(branch.infos,'material')|number:'1.2'}}</span>
+                                <span *ngIf="branch['planId']">{{computedSingleTotal(branch.planNum,branch.planPrice)|number:'1.2'}}</span>
+                            </ng-container>
+                            <ng-container *ngIf="showGradateByType(data.infoType)">
+                                {{computedGradateTotal(branch.infos) | number:'1.2'}}
+                            </ng-container>
+                        </td>
+                        <ng-container *ngIf="!showPurchaseByType(data.infoType)">
+                            <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'carpentry')|number:'1.2'}}
+                            </td>
+                            <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'tiler')|number:'1.2'}}</td>
+                            <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'painting')|number:'1.2'}}</td>
+                            <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'plumber')|number:'1.2'}}</td>
+                        </ng-container>
+                        <ng-container *ngIf="showPurchaseByType(data.infoType)">
+                            <td [colSpan]="2" align="right">--</td>
+                            <td [colSpan]="2" align="right">--</td>
+                            <td [colSpan]="2" align="right">--</td>
+                            <td [colSpan]="2" align="right">--</td>
+                        </ng-container>
+
+                        <td nzRight="0px">--</td>
+                    </tr>
+                </ng-template>
+            </ng-container>
+
+        </ng-template>
+        </tbody>
+    </nz-table>
+    <div nz-row class="cost-detail-remark mt-16">
+        <textarea placeholder="请输入备注信息" [(ngModel)]="remark"
+                  nz-input rows="5" maxlength="5000" (change)="modelRemarkChange($event)"></textarea>
+        <span *ngIf="remark && remark.length > 0"  class="count"><span>{{remark.length}}</span>/5000</span>
+    </div>
+</div>
+
+
+<ng-template #totalTemplate let-total>总条数：{{ total }}</ng-template>
+
+<!--设计费相关数据-->
+<h2 class="cost-account-title mb-16 mt-24">设计费</h2>
+<div>
+    <nz-table #designTable [nzData]="designData" nzSize="middle" nzBordered
+              [nzFrontPagination]="false" [nzShowPagination]="false"
+              [nzScroll]="{x:'1200px'}">
+        <tbody>
+        <ng-template ngFor let-data [ngForOf]="designTable.data">
+            <tr style="border-top:1px solid #e8e8e8;">
+                <td rowspan="3" width="40%" colspan="9" align="center" style="vertical-align: middle">
+                    {{data.name?data.name:data.infoName}}
+                </td>
+                <td align="center" width="30%" colspan="6">单价：{{data.unitPrice != null? (data.unitPrice |
+                    number:'1.2'):'--'}}
+                </td>
+                <td align="center" width="30%" colspan="6">面积：{{data.num != null?data.num:'--'}}</td>
+            </tr>
+            <tr>
+                <td align="center" width="60%" colspan="12">应收：{{data.discountPrice !=
+                    null?(data.discountPrice|number:'1.2'):'--'}}&nbsp;&nbsp;&nbsp;&nbsp;实收：{{data.totalPrice !=
+                    null?(data.totalPrice | number:'1.2'):'--'}}
+                </td>
+            </tr>
+            <tr>
+                <td align="center" width="30%" colspan="6">
+                    设计成本：{{((data.totalPrice?data.totalPrice:0)*((data.designerRate?data.designerRate:0)*0.01))|number:'1.2'}}
+                </td>
+                <td align="center" width="30%" colspan="6">提成：
+                    <nz-input-number [(ngModel)]="data.designerRate" [nzPrecision]="0"
+                                     (ngModelChange)="modelRateChange(data)"
+                                     [nzFormatter]="formatterPercent" [nzParser]="parserPercent"
+                                     [nzSize]="'small'" [nzMin]="0" [nzMax]="100" [nzStep]="1"
+                                     [disabled]="!disabledOperateByState()"></nz-input-number>
+                </td>
+            </tr>
+        </ng-template>
+        </tbody>
+    </nz-table>
+</div>
+
+<!--成本相关金额详情-->
+<div class="fixed-bottom">
+    <div nz-row class="pt-24 pb-16">
+        <div nz-col nzSpan="2" nzOffset="10">
+            <a href="javascript:void(0)" (click)="toggle()" class="change-toggle">
+                <i nz-icon [type]="switch?'down':'up'" style="color:rgba(0,0,0,0.65)" class="mr-8"></i>
+                <span>{{switch?'收起':'展开'}}</span>成本总计</a>
+        </div>
+        <div nz-col nzSpan="11" style="text-align: right" *ngIf="isSuperUser()">
+            <button nz-button nzType="primary" nz-popconfirm nzTitle="解除锁定预算，设计师将可进行增减项"
+                    *ngIf='lockState'
+                    (nzOnConfirm)="lockBudget(false)"
+                    class="ml-8">解锁预算
+            </button>
+            <button nz-button nzType="primary" nz-popconfirm [nzTitle]="showTitle()"
+                    [nzOkText]="showText()" *ngIf='!lockState'
+                    (nzOnConfirm)="lockBudget(true)"
+                    class="ml-8">锁定预算
+            </button>
+
+            <button nz-button nzType="default" class="ml-8"
+                    (click)="sendCost($event)" *ngIf="showSendByState()">提交至工长
+            </button>
+            <!--<button nz-button nzType="primary" class="ml-8">保存</button>-->
+        </div>
+    </div>
+    <div nz-row [@fade]="switch">
+        <div nz-col nzSpan="4" class="cost-account-chart">
+			<div id="container"></div>
+        </div>
+        <div nz-col nzSpan="3" class="cost-account-side">
+            <dl class="cost-side">
+                <dt [nzTitle]="profit?(profit).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    <span class="bg-profit bg-profit"></span>{{(profit?profit:0)|number:'1.2'}}
+                </dt>
+                <dd class="mt-8">毛利</dd>
+                <dd class="mt-8">毛利率：{{(finalPrice?((profit*100/finalPrice).toFixed(2)):0|number:'1.2')}}%</dd>
+            </dl>
+        </div>
+        <div nz-col nzSpan="2" class="cost-account-side ml-16">
+            <dl class="cost-side">
+                <dt [nzTitle]="finalCost?(finalCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    <span class="bg-cost"></span>{{(finalCost?finalCost:0)|number:'1.2'}}
+                </dt>
+                <dd class="mt-8">总成本</dd>
+                <dd class="mt-8">占比：{{(finalPrice?((finalCost*100/finalPrice).toFixed(2)):0|number:'1.2')}}%</dd>
+            </dl>
+        </div>
+        <div nz-col nzSpan="1" class="cost-account-side ml-24">
+            <p class="side-box">
+                <span class="side-text">成本明细</span>
+                <span class="side-line"></span>
+                <span class="side-angle"></span>
+            </p>
+        </div>
+        <div nz-col nzSpan="3" class="cost-account-side">
+            <dl class="cost-side">
+                <dt [nzTitle]="materialCost?(materialCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    {{(materialCost?materialCost:0)|number:'1.2'}}
+                </dt>
+                <dd class="mt-8">材料成本</dd>
+                <dd class="mt-8">材料占比：{{(finalCost?((materialCost*100/finalCost).toFixed(2)):0|number:'1.2')}}%</dd>
+            </dl>
+        </div>
+        <div nz-col nzSpan="2" class="cost-account-side ml-8">
+            <dl class="cost-side">
+                <dt [nzTitle]="purchaseCost?(purchaseCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    {{(purchaseCost?purchaseCost:0)|number:'1.2'}}
+                </dt>
+                <dd class="mt-8">代购</dd>
+                <dd class="mt-8">代购占比：{{(finalCost?((purchaseCost*100/finalCost).toFixed(2)):0|number:'1.2')}}%</dd>
+            </dl>
+        </div>
+        <div nz-col nzSpan="3" class="cost-account-side ml-8">
+            <dl class="cost-side">
+                <dt [nzTitle]="laborCost?(laborCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    {{(laborCost?laborCost:0)|number:'1.2'}}
+                </dt>
+                <dd class="mt-8">人工成本（含设计费）</dd>
+                <dd class="mt-8">人工占比：{{(finalCost?((laborCost*100/finalCost).toFixed(2)):0|number:'1.2')}}%</dd>
+            </dl>
+        </div>
+        <div nz-col nzSpan="4" class="cost-account-side">
+            <ul>
+                <li [nzTitle]="carpentryCost?(carpentryCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    木工：{{(carpentryCost?carpentryCost:0)|number:'1.2'}}
+                </li>
+                <li [nzTitle]="tilerCost?(tilerCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    泥工：{{(tilerCost?tilerCost:0)|number:'1.2'}}
+                </li>
+                <li [nzTitle]="painterCost?(painterCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    漆工：{{(painterCost?painterCost:0)|number:'1.2'}}
+                </li>
+                <li [nzTitle]="plumberCost?(plumberCost).toFixed(2):0" nzPlacement="left" nz-tooltip>
+                    水电工：{{(plumberCost?plumberCost:0)|number:'1.2'}}
+                </li>
+            </ul>
+        </div>
+        <div nz-col nzSpan="8" class="cost-account-side" style="padding-top: 16px;">
+            <dl style="display: flex;">
+                <dd>赠送后折扣：</dd>
+                <dd>
+                    <nz-input-number nzSize="small" [nzMin]="0.01"
+                                     [nzMax]="100" [nzStep]="0.01"
+                                     nzPlaceHolder="请输入"
+                                     [(ngModel)]="afterDiscount"
+                                    (ngModelChange)="modelDiscountChange(1)"></nz-input-number>
+                </dd>
+                <dd>整体折扣：</dd>
+                <dd>
+                    <nz-input-number nzSize="small" [nzMin]="0.01"
+                                     [nzMax]="100" [nzStep]="0.01"
+                                     nzPlaceHolder="请输入"
+                                     [(ngModel)]="totalDiscount"
+                                     (ngModelChange)="modelDiscountChange(2)"></nz-input-number>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<!--添加或修改大类名称弹出框-->
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="modalTitle"
+          [nzContent]="modalContent" [nzFooter]="modalFooter" (nzOnCancel)="handleCancel()">
+    <ng-template #modalTitle>{{modify?'修改':'添加'}}大项</ng-template>
+
+    <ng-template #modalContent>
+        <form nz-form [formGroup]="branchForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired nzFor="branchInfo">大项名称</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <input type="text" nz-input formControlName="branchInfo" placeholder="请输入大项名称" maxlength="30"
+                           [(ngModel)]="branchInfo">
+                    <nz-form-explain *ngIf="branchForm.get('branchInfo').dirty  && branchForm.get('branchInfo').errors">
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('minlength')">
+                            至少输入1个字符
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('maxlength')">
+                            至多输入30个字符
+                        </ng-container>
+                        <ng-container *ngIf="branchForm.get('branchInfo').hasError('account')">
+                            输入格式错误
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item *ngIf="!modify">
+                <nz-form-label [nzSpan]="6" nzFor="branchInfo">添加</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <nz-select name="branchType" [(ngModel)]="branchType" [ngModelOptions]="{standalone: true}">
+                        <nz-option [nzValue]="bi.value" [nzLabel]="bi.label" *ngFor="let bi of branchItems"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </ng-template>
+
+    <ng-template #modalFooter>
+        <button nz-button nzType="default" (click)="handleCancel()">取消</button>
+        <button nz-button nzType="primary" (click)="handleOk()" [disabled]="!branchForm.valid">确定</button>
+    </ng-template>
+</nz-modal>
+
+
+<!--修改套餐时（价格+数量）-->
+<nz-modal [(nzVisible)]="isPackVisible" nzTitle="修改套餐"
+          [nzContent]="packContent" [nzFooter]="packFooter" (nzOnCancel)="handlePackCancel()">
+    <ng-template #packContent>
+        <form nz-form [formGroup]="packForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired nzFor="packNum">套餐数量</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <nz-input-number [(ngModel)]="packNum" style="width:100%"
+                                     [nzStep]="0.01" [nzPrecision]="2"
+                                     nzPlaceHolder="请输入套餐数量" formControlName="packNum"></nz-input-number>
+                    <nz-form-explain *ngIf="packForm.get('packNum').dirty  && packForm.get('packNum').errors">
+                        <ng-container *ngIf="packForm.get('packNum').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="packForm.get('packNum').hasError('min')">
+                            至小输入0.01
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired nzFor="packNum">套餐价格</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                    <nz-input-number [(ngModel)]="packPrice" style="width:100%"
+                                     [nzStep]="0.01" [nzPrecision]="2" [nzMin]="0.01"
+                                     nzPlaceHolder="请输入套餐价格" formControlName="packPrice"></nz-input-number>
+                    <nz-form-explain *ngIf="packForm.get('packPrice').dirty  && packForm.get('packPrice').errors">
+                        <ng-container *ngIf="packForm.get('packPrice').hasError('required')">
+                            必填选项
+                        </ng-container>
+                        <ng-container *ngIf="packForm.get('packPrice').hasError('min')">
+                            至小输入0.01
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </ng-template>
+
+    <ng-template #packFooter>
+        <button nz-button nzType="default" (click)="handlePackCancel()">取消</button>
+        <button nz-button nzType="primary" (click)="handlePackOk()" [disabled]="!packForm.valid">确定</button>
+    </ng-template>
+</nz-modal>
+
+
+<nz-drawer [nzClosable]="true" [nzVisible]="visible" nzPlacement="bottom"
+        (nzOnClose)="close()" [nzHeight]="getWinHeight()-150" [nzTitle]="'项目成本表'">
+    <div class="cost-detail-warp">
+        <nz-table #groupingTable [nzData]="listOfData" nzSize="middle" nzBordered
+                  [nzFrontPagination]="false" [nzShowPagination]="false" [nzLoading]="loading"
+                  [nzScroll]="{x:'100%',y:(getWinHeight()-460)+'px'}">
+            <thead>
+            <tr style="border:1px solid #e8e8e8;">
+                <th nzLeft="0px" nzShowFilter [nzFilters]="filterName" (nzFilterChange)="filterChange($event)"
+                    rowspan="2" style="vertical-align:middle;">名称
+                </th>
+                <th colspan="10">大项名称</th>
+                <th [colSpan]="10"></th>
+                <th nzRight="0px" [rowSpan]="2" style="vertical-align:middle;" class="control-btn">操作</th>
+            </tr>
+            <tr>
+                <th>序号</th>
+                <th nzShowFilter [nzFilters]="itemNames" (nzFilterChange)="filterItemChange($event)">名称</th>
+                <th *ngIf="!itemBool[0].value">项目编号</th>
+                <th *ngIf="!itemBool[1].value">品牌</th>
+                <th *ngIf="!itemBool[2].value">规格</th>
+                <th *ngIf="!itemBool[3].value">型号</th>
+                <th>销售单位</th>
+                <th>销售数量</th>
+                <th>材料单价</th>
+                <th>材料合价</th>
+                <th>损耗</th>
+                <th>损耗合计</th>
+                <th>木工</th>
+                <th>木工合价</th>
+                <th>泥工</th>
+                <th>泥工合价</th>
+                <th>漆工</th>
+                <th>漆工合价</th>
+                <th>水电</th>
+                <th>水电合价</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-template ngFor let-data let-id="index" [ngForOf]="listOfData">
+                <tr *ngIf="data.rows > 0"
+                    style="vertical-align:middle;border-top:1px solid #e8e8e8;border-right:0;text-align: center">
+                    <td [rowSpan]="data.rows" *ngIf="data.rows > 0" nzLeft="0px"
+                        style="vertical-align: middle;" [nzTitle]="data.name?data.name:''"
+                        nzPlacement="left" nz-tooltip>{{data.name}}
+                        <a [nzTitle]="data.infoRemark?data.infoRemark:''" nzPlacement="left"
+                           nz-tooltip href="javascript:void(0)" *ngIf="data.infoRemark && data.infoType === 1">
+                            <i nz-icon type="exclamation-circle" theme="outline"></i></a>
+                    </td>
+                </tr>
+                <tr *ngIf="limitBranchByType(data.infoType) &&  disabledOperateByState()"
+                    style="vertical-align:middle;border-top:1px solid #e8e8e8;
+                    border-right:0;text-align: center">
+                    <td [colSpan]="getCloseByColume(10)" (click)="openBranch(id,data)" style="border-right:0">
+                        <a href="javascript:void(0)">添加大项</a></td>
+                    <td [colSpan]="11"></td>
+                </tr>
+
+                <ng-container *ngIf="data.infoMaps && data.infoMaps.length === 0">
+                    <tr style="vertical-align:middle;border-top:1px solid #e8e8e8;
+                    border-right:0;text-align: center">
+                        <td [colSpan]="getCloseByColume(10)" style="border-right: 0">暂无数据</td>
+                        <td [colSpan]="11"></td>
+                    </tr>
+                </ng-container>
+
+                <ng-container *ngIf="data.infoMaps && data.infoMaps.length > 0">
+                    <ng-template ngFor let-branch let-ib="index" [ngForOf]="data.infoMaps">
+                        <tr style="vertical-align:middle;border-top:1px solid #e8e8e8;border-right:0;text-align: center">
+                            <td [colSpan]="getCloseByColume(10)" style="vertical-align:middle;border-right:0;">
+                        <span *ngIf="branch && branch.planId">套餐：{{branch.name}}，小计：{{computedSingleTotal(branch.planNum,branch.planPrice)|number:'1.2'}}，（{{(branch.planPrice?branch.planPrice:0)}}x{{branch.planNum?branch.planNum:0}}{{branch.planUnit?branch.planUnit:'套'}}）
+                            <a [nzTitle]="branch && branch.planExplainMsg?branch.planExplainMsg:''" nzPlacement="left"
+                               nz-tooltip href="javascript:void(0)" *ngIf="branch && branch.planExplainMsg">
+                                <i nz-icon type="exclamation-circle" theme="outline" title="查看说明"></i></a>
+                            <a [nzTitle]="branch && branch.remark?branch.remark:''" nzPlacement="left"
+                               nz-tooltip href="javascript:void(0)" *ngIf="branch && branch.remark" class="ml-8">
+                                <i nz-icon type="question-circle" theme="outline" title="查看备注"></i></a>
+                        </span>
+                                <span *ngIf="branch && !branch.planId">{{branch.name}}</span>
+                            </td>
+                            <td [colSpan]="10" align="left"
+                                style="vertical-align:middle;border-top:1px solid #e8e8e8;">
+                                <nz-pagination [nzPageIndex]="branch.pageNo" [nzTotal]="branch.infos.length"
+                                               [nzPageSize]="pageSize" [nzShowTotal]="totalTemplate"
+                                               [nzSize]="'small'" [nzHideOnSinglePage]="true"
+                                               (nzPageIndexChange)="pageChange($event,branch)"></nz-pagination>
+
+                            </td>
+                            <td nzRight="0px" *ngIf="branch.cols > 0" style="text-align: left;">
+                                <a href="javascript:void(0)" class="mr-8"
+                                   (click)="openBranch(id,data,branch)"
+                                   *ngIf="limitBranchByType(data.infoType)  && disabledOperateByState()">修改名称</a>
+                                <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该项目吗?"
+                                   nzOkText="删除" nzCancelText="取消" class="ml-8"
+                                   (nzOnConfirm)="confirmDeleteBranch(branch)"
+                                   *ngIf="limitBranchByType(data.infoType) && disabledOperateByState()">删除</a>
+
+                                <a href="javascript:void(0)" class="mr-8"
+                                   (click)="openPack(branch)"
+                                   *ngIf="limitPackByType(data.infoType,branch)  && disabledOperateByState()">修改</a>
+                                <a href="javascript:void(0)" class="mr-8"
+                                   (click)="insertItemByPack(data,branch)"
+                                   *ngIf="addPackByType(data.infoType,branch)  && disabledOperateByState()">添加套餐</a>
+                                <a href="javascript:void(0)" class="mr-8"
+                                   nz-popconfirm nzTitle="确定删除该项目吗?"
+                                   nzOkText="删除" nzCancelText="取消" class="ml-8"
+                                   (nzOnConfirm)="confirmDeletePack(branch)"
+                                   *ngIf="limitPackByType(data.infoType,branch)  && disabledOperateByState()">删除</a>
+                            </td>
+                        </tr>
+
+                        <ng-template ngFor let-item let-i="index" let-last="last"
+                                     [ngForOf]="computedBranchInfos(branch)">
+                            <tr>
+                                <td>{{item.sn}}</td>
+                                <td [title]="item.name?item.name:''">
+                                    {{item.name?subItem(item.name,3):'--'}}
+                                    <a [nzTitle]="item.remark?item.remark:''" nzPlacement="left"
+                                       nz-tooltip href="javascript:void(0)" *ngIf="item.remark">
+                                        <i nz-icon type="exclamation-circle" theme="outline"></i></a>
+                                </td>
+                                <td [nzTitle]="item.code?item.code:''" nzPlacement="topLeft" nz-tooltip
+                                    *ngIf="!itemBool[0].value">
+                                    <span class="td-eclipse-100">{{item.code?item.code:'--'}}</span>
+                                </td>
+                                <td [title]="item.brand?item.brand:''" *ngIf="!itemBool[1].value">{{item.brand?item.brand:'--'}}</td>
+                                <td [title]="item.spec?item.spec:''" *ngIf="!itemBool[2].value">{{item.spec?item.spec:'--'}}</td>
+                                <td [title]="item.model?item.model:''" *ngIf="!itemBool[3].value">{{item.model?item.model:'--'}}</td>
+                                <td [title]="item.unit?item.unit:''">{{item.unit?item.unit:'--'}}</td>
+                                <ng-container *ngIf="showItemByPlan(item)">
+                                    <td [title]="item.num">
+                                        <input nz-input [disabled]="!disabledOperateByState()" [num]="item.num"
+                                               revInputDecimal role="16" nzSize="small" [formula]="item.numFormula"
+                                               [value]="item.num" placeholder="请输入销售数量"
+                                               (changeValue)="changeItemNum($event,item)"/>
+                                    </td>
+                                    <td [title]="item.unitPrice">
+                                        <input nz-input [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                               [num]="item.unitPrice"
+                                               revInputDecimal role="17" nzSize="small" [formula]="item.unitPriceFormula"
+                                               [value]="item.unitPrice" placeholder="请输入销售单价"
+                                               (changeValue)="changeItemPrice($event,item)"/>
+                                    </td>
+                                    <td [title]="item && item.unitPrice && item.num?computedSingleTotal(item.num,item.unitPrice):0">
+                                        {{item && item.unitPrice &&
+                                        item.num?(computedSingleTotal(item.num,item.unitPrice)|number:'1.2'):'--'}}
+                                    </td>
+                                    <td>
+                                        <input nz-input [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                               [num]="item.wastageRate"
+                                               revInputDecimal role="18" nzSize="small" [formula]="item.wastageRateFormula"
+                                               [value]="item.wastageRate" style="width:80%;" placeholder="请输入损耗占比"
+                                               (changeValue)="changeItemWastegeRate($event,item)"/>%
+                                    </td>
+                                    <td>{{(item && item.wastagePrice?item.wastagePrice:0)|number:'1.2'}}</td>
+                                    <ng-container *ngIf="showPurchaseByType(item.infoType)">
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                        <td>--</td>
+                                    </ng-container>
+                                    <ng-container *ngIf="!showPurchaseByType(item.infoType)">
+                                        <td [title]="item.carpenterPrice?item.carpenterPrice:''">
+                                            <nz-input-number [(ngModel)]="item.carpenterPrice" [nzSize]="'small'"
+                                                             [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                             (ngModelChange)="modelLabourChange(item,'carpenter')"
+                                                             [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                             style="width:100%"></nz-input-number>
+                                        </td>
+                                        <td>{{item.carpenterPrice && item.num?((item.carpenterPrice *
+                                            item.num)|number:'1.2'):'0'}}
+                                        </td>
+                                        <td [title]="item.masonPrice?item.masonPrice:''">
+                                            <!--{{item.masonPrice?item.masonPrice:'--'}}-->
+                                            <nz-input-number [(ngModel)]="item.masonPrice" [nzSize]="'small'"
+                                                             [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                             (ngModelChange)="modelLabourChange(item,'mason')"
+                                                             [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                             style="width:100%"></nz-input-number>
+                                        </td>
+                                        <td>{{item.masonPrice && item.num?((item.masonPrice * item.num)|number:'1.2'):'0'}}
+                                        </td>
+                                        <td>
+                                            <!--{{item.japannerPrice?item.japannerPrice:'--'}}-->
+                                            <nz-input-number [(ngModel)]="item.japannerPrice" [nzSize]="'small'"
+                                                             [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                             (ngModelChange)="modelLabourChange(item,'japanner')"
+                                                             [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                             style="width:100%"></nz-input-number>
+                                        </td>
+                                        <td>{{item.japannerPrice && item.num?((item.japannerPrice *
+                                            item.num)|number:'1.2'):'0'}}
+                                        </td>
+                                        <td [title]="item.utilityCharge?item.utilityCharge:''">
+                                            <!--{{item.utilityCharge?item.utilityCharge:'--'}}-->
+                                            <nz-input-number [(ngModel)]="item.utilityCharge" [nzSize]="'small'"
+                                                             [nzStep]="1" [nzPrecision]="2" [nzMin]="0"
+                                                             (ngModelChange)="modelLabourChange(item,'utility')"
+                                                             [disabled]="showItemByPlan(item) && !disabledOperateByState()"
+                                                             style="width:100%"></nz-input-number>
+                                        </td>
+                                        <td>{{item.utilityCharge && item.num?((item.utilityCharge *
+                                            item.num)|number:'1.2'):'0'}}
+                                        </td>
+                                    </ng-container>
+                                </ng-container>
+                                <ng-container *ngIf="!showItemByPlan(item)">
+                                    <td>{{(item.num?item.num:0)|number:'1.2'}}</td>
+                                    <td *ngIf="item['packFlag']"
+                                        [title]="item.unitPrice?item.unitPrice:0">{{item.unitPrice?item.unitPrice:0}}
+                                    </td>
+                                    <td *ngIf="item['packFlag']"
+                                        [title]="item.unitPrice && item.num?computedSingleTotal(item.num,item.unitPrice):0">
+                                        {{(item.unitPrice &&
+                                        item.num?computedSingleTotal(item.num,item.unitPrice):0)|number:'1.2'}}
+                                    </td>
+                                    <td *ngIf="!item['packFlag']">--</td>
+                                    <td *ngIf="!item['packFlag']">--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                </ng-container>
+
+                                <td nzRight="0px" style="border-top:1px solid #e8e8e8;" class="control-btn">
+                                    <nz-dropdown
+                                            *ngIf="moveBranchByType(data.infoType) && showItemByPlan(item) && disabledOperateByState()">
+                                        <a nz-dropdown href="javascript:void(0)">移动到<i nz-icon type="down"></i></a>
+                                        <ul nz-menu>
+                                            <ng-container *ngFor="let menu of moveMenus">
+                                                <li nz-menu-item
+                                                    *ngIf="menu.list && menu.list.length <= 0"
+                                                    (click)="moveItem(item,menu)">{{menu.name}}
+                                                </li>
+                                                <li nz-submenu *ngIf="menu.list && menu.list.length > 0">
+                                                    <span title>{{menu.name}}</span>
+                                                    <ul>
+                                                        <li nz-menu-item *ngFor="let ml of menu.list"
+                                                            (click)="moveItem(item,menu,ml.id)">{{ml.name}}
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ng-container>
+                                        </ul>
+                                    </nz-dropdown>
+                                    <ng-container
+                                            *ngIf="showBranchInByType(data.infoType) && showItemByPlan(item) && disabledOperateByState()">
+                                        <nz-dropdown *ngIf="!showPurchaseByType(data.infoType)">
+                                            <a nz-dropdown href="javascript:void(0)"
+                                               class="ml-8" title="添加到下一项">插入<i nz-icon type="down"></i></a>
+                                            <ul nz-menu>
+                                                <li nz-menu-item *ngFor="let bi of branchItems"
+                                                    (click)="insertItem(bi.value,branch,i,item)">{{bi.label}}
+                                                </li>
+                                            </ul>
+                                        </nz-dropdown>
+                                        <nz-dropdown *ngIf="showPurchaseByType(data.infoType)">
+                                            <a nz-dropdown href="javascript:void(0)"
+                                               class="ml-8" title="添加到下一项">插入<i nz-icon type="down"></i></a>
+                                            <ul nz-menu>
+                                                <li nz-menu-item *ngFor="let bi of getBranchItems(2,3)"
+                                                    (click)="insertItem(bi.value,branch,i,item)">{{bi.label}}
+                                                </li>
+                                            </ul>
+                                        </nz-dropdown>
+                                    </ng-container>
+                                    <a href="javascript:void(0)" class="ml-8" title="上移"
+                                       *ngIf="(i + (branch.pageNo-1)*pageSize) != 0 && controlPosMove(item)"
+                                       (click)="moveItemUp(branch,(i+ (branch.pageNo-1)*pageSize ))"><i nz-icon
+                                                                                                        type="arrow-up"></i></a>
+                                    <a href="javascript:void(0)" class="ml-8" title="下移"
+                                       *ngIf="(i+ (branch.pageNo-1)*pageSize) < (branch['infos'].length -1) && controlPosMove(item)"
+                                       (click)="moveItemDown(branch,(i+ (branch.pageNo-1)*pageSize ))"><i nz-icon
+                                                                                                          type="arrow-down"></i></a>
+                                    <a href="javascript:void(0)" class="ml-8" title="置顶"
+                                       *ngIf="(i + (branch.pageNo-1)*pageSize ) != 0 && controlPosMove(item)igl"
+                                       (click)="moveItemTop(branch,(i+ (branch.pageNo-1)*pageSize))"><i nz-icon
+                                                                                                        type="to-top"></i></a>
+                                    <a href="javascript:void(0)" class="ml-8" style="color: #F5222D;"
+                                       *ngIf="disabledOperateByState() && showItemByPlan(item)"
+                                       nz-popconfirm nzTitle="确定删除该项目吗?" nzOkText="删除" nzCancelText="取消"
+                                       (nzOnConfirm)="confirmDeleteItem(item)"><i nz-icon type="delete"></i></a>
+                                    <span *ngIf="!showItemByPlan(item)">
+                                <a *ngIf="item['packFlag'] && disabledOperateByState()"
+                                   href="javascript:void(0)" (click)="openPack(item)">修改</a>
+                                <a *ngIf="item['packFlag'] && disabledOperateByState()" href="javascript:void(0)"
+                                   class="ml-8" nz-popconfirm nzTitle="确定删除该项目吗?"
+                                   nzOkText="删除" nzCancelText="取消" class="ml-8"
+                                   (nzOnConfirm)="confirmDeletePack(item)">删除</a>
+                                <a *ngIf="!item['packFlag']">--</a>
+                            </span>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <tr>
+                            <td>小计</td>
+                            <td [colSpan]="getCloseByColume(11)" align="right">
+                                <ng-container *ngIf="showComputedByType(data.infoType)">
+                                    <span *ngIf="!branch['planId']">{{computedMaterialTotal(branch.infos,'material')|number:'1.2'}}</span>
+                                    <span *ngIf="branch['planId']">{{computedSingleTotal(branch.planNum,branch.planPrice)|number:'1.2'}}</span>
+                                </ng-container>
+                                <ng-container *ngIf="showGradateByType(data.infoType)">{{computedGradateTotal(branch.infos)
+                                    |
+                                    number:'1.2'}}
+                                </ng-container>
+                            </td>
+                            <ng-container *ngIf="!showPurchaseByType(data.infoType)">
+                                <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'carpentry')|number:'1.2'}}
+                                </td>
+                                <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'tiler')|number:'1.2'}}</td>
+                                <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'painting')|number:'1.2'}}</td>
+                                <td [colSpan]="2" align="right">{{computedTotal(branch.infos,'plumber')|number:'1.2'}}</td>
+                            </ng-container>
+                            <ng-container *ngIf="showPurchaseByType(data.infoType)">
+                                <td [colSpan]="2" align="right">--</td>
+                                <td [colSpan]="2" align="right">--</td>
+                                <td [colSpan]="2" align="right">--</td>
+                                <td [colSpan]="2" align="right">--</td>
+                            </ng-container>
+
+                            <td nzRight="0px">--</td>
+                        </tr>
+                    </ng-template>
+                </ng-container>
+
+            </ng-template>
+            </tbody>
+        </nz-table>
+
+        <div nz-row class="cost-detail-remark mt-16">
+            <textarea placeholder="请输入备注信息" [(ngModel)]="remark" nz-input rows="5" maxlength="5000"></textarea>
+            <span *ngIf="remark && remark.length > 0"  class="count"><span>{{remark.length}}</span>/5000</span>
+        </div>
+    </div>
+</nz-drawer>

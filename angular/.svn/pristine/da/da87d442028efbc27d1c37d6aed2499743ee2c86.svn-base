@@ -1,0 +1,706 @@
+import { Component, OnInit, Input,Output,EventEmitter } from '@angular/core';
+import {getComboNames, subItemName} from "../../../model/methods";
+import {WarningService} from "../../../service/warning.service";
+import {MasterComboService} from "../../../rev/master/master-combo-detail/master-combo.service";
+import {ItemDetailsService} from "./../item-details.service";
+import {Default} from "../../../model/constant";
+
+@Component({
+  selector: 'rev-item-details-name',
+  templateUrl: './item-details-name.component.html',
+  styleUrls: ['./item-details-name.component.scss']
+})
+export class ItemDetailsNameComponent implements OnInit {
+
+    //分类判断显示的标题 1:项目，2：主材，3：辅材，4：软材
+    @Input('type') type: number;
+    @Input() maxLength: number; //选择的最大数量，默认不限制
+    @Input() multiple = 'multiple'; //单选还是多选，默认多选
+    //区别新老版本显示问题 0：老版本或者默认值，1：为新版本
+    @Input() dataVersion: number = 0;
+    //区别来源（1：预算，2：成本）
+    @Input() sourceInfo: number = 1;
+
+
+    @Output() cancel:EventEmitter<any> = new EventEmitter<any>();
+    @Output() ok:EventEmitter<any> = new EventEmitter<any>();
+
+    //所有类别总和
+    public categories: Array<any> = [];
+    //选中的类别
+    public category: any;
+    //根据类别拉取对应的品牌
+    public brands: Array<any> = [];
+    //选中时的品牌（多选）
+    public brand: any;
+
+    //所有套系
+    public comboies: Array<any> = [];
+    //选中后的套系
+    public combos: Array<any>;
+
+    //查询中的具体文本
+    public info: string;
+
+    //表格中的数据
+    public dataSet: Array<any> = [];
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    //列表渲染时的加载过程中
+    public loading: boolean = false;
+
+    //选中的数据信息集合
+    public selectItems: Array<any> = [];
+
+    //显示选中的数据
+    public toggleType = 'down';
+    public toggle = false;
+
+    //表格中选中框(已选中的项目)
+    public allChecked: boolean = false;
+    public indeterminate: boolean = false;
+
+
+    //全选时
+    //防止多次重复加载
+    public preventRepeatLoad: boolean = true;
+    //全选时的加载
+    public clickSelectAll = false;
+    //全选时的加载情况
+    public loadingModuleAll = true;
+    //全选(选择项目时,非选中的全选项目)
+    public storeData: any;
+
+
+
+
+    constructor(private itemDetailsService: ItemDetailsService,
+                private warn: WarningService,
+                private masterCombo: MasterComboService) {
+    }
+
+    ngOnInit() {
+
+        //拉取类型
+        this.getCategory();
+        //根据参数拉取相应的接口数据
+        this.changeData();
+
+        //加载套系
+        this.getCombos();
+
+    }
+
+    //配制默认时选中
+    public compareFn = (o1: any, o2: any) => o1 && o2 ? o1.id === o2.id : o1 === o2; //类别选择框为对象
+
+    /**
+     * 加载根据不同类别加载类型数据
+     */
+    getCategory() {
+        switch (this.type) {
+            case 1:
+                this.loadBaseCategory();
+                break;
+            case 2:
+                this.loadCategory(1);
+                break;
+            case 3:
+                this.loadCategory(2);
+                break;
+        }
+    }
+
+    /**
+     *加载套系
+     */
+    getCombos() {
+        if (this.type === 2 || this.type === 3) {
+            this.masterCombo.getCombos().then(data => {
+                this.comboies = data;
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    /**
+     * 显示套系总名称
+     * @param combos
+     * @returns {any}
+     */
+    showComboNames(combos: any) {
+        return getComboNames(combos);
+    }
+
+    /**
+     * 加载类别
+     * @param {number} type
+     */
+    loadCategory(type: number) {
+        this.itemDetailsService.getCategoryByType(type).then(data => {
+            if (data && data.length > 0) {
+                this.categories = data;
+            } else {
+                this.categories = [];
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        });
+    }
+
+    /**
+     * 拉取基础库的类别数据
+     */
+    loadBaseCategory() {
+        this.itemDetailsService.getBaseCategory().then(data => {
+            if (data && data.length > 0) {
+                data.forEach(d => {
+                    d["categoryName"] = d.name;
+                    return d;
+                });
+                this.categories = data;
+            } else {
+                this.categories = [];
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 根据类别id拉取对应的品牌数据信息
+     * @param {number} cid
+     */
+    loadBrand(cid: number) {
+        this.itemDetailsService.getBrandByCategory(cid).then(data => {
+            if (data && data.length > 0) {
+                this.brands = data;
+            } else {
+                this.brands = [];
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    /**
+     * 类型变化时拉取数据
+     * @param cate
+     */
+    modelChangeCategory(cate: any) {
+        this.category = cate;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        if (this.showMaterialByType(this.type) && cate["id"]) {
+            this.loadBrand(cate["id"]);
+        }
+        this.changeData();
+    }
+
+    /**
+     * 品牌变化时拉取相应的数据接口
+     * @param brand
+     */
+    modelChangeBrand(brand: any) {
+        this.brand = brand;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+    /**
+     * 套系选择变化时调用
+     * @param combo
+     */
+    modelChangeCombo(combo: any) {
+        // this.category =
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+    searchData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    /**
+     * 根据不同类别显示不一样的标题
+     * @param {number} type
+     * @returns {string}
+     */
+    getTitle(type: number) {
+        switch (type) {
+            case 1:
+                return "项目";
+            case 2:
+                return "主材";
+            case 3:
+                return "辅材";
+            case 4:
+                return "软材";
+            default:
+                return "其它";
+        }
+    }
+
+
+    /**
+     * 拉取数据主入口
+     */
+    changeData() {
+        const params = {};
+        this.clickSelectAll = false;
+        this.preventRepeatLoad = true;
+        if (this.type === 1) {
+            params["pageNum"] = this.pageNo;
+            params["pageSize"] = this.pageSize;
+            if (this.category && this.category.id) {
+                params["categoryId"] = this.category.id;
+            }
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            this.loadBasicList(params);
+        } else if (this.type === 2) {
+            //表示已上架的数据
+            // params["state"] = 1;
+            //表示拉取类型 1： 主材；2： 辅材
+            params["type"] = 1;
+            if (this.combos && this.combos.length > 0) {
+                params["versionId"] = this.getComboIds(this.combos);
+            }
+            if (this.category && this.category.id) {
+                params["category"] = this.category.categoryName;
+            }
+            if (this.brand && this.brand.length > 0) {
+                params["brand"] = this.getBrands(this.brand);
+            }
+
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            params["page"] = this.pageNo;
+            this.loadMaterialList(params)
+        } else {
+            //表示已上架的数据
+            // params["state"] = 1;
+            //表示拉取类型 1： 主材；2： 辅材
+            params["type"] = 2;
+            if (this.category && this.category.id) {
+                params["category"] = this.category.categoryName;
+            }
+            if (this.brand && this.brand.length > 0) {
+                params["brand"] = this.getBrands(this.brand);
+            }
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            params["page"] = this.pageNo;
+            this.loadMaterialList(params)
+        }
+    }
+
+    //套系合并
+    getComboIds(combos: any) {
+        let ids = [];
+        combos.forEach(combo => {
+            ids.push(combo.id);
+        })
+        return ids;
+    }
+
+    //品牌合并
+    getBrands(brands: any) {
+        let bs = [];
+        brands.forEach(b => {
+            bs.push(b.brandName);
+        })
+        return bs;
+    }
+
+    //项目（拉取基础库的数据）
+    loadBasicList(params: any) {
+        this.loading = true;
+        if (this.loading) {
+            this.itemDetailsService.getBasicList(params).then(data => {
+                this.loading = false;
+                if (data.list && data.list.length > 0) {
+                    this.dataSet = data.list;
+                    this.dataSet.forEach(d => {
+                        d["category"] = d["categoryName"];
+                    })
+                    this.total = data.total;
+                } else {
+                    this.dataSet = [];
+                }
+
+            }).catch(err => {
+                this.loading = false;
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    /**
+     * 拉取主材、辅材数据
+     * @param params
+     */
+    loadMaterialList(params: any) {
+        this.loading = true;
+        if (this.loading) {
+            this.itemDetailsService.getMaterialList(params).then(data => {
+                this.loading = false;
+                if (data.list && data.list.length > 0) {
+                    this.dataSet = data.list;
+                    this.total = data.total;
+                } else {
+                    this.dataSet = []
+                }
+
+            }).catch(err => {
+                this.loading = false;
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    /**
+     * 添加单个细项
+     * @param e
+     * @param data
+     */
+    addItem(e: any, data) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (this.multiple == 'singel' && this.selectItems.length > 0) {
+            let singer = this.selectItems.some(v => {
+                return v['id'] == data['id']
+            })
+            if (!singer) {
+                this.selectItems = JSON.parse(JSON.stringify(this.selectItems.concat(data)));
+                this.refreshStatus();
+            }
+        } else {
+            this.selectItems = JSON.parse(JSON.stringify(this.selectItems.concat(data)));
+            this.refreshStatus();
+        }
+
+
+    }
+
+    /**
+     *标记删除
+     * @param e
+     * @param id
+     */
+    removeItem(e: any, id) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (this.selectItems && this.selectItems.length > 0) {
+            let index = 0;
+            this.selectItems.map((s, i) => {
+                if (s.id === id) {
+                    index = i;
+                }
+            });
+            this.deleteItem(e, index);
+        } else {
+            this.clickSelectAll = false;
+            this.preventRepeatLoad = true;
+        }
+    }
+
+    /**
+     * 逻辑删除本地数据
+     * @param e
+     * @param index
+     */
+    deleteItem(e, index) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.selectItems.splice(index, 1);
+        if (this.selectItems.length === 0) {
+            this.toggle = false;
+            this.toggleType = "down";
+        }
+        this.refreshStatus();
+    }
+
+    /**
+     * 批量删除
+     */
+    batchRemoveItems(e: any) {
+        let batchItems = this.selectItems.filter(data => data.checked);
+        if (batchItems && batchItems.length > 0) {
+            batchItems.forEach(b => {
+                this.removeItem(e, b.id);
+            })
+        }
+    }
+
+    /**
+     * 判定当前选项是否已经存在
+     * @param id
+     * @returns {boolean}
+     */
+    exist(id): boolean {
+        if (this.selectItems && this.selectItems.length) {
+            const m = this.selectItems.filter(m => m.id === id);
+            return m && m.length > 0;
+        }
+        return false;
+    }
+
+    /**
+     * 选中的数据统计个数
+     * @param id
+     * @returns {any}
+     */
+    itemsSize(id) {
+        if (this.selectItems && this.selectItems.length > 0) {
+            const size = this.selectItems.filter(m => m.id === id);
+            if (size && size.length > 0) {
+                return size.length;
+            }
+            return 0;
+        }
+        return 0;
+    }
+
+    /**
+     * 切换选中是否展示全部
+     * @param e
+     */
+    toggleClick(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.toggle = !this.toggle;
+        this.toggleType = this.toggle ? 'up' : 'down';
+    }
+
+    /**
+     * 准备删除的项目数量
+     * @returns {any}
+     */
+    getNumByChecked() {
+        const checked = this.selectItems.filter(s => s.checked === true);
+        return checked.length;
+    }
+
+    /**
+     * 选择全部
+     * @param {boolean} value
+     */
+    checkAll(value: boolean) {
+        this.selectItems.forEach(data => {
+            data.checked = value
+        });
+        this.refreshStatus();
+    }
+
+    /**
+     * 单个独立选择
+     */
+    refreshStatus() {
+        const allChecked = this.selectItems.length > 0 && this.selectItems.every(data => data.checked === true);
+        const allUnChecked = this.selectItems.every(data => !data.checked);
+        this.allChecked = allChecked;
+        this.indeterminate = (!allChecked) && (!allUnChecked);
+    }
+
+    /**
+     * 取消弹出框
+     */
+    cancelModal() {
+        // this.modal.dismiss();
+        this.cancel.emit(null);
+    }
+
+    /**
+     * 确定选中的数据返回到调用前端使用
+     * @param e
+     */
+    confirmModal(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.maxLength && this.selectItems.length > this.maxLength) {
+            this.warn.onWarn(`最多只能添加${this.maxLength}条`);
+            return;
+        }
+        // this.modal.close(this.selectItems);
+        this.ok.emit(this.selectItems);
+    }
+
+
+    showMaterialByType(type: number) {
+        switch (type) {
+            case 2:
+                return true;
+            case 3:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    //截取字符串
+    subItem(name: string, num: number) {
+        return subItemName(name, num);
+    }
+
+    /**
+     * 全选
+     * @param e
+     */
+    selectModuleAll(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.clickSelectAll = !this.clickSelectAll;
+
+        const params = {};
+        if (this.type === 1) {
+            params["pageNum"] = this.pageNo;
+            params["pageSize"] = this.total ? this.total : this.pageSize;
+            if (this.category && this.category.id) {
+                params["categoryId"] = this.category.id;
+            }
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            // this.loadBasicList(params);
+            //
+
+        } else if (this.type === 2) {
+            //表示拉取类型 1： 主材；2： 辅材
+            params["type"] = 1;
+            if (this.combos && this.combos.length > 0) {
+                params["versionId"] = this.getComboIds(this.combos);
+            }
+            if (this.category && this.category.id) {
+                params["category"] = this.category.categoryName;
+            }
+            if (this.brand && this.brand.length > 0) {
+                params["brand"] = this.getBrands(this.brand);
+            }
+
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            params["page"] = this.pageNo;
+            params["pageSize"] = this.total ? this.total : this.pageSize;
+            // this.loadMaterialList(params)
+        } else {
+            //表示拉取类型 1： 主材；2： 辅材
+            params["type"] = 2;
+            if (this.category && this.category.id) {
+                params["category"] = this.category.categoryName;
+            }
+            if (this.brand && this.brand.length > 0) {
+                params["brand"] = this.getBrands(this.brand);
+            }
+            if (this.info) {
+                params["name"] = this.info.trim();
+            }
+            params["page"] = this.pageNo;
+            params["pageSize"] = this.total ? this.total : this.pageSize;
+            // this.loadMaterialList(params)
+        }
+
+        if (this.storeData && this.total != this.storeData.length) {
+            if (this.preventRepeatLoad) {
+                this.clickSelectAll = true;
+                this.loadSelectData(params);
+            }
+        } else {
+            if (this.preventRepeatLoad && this.clickSelectAll) {
+                this.clickSelectAll = true;
+                this.loadSelectData(params);
+            } else {
+                if (this.clickSelectAll) {
+                    this.moduleAll(this.storeData);
+                } else {
+                    this.moduleRemoveAll(this.storeData);
+                }
+            }
+
+        }
+    }
+
+
+    loadSelectData(params: any) {
+        this.loading = true;
+        if (this.type === 1) {
+            // this.loadBasicList(params);
+            this.itemDetailsService.getBasicList(params).then(data => {
+                this.loading = false;
+                this.moduleAll(data.list);
+                this.storeData = data.list;
+            }).catch(err => {
+                this.loading = false;
+                this.warn.onMsgError(err);
+            })
+
+        } else {
+            this.itemDetailsService.getMaterialList(params).then(data => {
+                this.loading = false;
+                this.moduleAll(data.list);
+                this.storeData = data.list;
+            }).catch(err => {
+                this.loading = false;
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    loadData(params) {
+
+    }
+
+    //重新给数据数量赋值
+    moduleAll(data) {
+        if (data && data.length > 0) {
+            for (const d of data) {
+                d['num'] = 1;
+                this.selectItems.push(d);
+            }
+        }
+    }
+
+    moduleRemoveAll(data) {
+        const that = this;
+        if (data && data.length > 0) {
+            let dl = data.length,
+                sl = that.selectItems.length,
+                flag = true; //记录删除一次
+
+            for (let i = 0; i < dl; i++) {
+                flag = true;
+                for (let j = 0; j < sl; j++) {
+                    if (that.selectItems[j].id === data[i].id && flag) {
+                        that.selectItems.splice(j, 1, '');
+                        flag = false;
+                    }
+                }
+            }
+            that.selectItems = that.sortModuleAll(that.selectItems);
+        }
+
+    }
+
+    sortModuleAll(data) {
+        const arr = [];
+        if (data && data.length > 0) {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i]) {
+                    arr.push(data[i]);
+                }
+            }
+        }
+        return arr;
+    }
+
+}

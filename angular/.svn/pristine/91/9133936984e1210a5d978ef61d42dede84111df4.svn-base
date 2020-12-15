@@ -1,0 +1,404 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">选择套餐</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="modal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+<div class="ant-modal-body">
+    <div nz-row class="mb-16">
+        <rev-select-bar (handleMaterialSupplier)="selectMaterialSupplier($event)" (handleCombos)="selectCbs($event)"
+            (handleCategory)="selectCategory($event)" (handleBrands)="selectBrand($event)"
+            (handleSearch)="selectSearch($event)" [tabAllowClear]="tab" (handleCompanies)="getCompanies($event)" [showSingleInput]=true [showMultipleInput]="false">
+        </rev-select-bar>
+    </div>
+
+
+    <!---选中展示数据列表---->
+    <div nz-row class="ml-8" *ngIf="selectItems && selectItems.length > 0">
+
+    </div>
+    <div nz-row class="item-pack-table">
+        <nz-table [nzData]="packs" nzSize="middle" [nzTotal]="total" [nzLoading]="loading" [(nzPageIndex)]='pageNo'
+            [(nzPageSize)]="pageSize" [nzFrontPagination]="false" (nzPageIndexChange)="changeData()"
+            [nzShowPagination]="true" [nzScroll]="{ x:'130%',y:'340px'}" #packTable [nzBordered]="true">
+            <thead>
+                <tr style="border-top: 1px solid #dedede;">
+                    <th>SKU</th>
+                    <th>类别</th>
+                    <th>名称</th>
+                    <th>品牌</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>单位</th>
+                    <th>材质</th>
+                    <th>颜色</th>
+                    <th>产地</th>
+                    <!-- <th>数量</th> -->
+                    <!-- <th *ngIf="type === 2">供货价</th>
+                <th *ngIf="type === 2">活动价</th>
+                <th *ngIf="type === 2">活动时间</th> -->
+                    <!-- <th>材料商</th> -->
+                    <th>套系</th>
+                    <th *ngIf="type === 1">销售价</th>
+                    <th *ngIf="type === 2">活动价</th>
+                    <!-- <th  *ngIf="type === 1">套餐单位</th> -->
+                    <th>类型</th>
+                    <th nzRight="0px" width="100px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-template ngFor let-pack let-id="index" [ngForOf]="packs">
+                    <ng-container *ngIf="pack.details && pack.details.length > 0">
+                        <ng-template ngFor let-data let-index="index" [ngForOf]="pack.details">
+                            <tr [ngStyle]="{'background': pack.color}">
+                                <td [nzTitle]="data.sku?data.sku:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.sku?data.sku:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.category?data.category:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.category?data.category:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.name?data.name:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.name?data.name:'--'}}</span></td>
+                                <td [nzTitle]="data.brand?data.brand:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.brand?data.brand:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.spec?data.spec:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.spec?data.spec:'--'}}</span></td>
+                                <td [nzTitle]="data.model?data.model:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.model?data.model:'--'}}</span></td>
+                                <td [title]="data.unit?data.unit:''"><span>{{data.unit?data.unit:'--'}}</span></td>
+                                <td [nzTitle]="data.material?data.material:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.material?data.material:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.color?data.color:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.color?data.color:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.origin?data.origin:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.origin?data.origin:'--'}}</span>
+                                </td>
+
+                                <!--  <td [title]="data.number?data.number:''"><span>{{data.number?data.number:'--'}}</span>
+                            </td> -->
+
+                                <!-- <ng-container *ngIf="index === 0">
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="pack.newSupplyPrice?pack.newSupplyPrice:0">
+                                    <span>{{(pack.newSupplyPrice?pack.newSupplyPrice:0)| number:'1.2'}}</span></td>
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="pack && pack.supplyPrice?pack.supplyPrice:0">
+                                    <span>{{(pack && pack.supplyPrice?pack.supplyPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle;white-space: normal"
+                                    *ngIf="type === 2">
+                                    <span>{{pack && pack.startTime?(pack.startTime|date:'yy-MM-dd'):'--'}}</span><span
+                                        *ngIf="pack && pack.endTime">&nbsp;&nbsp;~&nbsp;&nbsp;{{pack.endTime?(pack.endTime|date:'yy-MM-dd'):'--'}}</span>
+                                </td>
+
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                    [title]="pack && pack.supplierName?pack.supplierName:''">
+                                    <span>{{ pack && pack.supplierName?pack.supplierName:'--'}}</span>
+                                </td>
+
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                    [nzTitle]="pack.comboName?pack.comboName:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                                </td>
+
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                    [title]="pack.sellingPrice?pack.sellingPrice:0">
+                                    <span>{{(pack.sellingPrice?pack.sellingPrice:0) | number:'1.2'}}</span></td>
+                                <td [rowSpan]="pack.rows" style="vertical-align: middle"  *ngIf="type === 1">
+                                    <span>{{pack.unit?pack.unit:'--'}}</span>
+                                </td>
+                                <td [rowSpan]="pack.rows" nzRight="0px"
+                                    style="vertical-align: middle;border-top:1px solid #e8e8e8;" width="100px">
+                                    <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                    <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)"
+                                       class="delete ml-8" (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                                </td>
+                            </ng-container> -->
+                                <!-- <td  style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="pack.newSupplyPrice?pack.newSupplyPrice:0">
+                                    <span>{{(pack.newSupplyPrice?pack.newSupplyPrice:0)| number:'1.2'}}</span></td>
+                                <td  style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="pack && pack.supplyPrice?pack.supplyPrice:0">
+                                    <span>{{(pack && pack.supplyPrice?pack.supplyPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <td  style="vertical-align: middle;white-space: normal"
+                                    *ngIf="type === 2">
+                                    <span>{{pack && pack.startTime?(pack.startTime|date:'yy-MM-dd'):'--'}}</span><span
+                                        *ngIf="pack && pack.endTime">&nbsp;&nbsp;~&nbsp;&nbsp;{{pack.endTime?(pack.endTime|date:'yy-MM-dd'):'--'}}</span>
+                                </td> -->
+
+                                <!--  <td  style="vertical-align: middle"
+                                    [title]="pack && pack.supplierName?pack.supplierName:''">
+                                    <span>{{ pack && pack.supplierName?pack.supplierName:'--'}}</span>
+                                </td> -->
+
+                                <td style="vertical-align: middle" [nzTitle]="pack.comboName?pack.comboName:''"
+                                    nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                                </td>
+
+                                <td *ngIf="type == 1" style="vertical-align: middle"
+                                    [title]="data.sellingPrice?data.sellingPrice:0">
+                                    <span>{{(data.sellingPrice?data.sellingPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <td style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="data && data.materialActivityPrice?data.materialActivityPrice:0">
+                                    <span>{{(data && data.materialActivityPrice?data.materialActivityPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <!-- <td  style="vertical-align: middle"  *ngIf="type === 1">
+                                    <span>{{pack.unit?pack.unit:'--'}}</span>
+                                </td> -->
+                                <td>
+                                    <span [ngSwitch]="pack.separable">
+                                        <p *ngSwitchCase="0">不可拆分</p>
+                                        <p *ngSwitchCase="1">可拆分</p>
+                                    </span>
+                                </td>
+                                <td nzRight="0px" width="100px" *ngIf="pack.separable == 0">
+                                    <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                    <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)" class="delete ml-8"
+                                        (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                                </td>
+                                <td nzRight="0px" width="100px" *ngIf="pack.separable == 1">
+                                    <a href="javascript:void(0)" (click)="addSingleItem(pack,data)">添加</a>
+                                    <a href="javascript:void(0)" *ngIf="singleSize(pack.id,data.id)" class="delete ml-8"
+                                        (click)="removeSingleItem($event,pack.id,data.id)">删除（{{singleSize(pack.id,data.id)}}）</a>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </ng-container>
+                    <ng-container *ngIf="!pack.details || pack.details.length === 0">
+                        <tr>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td style="vertical-align: middle" [nzTitle]="pack.comboName?pack.comboName:''"
+                                nzPlacement="topLeft" nz-tooltip>
+                                <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                            </td>
+
+                            <td *ngIf="type == 1" style="vertical-align: middle"
+                                [title]="data.sellingPrice?data.sellingPrice:0">
+                                <span>{{(data.sellingPrice?data.sellingPrice:0) | number:'1.2'}}</span>
+                            </td>
+                            <td style="vertical-align: middle" *ngIf="type === 2"
+                                [title]="data && data.materialActivityPrice?data.materialActivityPrice:0">
+                                <span>{{(data && data.materialActivityPrice?data.materialActivityPrice:0) | number:'1.2'}}</span>
+                            </td>
+                            <!-- <td  style="vertical-align: middle"  *ngIf="type === 1">
+                                    <span>{{pack.unit?pack.unit:'--'}}</span>
+                                </td> -->
+                            <td>
+                                <span [ngSwitch]="pack.separable">
+                                    <p *ngSwitchCase="0">不可拆分</p>
+                                    <p *ngSwitchCase="1">可拆分</p>
+                                </span>
+                            </td>
+                            <td nzRight="0px" style="vertical-align: middle;border-top:1px solid #e8e8e8;"
+                                width="100px">
+                                <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)" class="delete ml-8"
+                                    (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                            </td>
+                            <!-- <ng-container>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle" *ngIf="type === 2"
+                                [title]="pack.newSupplyPrice?pack.newSupplyPrice:0">
+                                <span>{{(pack.newSupplyPrice?pack.newSupplyPrice:0)| number:'1.2'}}</span></td>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle" *ngIf="type === 2"
+                                [title]="pack && pack.supplyPrice?pack.supplyPrice:0">
+                                <span>{{(pack && pack.supplyPrice?pack.supplyPrice:0) | number:'1.2'}}</span>
+                            </td>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle;white-space: normal"
+                                *ngIf="type === 2">
+                                <span>{{pack && pack.startTime?(pack.startTime|date:'yy-MM-dd'):'--'}}</span>
+                                <span *ngIf="pack && pack.endTime">~ {{pack.endTime?(pack.endTime|date:'yy-MM-dd'):'--'}}</span>
+                            </td>
+
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                [nzTitle]="pack && pack.supplierName?pack.supplierName:''"
+                                nzPlacement="topLeft" nz-tooltip>
+                                <span>{{pack && pack.supplierName?pack.supplierName:'--'}}</span>
+                            </td>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                [nzTitle]="pack.comboName?pack.comboName:''" nzPlacement="topLeft" nz-tooltip>
+                                <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                            </td>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle"
+                                [title]="pack.sellingPrice?pack.sellingPrice:0">
+                                <span>{{(pack.sellingPrice?pack.sellingPrice:0) | number:'1.2'}}</span></td>
+                            <td [rowSpan]="pack.rows" style="vertical-align: middle"  *ngIf="type === 1">
+                                <span>{{pack.unit?pack.unit:'--'}}</span>
+                            </td>
+                            <td [rowSpan]="pack.rows" nzRight="0px"
+                                style="vertical-align: middle;border-top:1px solid #e8e8e8;" width="100px">
+                                <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)"
+                                   class="delete ml-8"
+                                   (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                            </td>
+                        </ng-container> -->
+                        </tr>
+                    </ng-container>
+                </ng-template>
+            </tbody>
+        </nz-table>
+    </div>
+
+    <!---已选择数据展示-->
+    <div nz-row class="ml-8" *ngIf="selectItems && selectItems.length > 0">
+        <div nz-col (click)="toggleClick($event)" style="cursor: pointer">已选<span>（{{selectItems.length}}）</span>
+            <span><i nz-icon [type]="toggleType" theme="outline"></i></span>
+        </div>
+    </div>
+    <div nz-row class="item-pack-table" *ngIf="selectItems && selectItems.length > 0">
+        <nz-table [nzData]="selectItems" [hidden]="!toggle" nzSize="middle" [nzTotal]="total" [(nzPageIndex)]='pageNo'
+            [(nzPageSize)]="pageSize" [nzFrontPagination]="false" (nzPageIndexChange)="changeData()"
+            [nzShowPagination]="true" [nzScroll]="{ x:'130%',y:'240px'}" #packTable [nzBordered]="true">
+            <thead>
+                <tr style="border-top: 1px solid #dedede;">
+                    <th>SKU</th>
+                    <th>类别</th>
+                    <th>名称</th>
+                    <th>品牌</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>单位</th>
+                    <th>材质</th>
+                    <th>颜色</th>
+                    <th>产地</th>
+                    <!-- <th>数量</th> -->
+                    <!-- <th *ngIf="type === 2">供货价</th>
+                <th *ngIf="type === 2">活动价</th>
+                <th *ngIf="type === 2">活动时间</th> -->
+                    <!-- <th>材料商</th> -->
+                    <th>套系</th>
+                    <th *ngIf="type === 1">销售价</th>
+                    <th *ngIf="type === 2">活动价</th>
+                    <!-- <th  *ngIf="type === 1">套餐单位</th> -->
+                    <th>类型</th>
+                    <th nzRight="0px" width="100px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-template ngFor let-pack let-id="index" [ngForOf]="selectItems">
+                    <ng-container *ngIf="pack.details && pack.details.length > 0">
+                        <ng-template ngFor let-data let-index="index" [ngForOf]="pack.details">
+                            <tr [ngStyle]="{'background': pack.color}">
+                                <td [nzTitle]="data.sku?data.sku:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.sku?data.sku:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.category?data.category:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.category?data.category:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.name?data.name:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.name?data.name:'--'}}</span></td>
+                                <td [nzTitle]="data.brand?data.brand:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.brand?data.brand:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.spec?data.spec:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.spec?data.spec:'--'}}</span></td>
+                                <td [nzTitle]="data.model?data.model:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.model?data.model:'--'}}</span></td>
+                                <td [title]="data.unit?data.unit:''"><span>{{data.unit?data.unit:'--'}}</span></td>
+                                <td [nzTitle]="data.material?data.material:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.material?data.material:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.color?data.color:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.color?data.color:'--'}}</span>
+                                </td>
+                                <td [nzTitle]="data.origin?data.origin:''" nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{data.origin?data.origin:'--'}}</span>
+                                </td>
+                                <td style="vertical-align: middle" [nzTitle]="pack.comboName?pack.comboName:''"
+                                    nzPlacement="topLeft" nz-tooltip>
+                                    <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                                </td>
+
+                                <td *ngIf="type == 1" style="vertical-align: middle"
+                                    [title]="data.sellingPrice?data.sellingPrice:0">
+                                    <span>{{(data.sellingPrice?data.sellingPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <td style="vertical-align: middle" *ngIf="type === 2"
+                                    [title]="data && data.materialActivityPrice?data.materialActivityPrice:0">
+                                    <span>{{(data && data.materialActivityPrice?data.materialActivityPrice:0) | number:'1.2'}}</span>
+                                </td>
+                                <td>
+                                    <span [ngSwitch]="pack.separable">
+                                        <p *ngSwitchCase="0">不可拆分</p>
+                                        <p *ngSwitchCase="1">可拆分</p>
+                                    </span>
+                                </td>
+                                <td nzRight="0px" width="100px" *ngIf="pack.separable == 0">
+                                    <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                    <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)" class="delete ml-8"
+                                        (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                                </td>
+                                <td nzRight="0px" width="100px" *ngIf="pack.separable == 1">
+                                    <a href="javascript:void(0)" (click)="addSingleItem(pack,data)">添加</a>
+                                    <a href="javascript:void(0)" *ngIf="singleSize(pack.id,data.id)" class="delete ml-8"
+                                    (click)="removeSingleSelect($event,pack.id,data.id)">删除</a>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </ng-container>
+                    <ng-container *ngIf="!pack.details || pack.details.length === 0">
+                        <tr>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td>--</td>
+                            <td style="vertical-align: middle" [nzTitle]="pack.comboName?pack.comboName:''"
+                                nzPlacement="topLeft" nz-tooltip>
+                                <span>{{pack.comboName?pack.comboName:'--'}}</span>
+                            </td>
+
+                            <td *ngIf="type == 1" style="vertical-align: middle"
+                                [title]="data.sellingPrice?data.sellingPrice:0">
+                                <span>{{(data.sellingPrice?data.sellingPrice:0) | number:'1.2'}}</span>
+                            </td>
+                            <td style="vertical-align: middle" *ngIf="type === 2"
+                                [title]="data && data.materialActivityPrice?data.materialActivityPrice:0">
+                                <span>{{(data && data.materialActivityPrice?data.materialActivityPrice:0) | number:'1.2'}}</span>
+                            </td>
+                            <td>
+                                <span [ngSwitch]="pack.separable">
+                                    <p *ngSwitchCase="0">不可拆分</p>
+                                    <p *ngSwitchCase="1">可拆分</p>
+                                </span>
+                            </td>
+                            <td nzRight="0px" style="vertical-align: middle;border-top:1px solid #e8e8e8;"
+                                width="100px">
+                                <a href="javascript:void(0)" (click)="addItem(pack)">添加</a>
+                                <a href="javascript:void(0)" *ngIf="itemsSize(pack.id)" class="delete ml-8"
+                                    (click)="removeItem($event,pack.id)">删除（{{itemsSize(pack.id)}}）</a>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </ng-template>
+            </tbody>
+        </nz-table>
+    </div>
+
+
+</div>
+
+<div class="ant-modal-footer">
+    <button nz-button nzType="default" (click)="cancelModal()">取消</button>
+    <button nz-button nzType="primary" [disabled]="selectItems && selectItems.length === 0"
+        (click)="confirmModal($event)">确定
+    </button>
+</div>

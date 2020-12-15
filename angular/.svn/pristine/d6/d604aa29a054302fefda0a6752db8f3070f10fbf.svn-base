@@ -1,0 +1,180 @@
+<div class="settle-material-wage">
+    <div class="head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="pt-20">
+        <div class="content-head">
+            <radio-switch [radioSwitch]="radioSwitch" [defaultRadioSwitch]="defaultRadio"
+                          (handleSwitch)="handleSwitch($event)"></radio-switch>
+            <div class="search">
+                <nz-select style="width: 160px; margin-right: 8px" nzAllowClear="false" nzPlaceHolder="请选择公司" nzShowSearch  [(ngModel)]="company" [ngModelOptions]="{standalone: true}" (ngModelChange)="searchData()">
+                    <nz-option *ngFor="let company of companyList" [nzValue]="company.id.toString()"
+                               [nzLabel]="company.companyName"></nz-option>
+                </nz-select>
+                <nz-input-group nzCompact class="info">
+                    <nz-select style="width: 100px;" [(ngModel)]="condition" (ngModelChange)="clearInput()">
+                        <nz-option [nzLabel]="'项目名称'" [nzValue]="0"></nz-option>
+                        <nz-option [nzLabel]="'客户'" [nzValue]="1"></nz-option>
+                        <nz-option [nzLabel]="'工长'" [nzValue]="2"></nz-option>
+                        <nz-option [nzLabel]="'订单编号'" [nzValue]="3"></nz-option>
+                    </nz-select>
+                    <input nz-input type="text" class="text" placeholder="请输入" autocomplete="off" [(ngModel)]="name"
+                           *ngIf="condition == 0"/>
+                    <input nz-input type="text" class="text" placeholder="请输入" autocomplete="off"
+                           [(ngModel)]="customerName" *ngIf="condition == 1"/>
+                    <input nz-input type="text" class="text" placeholder="请输入" autocomplete="off" [(ngModel)]="workName"
+                           *ngIf="condition == 2"/>
+                    <input nz-input type="text" class="text" placeholder="请输入" autocomplete="off" [(ngModel)]="orderNo"
+                           *ngIf="condition == 3"/>
+                </nz-input-group>
+                <button nz-button nzType="primary" (click)="searchData()">查询</button>
+            </div>
+        </div>
+        <div class="mt-16 select">
+            <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="wageState === 0"
+                    (click)="showAudit()" class="mr-8">不通过
+            </button>
+            <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" *ngIf="wageState === 0"
+                    class="mr-8" (click)="showModal()">结算
+            </button>
+            <button nz-button nzType="primary" [disabled]="checkedNumber.length == 0" (click)="print()">打印</button>
+            <a id='print' [routerLink]="['/view/print']" target="_blank" style="color: aliceblue;"
+                href="javascript:void(0)" [queryParams]="{id:btoa(ids),show:true,state:this.wageState}" (click)='unlock()'>
+            </a>
+            <span *ngIf="checkedNumber.length > 0">已选{{checkedNumber.length}}项</span>
+        </div>
+        <div class="mt-16">
+            <nz-table
+                #nzTable
+                nzSize="middle"
+                [nzBordered]="true"
+                [nzFrontPagination]="false"
+                [(nzPageIndex)]='pageNo'
+                [(nzPageSize)]="pageSize"
+                [nzTotal]="total"
+                (nzPageIndexChange)="changePage()"
+                [nzShowPagination]='true'
+                [nzData]="wageList">
+                <thead>
+                <tr>
+                    <th nzShowCheckbox [(nzChecked)]="isAllDisplayDataChecked" [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="checkAll($event)" width="5%" [nzDisabled]="wageList.length === 0"></th>
+                    <th>编号</th>
+                    <th>项目名称</th>
+                    <th>客户</th>
+                    <th>材料商</th>
+                    <th nz-th><span>类型</span></th>
+                    <th>订单金额</th>
+                    <th>配送费</th>
+                    <th nz-th>合计</th>
+                    <th>状态</th>
+                    <th>工长</th>
+                    <th>工长手机号</th>
+                    <th>签收时间</th>
+                    <th *ngIf="wageState === 0">申请时间</th>
+                    <th *ngIf="wageState === 1">结算时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let data of nzTable.data">
+                    <td nzShowCheckbox [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()"></td>
+                    <td [title]="data.materialOrderNo?data.materialOrderNo:''">
+                        {{data.materialOrderNo ? data.materialOrderNo : '--'}}
+                    </td>
+                    <td [title]="data.houseAddress?data.houseAddress:''">
+                        {{data.houseAddress ? data.houseAddress : '--'}}
+                    </td>
+                    <td [title]="data.customerName?data.customerName:''">
+                        {{data.customerName ? data.customerName : '--'}}
+                    </td>
+                    <td [title]="data.materialName?data.materialName:''">
+                        {{data.materialName ? data.materialName : '--'}}
+                    </td>
+                    <td nz-td [title]="getTypeName(data.type)">
+                        {{getTypeName(data.type)}}
+                      </td>
+                    <td [title]="data.totalPrice || data.totalPrice == 0?data.totalPrice:''">
+                        {{data.totalPrice || data.totalPrice == 0  ? (data.totalPrice|number:'1.2') : '--'}}
+                    </td>
+                    <td [title]="data.freight?data.freight:0">
+                        {{(data.freight?data.freight:0)|number:'1.2'}}
+                    </td>
+                    <td nz-td [title]="getCountPrice(data)| number:'1.2'">
+                        {{getCountPrice(data) | number:'1.2'}}
+                      </td>
+                      <td>{{getState(data.state)}}</td>
+                    <td [title]="data.workerName?data.workerName:''">
+                        {{data.workerName ? data.workerName : '--'}}
+                    </td>
+                    <td [title]="data.workerPhone?data.workerPhone:''">
+                        {{data.workerPhone ? data.workerPhone : '--'}}
+                    </td>
+                    <td>{{data.signingTime ? (data.signingTime | date:'yy-MM-dd HH:mm') : '--'}}</td>
+                    <td *ngIf="wageState === 0">{{data.submitSettlementTime ? (data.submitSettlementTime | date:'yy-MM-dd HH:mm') : '--'}}</td>
+                    <td *ngIf="wageState === 1">{{data.auditSettlementTime ? (data.auditSettlementTime | date:'yy-MM-dd HH:mm') : '--'}}</td>
+             
+                    <td>
+                        <div *ngIf="wageState === 0">
+                            <a href="javascript:void(0)" (click)="showAudit(data.id)">不通过</a>
+                            <a href="javascript:void(0)" class="ml-8"
+                               (click)="showModal(data.materialId,data.id)">结算</a>
+                            <a href="javascript:void(0)" class="ml-8" [routerLink]="['./../detail']"
+                               [queryParams]="{id:btoa(data.id),materialId:btoa(data.materialId),
+                                materialType:data.type,type:2}">详情</a>
+                        </div>
+                        <div *ngIf="wageState === 1">
+                            <a href="javascript:void(0)" [routerLink]="['./../detail']"
+                               [queryParams]="{id:btoa(data.id),materialId:btoa(data.materialId),
+                                materialType:data.type,type:2}">详情</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </nz-table>
+        </div>
+    </div>
+</div>
+
+<nz-modal
+        [(nzVisible)]="isVisible"
+        nzTitle="结算账户"
+        [nzFooter]="null"
+        (nzOnCancel)="handleCancel()">
+    <form nz-form [formGroup]="wageForm">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired>选择结算账户</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+                <nz-select nzAllowClear="false" nzPlaceHolder="请选择结算账户" formControlName="account" [(ngModel)]="account">
+                    <nz-option *ngFor="let account of accountStatus" [nzValue]="account.id"
+                               [nzLabel]="account.bankName + account.bankNo"></nz-option>
+                </nz-select>
+            </nz-form-control>
+        </nz-form-item>
+        <div class='btns'>
+            <button nz-button nzType="default" (click)="handleCancel()">关闭</button>
+            <button nz-button nzType="primary" (click)="handleOk($event)" [disabled]="!wageForm.valid">提交</button>
+        </div>
+    </form>
+</nz-modal>
+
+<nz-modal
+        [(nzVisible)]="auditVisible"
+        nzTitle="结算不通过"
+        nzOkText="提交"
+        nzCancelText="取消"
+        (nzOnCancel)="auditCancel()"
+        (nzOnOk)="auditOk()">
+    <div class="modify">
+        <form [formGroup]="auditForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="6">审核意见</nz-form-label>
+                <nz-form-control [nzSpan]="14" class="textarea">
+                    <textarea nz-input formControlName="msg" [(ngModel)]="msg" placeholder="请输入审核内容" maxlength="300"
+                              rows="4"></textarea>
+                    <span class="count" *ngIf="msg && msg.length > 0"><span>{{msg.length}}</span>/300</span>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </div>
+</nz-modal>

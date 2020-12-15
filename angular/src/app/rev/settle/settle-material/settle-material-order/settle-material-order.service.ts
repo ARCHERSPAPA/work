@@ -1,0 +1,120 @@
+import {Injectable} from '@angular/core';
+import {RequestService} from '../../../../service/request.service';
+import {Messages} from "../../../../model/msg";
+
+@Injectable({
+    providedIn: 'root'
+})
+export class SettleMaterialOrderService {
+
+    constructor(private req: RequestService) {
+
+    }
+
+
+    /**
+     * 拉取材料订单列表数据
+     * @param params
+     * @returns {Promise<any>}
+     */
+    getMaterialOrders(params: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: "orderMaterialList",
+                data: params,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            })
+        })
+    }
+
+    //判断是否需要审核
+    needAudit(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'orderMaterialAudit',
+                success: res => {
+                    if (res && res.code == 200) {
+                        resolve(res.data)
+                    } else {
+                        reject(res.msg)
+                    }
+                }
+            })
+        })
+    }
+
+
+    //异常审核提交
+    errorSubmit(param): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'orderErrorSubmit',
+                data: param,
+                success: res => {
+                    if (res && res.code == 200) {
+                        resolve(res)
+                    } else {
+                        reject(res.msg)
+                    }
+                }
+            })
+        })
+    }
+
+    //审核异常提交
+    errorExecption(param): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'orderErrorException',
+                data: param,
+                success: res => {
+                    if (res && res.code == 200) {
+                        resolve(res)
+                    } else {
+                        reject(res.msg)
+                    }
+                }
+            })
+        })
+    }
+
+    //运费异常提交
+    errorFreightExecption(param): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'orderErrorFreight',
+                data: param,
+                success: res => {
+                    if (res && res.code == 200) {
+                        resolve(res)
+                    } else {
+                        reject(res.msg)
+                    }
+                }
+            })
+        })
+    }
+
+    //获取下拉公司列表
+    getMaterialSupplierList(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.req.doPost({
+                url: 'materialSupplierListBySelect',
+                data: {},
+                success: (res => {
+                    if (res && res.code === 200) {
+                        resolve(res.data);
+                    } else {
+                        reject(res.msg);
+                    }
+                })
+            });
+        })
+    }
+}

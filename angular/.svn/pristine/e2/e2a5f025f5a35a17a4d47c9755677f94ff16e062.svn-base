@@ -1,0 +1,41 @@
+<div class="select-bar">
+    <nz-select nzShowSearch *ngIf="showMaterial" style="width: 120px;" class="mr-8"
+               nzAllowClear="true" nzPlaceHolder="请选择材料商"
+               [(ngModel)]="company"
+               (ngModelChange)="changeMaterialSupplier($event)"
+               >
+        <nz-option *ngFor="let cp of cps" [nzValue]="cp.id"
+                   [nzLabel]="cp.companyName"></nz-option>
+    </nz-select>
+
+    <nz-select *ngIf="showCombo" style="min-width: 120px; max-width: 160px;" class="select-bar-box mr-8"
+               nzAllowClear="true" nzPlaceHolder="全部套系" [(ngModel)]="combos"
+               (ngModelChange)="changeCombos($event)" [nzMode]="'multiple'">
+        <nz-option *ngFor="let cb of cbs" [nzValue]="cb.id" [nzLabel]="cb.comboName"></nz-option>
+    </nz-select>
+
+    <nz-select style="width: 120px;" class="mr-8" nzAllowClear="true" nzPlaceHolder="类别"
+               [(ngModel)]="category" [compareWith]="compareFn"
+               (ngModelChange)="changeCategory($event)">
+        <nz-option *ngFor="let ct of cts" [nzValue]="ct"
+                   [nzLabel]="ct.categoryName"></nz-option>
+    </nz-select>
+
+    <nz-select style="min-width: 120px; max-width: 160px" class="select-bar-box mr-8"
+               nzAllowClear="true" nzPlaceHolder="品牌"
+               [(ngModel)]="brands" nzMode="multiple"
+               (ngModelChange)="changeBrands($event)" [disabled]='(bs && bs.length === 0) || !bs'>
+        <nz-option *ngFor="let b of bs" [nzValue]="b.brandName"
+                   [nzLabel]="b.brandName"></nz-option>
+    </nz-select>
+
+    <nz-input-group *ngIf="showMultipleInput" nzCompact class="info mr-8">
+        <nz-select [(ngModel)]="inputType" style="width: 80px" (ngModelChange)="changeInputType($event)">
+            <nz-option [nzLabel]="it.label" [nzValue]="it.value" *ngFor="let it of its"></nz-option>
+        </nz-select>
+        <input type="text" nz-input placeholder="请输入查询条件" [(ngModel)]="info"
+               style="width: 160px;">
+    </nz-input-group>
+    <input class="mr-8" style="width:240px;" *ngIf="showSingleInput" nz-input placeholder="名称/型号/规格/sku/材质/颜色" [(ngModel)]="detailName">
+    <button nz-button nzType="primary" type="submit" (click)="changeSearch()">查询</button>
+</div>

@@ -1,0 +1,22 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {SelectBarModule} from "../../component/select-bar/select-bar.module";
+import {NgZorroAntdModule} from 'ng-zorro-antd';
+import {ItemPackComponent} from "./item-pack.component";
+
+
+@NgModule({
+    declarations: [
+        ItemPackComponent
+    ],
+    imports: [
+        CommonModule,
+        SelectBarModule,
+        NgZorroAntdModule
+    ],
+    entryComponents: [
+        ItemPackComponent
+    ],
+})
+export class ItemPackModule {
+}

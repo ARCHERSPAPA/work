@@ -1,0 +1,90 @@
+import {NgModule, APP_INITIALIZER} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
+import {ReactiveFormsModule, FormsModule} from '@angular/forms';
+import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
+
+import {NgZorroAntdModule} from 'ng-zorro-antd';
+
+import {IconDefinition} from '@ant-design/icons-angular';
+//删除冗余的icon引入代码
+// import * as AllIcons from '@ant-design/icons-angular/icons';
+
+import {NZ_I18N, zh_CN} from 'ng-zorro-antd';
+
+
+
+import {AppComponent} from './app.component';
+import {AppRoutingModule} from './app-routing.module';
+import {RevComponent} from './rev/rev.component';
+import {HeadComponent} from './rev/head/head.component';
+
+import {registerLocaleData} from '@angular/common';
+import zh from '@angular/common/locales/zh';
+import {RequestService} from './service/request.service';
+import {UserService} from './service/user.service';
+import {WarningService} from './service/warning.service';
+import {CheckService, CheckProvider} from './service/check.service';
+import {ConfigService} from './service/config.service';
+import {BaseService} from './service/base.service';
+import {GuardService, DefendService} from './service/guard.service';
+import {InterceptorService} from './service/interceptor.service';
+import {ErrorComponent} from './rev/error/error.component';
+import {GoTopDirective} from './directive/go-top.directive';
+import {ViewComponent} from './view/view.component';
+import {UserComponent} from './user/user.component';
+import {CookieService} from 'ngx-cookie-service';
+import {QiNiuService} from './service/qi-niu.service';
+import {CopyrightModule} from './public/copyright.module';
+import { LightboxModule } from 'ngx-lightbox';
+
+
+
+registerLocaleData(zh);
+
+
+@NgModule({
+    declarations: [
+        AppComponent,
+        HeadComponent,
+        UserComponent,
+        RevComponent,
+        ErrorComponent,
+        ViewComponent,
+        GoTopDirective,
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+
+        HttpClientModule,
+        CopyrightModule,
+        AppRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+
+        /** 导入 ng-zorro-antd 模块 **/
+        NgZorroAntdModule,
+        LightboxModule,
+    ],
+    providers: [
+        UserService,
+        RequestService,
+        WarningService,
+        BaseService,
+        CheckService,
+        ConfigService,
+        GuardService,
+        DefendService,
+        CookieService,
+        QiNiuService,
+        {provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true},
+        /** 配置 ng-zorro-antd 国际化 **/
+        {provide: NZ_I18N, useValue: zh_CN},
+        {provide: APP_INITIALIZER, useFactory: CheckProvider, deps: [CheckService], multi: true}
+    ],
+    bootstrap: [AppComponent]
+})
+export class AppModule {
+}

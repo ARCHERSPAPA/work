@@ -1,0 +1,463 @@
+import {Component, OnInit, Input} from '@angular/core';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {changeToDecimal, toInteger} from '../../model/methods';
+
+@Component({
+    selector: 'rev-enginees',
+    templateUrl: './enginees.component.html',
+    styleUrls: ['./enginees.component.scss']
+})
+export class EngineesComponent implements OnInit {
+    @Input() data: any;
+
+    @Input() radio: number;
+
+    public title: string;
+
+    public cancelIds: Array<any> = [];
+
+    public dataSource: any;
+
+
+    constructor(public activeModal: NgbActiveModal) {
+    }
+
+    ngOnInit() {
+        this.title = '请勾选需要计算工程管理费的项目';
+        this.dataSource = this.formatData(this.data);
+
+    }
+
+
+    /**
+     * 初始化数据
+     * @param data
+     * @returns {any}
+     */
+    formatData(data: any) {
+        const source = data, that = this;
+        for (const so of source) {
+            if (that.getTotalInType(so.type)) {
+                if (so.infoMaps && so.infoMaps.length > 0) {
+                    for (const info of so.infoMaps) {
+                        info['type'] = so.type;
+                        let infoAllChecked = false, infoAllUnChecked = false;
+                        if (info.infos && info.infos.length > 0) {
+                            infoAllChecked = info.infos.every(i => i.engineerYn === true);
+                            infoAllUnChecked = info.infos.every(i => !i.engineerYn);
+                        }
+                        info['checked'] = infoAllChecked;
+                        info['indeterminate'] = (!infoAllChecked) && (!infoAllUnChecked);
+                    }
+                    const checkedAll = so.infoMaps.every(sin => sin.checked === true);
+                    const unCheckedAll = so.infoMaps.every(sin => (!sin.checked && !sin['indeterminate']));
+                    so['checked'] = checkedAll;
+                    so['indeterminate'] = (!checkedAll) && (!unCheckedAll);
+
+                }
+            }
+        }
+        return source;
+    }
+
+    //
+    // getTotal(type, bool) {
+    //     let total = 0;
+    //     if (this.data && this.data.length > 0) {
+    //         for (let d of this.data) {
+    //             if (d.type === type) {
+    //                 if (d.type === 1) {
+    //                     if (d.versionType !== 2) {
+    //                         total = this.changeToInt(d.smallTotal, 2);
+    //                     } else {
+    //                         if (d.infoMaps && d.infoMaps.length > 0) {
+    //                             for (let info of d.infoMaps) {
+    //                                 if (info.infos && info.infos.length > 0) {
+    //                                     for (let f of info.infos) {
+    //                                         total += this.changeToInt(f.totalPrice, 2);
+    //                                     }
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //                 if (d.type ! === 1) {
+    //                     if (d.infoMaps && d.infoMaps.length > 0) {
+    //                         for (let info of d.infoMaps) {
+    //                             if (info.infos && info.infos.length > 0) {
+    //                                 for (let f of info.infos) {
+    //                                     total += (f.engieerYn === bool) ? this.changeToInt(f.totalPrice, 2) : 0;
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return Number(total / Math.pow(10, 2));
+    // }
+
+    /**
+     * 类型下的计算（分支）
+     * @param source
+     * @param {boolean} bool
+     * @returns {any}
+     */
+    getTotalByInfos(data:any,source: any, bool: boolean) {
+        let total = 0;
+        if (source && source.length > 0) {
+            if(data.type === 2){
+                if(data.isPlan !== 1){
+                    source.map(s => {
+                        total += (s.engineerYn === bool) ? this.changeToInt(s.totalPrice, 2) : 0;
+                    });
+                }
+                if(data.isPlan === 1){
+                    total += data.checked ? ( this.changeToInt(data['planTotalPrice'] ? data['planTotalPrice'] : 0, 2) ) : 0;
+                }
+            }else{
+                source.map(s => {
+                    total += (s.engineerYn === bool) ? this.changeToInt(s.totalPrice, 2) : 0;
+                });
+            }
+            
+        }
+        return Number(total / Math.pow(10, 2));
+    }
+
+    /**
+     * 类型下的计算（主干）
+     * @param maps
+     * @param {boolean} bool
+     * @returns {any}
+     */
+    getTotalByMaps(maps: any, bool: boolean) {
+        let total = 0, that = this;
+        if (maps && maps.length > 0) {
+            maps.map(m => {
+                if (m && m.infos && m.infos.length > 0) {
+                    if(m.type === 2){
+                        if(m.isPlan !== 1){
+                            m.infos.map(info => {
+                                total += (info.engineerYn === bool) ? that.changeToInt(info.totalPrice, 2) : 0;
+                            });
+                        }
+                        if(m.isPlan === 1){
+                            total += m.checked ? ( that.changeToInt(m['planTotalPrice'] ? m['planTotalPrice'] : 0, 2) ) : 0;
+                        }
+                    }else{
+                        m.infos.map(info => {
+                            total += (info.engineerYn === bool) ? that.changeToInt(info.totalPrice, 2) : 0;
+                        });
+                    }
+                   
+                }
+            });
+        }
+        return Number(total / Math.pow(10, 2));
+    }
+
+
+    /**
+     * 计算全部
+     * @param {boolean} bool
+     */
+    getTotalAll(bool: boolean) {
+        let dataSource = this.dataSource,
+            total = 0,
+            that = this;
+        if (dataSource && dataSource.length > 0) {
+            for (const source of dataSource) {
+                if (that.getTotalInType(source.type)) {
+                    if (bool && source.type === 1 && source.versionType !== 2) {
+                        total +=  that.changeToInt(source.smallTotal, 2);
+                    } else {
+                        total += that.changeToInt(that.getTotalByMaps(source.infoMaps, bool), 2);
+                    }
+                }
+
+            }
+        }
+        return Number(total / Math.pow(10, 2));
+    }
+
+    /**
+     * 计算可用的类型
+     * @param {number} type
+     * @returns {boolean}
+     */
+    getTotalInType(type: number) {
+        return type > 0 && type < 5;
+    }
+
+    /**
+     * 中间标题选中
+     * @param {boolean} bool
+     * @param data
+     * @param {number} type
+     */
+    middleChange(bool: boolean, data: any, type: number) {
+        if (data && data.infos && data.infos.length > 0) {
+            data.infos.map(d => d.engineerYn = bool);
+            const allChecked = data.infos.every(sin => sin.engineerYn === true);
+            const allUnChecked = data.infos.every(sin => !sin.engineerYn);
+            data['checked'] = allChecked;
+            data['indeterminate'] = (!allChecked) && (!allUnChecked);
+        }
+        this.refreshStatus(this.dataSource, type);
+    }
+
+    /**
+     * 大类型选中
+     * @param {boolean} bool
+     * @param data
+     * @param {number} type
+     */
+    engineerChange(bool: boolean, data: any, type: number) {
+        if (data && data.length > 0) {
+            data.map(d => {
+                d.checked = bool;
+                if (d.infos && d.infos.length > 0) {
+                    d.infos.map(i => i.engineerYn = bool);
+                }
+            });
+        }
+        this.refreshStatus(this.dataSource, type);
+    }
+
+    /**
+     * 具体详情选中
+     * @param {boolean} bool
+     * @param data
+     * @param {number} type
+     */
+    checkedChange(bool: boolean, data: any, type: number) {
+        if (data.infos && data.infos.length > 0) {
+            const allChecked = data.infos.every(sin => sin.engineerYn === true);
+            const allUnChecked = data.infos.every(sin => !sin.engineerYn);
+            data['checked'] = allChecked;
+            data['indeterminate'] = (!allChecked) && (!allUnChecked);
+        }
+        this.refreshStatus(this.dataSource, type);
+    }
+
+    /**
+     * 更新大类中间状态
+     * @param source
+     * @param type
+     */
+    refreshStatus(source, type) {
+        if (source && source.length > 0) {
+            for (const so of source) {
+                if (so.type === type && so.infoMaps && so.infoMaps.length > 0) {
+                    // let allChecked = so.infoMaps.every(sin => sin.checked === true);
+                    // let allUnChecked = so.infoMaps.every(sin => !sin.checked);
+                    // let allChecked = false,allUnChecked = false;
+                    // so.infoMaps.map(sin =>{
+                    //     if(sin.infos && sin.infos.length > 0){
+                    //         sin.checked = sin.infos.every(info => info.engineerYn === true);
+                    //     }
+                    // });
+                    const allChecked = so.infoMaps.every(sin => sin.checked === true);
+                    const allUnChecked = so.infoMaps.every(sin => (!sin.checked && !sin['indeterminate']));
+
+                    so['checked'] = allChecked;
+                    so['indeterminate'] = (!allChecked) && (!allUnChecked);
+                }
+            }
+        }
+    }
+
+    // getTotalSeries(){
+    //     let total = 0;
+    //     if(this.data && this.data.length > 0){
+    //         for(let d of this.data){
+    //             if(d.type === 1 && d.versionType === 2){
+    //                 if(d["infoMaps"] && d["infoMaps"].length > 0){
+    //                   for(let i of d["infoMaps"]){
+    //                       if(i.infos && i.infos.length > 0){
+    //                           for(let f of i.infos){
+    //                               total += this.changeToInt(f.totalPrice,2);
+    //                           }
+    //                       }
+    //                   }
+    //                 }
+    //             }else if(d.type === 1 && d.versionType !== 2){
+    //                 total = this.changeToInt(d.smallTotal,2);
+    //             }
+    //         }
+    //     }
+    //     return Number(total/Math.pow(10,2));
+    // }
+
+    /**
+     * 是否全选本栏
+     * @param infos
+     */
+    // toggleCheck(infos) {
+    //     let checked = 0;
+    //     if (infos && infos.length > 0) {
+    //         for (let i of infos) {
+    //             if (i.engineerYn) {
+    //                 checked++;
+    //             }
+    //         }
+    //         return infos.length === checked;
+    //     }
+    //     return false;
+    // }
+
+    // getTotalChecked() {
+    //     let sum, total = 0;
+    //     total += Number(this.getTotal(2, true));
+    //     total += Number(this.getTotal(3, true));
+    //     total += Number(this.getTotal(4, true));
+    //     // total += Number(this.getTotalSeries());
+    //     sum = String(total * this.radio * 100 / 100);
+    //     sum = sum.lastIndexOf(".") > 0 ? sum.substring(0, sum.lastIndexOf(".") + 3) : sum;
+    //     return sum;
+    // }
+
+    // getTotalUnchecked() {
+    //     let sum, total = 0;
+    //     total += Number(this.getTotal(2, false));
+    //     total += Number(this.getTotal(3, false));
+    //     total += Number(this.getTotal(4, false));
+    //     sum = String(total * 100 / 100);
+    //     sum = sum.lastIndexOf(".") > 0 ? sum.substring(0, sum.lastIndexOf(".") + 3) : sum;
+    //     return sum;
+    // }
+
+    /**
+     * 选择本条数据
+     * @param t
+     */
+    // toggleInfo(t) {
+    //     t.engineerYn = !t.engineerYn;
+    //     this.setCancelId(t.id);
+    // }
+
+    // toggleAll(infos, bool) {
+    //     if (infos && infos.length) {
+    //         infos.forEach(info => {
+    //             info.engineerYn = !bool;
+    //             if (info.engineerYn) {
+    //                 this.removeCancelId(info.id);
+    //             } else {
+    //                 this.addCancelId(info.id);
+    //             }
+    //         });
+    //     }
+    //     return;
+    // }
+
+    // setCancelId(id) {
+    //     if (this.cancelIds.length == 0) {
+    //         this.cancelIds.push(id);
+    //     } else {
+    //         if (this.cancelIds.indexOf(id) == -1) {
+    //             this.cancelIds.push(id);
+    //         } else {
+    //             for (let i = 0; i < this.cancelIds.length; i++) {
+    //                 if (this.cancelIds[i] === id) {
+    //                     this.cancelIds.splice(i, 1);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // removeCancelId(id) {
+    //     if (this.cancelIds && this.cancelIds.length > 0) {
+    //         for (let i = 0; i < this.cancelIds.length; i++) {
+    //             if (this.cancelIds[i] === id) {
+    //                 this.cancelIds.splice(i, 1);
+    //             }
+    //         }
+    //     }
+    // }
+
+    // addCancelId(id) {
+    //     if (this.cancelIds.length == 0) {
+    //         this.cancelIds.push(id);
+    //     }
+    //     if (this.cancelIds && this.cancelIds.length > 0) {
+    //         if (this.cancelIds.indexOf(id) == -1) {
+    //             this.cancelIds.push(id);
+    //         }
+    //     }
+    // }
+
+    /**
+     * 确定提交到price
+     * @param e
+     */
+    confirm(e: any) {
+        e.stopPropagation();
+        e.preventDefault();
+        const ids = [];
+        if (this.dataSource && this.dataSource.length > 0) {
+            this.dataSource.forEach(so => {
+                if (so.type > 1 && so.type < 5) {
+                    if (so.infoMaps && so.infoMaps.length > 0) {
+                        so.infoMaps.forEach(sin => {
+                            if (sin.infos && sin.infos.length > 0) {
+                                sin.infos.forEach(info => {
+                                    if (!info.engineerYn) {
+                                        ids.push(info.id);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        this.activeModal.close(ids);
+    }
+
+    /**
+     * 根据类型显示
+     * @param {number} type
+     */
+    showSubByType(type: number) {
+        switch (type) {
+            case 2:
+                return true;
+            case 3:
+                return true;
+            case 4:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 精度换算
+     * @param {number} num
+     * @param {number} curve
+     * @returns {number | any}
+     */
+    changeToInt(num: number, curve: number) {
+        return toInteger(num, curve);
+    }
+
+    /**
+     * 合计
+     * @param unit
+     * @param num
+     * @returns {any}
+     */
+    converseToDecimal(unit, num) {
+        const result = this.changeToInt(unit, 2) * this.changeToInt(num, 2) / Math.pow(10, 4);
+        return changeToDecimal(result);
+    }
+
+    ngOnDestroy() {
+        this.dataSource = null;
+        this.radio = null;
+    }
+
+}

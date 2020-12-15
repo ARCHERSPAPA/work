@@ -1,0 +1,52 @@
+<div class="contracts">
+  <div class="file-title">
+    <!--<span class="title">合同附件</span>-->
+    <!--<div class="btns">-->
+      <!--<button nz-button nzType="primary" style="margin-right: 4px;" (click)='addImg(2)'>添加图片</button>-->
+      <!--<button nz-button nzType="primary" (click)='addImg(1)'>添加文件</button>-->
+    <!--</div>-->
+    <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+  </div>
+  <div class="file-list mt-16">
+    <nz-table #basicTable [nzData]="filesData" [nzBordered]="true" [nzFrontPagination]="false" nzSize="middle"
+              [nzShowPagination]="false">
+      <thead>
+      <tr>
+        <th>附件名称</th>
+        <th>添加时间</th>
+        <th>文件类型</th>
+        <th>默认使用</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td [title]="data.attachName?data.attachName:''">{{data.attachName}}</td>
+        <td>
+          {{data.createTime | date:'y-MM-dd'}}
+        </td>
+        <td [ngSwitch]="data.type">
+          <span *ngSwitchCase="0">图片</span>
+          <span *ngSwitchCase="1">文件</span>
+          <span *ngSwitchDefault>--</span>
+        </td>
+        <td [ngSwitch]="data.state">
+          <span *ngSwitchCase="0">未使用</span>
+          <span *ngSwitchCase="1">已使用</span>
+          <span *ngSwitchDefault>--</span>
+        </td>
+        <td>
+          <a href="javascript:void(0)" class="template_a" [routerLink]="['../detail']"
+             [queryParams]="{state:data.state,id:btoa(data.id),type:data.type}">详情</a>
+          <a href="javascript:void(0)" class="product_a" nz-popconfirm nzTitle="确定删除该附件？" nzOkText="删除"
+             nzCancelText="取消" (nzOnConfirm)="delAccessory(data.id)" *ngIf='data.state==0'>删除</a>
+          <a href="javascript:void(0)" class="template_a" *ngIf="data.state === 0" (click)='uploadProduct(data.id,data.state)'>上架</a>
+          <a href="javascript:void(0)" class="template_a" *ngIf="data.state === 1" (click)='uploadProduct(data.id,data.state)'>下架</a>
+          <a href="javascript:void(0)" class="template_a"  (click)='viewProduct(data.type)'>预览</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+  <rev-imgview [album]="_albums" [index]="imgIndex" *ngIf="_albums.length>0"></rev-imgview>
+</div>

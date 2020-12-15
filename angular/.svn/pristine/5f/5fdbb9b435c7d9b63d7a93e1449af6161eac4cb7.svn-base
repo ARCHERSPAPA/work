@@ -1,0 +1,248 @@
+import {Component, OnInit, Input, Output, EventEmitter, SimpleChange} from '@angular/core';
+import {WarningService} from "../../service/warning.service";
+import {MasterComboService} from "../../rev/master/master-combo-detail/master-combo.service";
+import {getCustomTypeByNames} from "../../model/methods";
+import {MasterService} from "../../rev/master/master.service";
+
+@Component({
+    selector: 'rev-select-bar',
+    templateUrl: './select-bar.component.html',
+    styleUrls: ['./select-bar.component.scss']
+})
+export class SelectBarComponent implements OnInit {
+    //默认为1：主材，2：辅材，3：软材
+    @Input() type: number = 1;
+
+    //是否显示材料商
+    @Input() showMaterial: boolean = true;
+    @Input() entryMaterial: number;
+
+    //是否显示套系
+    @Input() showCombo: boolean = true;
+    @Input() entryCombos: Array<any>;
+
+    //是否显示类别
+    @Input() showCategory: boolean = true;
+    @Input() entryCategory:any;
+
+    //是否显示品牌
+    @Input() showBrand: boolean = true;
+    @Input() entryBrands: Array<string>;
+
+    //自定义查询输入型的文案类别
+    // @Input() infoTypes: Array<any> = ['NAME','SPEC','MODEL'];
+    // @Input() entryInfoType:string;
+    @Input() entryInfoCnt:string;
+
+    @Input() tabAllowClear:any;
+
+    //是否显示组合输入框
+    @Input() showMultipleInput: boolean = true;
+    //是否展示单个输入框
+    @Input() showSingleInput: boolean = false;
+    //回调查询的供应商数据
+    @Output() handleCompanies: EventEmitter<any> = new EventEmitter<any>();
+    //选择材料商回调
+    @Output() handleMaterialSupplier: EventEmitter<any> = new EventEmitter<any>();
+
+    //选择套系后回调
+    @Output() handleCombos: EventEmitter<any> = new EventEmitter<any>();
+
+    //选择类别后回调
+    @Output() handleCategory: EventEmitter<any> = new EventEmitter<any>();
+
+    //选择品牌后回调
+    @Output() handleBrands: EventEmitter<any> = new EventEmitter<any>();
+
+    //查询时回调
+    @Output() handleSearch: EventEmitter<any> = new EventEmitter<any>();
+
+
+    //选中的材料商
+    public company: any;
+    //获取材料商数据信息
+    public cps: any
+    //选中的套系
+    public combos: any;
+    //获取套系数据
+    public cbs: any;
+    //选中的类别
+    public category: any;
+    public cts: any;
+    //选中的品牌
+    public brands: any;
+    public bs: any;
+    //选中的输入类别（自定义）
+    // public inputType: string;
+    //输入的文案
+    public info: string;
+    //单个输入
+    public detailName:string;
+
+    //类别自定义
+    // public its: Array<any>;
+
+    public compareFn = (o1: any, o2: any) => o1 && o2 ? o1.id === o2.id : o1 === o2; //类别选择框为对象
+
+    constructor(private warn: WarningService,
+                private master: MasterService,
+                private masterCombo: MasterComboService) {
+    }
+
+    ngOnInit() {
+        // this.its = getCustomTypeByNames(this.infoTypes);
+        //
+        // if(this.its && this.its.length > 0){
+        //     if(this.entryInfoType){
+        //         this.inputType = this.its.find(it => it.value === this.entryInfoType).value;
+        //     }else{
+        //         this.inputType = this.its[0].value;
+        //     }
+        // }
+
+
+        this.info = this.entryInfoCnt?this.entryInfoCnt: null;
+
+
+        if(this.showMaterial){
+            this.loadMaterials();
+        }
+
+        if(this.showCombo){
+            this.loadCombos();
+        }
+
+        if(this.showCategory){
+            this.loadCategory();
+        }
+
+    }
+
+
+    ngOnChanges(sc:SimpleChange){
+        if(sc["tabAllowClear"]){
+            if(sc["tabAllowClear"] && sc["tabAllowClear"]["currentValue"] != sc["tabAllowClear"]["previousValue"]){
+                this.company = null;
+                this.combos = null;
+                this.category = null;
+                this.brands = null;
+                this.info = null;
+            }
+        }
+
+    }
+
+
+    //加载供应商
+    loadMaterials() {
+        this.master.getCompanys().then(data => {
+            this.cps = data;
+            this.company = this.entryMaterial?this.entryMaterial: null;
+            this.handleCompanies.emit(data);
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //加载套系
+    loadCombos() {
+        this.masterCombo.getCombos().then(data => {
+            this.cbs = data;
+            if(this.entryCombos && this.entryCombos.length > 0){
+                this.combos = this.entryCombos;
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //加载类别
+    loadCategory() {
+        this.master.getCategoriesByType(this.type).then(data => {
+            this.cts = data;
+            if(this.entryCategory && this.entryCategory["id"]){
+                this.category = this.cts.find(c => c.id === this.entryCategory["id"]);
+                if(this.category && this.category["id"]){
+                    // console.log("load category",this.category);
+                    this.loadBrand(this.category["id"]);
+                }
+            }
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //根据类别加载品牌
+    loadBrand(cid: number) {
+        if (cid) {
+            this.master.getBrands(cid).then(data => {
+                this.bs = data;
+                if(this.entryBrands && this.entryBrands.length > 0){
+                    this.brands = this.entryBrands;
+                    console.log("load brands is",this.brands);
+                }
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+
+    }
+
+    /**
+     * 材料商选择变化时调用
+     * @param ms
+     */
+    changeMaterialSupplier(ms:any) {
+        this.company = ms;
+        this.handleMaterialSupplier.emit(this.company);
+    }
+
+    /**
+     * 收起时再回调查询套系
+     * @param {boolean} open
+     */
+    changeCombos(combos:any) {
+        this.combos = combos;
+        this.handleCombos.emit(this.combos);
+    }
+
+    /**
+     * 类别变化时调用
+     * @param cate
+     */
+    changeCategory(cate:any) {
+        this.category = cate;
+        this.handleCategory.emit(this.category);
+        if(this.showBrand && this.category && this.category["id"]){
+            this.handleBrands.emit(this.brands);
+            this.loadBrand(this.category.id);
+        }else{
+            //类别为空时
+            this.bs = null;
+            this.brands = null;
+            this.handleBrands.emit(this.brands);
+        }
+    }
+
+    /**
+     * 收起时再回调品牌查询
+     * @param {boolean} open
+     */
+    changeBrands(bs:any) {
+        this.brands = bs;
+        this.handleBrands.emit(this.brands);
+    }
+
+    // changeInputType(type:string){
+        // this.inputType = type;
+        // this.info = null;
+    // }
+
+    /**
+     * 输入文本变化时回调
+     */
+    changeSearch() {
+        this.handleSearch.emit({content: this.info?this.info.trim():null,detailName: this.detailName?this.detailName.trim():null});
+    }
+
+}

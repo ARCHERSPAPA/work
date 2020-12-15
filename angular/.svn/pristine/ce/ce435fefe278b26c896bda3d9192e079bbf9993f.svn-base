@@ -1,0 +1,44 @@
+@import "./../../../../../assets/scss/mixin";
+.btns {
+    text-align: right;
+    margin-top: 24px;
+    height: 64px;
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 200px);
+    right: 0;
+    background: #ffffff;
+    box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.15);
+    button:first-child {
+        margin-right: 8px;
+    }
+    button{
+        margin-top: 16px;
+    }
+    button:last-child{
+        margin-right: 24px;
+    }
+}
+tr th,
+tr td {
+    font-size: 14px;
+    max-width: 123px;
+    vertical-align: middle;
+    a {
+        padding-right: 4px;
+    }
+    @include ellipsis();
+}
+.modify {
+    .textarea {
+        position: relative;
+        .count {
+            position: absolute;
+            right: 0;
+            bottom: -20px;
+            > span {
+                color: #f92650;
+            }
+        }
+    }
+}

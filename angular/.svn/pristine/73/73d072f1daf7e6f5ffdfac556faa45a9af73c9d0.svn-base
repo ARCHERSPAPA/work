@@ -1,0 +1,110 @@
+<div class="settle-material">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div class="settle-material-head">
+    <radio-switch [radioSwitch]='radioSwitch' [defaultRadioSwitch]='defaultPage' style="z-index: 100000;"
+      *ngIf='auditState==1' (handleSwitch)="handleSwitch($event)"></radio-switch>
+    <div *ngIf='auditState!=1'>
+      &nbsp;
+    </div>
+    <div>
+      <nz-select nzShowSearch style="width: 200px;" nzAllowClear="false" class="serchs" [(ngModel)]="selectCompany"
+        nzPlaceHolder='请选择公司' [ngModelOptions]="{standalone: true}" (ngModelChange)="swichCompany($event)">
+        <nz-option *ngFor="let componey of componeyStatus" [nzValue]="componey.id" [nzLabel]="componey.companyName">
+        </nz-option>
+      </nz-select>
+
+      <nz-input-group nzCompact class="compact">
+        <nz-select style="width: 108px; " nzAllowClear="false" nzPlaceHolder='公司名称/联系人/手机号' class="serchs"
+          [(ngModel)]="querys" [ngModelOptions]="{standalone: true}" (ngModelChange)="swichType($event)">
+          <nz-option *ngFor="let audit of queryType" [nzValue]="audit.key" [nzLabel]="audit.text">
+          </nz-option>
+        </nz-select>
+        <input type="text" nz-input [(ngModel)]="query" placeholder="项目/楼盘名称/客户工长/材料订单编号">
+      </nz-input-group>
+      <button nz-button nzType='primary' (click)='changePage(1)'>查询</button>
+    </div>
+  </div>
+  <div class="settle-material-list">
+    <nz-table #nzTable [nzData]="materialList" [nzBordered]="true" [nzFrontPagination]="false" [(nzPageIndex)]="pageNo"
+      [(nzPageSize)]="pageSize" [nzTotal]="total" (nzPageIndexChange)='changePage()' nzSize="middle"
+      [nzShowPagination]="true" nzSize="middle">
+      <thead nz-thead>
+        <tr>
+          <th nz-th><span>编号</span></th>
+          <th nz-th><span>项目名称</span></th>
+          <th nz-th><span>客户</span></th>
+          <th nz-th><span>材料商</span></th>
+          <th nz-th><span>类型</span></th>
+          <th nz-th><span>订单金额</span></th>
+          <th nz-th><span>配送费</span></th>
+          <th nz-th><span>合计</span></th>
+          <th nz-th><span>工长</span></th>
+          <th nz-th><span>已提材料费占比</span></th>
+          <th nz-th><span>加后占比</span></th>
+          <th nz-th><span>状态</span></th>
+          <th nz-th><span>手机号</span></th>
+          <th nz-th *ngIf='pageType==1'><span>提交时间</span></th>
+          <th nz-th *ngIf='pageType==2'><span>审核时间</span></th>
+          <th nz-th><span>操作</span></th>
+        </tr>
+      </thead>
+      <tbody nz-tbody style="font-size: 12px">
+        <tr nz-tbody-tr *ngFor="let material of nzTable.data">
+          <td nz-td [title]="material.materialOrderNo">
+            {{material.materialOrderNo?material.materialOrderNo:'--'}}
+          </td>
+          <td nz-td
+            [title]="material.customerHouseAddress?(material.customerHouseAddress+material.customerRoomNumber):'--'">
+            {{material.customerHouseAddress?(material.customerHouseAddress+material.customerRoomNumber):'--'}}
+          </td>
+          <td nz-td [title]="material.customerName?material.customerName:'--'">
+            {{material.customerName?material.customerName:'--'}}
+          </td>
+          <td nz-td [title]="material.abbreviation?material.abbreviation :'--'">
+            {{material.abbreviation?material.abbreviation :'--'}}
+          </td>
+          <td nz-td [title]="getTypeName(material.type)">
+            {{getTypeName(material.type)}}
+          </td>
+          <td nz-td [title]="material.totalPrice?material.totalPrice:'--'">
+            {{material.totalPrice?(material.totalPrice | number:'1.2'):'0'}}
+          </td>
+          <td nz-td [title]="material.freight?material.freight:'0'">
+            {{material.freight?(material.freight | number:'1.2'):'0'}}
+          </td>
+          <td nz-td [title]="getCountPrice(material)| number:'1.2'">
+            {{getCountPrice(material) | number:'1.2'}}
+          </td>
+          <td nz-td [title]="material.memberName?material.memberName:'--'">
+            {{material.memberName?material.memberName:'--'}}
+          </td>
+          <td nz-td [title]="material.materialRatio?material.materialRatio:'--'">
+            {{(material.materialRatio || material.materialRatio==0)?material.materialRatio+'%':'--'}}
+          </td>
+          <td nz-td [title]="material.allPriceRatio?material.allPriceRatio:'--'">
+            {{(material.allPriceRatio || material.allPriceRatio==0)?material.allPriceRatio+'%':'--'}}
+          </td>
+
+          <td>{{getState(material.state)}}</td>
+          <td nz-td [title]="material.phone?material.phone:'--'">
+            {{material.phone?material.phone:'--'}}
+          </td>
+          <td nz-td *ngIf='pageType==1'>
+            {{material.createTime?(material.createTime|date:'yy-MM-dd HH:mm'):'--'}}
+          </td>
+          <td nz-td *ngIf='pageType==2'>
+            {{material.auditTime?(material.auditTime|date:'yy-MM-dd HH:mm'):'--'}}
+          </td>
+          <td nz-td>
+            <a [routerLink]="'./../detail'"
+              [queryParams]="{type:1,id:btoa(material.id),materialType:material.type,materialId:btoa(material.materialId)}">
+              详情
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

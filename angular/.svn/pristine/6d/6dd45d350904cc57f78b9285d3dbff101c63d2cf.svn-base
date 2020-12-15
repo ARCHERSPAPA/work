@@ -1,0 +1,44 @@
+import { Injectable } from '@angular/core';
+import { RequestService } from '../../../../service/request.service';
+@Injectable({
+  providedIn: 'root'
+})
+export class SettleMaterialOrderService {
+
+  constructor(
+    private req: RequestService,
+  ) { 
+    
+  }
+  //判断是否需要审核
+  needAudit(): Promise<any> {
+    return new Promise((reslove, rej) => {
+      this.req.doPost({
+        url: 'orderMaterialAudit',
+        success: res => {
+          if (res && res.code == 200) {
+            reslove(res.data.audit)
+          } else {
+            rej(res.msg)
+          }
+        }
+      })
+    })
+  }
+  //获取下拉公司列表
+  getMaterialSupplierList(): Promise<any> {
+    return new Promise((reslove, rej) => {
+    this.req.doPost({
+      url: 'materialSupplierListBySelect',
+      data: {},
+      success: (res => {
+        if (res && res.code === 200) {
+          reslove(res.data);
+        } else {
+          rej(res.msg);
+        }
+      })
+    });
+  })
+  }
+}

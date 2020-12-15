@@ -1,0 +1,12 @@
+.textarea{
+    position: relative;
+    .count{
+        position: absolute;
+        right: 5px;
+        bottom: -20px;
+        font-size: 12px;
+        > span{
+            color: #F92650;
+        }
+    }
+}

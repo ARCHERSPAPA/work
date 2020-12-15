@@ -1,0 +1,13 @@
+@charset "utf-8";
+@import "../../../../assets/scss/mixin";
+.exception{
+    tr th,tr td{
+      font-size: 14px;
+      max-width:100px;
+      vertical-align: middle;
+      a{
+        padding-right: 4px;
+      }
+      @include ellipsis();
+    }
+}

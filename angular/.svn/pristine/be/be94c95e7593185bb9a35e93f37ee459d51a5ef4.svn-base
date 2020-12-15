@@ -1,0 +1,1224 @@
+﻿<div class="detail-contract">
+    <!-- *ngIf="showBudget()" -->
+    <div class="contract-state">
+        <nz-alert nzType="info" [nzMessage]="headMessage" nzShowIcon></nz-alert>
+        <ng-template #headMessage>
+            <div>
+                {{showBudgetByState()}}
+            </div>
+        </ng-template>
+    </div>
+    <form nz-form [formGroup]="contractForm" onsubmit="return false">
+        <div class="contract-select">
+            <!-- [nzDisabled]="showBtnRadio()" -->
+            <nz-radio-group [(ngModel)]="agreementType" name="agreementType" formControlName="agreementType"
+                            (ngModelChange)="changeAgreementType()">
+                <label nz-radio nzValue='0'>对私合同</label>
+                <label nz-radio nzValue='1'>对公合同</label>
+            </nz-radio-group>
+        </div>
+        <div nz-row [nzGutter]="24" class="mb-16">
+            <div nz-col [nzSpan]="24">
+                <nz-form-item nzFlex style="padding-left: 35px;">
+                    <nz-form-label nz-col [nzSpan]="2">合同总额</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="22">
+                        <input nz-input placeholder="请输入合同总额" formControlName="agreementPrice" name="agreementPrice"
+                               autocomplete="off" [(ngModel)]="agreementPrice" (blur)="changePrice()"
+                               (keydown)="enterPrice($event)" maxlength="10">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('agreementPrice').dirty && contractForm.get('agreementPrice').errors">
+                            <ng-container *ngIf="contractForm.get('agreementPrice').hasError('required')">
+                                必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('agreementPrice').hasError('price')">
+                                格式错误，最多保留小数点后二位
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('agreementPrice').hasError('minlength')">至少输入1个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('agreementPrice').hasError('maxlength')">至多输入10个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <div nz-row>
+            <div nz-col [nzSpan]="24" class="contract-head">
+                <h3 class="title">甲方信息</h3>
+            </div>
+        </div>
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">发包方(甲方)</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入发包方(甲方)" formControlName="theEmployer" name="theEmployer"
+                               maxlength="30" autocomplete="off" [(ngModel)]="theEmployer">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('theEmployer').dirty && contractForm.get('theEmployer').errors">
+                            <ng-container *ngIf="contractForm.get('theEmployer').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('theEmployer').hasError('minlength')">至少输入2个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('theEmployer').hasError('maxlength')">至多输入30个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">代表人</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入代表人信息" formControlName="representative" name="representative"
+                               (blur)="representative=trims(representative)"
+                               maxlength="32" autocomplete="off" [(ngModel)]="representative">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('representative').dirty && contractForm.get('representative').errors">
+                            <ng-container *ngIf="contractForm.get('representative').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('representative').hasError('minlength')">至少输入2个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('representative').hasError('maxlength')">至多输入30个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">代表人身份证</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入身份证号" formControlName="representativeCardNo"
+                               name="representativeCardNo" maxlength="20" autocomplete="off"
+                               (blur)="representativeCardNo=trims(representativeCardNo)"
+                               (ngModelChange)="checkValidatorByType('representativeCardNo')"
+                               [(ngModel)]="representativeCardNo">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('representativeCardNo').dirty && contractForm.get('representativeCardNo').errors">
+                            <ng-container *ngIf="contractForm.get('representativeCardNo').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('representativeCardNo').hasError('isCard')">
+                                输入证件号码格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('representativeCardNo').hasError('minlength')">
+                                至少输入15个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('representativeCardNo').hasError('maxlength')">
+                                至多输入18个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">办公(或住所)</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16" [nzTitle]="officeArea?officeArea:''" nz-tooltip>
+                        <input nz-input placeholder="请输入办公(或住所)" formControlName="officeArea" name="officeArea"
+                               maxlength="32" autocomplete="off" [(ngModel)]="officeArea">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('officeArea').dirty && contractForm.get('officeArea').errors">
+                            <ng-container *ngIf="contractForm.get('officeArea').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('officeArea').hasError('minlength')">至少输入2个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('officeArea').hasError('maxlength')">至多输入30个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">手机号码</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入手机号码" formControlName="phoneNumber" name="phoneNumber"
+                               maxlength="11" autocomplete="off" [(ngModel)]="phoneNumber">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('phoneNumber').dirty && contractForm.get('phoneNumber').errors">
+                            <ng-container *ngIf="contractForm.get('phoneNumber').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('phoneNumber').hasError('phone')">格式不正确</ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">联系电话</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入联系电话" formControlName="contactNumber" name="contactNumber"
+                               maxlength="16" autocomplete="off" [(ngModel)]="contactNumber"
+                        >
+                        <nz-form-explain
+                                *ngIf="contractForm.get('contactNumber').dirty && contractForm.get('contactNumber').errors">
+                            <ng-container *ngIf="contractForm.get('contactNumber').hasError('communicate')">输入联系电话格式不正确
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="8" *ngIf="agreementType === '1'">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">统一社会信用代码号</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入统一社会信用代码号" formControlName="companyCode" name="companyCode"
+                               maxlength="18" autocomplete="off" [(ngModel)]="companyCode">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('companyCode').dirty && contractForm.get('companyCode').errors">
+                            <ng-container *ngIf="contractForm.get('companyCode').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('companyCode').hasError('minlength')">至少且最多输入18个字符
+                            </ng-container>
+                            <!--  <ng-container *ngIf="contractForm.get('companyCode').hasError('maxlength')">至多输入18个字符
+                             </ng-container> -->
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <div nz-row>
+            <div nz-col [nzSpan]="24" class="contract-head">
+                <h3 class="title">工程概况</h3>
+            </div>
+        </div>
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">工程地点</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入工程地点" formControlName="engineeringSurvey"
+                               name="engineeringSurvey" maxlength="60" autocomplete="off"
+                               [(ngModel)]="engineeringSurvey">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('engineeringSurvey').dirty && contractForm.get('engineeringSurvey').errors">
+                            <ng-container *ngIf="contractForm.get('engineeringSurvey').hasError('required')">必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('engineeringSurvey').hasError('minlength')">
+                                至少输入2个字符
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('engineeringSurvey').hasError('maxlength')">
+                                至多输入50个字符
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">工程面积</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input type="text" placeholder="请输入工程面积" formControlName="engineeringArea"
+                               name="engineeringArea" maxlength="32" autocomplete="off" [(ngModel)]="engineeringArea">
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">工期</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <nz-input-number nzPlaceHolder="请输入工期" formControlName="engineeringTimeLimit"
+                                         name="engineeringTimeLimit" maxlength="20" [nzMin]="1" [nzMax]="180"
+                                         [nzStep]="1"
+                                         autocomplete="off" [(ngModel)]="engineeringTimeLimit" style="width: 100%;">
+                        </nz-input-number>
+                        <nz-form-explain
+                                *ngIf="contractForm.get('engineeringTimeLimit').dirty && contractForm.get('engineeringTimeLimit').errors">
+                            <ng-container *ngIf="contractForm.get('engineeringTimeLimit').hasError('required')">
+                                必填项目
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('engineeringTimeLimit').hasError('numberMin')">
+                                输入格式不正确
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('engineeringTimeLimit').hasError('minlength')">
+                                至少比1大
+                            </ng-container>
+                            <ng-container *ngIf="contractForm.get('engineeringTimeLimit').hasError('maxlength')">
+                                至多为180
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">开工时间</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <nz-date-picker formControlName="engineeringStartTime" name="engineeringStartTime"
+                                        style="width:100%" [(ngModel)]="engineeringStartTime"
+                                        [nzDisabledDate]="disabledDate"
+                                        nzShowToday="false"
+                                        (ngModelChange)="modelChangeValidatorByType('engineeringStartTimeRemark')">
+                        </nz-date-picker>
+                        <nz-form-explain
+                                *ngIf="contractForm.get('engineeringStartTime').dirty && contractForm.get('engineeringStartTime').errors">
+                            <ng-container *ngIf="contractForm.get('engineeringStartTime').hasError('required')">
+                                开工时间与开工备注必填基一
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="8">
+                <nz-form-item nzFlex>
+                    <nz-form-label nz-col [nzSpan]="8">开工备注</nz-form-label>
+                    <nz-form-control nz-col [nzSpan]="16">
+                        <input nz-input placeholder="请输入开工备注" formControlName="engineeringStartTimeRemark"
+                               name="engineeringStartTimeRemark" maxlength="32" autocomplete="off"
+                               [(ngModel)]="engineeringStartTimeRemark"
+                               (ngModelChange)="modelChangeValidatorByType('engineeringStartTime')">
+                        <nz-form-explain
+                                *ngIf="contractForm.get('engineeringStartTimeRemark').dirty && contractForm.get('engineeringStartTimeRemark').errors">
+                            <ng-container *ngIf="contractForm.get('engineeringStartTimeRemark').hasError('required')">
+                                开工时间与开工备注必填其一
+                            </ng-container>
+                        </nz-form-explain>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+        <!---默认项目--->
+        <div nz-row *ngIf="state !== 2">
+            <div nz-col [nzSpan]="24" class="contract-head">
+                <h3 class="title">默认项目<a href="javascript:void(0)" class="contract-icon ml-10"
+                                         (click)="toggleItem('setting')"><i nz-icon
+                                                                            type="{{!toggle.setting?'down':'up'}}"
+                                                                            theme="outline"></i></a>
+                </h3>
+            </div>
+        </div>
+        <div [hidden]="!toggle.setting">
+            <div nz-row [nzGutter]="24">
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">违约金百分比</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input nz-input placeholder="请输入点总金额的百分比%" formControlName="penalty" name="penalty"
+                                   maxlength="32" autocomplete="off" [(ngModel)]="penalty">
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('penalty').dirty && contractForm.get('penalty').errors">
+                                <ng-container *ngIf="contractForm.get('penalty').hasError('price')">格式不正确，至多保留二位小数
+                                </ng-container>
+                                <ng-container *ngIf="contractForm.get('penalty').hasError('max')">至多为20
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">延期违约金</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input nz-input placeholder="请输入责任方向对方支付的金额" formControlName="liquidated" name="liquidated"
+                                   maxlength="32" autocomplete="off" [(ngModel)]="liquidated">
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('liquidated').dirty && contractForm.get('liquidated').errors">
+                                <ng-container *ngIf="contractForm.get('liquidated').hasError('price')">
+                                    格式不正确,至多保留两位小数
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">开工清场时间</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input nz-input placeholder="请输入开工前甲方为乙方清场时间(天)" formControlName="clearSite"
+                                   name="clearSite" maxlength="32" autocomplete="off" [(ngModel)]="clearSite">
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('clearSite').dirty && contractForm.get('clearSite').errors">
+                                <ng-container *ngIf="contractForm.get('clearSite').hasError('numberMin')">格式不正确
+                                </ng-container>
+                                <ng-container *ngIf="contractForm.get('clearSite').hasError('max')">至多为100
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            <div nz-row [nzGutter]="24">
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">垃圾清运费</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input nz-input placeholder="请输入点总金额的百分比%" formControlName="clearPrice" name="clearPrice"
+                                   maxlength="32" autocomplete="off" [(ngModel)]="clearPrice">
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('clearPrice').dirty && contractForm.get('clearPrice').errors">
+                                <ng-container *ngIf="contractForm.get('clearPrice').hasError('price')">格式不正确，至多保留二位小数
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">上午施工时间</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input type="hidden" formControlName="constructAmBeginTime" name="constructAmBeginTime"
+                                   [(ngModel)]="constructAmBeginTime"/>
+                            <input type="hidden" formControlName="constructAmEndTime" name="constructAmEndTime"
+                                   [(ngModel)]="constructAmEndTime"/>
+                            <div nz-row nzType="flex" nzJustify="space-between">
+                                <div nz-col [nzSpan]="11">
+                                    <nz-time-picker [(ngModel)]="constructAmBeginTime"
+                                                    [ngModelOptions]="{standalone: true}" [nzFormat]="'HH:mm'"
+                                                    [nzDisabled]="!showBtnByState()"
+                                                    [nzDisabledHours]="disabledAmBeginHours"
+                                                    [nzMinuteStep]="10" [nzDisabledMinutes]="disabledAmBeginMinutes"
+                                                    [nzHideDisabledOptions]="true" nzAllowEmpty="false"
+                                                    (ngModelChange)="changeAmBeginTime($event)" style="width:100%;">
+                                    </nz-time-picker>
+                                </div>
+                                <div nz-col [nzSpan]="2" style="text-align: center;">-</div>
+                                <div nz-col [nzSpan]="11">
+                                    <nz-time-picker [(ngModel)]="constructAmEndTime"
+                                                    [ngModelOptions]="{standalone: true}" [nzFormat]="'HH:mm'"
+                                                    [nzDisabled]="disabledAmEndTime()"
+                                                    [nzDisabledHours]="disabledAmEndHours"
+                                                    [nzMinuteStep]="10" [nzDisabledMinutes]="disabledAmEndMinutes"
+                                                    [nzHideDisabledOptions]="true" nzAllowEmpty="false"
+                                                    style="width:100%">
+                                    </nz-time-picker>
+                                </div>
+                            </div>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">下午施工时间</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <input type="hidden" formControlName="constructPmBeginTime" name="constructPmBeginTime"
+                                   [(ngModel)]="constructPmBeginTime"/>
+                            <input type="hidden" formControlName="constructPmEndTime" name="constructPmEndTime"
+                                   [(ngModel)]="constructPmEndTime"/>
+                            <div nz-row nzType="flex" nzJustify="space-between">
+                                <div nz-col [nzSpan]="11">
+                                    <nz-time-picker [(ngModel)]="constructPmBeginTime"
+                                                    [ngModelOptions]="{standalone: true}" [nzFormat]="'HH:mm'"
+                                                    [nzDisabled]="!showBtnByState()"
+                                                    [nzDisabledHours]="disabledPmBeginHours"
+                                                    [nzMinuteStep]="10" [nzDisabledMinutes]="disabledPmBeginMinutes"
+                                                    [nzHideDisabledOptions]="true" nzAllowEmpty="false"
+                                                    (ngModelChange)="changeTime(constructPmBeginTime,constructPmEndTime,true)"
+                                                    style="width:100%;"></nz-time-picker>
+                                </div>
+                                <div nz-col [nzSpan]="2" style="text-align: center;">-</div>
+                                <div nz-col [nzSpan]="11">
+                                    <nz-time-picker [(ngModel)]="constructPmEndTime"
+                                                    [ngModelOptions]="{standalone: true}" [nzFormat]="'HH:mm'"
+                                                    [nzDisabled]="disabledPmEndTime()"
+                                                    [nzDisabledHours]="disabledPmEndHours"
+                                                    [nzMinuteStep]="10" [nzDisabledMinutes]="disabledPmEndMinutes"
+                                                    [nzHideDisabledOptions]="true" nzAllowEmpty="false"
+                                                    (ngModelChange)="changeTime(constructPmEndTime,constructPmBeginTime,false)"
+                                                    style="width:100%"></nz-time-picker>
+                                </div>
+                            </div>
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('liquidated').dirty && contractForm.get('liquidated').errors">
+                                <ng-container *ngIf="contractForm.get('liquidated').hasError('price')">
+                                    格式不正确,至多保留两位小数
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            <div nz-row [nzGutter]="24">
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">承包方式</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <nz-select style="width: 100%" name="contractType" formControlName="contractType"
+                                       [(ngModel)]="contractType" nzAllowClear="false" nzPlaceHolder="请选择承包方式"
+                                       [nzDisabled]="!showBtnByState()">
+                                <nz-option *ngFor="let option of contractTypes" [nzValue]="option.id"
+                                           [nzLabel]="option.content"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            <div nz-row [nzGutter]="24">
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">争议解决方式</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <nz-select style="width: 100%" name="disputeType" formControlName="disputeType"
+                                       [(ngModel)]="disputeType" nzAllowClear="false" nzPlaceHolder="请选择争议解决方式">
+                                <nz-option *ngFor="let option of disputeTypes" [nzValue]="option.id"
+                                           [nzLabel]="option.content"></nz-option>
+                            </nz-select>
+                            <input nz-input placeholder="请输入解决单位信息" formControlName="disputeDetail" name="disputeDetail"
+                                   maxlength="100" autocomplete="off" [(ngModel)]="disputeDetail"
+                                   (ngModelChange)="modelChangeValidatorByType('disputeType')"
+                                   [hidden]="disputeType !== '1'">
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('disputeDetail').dirty && contractForm.get('disputeDetail').errors && disputeType === '1'">
+                                <ng-container *ngIf="contractForm.get('disputeDetail').hasError('required')">
+                                    必填项目
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">图纸提供方式</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <nz-select style="width: 100%" name="drawingType" formControlName="drawingType"
+                                       [(ngModel)]="drawingType" nzAllowClear="false" nzPlaceHolder="请选择图纸提供方式">
+                                <nz-option *ngFor="let option of drawingTypes" [nzValue]="option.id"
+                                           [nzLabel]="option.content"></nz-option>
+                            </nz-select>
+                            <nz-date-picker placeholder="请输入请选择交图时间" formControlName="drawingDetail"
+                                            [(ngModel)]="drawingDetail" [hidden]="drawingType !== '1'"
+                                            name="drawingDetail"
+                                            [nzDisabledTime]="disabledDate" nzShowToday="false"
+                                            (ngModelChange)="modelChangeValidatorByType('drawingType')"></nz-date-picker>
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('drawingDetail').dirty && contractForm.get('drawingDetail').errors && drawingType === '1'">
+                                <ng-container *ngIf="contractForm.get('drawingDetail').hasError('required')">
+                                    必填项目
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col [nzSpan]="8">
+                    <nz-form-item nzFlex>
+                        <nz-form-label nz-col [nzSpan]="8">质量标准</nz-form-label>
+                        <nz-form-control nz-col [nzSpan]="16">
+                            <nz-select style="width: 100%" name="qtType" formControlName="qtType" [(ngModel)]="qtType"
+                                       nzAllowClear="false" nzPlaceHolder="请选择质量标准">
+                                <nz-option *ngFor="let option of qtTypes" [nzValue]="option.id"
+                                           [nzLabel]="option.content"></nz-option>
+                            </nz-select>
+                            <input nz-input placeholder="请输入其它规定" formControlName="qtDetail" name="qtDetail"
+                                   maxlength="100" autocomplete="off" [(ngModel)]="qtDetail"
+                                   (ngModelChange)="modelChangeValidatorByType('qtType')" [hidden]="qtType !== '3'">
+                            <nz-form-explain *ngIf="contractForm.get('qtDetail').dirty && contractForm.get('qtDetail').errors
+                                    && qtType === '3'">
+                                <ng-container *ngIf="contractForm.get('qtDetail').hasError('required')">必填项目
+                                </ng-container>
+                                <ng-container *ngIf="contractForm.get('qtDetail').hasError('maxlength')">至多输入100个字符
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+        </div>
+        <!---约定条款--->
+        <div nz-row [nzGutter]="24" *ngIf="state !== 2">
+            <div nz-col [nzSpan]="24" class="contract-head">
+                <h3 class="title">其它约定条款</h3>
+            </div>
+            <div nz-col [nzSpan]="24" class="abolish" *ngIf="reSginInfo">
+                {{reSginInfo}}
+            </div>
+            <div nz-col [nzSpan]="24" *ngIf="!reSginInfo">
+                <div nz-col [nzSpan]="24" class="padCut">
+                    <nz-form-item nzFlex class="padCut">
+                        <nz-form-control nz-col [nzSpan]="24" class="textarea padCut">
+                            <textarea rows="4" nz-input formControlName="appends" name="appends" [(ngModel)]="appends"
+                                      maxlength="350" placeholder="请输入条款内容"></textarea>
+                            <span class="count"
+                                  *ngIf="appends && appends.length > 0"><span>{{appends.length}}</span>/350</span>
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('appends').dirty && contractForm.get('appends').errors">
+                                <ng-container *ngIf="contractForm.get('appends').hasError('special')">
+                                    不能输入包含以下字符'\"%&<>\\等特殊字符
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            <div nz-col [nzSpan]="24" *ngIf="reSginInfo">
+                <div nz-col [nzSpan]="24" class="padCut">
+                    <nz-form-item nzFlex class="padCut">
+                        <nz-form-control nz-col [nzSpan]="24" class="textarea padCut">
+                            <textarea rows="4" nz-input formControlName="reAppends" name="appends"
+                                      [(ngModel)]="appends && appends.length > 280 ? appends.slice(0,280):appends"
+                                      maxlength="280" placeholder="请输入条款内容"></textarea>
+                            <span class="count"
+                                  *ngIf="appends && appends.length > 0"><span>{{appends.length > 280 ? appends.slice(0,280).length : appends.length}}</span>/280</span>
+                            <nz-form-explain
+                                    *ngIf="contractForm.get('reAppends').dirty && contractForm.get('reAppends').errors">
+                                <ng-container *ngIf="contractForm.get('reAppends').hasError('special')">
+                                    不能输入包含以下字符'\"%&<>\\等特殊字符
+                                </ng-container>
+                            </nz-form-explain>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+        </div>
+        <!---收款金额--->
+        <div nz-row [nzGutter]="24">
+            <div nz-col [nzSpan]="24" class="contract-head mt-8">
+                <h3 class="title">{{state === 2?'收款计划':'付款方式'}}</h3>
+                <nz-dropdown [nzTrigger]="'click'" class="template"
+                             *ngIf="selectAllTemplate && selectAllTemplate.length > 0" [nzDisabled]="showTemplate()">
+                    <a nz-dropdown class="templateAllName" nz-tooltip [nzTitle]="templateName">
+                        <span class="templateName">{{templateName}}</span>
+                        <i nz-icon type="down"></i>
+                    </a>
+                    <ul nz-menu>
+                        <li nz-menu-item *ngFor="let item of selectAllTemplate;let i = index"
+                            (click)="selectTemplate(item.id,i)"
+                            [ngStyle]="{'background':i == selectIndex ?'#e6f7ff':'#fff','color':i==selectIndex ? '#1890ff':'rgba(0,0,0,.65)'}"
+                            class="select">
+                            <a>{{item.name}}</a>
+                        </li>
+                    </ul>
+                </nz-dropdown>
+                <span *ngIf="!selectAllTemplate || selectAllTemplate.length == 0" class="template">
+                    选择模板 <i nz-icon type="down" style="font-size:12px"></i>
+                </span>
+                <!-- 修改金额 -->
+                <span class="fix" *ngIf="showBtnByState() && showBtnPageState() && baseQuote.state !== 3">
+                    <a href="javascript:void(0)" (click)="modifyPayListOpen()">自定义</a>
+                </span>
+            </div>
+            <!---报价、其它合同展示--->
+            <div nz-col [nzSpan]="24" *ngIf="state !== 2 && pays && pays.length > 0">
+                <nz-table #nzTable [nzData]="pays" [nzBordered]="true" [nzFrontPagination]="false"
+                          [nzShowPagination]="false" nzSize="middle" [nzTitle]="totalHeader">
+                    <thead>
+                    <tr>
+                        <th width="10%">收款期数</th>
+                        <th width="10%">付款时间</th>
+                        <th width="10%">收款比例（%）</th>
+                        <th width="30%">金额</th>
+                        <th width="40%">备注</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let pay of nzTable.data;let i = index;let last = last">
+                        <td *ngIf="state === 2">{{pay.payType?pay.payType:'--'}}</td>
+                        <td *ngIf="state !== 2">{{getPayType(pay.type)}}</td>
+                        <td>{{pay.payTime?pay.payTime:'--'}}</td>
+                        <td *ngIf="i != 1">{{pay.percentage?(pay.percentage|number:'1.2'):'0'}}</td>
+                        <td *ngIf=" i == 1">{{pay.percentage?(pay.percentage|number:'1.2'):'0'}}(包括定金)</td>
+                        <td>{{pay.totalPrice|number:'1.2'}}</td>
+                        <td [nzTitle]="pay.remark?pay.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+                            {{pay.remark?pay.remark:'暂无备注信息'}}
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+            <div nz-col [nzSpan]="24" *ngIf="state === 2">
+                <div nz-col nzSpan="24" style="padding: 10px;margin-left:-10px;">
+                    <button nz-button nzType="default" size="small" (click)="addReceive($event)">添加收款计划</button>
+                </div>
+            </div>
+            <!---收款详情展示--->
+            <div nz-col [nzSpan]="24" *ngIf="state === 2">
+                <nz-table #nzTable [nzData]="pays" [nzBordered]="true" [nzFrontPagination]="false"
+                          [nzShowPagination]="false" nzSize="middle" [nzTitle]="header">
+                    <thead>
+                    <tr>
+                        <th width="10%">收款名称</th>
+                        <th width="10%">收款比例（%）</th>
+                        <th width="10%">应收</th>
+                        <th width="10%">客户付款时间</th>
+                        <th width="15%">实收金额</th>
+                        <th width="10%">收据编号</th>
+                        <th width="20%">备注</th>
+                        <th width="15%">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let pay of nzTable.data;let i = index;let last = last">
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{ pay.payType }}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <nz-form-item>
+                                    <nz-form-control>
+                                        <input type="text" nz-input
+                                               [(ngModel)]="editReceiveCache[pay.id].data.payType"
+                                               placeholder="请输入收款名称" [formControlName]="'receiveType'+pay.id"
+                                               [name]="'receiveType'+pay.id" maxlength="16"/>
+                                        <nz-form-explain
+                                                *ngIf="contractForm.get('receiveType'+pay.id).dirty && contractForm.get('receiveType'+pay.id).errors">
+                                            收款名称至多10个字符
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </ng-container>
+                        </td>
+                        <td>{{(pay.percentage?pay.percentage:0)|number:'1.2'}}</td>
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{(pay.totalPrice?pay.totalPrice:0)|number:'1.2'}}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <nz-form-item>
+                                    <nz-form-control>
+                                        <input type="text" nz-input
+                                               [(ngModel)]="editReceiveCache[pay.id].data.totalPrice"
+                                               placeholder="请输入金额" [formControlName]="'receiveTotalPrice'+pay.id"
+                                               [name]="'receiveTotalPrice'+pay.id" maxlength="10"
+                                               onkeyup="var p2 = parseFloat(value).toFixed(2);value = p2>=0?(/\.0?$/.test(value)?value:p2.replace(/0$/,'').replace(/\.0$/,'')):''"/>
+                                        <nz-form-explain
+                                                *ngIf="contractForm.get('receiveTotalPrice'+pay.id).dirty && contractForm.get('receiveTotalPrice'+pay.id).errors">
+                                            金额至多10个字符
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </ng-container>
+                        </td>
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{pay.customerPayTime?pay.customerPayTime:'--'}}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <nz-form-item>
+                                    <nz-form-control>
+                                        <input type="text" nz-input
+                                               [(ngModel)]="editReceiveCache[pay.id].data.customerPayTime"
+                                               placeholder="请输入时间"
+                                               [formControlName]="'receiveCustomerPayTime'+pay.id"
+                                               [name]="'receiveCustomerPayTime'+pay.id" maxlength="20"/>
+                                        <nz-form-explain
+                                                *ngIf="contractForm.get('receiveCustomerPayTime'+pay.id).dirty && contractForm.get('receiveCustomerPayTime'+pay.id).errors">
+                                            付款时间至多20个字符
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+
+                            </ng-container>
+                        </td>
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{(pay.discountPrice?pay.discountPrice:0)|number:'1.2'}}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <nz-form-item>
+                                    <nz-form-control>
+                                        <input type="text" nz-input
+                                               [(ngModel)]="editReceiveCache[pay.id].data.discountPrice"
+                                               placeholder="请输入实收金额" [formControlName]="'receiveDiscountPrice'+pay.id"
+                                               [name]="'receiveDiscountPrice'+pay.id" maxlength="10"
+                                               onkeyup="var p2 = parseFloat(value).toFixed(2);value = p2>=0?(/\.0?$/.test(value)?value:p2.replace(/0$/,'').replace(/\.0$/,'')):''"/>
+                                        <nz-form-explain
+                                                *ngIf="contractForm.get('receiveDiscountPrice'+pay.id).dirty && contractForm.get('receiveDiscountPrice'+pay.id).errors">
+                                            实收金额至多10个字符
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </ng-container>
+                        </td>
+                        <!---收款编号--->
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{ pay.receipt }}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <nz-form-item>
+                                    <nz-form-control>
+                                        <input type="text" nz-input
+                                               [(ngModel)]="editReceiveCache[pay.id].data.receipt"
+                                               placeholder="请输入编号" [formControlName]="'receiveReceipt'+pay.id"
+                                               [name]="'receiveReceipt'+pay.id" maxlength="20"/>
+                                        <nz-form-explain
+                                                *ngIf="contractForm.get('receiveReceipt'+pay.id).dirty && contractForm.get('receiveReceipt'+pay.id).errors">
+                                            收款单据至多20个字符
+                                        </nz-form-explain>
+                                    </nz-form-control>
+                                </nz-form-item>
+
+                            </ng-container>
+                        </td>
+                        <td nz-td [nzTitle]="pay.remark?pay.remark:'暂无备注信息'" nzPlacement="topLeft" nz-tooltip>
+                            <ng-container *ngIf="!editReceiveCache[pay.id].edit">
+                                {{ pay.remark }}
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[pay.id].edit">
+                                <input type="text" nz-input [(ngModel)]="editReceiveCache[pay.id].data.remark"
+                                       placeholder="请输入备注信息" [formControlName]="'receiveRemark'+pay.id"
+                                       [name]="'receiveRemark'+pay.id" maxlength="500"/>
+                            </ng-container>
+                        </td>
+                        <td>
+                            <ng-container *ngIf="!editReceiveCache[''+pay.id].edit">
+                                <a href="javascript:void(0)" (click)="startEditReceive(pay)" class="mr-10">编辑</a>
+                                <a href="javascript:void(0)" *ngIf="last" class="mr-10" nz-popconfirm
+                                   nzTitle="你确定删除本收款计划吗?" nzOkText="删除" nzCancelText="取消"
+                                   (nzOnConfirm)="delReceiveCount(pay.id)">删除</a>
+                            </ng-container>
+                            <ng-container *ngIf="editReceiveCache[''+pay.id].edit">
+                                <a href="javascript:void(0)" (click)="saveEditReceive(''+pay.id)"
+                                   class="mr-10">保存</a>
+                                <a href="javascript:void(0)" (click)="cancelEditReceive(''+pay.id)">取消</a>
+                            </ng-container>
+                        </td>
+                    </tr>
+                    <tr *ngIf="pays && pays.length > 0">
+                        <td nz-td colspan="2">合计</td>
+                        <td nz-td colspan="2">{{getTotalReceive('totalPrice')|number:'1.2'}}(差额{{(getPauses()-
+                            getTotalReceive('totalPrice'))|number:'1.2'}})
+                        </td>
+                        <td nz-td colspan="3">{{getTotalReceive('discountPrice')|number:'1.2'}}(差额{{(getPauses() -
+                            getTotalReceive('discountPrice'))|number:'1.2'}})
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" (click)="finishShow()"
+                               *ngIf="!finishBool && !overTime">收款完成</a>
+                            <ng-container *ngIf="!finishBool && overTime">
+                                {{overTime?(overTime|date:'yyyy-MM-dd'):''}}<a href="javascript:void(0)"
+                                                                               (click)="finishShow()"
+                                                                               class="ml-10">修改</a></ng-container>
+                            <ng-container *ngIf="finishBool">
+                                <nz-date-picker [nzSize]="small" nzFormat="yyyy-MM-dd" nzShowTime="true"
+                                                nzAllowClear="false" nzPlaceholder="请选择日期" [(ngModel)]="overTime"
+                                                nzShowToday="false" (nzOnOk)="changeOverTime($event)"
+                                                formControlName="receiveFinishTime"></nz-date-picker>
+                            </ng-container>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+
+            </div>
+
+        </div>
+        <!---补充条款--->
+        <div nz-row class="mt-20" *ngIf="state !== 2">
+            <div nz-col [nzSpan]="24" class="contract-head">
+                <h3 class="title">补充条款<a href="javascript:void(0)" class="contract-icon ml-10"
+                                         (click)="toggleItem('item')"><i nz-icon type="{{!toggle.item?'down':'up'}}"
+                                                                         theme="outline"></i></a>
+                </h3>
+            </div>
+        </div>
+        <div [hidden]="!toggle.item">
+            <div nz-row [nzGutter]="24" class="padCut">
+                <div nz-col [nzSpan]="24" class="padCut">
+                    <div nz-col [nzSpan]="24">
+                        <nz-form-item nzFlex>
+                            <nz-form-control nz-col [nzSpan]="24" class="textarea padCut">
+                                <textarea rows="4" nz-input formControlName="preferential" name="preferential"
+                                          [(ngModel)]="preferential" maxlength="350" placeholder="请输入优惠活动"></textarea>
+                                <span class="count"
+                                      *ngIf="preferential && preferential.length > 0"><span>{{preferential.length}}</span>/350</span>
+                                <nz-form-explain *ngIf="contractForm.get('preferential').dirty &&
+                                 contractForm.get('preferential').errors">
+                                    <ng-container *ngIf="contractForm.get('preferential').hasError('special')">
+                                        不能输入包含以下字符'\"%&<>\\等特殊字符
+                                    </ng-container>
+                                </nz-form-explain>
+                            </nz-form-control>
+                        </nz-form-item>
+                    </div>
+                </div>
+            </div>
+            <div nz-row [nzGutter]="24" class="mt-8">
+                <div nz-col [nzSpan]="24" class="padCut">
+                    <div nz-col [nzSpan]="24">
+                        <nz-form-item nzFlex>
+                            <nz-form-control nz-col [nzSpan]="24" class="textarea padCut">
+                                <textarea rows="4" nz-input formControlName="clause" name="clause" [(ngModel)]="clause"
+                                          maxlength="350" placeholder="请输入其它约定条款..."></textarea>
+                                <span class="count"
+                                      *ngIf="clause && clause.length > 0"><span>{{clause.length}}</span>/350</span>
+                                <nz-form-explain
+                                        *ngIf="contractForm.get('clause').dirty && contractForm.get('clause').errors">
+                                    <ng-container *ngIf="contractForm.get('clause').hasError('special')">
+                                        不能输入包含以下字符'\"%&<>\\等特殊字符
+                                    </ng-container>
+                                </nz-form-explain>
+                            </nz-form-control>
+                        </nz-form-item>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!---表单title设置--->
+        <ng-template #header>
+            <div nz-row>
+                <div nz-row>
+                    <div nz-col nzSpan="24"><span class="total">预算：￥{{totalPay|number:'1.2'}}</span></div>
+                    <div nz-col nzSpan="24">
+                        <span nz-col nzSpan="8">进场前增减项：￥{{(beforePausePrice?beforePausePrice:0)| number:'1.2'}}</span>
+                        <span nz-col nzSpan="8">进场后增减项：￥{{(afterPausePrice?afterPausePrice:0)| number:'1.2'}}</span>
+                        <span nz-col nzSpan="8">定制增项：￥{{(customizationPrice?customizationPrice:0)| number:'1.2'}}</span>
+                    </div>
+                    <div nz-col nzSpan="24" *ngIf="pauses && pauses.length > 0">
+                        <span nz-col nzSpan="8" *ngFor="let pause of pauses">增减项
+                            {{pause.applyActualPrice?(pause.applyActualPrice > 0?'+':''):''}}&nbsp;&nbsp;￥{{(pause.applyActualPrice?pause.applyActualPrice:0)|number:'1.2'}}
+                            {{pause.createTime | date:'yyyy-MM-dd HH:mm'}}</span>
+                    </div>
+                    <div nz-col nzSpan="24"><span class="total">总计：￥{{getPauses()|number:'1.2'}}</span></div>
+                </div>
+            </div>
+        </ng-template>
+
+        <!---提交按钮控件--->
+        <div nz-row class="btns-fixed mt-20">
+            <div nz-col [nzSpan]="24" class="text-right">
+                <div style="display:inline-block" *ngIf="showContractByState()">
+                    <a href="javascript:void(0)" class="ant-btn ant-btn-default" target="_blank"
+                       [routerLink]="['/view/contract']" [queryParams]="{cid:btoa(cid)}">预览合同</a>
+                </div>
+                <div style="display:inline-block" *ngIf="!showContractByState()">
+                    <a href="javascript:void(0)" (click)="viewContract()" class="ant-btn ant-btn-default"
+                       *ngIf="!contractUrl" target="_blank"
+                       [routerLink]="['/view/contract']" [queryParams]="{cid:btoa(cid)}">预览合同</a>
+                    <a [href]="contractUrl" class="ant-btn ant-btn-default" target="_blank"
+                       *ngIf="contractUrl">预览合同</a>
+                </div>
+                <!--<div *ngIf="showBtnByState()">-->
+                <div style="display:inline-block" *ngIf="showBtnByState() && showBtnPageState()">
+                    <a href="javascript:void(0)" nz-button nzType="primary"
+                       *ngIf="showTempSaveBtn()" (click)="confirmSubmitToCustomer(0)"
+                       class="ml-8">保存</a>
+                    <a href="javascript:void(0)" nz-button nzType="primary" nz-popconfirm
+                       [nzTitle]="'请确认合同总额为'+finalPrice+'？'" nzOkText="确定"
+                       *ngIf="baseQuote.state == 10 || baseQuote.state == 0" class="ml-8"
+                       nzCancelText="取消" (nzOnConfirm)="confirmSubmitToCustomer(1)">提交至客户</a>
+
+                    <a href="javascript:void(0)" class="ml-8" nz-button nzType="primary"
+                       nz-popconfirm [nzTitle]="'请确认合同总额为'+finalPrice+'？'" nzOkText="确定"
+                       *ngIf="baseQuote.state !== 10 && baseQuote.state !== 0 && baseQuote.state !== 3"
+                       nzCancelText="取消" (nzOnConfirm)="confirmSubmitToCustomer(1)">修改并提交</a>
+                </div>
+                <div style="display:inline-block" *ngIf="resignByState()">
+                    <a href="javascript:void(0)" nz-button nzType="primary" class="ml-8"
+                       nz-popconfirm [nzTitle]="'重签合同后客户将无法查看原合同？'"
+                       nzOkText="重签" nzCancelText="取消" (nzOnConfirm)="resetContract()">重签</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<!---修改整体付款金额--->
+<!-- (nzOnOk)="modifyPayCountOk()" -->
+<nz-modal [(nzVisible)]="isModifyPayCount" nzTitle="修改付款金额" nzOkText="确定" nzWidth="800" nzCancelText="取消"
+          (nzOnCancel)="modifyPayCountCancel()" [nzFooter]="modalFooter">
+    <ng-template #modalFooter>
+        <button nz-button nzType="default" (click)="modifyPayCountCancel()">取消</button>
+        <button nz-button nzType="default" (click)="modifyPayBalance()">自动配平</button>
+        <button nz-button nzType="primary" (click)="modifyPayCountOk()">确定</button>
+    </ng-template>
+    <div class="modify">
+        <div nz-row style="margin-left: 16px;">
+            <div nz-col nzSpan="2">总计：</div>
+            <div nz-col nzSpan="16">{{(totalPay?totalPay:0)|number:'1.2'}}</div>
+        </div>
+        <form nz-form [formGroup]="modifyCountForm">
+            <div nz-row>
+                <nz-table [nzData]="[{title:'收款模板'}]" nzSize="small" [nzFrontPagination]="false"
+                          [nzShowPagination]="false">
+                    <thead>
+                    <tr>
+                        <th width="15%">收款期数</th>
+                        <th width="30%">金额</th>
+                        <th width="20%">付款时间</th>
+                        <th width="20%">占比</th>
+                        <th width="15%">备注</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let pay of payList;let i = index">
+                        <td>{{getPayType(pay.type)}}</td>
+                        <td>
+                            <nz-form-item>
+                                <nz-form-control>
+                                    <input nz-input placeholder="请输入金额" [formControlName]="'pay'+i" autocomplete="off"
+                                           [(ngModel)]="pay.amount" (keyup)="payAmount($event,i)"/>
+                                    <nz-form-explain
+                                            *ngIf="modifyCountForm.get('pay'+i).dirty && modifyCountForm.get('pay'+i).errors">
+                                        <ng-container *ngIf="modifyCountForm.get('pay'+i).hasError('required')">
+                                            必填选项
+                                        </ng-container>
+                                        <ng-container *ngIf="modifyCountForm.get('pay'+i).hasError('price')">
+                                            格式错误，最多保留小数点后二位
+                                        </ng-container>
+                                    </nz-form-explain>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </td>
+                        <td [nzTitle]="pay.payTime" nzPlacement="topLeft" nz-tooltip>
+                            <nz-form-item>
+                                <nz-form-control>
+                                    <input nz-input placeholder="请输入付款时间信息" [formControlName]="'payTime'+i"
+                                           autocomplete="off"
+                                           [(ngModel)]="pay.payTime" maxlength="50"/>
+                                    <nz-form-explain
+                                            *ngIf="modifyCountForm.get('payTime'+i).dirty && modifyCountForm.get('payTime'+i).errors">
+                                        <ng-container *ngIf="modifyCountForm.get('payTime'+i).hasError('maxlength')">
+                                            至多输入50个字符
+                                        </ng-container>
+                                    </nz-form-explain>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </td>
+                        <td *ngIf="i > 0">
+                            <!--  <nz-form-item>
+                                 <nz-form-control>
+                                     <input nz-input placeholder="请输入占比" [formControlName]="'percentage'+i" autocomplete="off"
+                                         [(ngModel)]="pay.percentage" maxlength="6" (keyup)="payPercentage($event,i)" />
+                                     <nz-form-explain
+                                         *ngIf="modifyCountForm.get('percentage'+i).dirty && modifyCountForm.get('percentage'+i).errors">
+                                         <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('required')">
+                                             必填选项
+                                         </ng-container>
+                                         <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('min')">
+                                             至少为0
+                                         </ng-container>
+                                         <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('max')">
+                                             至多为1
+                                         </ng-container>
+                                         <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('decimal')">
+                                             格式错误，最多保留小数点后四位
+                                         </ng-container>
+                                     </nz-form-explain>
+                                 </nz-form-control>
+                             </nz-form-item> -->
+                            <nz-form-item>
+                                <nz-form-control>
+                                    <input nz-input placeholder="请输入占比" [formControlName]="'percentage'+i"
+                                           autocomplete="off" [(ngModel)]="pay.percentage" maxlength="6"
+                                           (keyup)="payPercentage($event,i)"/>
+                                    <nz-form-explain
+                                            *ngIf="modifyCountForm.get('percentage'+i).dirty && modifyCountForm.get('percentage'+i).errors">
+                                        <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('required')">
+                                            必填选项
+                                        </ng-container>
+                                        <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('min')">
+                                            至少为0
+                                        </ng-container>
+                                        <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('max')">
+                                            至多为100
+                                        </ng-container>
+                                        <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('number')">
+                                            格式错误，只能输入正整数或者0
+                                        </ng-container>
+                                    </nz-form-explain>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </td>
+                        <td *ngIf="i == 0">
+                            <nz-form-item>
+                                <nz-form-control>
+                                    <input nz-input placeholder="请输入占比" autocomplete="off" [value]="pay.percentage"
+                                           disabled="true"/>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </td>
+                        <td>
+                            <nz-form-item>
+                                <nz-form-control>
+                                    <input nz-input placeholder="请输入备注信息" [formControlName]="'remark'+i"
+                                           autocomplete="off"
+                                           [(ngModel)]="pay.remark" maxlength="120"/>
+                                    <nz-form-explain
+                                            *ngIf="modifyCountForm.get('remark'+i).dirty && modifyCountForm.get('remark'+i).errors">
+                                        <ng-container *ngIf="modifyCountForm.get('remark'+i).hasError('maxlength')">
+                                            至多输入120个字符
+                                        </ng-container>
+                                    </nz-form-explain>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </td>
+                    </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+            <div nz-row [hidden]="getTotal() === totalPay">
+                <nz-alert nzType="error" [nzMessage]="errorTpl"></nz-alert>
+            </div>
+        </form>
+        <!--  <div nz-row nzSpan="24">
+             <div nz-col nzSpan="4">收款期数</div>
+             <div nz-col nzSpan="4">金额</div>
+             <div nz-col nzSpan="5" class="ml-10">付款时间</div>
+             <div nz-col nzSpan="4" class="ml-10">占比</div>
+             <div nz-col nzSpan="6" class="ml-10">备注</div>
+         </div>
+         <div nz-row nzSpan="24" *ngFor="let pay of payList;let i = index">
+             <div nz-col nzSpan="4">{{getPayType(pay.type)}}</div>
+             <div nz-col nzSpan="4">
+                 <nz-form-item>
+                     <nz-form-control>
+                         <input nz-input placeholder="请输入金额" [formControlName]="'pay'+i" autocomplete="off"
+                             [(ngModel)]="pay.amount" (keyup)="payAmount($event,i)" />
+                         <nz-form-explain
+                             *ngIf="modifyCountForm.get('pay'+i).dirty && modifyCountForm.get('pay'+i).errors">
+                             <ng-container *ngIf="modifyCountForm.get('pay'+i).hasError('required')">
+                                 必填选项
+                             </ng-container>
+                             <ng-container *ngIf="modifyCountForm.get('pay'+i).hasError('price')">
+                                 格式错误，最多保留小数点后二位
+                             </ng-container>
+                         </nz-form-explain>
+                     </nz-form-control>
+                 </nz-form-item>
+             </div>
+             <div nz-col nzSpan="5" class="ml-10">
+                 <nz-form-item>
+                     <nz-form-control>
+                         <input nz-input placeholder="请输入付款时间信息" [formControlName]="'payTime'+i" autocomplete="off"
+                             [(ngModel)]="pay.payTime" maxlength="50" />
+                         <nz-form-explain
+                             *ngIf="modifyCountForm.get('payTime'+i).dirty && modifyCountForm.get('payTime'+i).errors">
+                             <ng-container *ngIf="modifyCountForm.get('payTime'+i).hasError('maxlength')">
+                                 至多输入50个字符
+                             </ng-container>
+                         </nz-form-explain>
+                     </nz-form-control>
+                 </nz-form-item>
+             </div>
+             <div nz-col nzSpan="4" class="ml-10" *ngIf="i > 0">
+                 <nz-form-item>
+                     <nz-form-control>
+                         <input nz-input placeholder="请输入占比" [formControlName]="'percentage'+i" autocomplete="off"
+                             [(ngModel)]="pay.percentage" maxlength="6" (keyup)="payPercentage($event,i)" />
+                         <nz-form-explain
+                             *ngIf="modifyCountForm.get('percentage'+i).dirty && modifyCountForm.get('percentage'+i).errors">
+                             <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('required')">
+                                 必填选项
+                             </ng-container>
+                             <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('min')">
+                                 至少为0
+                             </ng-container>
+                             <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('max')">
+                                 至多为1
+                             </ng-container>
+                             <ng-container *ngIf="modifyCountForm.get('percentage'+i).hasError('decimal')">
+                                 格式错误，最多保留小数点后四位
+                             </ng-container>
+                         </nz-form-explain>
+                     </nz-form-control>
+                 </nz-form-item>
+             </div>
+             <div nz-col nzSpan="4" class="ml-10" *ngIf="i == 0">
+                 <nz-form-item>
+                     <nz-form-control>
+                         <input nz-input placeholder="请输入占比" autocomplete="off" [value]="pay.percentage"
+                             disabled="true" />
+                     </nz-form-control>
+                 </nz-form-item>
+             </div>
+             <div nz-col nzSpan="6" class="ml-10">
+                 <nz-form-item>
+                     <nz-form-control>
+                         <input nz-input placeholder="请输入备注信息" [formControlName]="'remark'+i" autocomplete="off"
+                             [(ngModel)]="pay.remark" maxlength="120" />
+                         <nz-form-explain
+                             *ngIf="modifyCountForm.get('remark'+i).dirty && modifyCountForm.get('remark'+i).errors">
+                             <ng-container *ngIf="modifyCountForm.get('remark'+i).hasError('maxlength')">
+                                 至多输入120个字符
+                             </ng-container>
+                         </nz-form-explain>
+                     </nz-form-control>
+                 </nz-form-item>
+             </div>
+         </div>
+         <div nz-row [hidden]="getTotal() === totalPay">
+             <nz-alert nzType="error" [nzMessage]="errorTpl"></nz-alert>
+         </div> -->
+        <!--<form [formGroup]="modifyCountForm">-->
+        <!--<ul *ngIf="payList && payList.length > 0">-->
+        <!--<li>-->
+        <!--<label class="label w20">总计：</label>-->
+        <!--<div class="inp w60">{{totalPay|number:'1.2'}}</div>-->
+        <!--</li>-->
+        <!--<li>-->
+        <!--<label class="label w10">收款期数</label>-->
+        <!--<div class="inp w10">金额</div>-->
+        <!--<div class="inp w20">付款时间</div>-->
+        <!--<div class="inp w10">占比</div>-->
+        <!--<div class="inp w20">备注</div>-->
+        <!--</li>-->
+        <!--<li *ngFor="let pay of payList;let i = index">-->
+        <!--<label class="label w10">{{getPayType(pay.type)}}</label>-->
+        <!--<div class="inp w10">-->
+        <!--<input type="text" class="text" placeholder="请输入金额"-->
+        <!--autocomplete="off" [(ngModel)]="pay.amount" maxlength=""-->
+        <!--[formControlName]="'pay'+i" (keyup)="payAmount($event,i)"/>-->
+        <!--<div [hidden]="modifyCountForm.get('pay'+i).valid || modifyCountForm.get('pay'+i).pristine"-->
+        <!--class="error">-->
+        <!--<span [hidden]="!modifyCountForm.hasError('required',['pay'+i])">必填</span>-->
+        <!--<span [hidden]="!modifyCountForm.hasError('price',['pay'+i])">&nbsp;&nbsp;格式错误，最多保留小数点后二位</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="inp w20">-->
+        <!--<input class="text" placeholder="请输入付款时间信息" maxlength="60"-->
+        <!--autocomplete="off" [(ngModel)]="pay.payTime"-->
+        <!--[formControlName]="'payTime'+i"/>-->
+        <!--<div-->
+        <!--[hidden]="modifyCountForm.get('payTime'+i).valid || modifyCountForm.get('payTime'+i).pristine"-->
+        <!--class="error">-->
+        <!--<span [hidden]="!modifyCountForm.hasError('maxlength',['payTime'+i])">至多输入50个字符</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="inp w10" *ngIf="i > 0">-->
+        <!--<input type="text" class="text" placeholder="请输入占比"-->
+        <!--autocomplete="off" [(ngModel)]="pay.percentage" maxlength="6"-->
+        <!--(keyup)="payPercentage($event,i)"-->
+        <!--[formControlName]="'percentage'+i"/>-->
+        <!--<div [hidden]="modifyCountForm.get('percentage'+i).valid || modifyCountForm.get('percentage'+i).pristine"-->
+        <!--class="error">-->
+        <!--<span [hidden]="!modifyCountForm.hasError('required',['percentage'+i])">必填</span>-->
+        <!--<span [hidden]="!modifyCountForm.hasError('min',['percentage'+i])">&nbsp;&nbsp;至少为0</span>-->
+        <!--<span [hidden]="!modifyCountForm.hasError('max',['percentage'+i])">&nbsp;&nbsp;至多为1</span>-->
+        <!--<span [hidden]="!modifyCountForm.hasError('decimal',['percentage'+i])">&nbsp;&nbsp;格式错误，最多保留小数点后四位</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="inp w10" *ngIf="i === 0">-->
+        <!--<input type="text" class="text" disabled="true"/>-->
+        <!--</div>-->
+
+        <!--<div class="inp w20">-->
+        <!--<input class="text" placeholder="请输入备注" maxlength="130"-->
+        <!--autocomplete="off" [(ngModel)]="pay.remark"-->
+        <!--[formControlName]="'remark'+i"/>-->
+        <!--<div-->
+        <!--[hidden]="modifyCountForm.get('remark'+i).valid || modifyCountForm.get('remark'+i).pristine"-->
+        <!--class="error">-->
+        <!--<span [hidden]="!modifyCountForm.hasError('maxlength',['remark'+i])">至多输入120个字符</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</li>-->
+        <!--<li [hidden]="getTotal() === totalPay">-->
+        <!--<label class="label w100" [ngClass]="{error:getTotal() !== totalPay}">当前输入金额{{getTotal()|number:'1.2'}}&nbsp;&nbsp;与原始总{{totalPay|number:'1.2'}}&nbsp;&nbsp;金额相差约为{{(totalPay-->
+        <!-- - getTotal())| number:'1.2'}}</label>-->
+        <!--</li>-->
+        <!--</ul>-->
+        <!--</form>-->
+
+
+    </div>
+</nz-modal>
+<ng-template #errorTpl>
+    <span>当前输入金额{{getTotal()|number:'1.2'}}&nbsp;&nbsp;
+        与原始总{{totalPay|number:'1.2'}}&nbsp;&nbsp;金额相差约为{{(totalPay - getTotal())| number:'1.2'}}</span>
+</ng-template>
+<!-- <nz-modal nzWidth="33vw" [(nzVisible)]="isVisible" nzTitle="" [nzFooter]="true" (nzOnCancel)="handleCancel()"
+nzCancelText="取消" nzOkText="继续"
+  (nzOnOk)="submit()">
+
+</nz-modal> -->
+<!-- 付款方式头部 -->
+<ng-template #totalHeader>
+    <span>总计：{{(totalPay?totalPay:0)|number:'1.2'}}</span>
+</ng-template>

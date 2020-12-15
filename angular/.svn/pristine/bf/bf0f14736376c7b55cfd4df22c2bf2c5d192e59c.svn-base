@@ -1,0 +1,80 @@
+import { Component, OnInit } from '@angular/core';
+
+import { RequestService } from "../../../service/request.service";
+import { WarningService } from "../../../service/warning.service";
+import { Default } from "../../../model/constant";
+import { Messages } from "../../../model/msg";
+import {FormGroup,FormBuilder, Validators} from '@angular/forms';
+
+@Component({
+  selector: 'rev-master-class-restrict',
+  templateUrl: './master-class-restrict.component.html',
+  styleUrls: ['./master-class-restrict.component.scss','./../master.component.scss']
+})
+export class MasterClassRestrictComponent implements OnInit {
+
+	public title: string;
+	public radioSwitch: Array<any> = [];
+	public state: number = 0;
+
+	// 表格
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+	public total: number = Default.PAGE.PAGE_TOTAL;
+	public restrictLsit:Array<any> = [
+		{dad:11}
+	];
+
+	//限制弹窗
+    public isLimitVisible = false;
+    public limitForm: FormGroup;
+    public limitOrder = '2';
+
+	constructor(
+		private req: RequestService,
+        private warn: WarningService,
+        private fb: FormBuilder
+	) { }
+
+	ngOnInit() {
+		this.title = '类别限制';
+		this.radioSwitch = [
+            {
+                key: 0,
+                text: "主材"
+            },
+            {
+                key: 1,
+                text: "辅材"
+            }
+		];
+		//限制
+        this.limitForm = this.fb.group({
+            limitOrder: [this.limitOrder, [
+				Validators.required
+			]]
+        });
+	}
+
+	//tab 切换
+    handleSwitch(e: number) {
+        this.state = e;
+        // this.changeData();
+	}
+	
+	// 限制操作弹窗
+	limitModal(){
+		this.isLimitVisible = true;
+	}
+
+	handleCancel(){
+        this.isLimitVisible = false;
+        this.limitForm.reset();
+	}
+	
+	handleOk(){
+		if(this.limitForm.valid){
+		}
+	}
+
+}

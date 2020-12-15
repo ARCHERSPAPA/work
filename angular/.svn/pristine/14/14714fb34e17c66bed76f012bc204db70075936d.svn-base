@@ -1,0 +1,355 @@
+import {Component, OnInit} from '@angular/core';
+import {btoa, getOrderByType} from '../../../../model/methods';
+import {Default, orderMaterialStatus} from '../../../../model/constant';
+import {WarningService} from '../../../../service/warning.service';
+import {Router, ActivatedRoute} from '@angular/router';
+import {getMaterialState} from '../../../../model/methods';
+import {SettleMaterialOrderService} from '../settle-material-order/settle-material-order.service';
+import {SettleMaterialWageService} from "../settle-material-wage/settle-material-wage.service";
+import {plus} from '../../../../model/count';
+
+@Component({
+    selector: 'rev-settle-material-order',
+    templateUrl: './settle-material-order.component.html',
+    styleUrls: ['./settle-material-order.component.scss']
+})
+export class SettleMaterialOrderComponent implements OnInit {
+
+    public title: string;
+    //tab 切换
+    public radioSwitch: Array<any> = [
+        {
+            key: 1,
+            text: '待审核'
+        },
+        {
+            key: 2,
+            text: '已审核'
+        }
+    ];
+
+    //查询bar
+    public forms: Array<any> = [
+        {
+            type: "select",
+            name: "orderState",
+            placeholder: "请选择订单状态",
+            data: orderMaterialStatus,
+            cols: 4,
+            value: null
+        },
+        {
+            type: "select",
+            name: "company",
+            placeholder: "请选择材料商",
+            data: null,
+            cols: 4,
+            value: null
+        },
+        {
+            type: "group",
+            name: "group",
+            placeholder: "请输入",
+            cols: 6,
+            data: [
+                {label: "楼盘名称", value: 0},
+                {label: "客户", value: 1},
+                {label: "工长", value: 2},
+                {label: "材料订单编号", value: 3}
+            ],
+            value: {
+                select: 0,
+                text: null
+            }
+        },
+        {
+            type: "button",
+            name: "search",
+            text: "查询"
+        }
+    ];
+
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    //切换的tab待审核，已审核
+    public pageType: number = 1;
+    //默认tab
+    public defaultSwitchRadio: any;
+
+    public materialList;
+    //材料商的所有数据
+    public companyList: Array<any>;
+    //选中的材料商
+    public company: any;
+
+    public auditState: number;
+
+    //订单状态
+    public orderState: any;
+    //输入文本查询
+    public name: string;
+    public customerName: string;
+    public memberName: string;
+    public materialOrderNo: string;
+
+
+    constructor(private settleMaterialOrderService: SettleMaterialOrderService,
+                private settleMaterialWageService: SettleMaterialWageService,
+                private router: Router,
+                private warn: WarningService,
+                private activatedRoute: ActivatedRoute,
+    ) {
+    }
+
+    ngOnInit() {
+        this.title = "材料订单";
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['pageType']) {
+                this.pageType = params['pageType'];
+            }
+        });
+
+        //加载材料商信息
+        this.getMaterialList();
+
+
+        this.settleMaterialOrderService.needAudit()
+            .then(data => {
+                this.auditState = data.audit;
+                return true;
+            })
+            .catch(err => {
+                this.warn.onMsgError(err);
+                return false;
+            })
+            .then(res => {
+                console.log(res);
+                this.changeData();
+            });
+        //根据地址栏重新渲染数据
+        this.activatedRoute.queryParams.subscribe((params) => {
+            if (params) {
+                this.defaultSwitchRadio = this.pageType === 1 ? this.radioSwitch[0] : this.radioSwitch[1];
+
+                this.auditState = params["auditState"] ? Number(params["auditState"]) : 0;
+
+                if (params['page']) {
+                    this.pageNo = params['page'] > 0 ? params['page'] : Default.PAGE.PAGE_NO;
+                }
+                if (params['company']) {
+                    this.company = params['company'] ? params['company'] : null;
+                }
+                if (params['name']) {
+                    this.name = params['name'];
+                    this.forms[2].value.select = this.forms[2].data[0].value;
+                    this.forms[2].value.text = this.name;
+                }
+                if (params['customerName']) {
+                    this.customerName = params['customerName'];
+                    this.forms[2].value.select = this.forms[2].data[1].value;
+                    this.forms[2].value.text = this.customerName;
+                }
+                if (params['memberName']) {
+                    this.memberName = params['memberName'];
+                    this.forms[2].value.select = this.forms[2].data[2].value;
+                    this.forms[2].value.text = this.memberName;
+                }
+                if (params['materialOrderNo']) {
+                    this.materialOrderNo = params['materialOrderNo'];
+                    this.forms[2].value.select = this.forms[2].data[3].value;
+                    this.forms[2].value.text = this.materialOrderNo;
+                }
+                this.changeData();
+            }
+        });
+    }
+
+
+    //拉取所有的材料商数据
+    getMaterialList() {
+        this.settleMaterialWageService.getMaterialSupplierList()
+            .then((data: any) => {
+                if (data && data.length > 0) {
+                    data.forEach(d => {
+                        d["content"] = d.companyName
+                    });
+                    this.companyList = data;
+                }
+                this.companyList.unshift({id: '', content: '全部材料商'});
+                this.forms[1].data = this.companyList;
+                if (this.company) {
+                    this.forms[0].value = this.forms[0].data.filter(d => d.id === parseInt(this.company))[0];
+                }
+            })
+            .catch(err => {
+                this.warn.onMsgError(err);
+            });
+    }
+
+
+    // 状态
+    getState(state: number) {
+        return getMaterialState(state);
+    }
+
+
+    //切换页面radio
+    handleSwitch(type: number) {
+        this.pageType = type;
+        this.forms[2].value.select = this.forms[2].data[0].value;
+        this.forms[2].value.text = null;
+        this.cleanSelectInfo();
+        this.cleanInputInfo();
+        this.resetData();
+
+    }
+
+    //搜索回调
+    handleForm(e: any) {
+        let that = this;
+        if (e && e.name === this.forms[3].name) {
+            if (e.value) {
+                that.cleanInputInfo();
+                let maps = e.value;
+                if (maps && maps.size > 0) {
+                    maps.forEach((map, key) => {
+                        if (key === this.forms[2].name) {
+                            that.getInfoBySwitch(map.select, map.text);
+                        }
+                    });
+                    this.resetData();
+                }
+            }
+        }
+    }
+
+    getInfoBySwitch(type: number, info: string) {
+        switch (type) {
+            case this.forms[2].data[0].value:
+                this.name = info;
+                break;
+            case this.forms[2].data[1].value:
+                this.customerName = info;
+                break;
+            case this.forms[2].data[2].value:
+                this.memberName = info;
+                break;
+            case this.forms[2].data[3].value:
+                this.materialOrderNo = info;
+                break;
+            default:
+                break;
+        }
+    }
+
+    handleSelect(e: any) {
+        if (e && e.name === this.forms[0].name) {
+            this.orderState = e.value ? e.value.id : null;
+        } else if (e && e.name === this.forms[1].name) {
+            this.company = e.value ? e.value.id : null;
+        }
+        this.resetData();
+    }
+
+    //重置页码
+    resetData() {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changePage();
+    }
+
+    //清空输入
+    cleanInputInfo() {
+        this.name = null;
+        this.customerName = null;
+        this.memberName = null;
+        this.materialOrderNo = null;
+    }
+    //清空选择项
+    cleanSelectInfo(){
+        this.orderState = null;
+        this.forms[0].value = null;
+        this.company = null;
+        this.forms[1].value = null;
+
+    }
+
+
+    //页面交换
+    changePage() {
+        this.router.navigate(['./'],
+            {
+                queryParams: {
+                    pageType: this.pageType,
+                    orderState: this.orderState,
+                    company: this.company,
+                    page: this.pageNo,
+                    name: this.name,
+                    customerName: this.customerName,
+                    memberName: this.memberName,
+                    materialOrderNo: this.materialOrderNo,
+                    auditState: this.auditState
+                }, relativeTo: this.activatedRoute
+            });
+    }
+
+
+    btoa(id: string) {
+        return btoa(id);
+    }
+
+
+    changeData() {
+        let params = {
+            pageSize: this.pageSize,
+            page: this.pageNo
+        };
+
+
+        if (this.auditState == 1) {
+            params['type'] = this.pageType;
+        } else {
+            params['type'] = 3;
+        }
+        if (this.company) {
+            params['materialId'] = this.company;
+        }
+        if (this.orderState) {
+            params['state'] = this.orderState;
+        }
+
+        if (this.name) {
+            params["name"] = this.name.trim();
+        }
+        if (this.customerName) {
+            params["customerName"] = this.customerName.trim();
+        }
+        if (this.memberName) {
+            params["memberName"] = this.memberName.trim();
+        }
+        if (this.materialOrderNo) {
+            params["materialOrderNo"] = this.materialOrderNo.trim();
+        }
+
+        this.settleMaterialOrderService.getMaterialOrders(params)
+            .then(data => {
+                this.total = data.total;
+                this.materialList = data.list
+            })
+            .catch(err => {
+                this.warn.onMsgError(err);
+            })
+    }
+
+    getTypeName(type: number) {
+       return getOrderByType(type);
+    }
+
+    getCountPrice(material) {
+        return Number(plus(material.totalPrice,material.freight));
+    }
+}
+

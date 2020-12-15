@@ -1,0 +1,61 @@
+<div class="master-warp"> 
+	<div>
+        <rev-title [title]="title"></rev-title>
+	</div>
+	<div class="mt-24">
+		<radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+	</div>
+	<div class="mt-16">
+		<nz-table 
+			[nzData]="restrictLsit" 
+			nzSize="middle" 
+			[nzFrontPagination]="false" 
+			[nzShowPagination]="false" 
+			#restrictTable 
+			nzBordered="true">
+			<thead>
+				<tr>
+					<th width="30%">类别名称</th>
+					<th width="20%">限制开单类型</th>
+					<th width="20%">编辑时间</th>
+					<th width="20%">编辑账号</th>
+					<th width="10%">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let data of restrictTable.data">
+					<td [title]="data.name?data.name:''">
+						{{data.name?data.name:'--'}}
+					</td>
+					<td [title]="getTypeName(data.type)">
+						{{getTypeName(data.type)}}
+					</td>
+					<td>
+						{{data.modifyTime | date:'yy-MM-dd HH:mm'}}
+					</td>
+					<td [title]="data.account?data.account:''">
+						{{data.account?data.account:'--'}}
+					</td>
+					<td>
+						<a href="javascript:void(0)" (click)="limitModal(data.type,data.id)">限制</a>
+					</td>
+				</tr>
+			</tbody>
+		</nz-table>
+	</div>
+</div>
+
+<!---限制弹窗--->
+<nz-modal [(nzVisible)]="isLimitVisible" [nzTitle]="'限制'" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+    <form nz-form [formGroup]="limitForm">
+        <nz-form-item>
+            <nz-form-control>
+				<nz-radio-group [(ngModel)]="limitOrder" formControlName="limitOrder">
+					<label nz-radio nzValue="2">标品订单</label>
+					<label nz-radio nzValue="3">定制订单</label>
+					<label nz-radio nzValue="1">不限制</label>
+				</nz-radio-group>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</nz-modal>

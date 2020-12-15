@@ -1,0 +1,126 @@
+<div class="master">
+    <div class="master-head">
+        <rev-title [title]="title" [buttons]="buttons" [show]="true" (handleName)="handleName($event)"></rev-title>
+    </div>
+
+    <div class="master-warp">
+        <div nz-row class="mt-24">
+            <div nz-col nzSpan="8">
+                <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+            </div>
+            <div nz-col nzSpan="12" nzOffset="4">
+                <div nz-row nzType="flex" nzJustify="end">
+                    <div nz-col nzSpan="5">
+                        <nz-select style="width: 100%;" [nzPlaceHolder]="'请选择活动状态'" nzAllowClear
+                                   (ngModelChange)="modelStateChange($event)" [ngModel]="state">
+                            <nz-option [nzValue]="a.key" [nzLabel]="a.value"
+                                       *ngFor="let a of activityStates"></nz-option>
+                        </nz-select>
+                    </div>
+                    <div nz-col nzSpan="5" class="ml-8">
+                        <nz-select style="width: 100%;" [nzPlaceHolder]="'请选择材料商'" nzAllowClear
+                                   (ngModelChange)="modelCompanyChange($event)" [ngModel]="materialId">
+                            <nz-option [nzValue]="c.id" [nzLabel]="c.companyName"
+                                       *ngFor="let c of companyes"></nz-option>
+                        </nz-select>
+                    </div>
+                    <div nz-col nzSpan="9" class="ml-8">
+                        <input nz-input placeholder="请输入活动名称" [(ngModel)]="activityName">
+                    </div>
+                    <div nz-col nzSpan="2" class="ml-8">
+                        <button nz-button nzType="primary" (click)="resetData()">查询</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div nz-row class="mt-16">
+        <nz-table [nzData]="promotions" nzSize="middle" [nzTotal]="total" [nzTitle]="header"
+                  [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzFrontPagination]="false"
+                  (nzPageIndexChange)="changeData()" [nzShowPagination]="true">
+            <thead>
+            <tr>
+                <th nzShowCheckbox [(nzChecked)]="allChecked"
+                    [nzIndeterminate]="indeterminate"
+                    (nzCheckedChange)="checkAll($event)"></th>
+                <th>编号</th>
+                <th>活动名称</th>
+                <th>材料商</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>活动状态</th>
+                <th>编辑时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let p of promotions;let i = index">
+                <td [(nzChecked)]="p.checked" nzShowCheckbox
+                    (nzCheckedChange)="refreshStatus()"></td>
+                <td><span>{{'0'.repeat(4 - ((i+1+(pageNo - 1)*pageSize)+'').length)+(i+1+(pageNo - 1)*pageSize)}}</span></td>
+                <td [title]="p.activityName"><span>{{p.activityName}}</span></td>
+                <td [title]="p.companyName"><span>{{p.companyName}}</span></td>
+                <td><span>{{p.startTime | date:'yyyy-MM-dd HH:mm'}}</span></td>
+                <td><span>{{p.endTime?(p.endTime | date:'yyyy-MM-dd HH:mm'):'--'}}</span></td>
+                <td><span>{{getStatusName(getPromotionByTime(p))}}</span></td>
+                <td><span>{{p.modifyTime | date:'yyyy-MM-dd HH:mm'}}</span></td>
+                <td>
+                    <a href="javascript:void(0)" *ngIf="getStateIsTrue(1,4)"
+                       nz-popconfirm nzTitle="确认提交该活动吗?" nzOkText="提交"
+                       (nzOnConfirm)="submitItem(p.id,p.materialId)"
+                       (nzOnCancel)="cancel()" nzPlacement="topLeft">提交审核</a>
+
+                    <a href="javascript:void(0)" class="ml-8" *ngIf="getStateIsTrue(1,4)" (click)="detailItem(p)">编辑</a>
+
+                    <a href="javascript:void(0)" class="ml-8" *ngIf="getStateIsTrue(1,4)"
+                       nz-popconfirm nzTitle="确定删除活动吗?" nzOkText="删除"
+                       (nzOnConfirm)="deleteItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">删除</a>
+
+                    <a href="javascript:void(0)" *ngIf="getStateIsTrue(2)"
+                       nz-popconfirm nzTitle="确定撤回该活动审核申请吗?" nzOkText="撤回"
+                       (nzOnConfirm)="recallItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">撤回</a>
+
+                    <a href="javascript:void(0)" *ngIf="getStateIsTrue(3)"
+                       nz-popconfirm nzTitle="确定下架该活动吗?" nzOkText="下架"
+                       (nzOnConfirm)="removeItem(p.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft">下架</a>
+
+                    <a href="javascript:void(0)" class="ml-8" *ngIf="getStateIsTrue(2,3)" (click)="detailItem(p)">详情</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+
+
+<ng-template #header>
+    <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(1,4)"
+            nz-popconfirm nzTitle="确认提交该活动吗?" nzOkText="提交"
+            (nzOnConfirm)="submitItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">提交审核
+    </button>
+    <button nz-button nzType="danger" class="ml-8"
+            [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(1,4)"
+            nz-popconfirm nzTitle="确定删除活动吗?" nzOkText="删除"
+            (nzOnConfirm)="deleteItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">删除
+    </button>
+
+    <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(2)"
+            nz-popconfirm nzTitle="确定撤回该活动审核申请吗?" nzOkText="撤回"
+            (nzOnConfirm)="recallItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">撤回
+    </button>
+
+    <button nz-button nzType="primary" [disabled]="selectItems.length === 0" *ngIf="getStateIsTrue(3)"
+            nz-popconfirm nzTitle="确定下架该活动吗?" nzOkText="下架"
+            (nzOnConfirm)="removeItems()" (nzOnCancel)="cancel()" nzPlacement="topLeft">下架
+    </button>
+
+    <span class="ml-8" *ngIf="selectItems.length > 0">已选{{selectItems.length}}项</span>
+</ng-template>
+
+
+
+
+<rev-master-common-promotion [companies]="companyes" [isVisible]="isVisible"
+                             (confirmEmitter)="handleOk($event)" [type]="1" [form]="form"
+></rev-master-common-promotion>

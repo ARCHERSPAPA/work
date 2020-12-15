@@ -1,0 +1,34 @@
+<div *ngIf="forms && forms.length > 0" class="search-bar">
+    <ng-container *ngFor="let f of forms">
+        <div class="search-bar-side" *ngIf="f.type ==='text'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+            <input nz-input placeholder="{{f.placeholder}}" [(ngModel)]="f.value"/>
+        </div>
+        <div class="search-bar-side" *ngIf="f.type === 'select'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+            <nz-select nzShowSearch [(ngModel)]="f.value" (ngModelChange)="modelSelectChanged($event,f.name)"
+             nzAllowClear [nzMode]="f.mode?f.mode:'default'" style="width:100%;"
+            [nzPlaceHolder]="f.placeholder">
+                <ng-container *ngIf="f.data && f.data.length > 0">
+                    <nz-option *ngFor="let fp of f.data"
+                               [nzValue]="fp" [nzLabel]="fp.content"></nz-option>
+                </ng-container>
+            </nz-select>
+        </div>
+        <div class="search-bar-side" *ngIf="f.type === 'button'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+            <button nz-button (click)="clickChanged($event,f.name)" nzType="primary"
+                    style="width:100%;">{{f.text?f.text:'查询'}}</button>
+        </div>
+        <div class="search-bar-side" *ngIf="f.type === 'group'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+            <nz-input-group nzCompact>
+                <nz-select [(ngModel)]="f.value.select" style="width:40%"
+                           (ngModelChange)="modelChanged($event,f.name)">
+                    <ng-container *ngIf="f.data && f.data.length > 0">
+                        <nz-option *ngFor="let fp of f.data"
+                                   [nzValue]="fp.value" [nzLabel]="fp.label"></nz-option>
+                    </ng-container>
+                </nz-select>
+                <input type="text" nz-input [(ngModel)]="f.value.text"
+                       placeholder="{{f.placeholder+getTips(f.value.select,f.data)}}" style="width:60%;">
+            </nz-input-group>
+        </div>
+    </ng-container>
+</div>

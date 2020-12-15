@@ -1,0 +1,684 @@
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { WarningService } from "../../../../service/warning.service";
+import {
+    equalZero,
+    getPromotionState,
+    getPromotionStateName,
+    getRows,
+    showItemInArray,
+    showTitleBySurvival
+} from "../../../../model/methods";
+import { ActivatedRoute, Router } from '@angular/router';
+import { Default } from "../../../../model/constant";
+import { MasterService } from "../../master.service";
+import { MasterPromotionDetailService } from "../master-promotion-detail.service";
+
+@Component({
+    selector: 'rev-master-promotion-materials',
+    templateUrl: './master-promotion-materials.component.html',
+    styleUrls: ['./../master-promotion-detail.component.scss', './master-promotion-materials.component.scss']
+})
+export class MasterPromotionMaterialsComponent implements OnInit {
+
+    public title: string;
+
+    //当前活动id
+    public aid: string;
+
+    //活动名称
+    public name: string;
+    public status: number;
+    //活动关联公司
+    public company: string;
+    //供应商id
+    public materialId: number;
+    //活动开始时间
+    public startTime: Date;
+    //活动截止时间
+    public endTime: Date;
+    // 备注
+    public remark: string;
+    //记录原始数据
+    // public initItem: any;
+    //编辑备注（复用）
+    // public editRemark:string;
+
+
+    //公司列表select
+    public companyes: any;
+
+    //校验活动输入(活动价格表单验证)
+    public resetForm: FormGroup;
+    public resetVisible: boolean = false;
+
+    public form: any;
+    public isVisible: boolean = false;
+
+    //tab切换
+    public radioSwitch: Array<any>;
+    public radio: number = 1;
+
+    //选中项目
+    public selectItems: Array<any> = [];
+    //列表渲染数据
+    public materials: any;
+    //查询相关(类别、品牌、活动内容)
+    public categoryName: string;
+    //加载时渲染
+    public loading: boolean = false;
+
+    //品牌多选
+    public brandName: Array<string> = [];
+
+    public info: any;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+
+    public allChecked: boolean = false;
+    public indeterminate: boolean = false;
+
+    //已添加材料总和
+    public masterTotal: number = 0;
+
+    //审核状态
+    public auditType: number = 1;
+    //判断是不是批量操作活动价
+    public editAllPrice: boolean = false;
+
+    //查看图片
+    public _albums: Array<any> = [];
+    public isClear: boolean;
+
+    constructor(private fb: FormBuilder,
+        private warn: WarningService,
+        private activatedRoute: ActivatedRoute,
+        private router: Router,
+        private master: MasterService,
+        private masterPromotion: MasterPromotionDetailService) {
+    }
+
+    ngOnInit() {
+        this.title = "活动材料";
+        //加载所有相关联的公司数据
+        this.loadCompanys();
+
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params["item"]) {
+                let item = JSON.parse(params["item"]);
+                // this.initItem = item;
+                this.aid = item.id;
+                this.name = item.activityName;
+                this.company = item.companyName;
+                this.materialId = item.materialId;
+                if (item.startTime) {
+                    this.startTime = new Date(item.startTime);
+                }
+                if (item.endTime) {
+                    this.endTime = new Date(item.endTime);
+                }
+                if (item.remark) {
+                    this.remark = item.remark
+                }
+                this.status = this.getPromotionStateByTime(item);
+
+                this.auditType = item.type;
+
+            }
+        })
+
+
+        this.resetForm = this.fb.group({
+            activityPrice: ['', [
+                Validators.required
+            ]]
+        })
+
+        this.radioSwitch = [
+            {
+                key: 1,
+                text: "活动材料"
+            },
+            {
+                key: 2,
+                text: "未添加"
+            }
+        ];
+
+        this.changeData();
+    }
+
+    //将日期转成时间戳
+    coverNumToDate(time: Date) {
+        return new Date(time).getTime();
+    }
+
+    //状态名称
+    getStatusName(status: number) {
+        return getPromotionStateName(status);
+    }
+
+    getPromotionStateByTime(m: any) {
+        return getPromotionState(m);
+    }
+
+    //拉取参与公司或者材料商
+    loadCompanys() {
+        this.master.getCompanys().then(res => {
+            this.companyes = res;
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+
+    //编辑活动
+    editPromote() {
+        this.isVisible = true;
+        this.form = {
+            name: this.name,
+            remark: this.remark,
+            companyId: this.materialId,
+            startTime: this.startTime,
+            endTime: this.endTime
+        }
+    }
+
+    //基础信息弹出框取消
+    handleCancel() {
+        this.isVisible = false;
+    }
+
+    //基础信息弹出框确定
+    handleOk(form: any) {
+        // console.log(form);
+        let params = {};
+        params["id"] = this.aid;
+        params["materialId"] = form["companyId"];
+        params["activityName"] = form["name"];
+        params["startTime"] = new Date(form["startTime"]).getTime();
+        if (form["endTime"]) {
+            params["endTime"] = new Date(form["endTime"]).getTime();
+        } else {
+            params["endTime"] = null;
+        }
+        if (form["remark"]) {
+            params["remark"] = form["remark"];
+        }
+        // this.req.doPost({
+        //     url: "promotionUpdate",
+        //     data: params,
+        //     success: (res => {
+        //         if (res && res.code == 200) {
+        //             this.warn.onMsgSuccess(res.msg || Messages.SUCCESS.DATA);
+        //             this.name = params["activityName"];
+        //             let cp = this.companyes.filter(c => c.id === params["materialId"])
+        //             if (cp && cp.length === 1) {
+        //                 this.company = cp[0]["companyName"];
+        //             }
+        //             this.startTime = new Date(params["startTime"]);
+        //             if (params["endTime"]) {
+        //                 this.endTime = new Date(params["endTime"]);
+        //             } else {
+        //                 this.endTime = null;
+        //             }
+        //             if (params["remark"]) {
+        //                 this.remark = params["remark"]
+        //             }
+        //             this.status = this.getPromotionStateByTime({startTime: this.startTime, endTime: this.endTime});
+        //         } else {
+        //             this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        //         }
+        //         this.handleCancel();
+        //     })
+        // })
+        this.masterPromotion.updateMasterPromotionMaterials(params).then(msg => {
+            this.handleCancel();
+            this.warn.onMsgSuccess(msg);
+            this.name = params["activityName"];
+            let cp = this.companyes.filter(c => c.id === params["materialId"])
+            if (cp && cp.length === 1) {
+                this.company = cp[0]["companyName"];
+            }
+            this.startTime = new Date(params["startTime"]);
+            if (params["endTime"]) {
+                this.endTime = new Date(params["endTime"]);
+            } else {
+                this.endTime = null;
+            }
+            if (params["remark"]) {
+                this.remark = params["remark"]
+            }
+            this.status = this.getPromotionStateByTime({ startTime: this.startTime, endTime: this.endTime });
+        }).catch(err => {
+            this.handleCancel();
+            this.warn.onMsgError(err);
+        })
+    }
+
+
+    initData() {
+        this.loadData().then(data => {
+            this.materials = data["list"];
+            if (this.radio === 1) {
+                this.masterTotal = data["total"] ? data["total"] : 0;
+
+            }
+            this.total = data["total"];
+            this.selectItems = [];
+            this.refreshStatus();
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //异步加载
+    changeData() {
+        this.loadData().then(data => {
+            this.materials = data["list"];
+            if (this.materials && this.materials.length > 0) {
+                this.materials.reverse().forEach((order, index) => {
+                    getRows(this.materials, index);
+                })
+                this.materials.reverse();
+            }
+            if (this.radio === 1) {
+                this.masterTotal = data["total"] ? data["total"] : 0;
+            }
+            this.total = data["total"];
+            this.selectItems = [];
+            this.isClear = false;
+            this.refreshStatus();
+        }).catch(err => {
+            this.warn.onMsgError(err);
+        })
+    }
+
+    //拉取数据
+    loadData(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this.aid) {
+                let params = {}, reqUrl;
+                params["page"] = this.pageNo;
+                params["pageSize"] = this.pageSize;
+                if (this.categoryName) {
+                    params["categoryName"] = this.categoryName.trim();
+                }
+                if (this.brandName && this.brandName.length > 0) {
+                    params["brandName"] = this.brandName
+                }
+                if (this.info) {
+                    let infos = this.info;
+                    for (let key in infos) {
+                        if (infos[key]) {
+                            params[key] = infos[key].trim();
+                        }
+                    }
+                }
+                if (this.radio === 1) {
+                    reqUrl = "activityMasterListIn";
+                    params["id"] = this.aid;
+                } else {
+                    reqUrl = "activityMasterListNo";
+                    params["id"] = this.aid;
+                    params["materialId"] = this.materialId;
+                }
+                this.loading = true;
+                // this.req.doPost({
+                //     url: reqUrl,
+                //     data: params,
+                //     success: (res => {
+                //         this.loading = false;
+                //         if (res && res.code == 200) {
+                //             resolve(res.data);
+                //         } else {
+                //             reject(res.msg || Messages.FAIL.DATA);
+                //         }
+                //     })
+                // })
+                this.masterPromotion.tabMasterPromotionMaterials(reqUrl, params).then(data => {
+                    this.loading = false;
+                    resolve(data);
+                }).catch(err => {
+                    this.loading = false;
+                    reject(err);
+                })
+            }
+        })
+    }
+
+    //按类别搜索
+    handleCategory(e: any) {
+        this.categoryName = e.categoryName;
+        this.brandName = [];
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+    //按品牌搜索
+    handleBrand(e: any) {
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.brandName = e;
+        this.changeData();
+    }
+
+    //按指定标准搜索
+    handleSearch(e: any) {
+        this.info = e;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changeData();
+    }
+
+
+    /**
+     * 添加材料到活动项目中去
+     * @param aid 活动id
+     * @param ap 活动价格
+     * @param ids 添加的ids
+     * @param type 区别添加类别 1：直接添加，2覆盖添加
+     */
+    addMaterial(aid, forms) {
+        if (aid && forms.length > 0) {
+            let params = {
+                activityId: aid,
+                materialAndPriceForm: forms
+            };
+            this.masterPromotion.addMasterPromotionMaterials(params).then(msg => {
+                this.warn.onMsgSuccess(msg);
+                this.resetLoadData(forms, this.materials);
+                this.masterTotal = this.masterTotal + forms.length;
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+
+    }
+
+    //删除或者添加时重新拉取数据
+    resetLoadData(ids, materials) {
+        if (ids && materials && ids.length === materials.length) {
+            this.pageNo = this.pageNo - 1;
+            if (this.pageNo < Default.PAGE.PAGE_NO) {
+                this.pageNo = Default.PAGE.PAGE_NO;
+            }
+            this.changeData();
+        } else {
+            this.changeData();
+        }
+    }
+
+
+    //tab 切换
+    handleSwitch(e: any) {
+        this.radio = e;
+        this.categoryName = '';
+        this.brandName = [];
+        this.info = '';
+        this.isClear = true;
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.total = Default.PAGE.PAGE_TOTAL;
+        this.changeData();
+    }
+
+
+    //全选
+    checkAll(e) {
+        this.allChecked = e;
+        this.materials.forEach(m => {
+            m["checked"] = this.allChecked;
+        });
+        this.refreshStatus();
+    }
+
+    //选择某一项
+    refreshStatus() {
+        let allChecked = false,
+            allUnChecked = false;
+
+        if (this.materials && this.materials.length > 0) {
+            allChecked = this.materials.every(m => m.checked === true);
+            allUnChecked = this.materials.every(m => !m.checked);
+            this.allChecked = allChecked;
+            this.indeterminate = (!allChecked) && (!allUnChecked);
+            this.selectItems = this.materials.filter(m => m.checked === true);
+        } else {
+            this.allChecked = allUnChecked;
+        }
+
+        this.radioSwitch[0].text = `活动材料${this.masterTotal > 0 ? '（' + this.masterTotal + '）' : ''}`;
+
+    }
+
+    //提交确认
+    confirm() {
+        let ids = [this.aid];
+        this.submitMaster(...ids);
+    }
+
+    //撤回
+    backItem() {
+        this.backPromotions(1, this.aid);
+    }
+
+    //下架
+    underItem() {
+        this.backPromotions(2, this.aid);
+    }
+
+    /**
+     * 撤回与下架共用
+     * @param type 1:撤回 2：下架
+     * @param ids
+     */
+    backPromotions(type, ...ids) {
+        if (ids && ids.length > 0) {
+            let params = {
+                recallAndOut: type,
+                ids: ids
+            };
+            this.masterPromotion.backMasterPromotions(params).then(msg => {
+                this.warn.onMsgSuccess(msg);
+                this.router.navigate(["../list"], { relativeTo: this.activatedRoute });
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+
+    //删除活动材料
+    deleteMaster(...ids) {
+        if (ids && ids.length > 0) {
+            this.masterPromotion.deleteMasterPromotionMaterials({ ids: ids }).then(msg => {
+                this.warn.onMsgSuccess(msg);
+                this.resetLoadData(ids, this.materials);
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    //删除活动材料
+    removeMaster(...ids) {
+        if (ids && ids.length > 0) {
+            this.masterPromotion.removeMasterPromotionMaterials({ ids: ids }).then(msg => {
+                this.warn.onMsgSuccess(msg);
+                this.resetLoadData(ids, this.materials);
+            }).catch(err => {
+                this.warn.onMsgError(err);
+            })
+        }
+    }
+
+    //提交审核
+    submitMaster(...ids) {
+        if (ids && ids.length > 0) {
+            this.masterPromotion.auditMasterPromotion({
+                largeActivity: [{
+                    id: this.aid,
+                    materialId: this.materialId
+                }]
+            }).then(msg => {
+                this.warn.onMsgSuccess(msg);
+                this.router.navigate(["../list"], { relativeTo: this.activatedRoute });
+            }).catch(err => {
+                this.warn.onModalInfo({
+                    title: "温馨提示",
+                    content: err,
+                    ok: () => {
+                        console.log("confirm");
+                    }
+                });
+            })
+        }
+    }
+
+
+    //单个删除项目
+    deleteItem(id: number) {
+        this.deleteMaster(id);
+    }
+
+    //批量删除
+    deleteItems() {
+        let ids = this.getSelectItemById();
+        this.deleteMaster(...ids);
+    }
+
+    //审核中、已通过删除
+    removeItem(id: number) {
+        this.removeMaster(id);
+    }
+
+    removeItems() {
+        let ids = this.getSelectItemById();
+        this.removeMaster(...ids);
+    }
+
+
+
+    //添加
+    addItem(id: number, price: string) {
+        this.addMaterial(this.aid, [{ id: id, activityPrice: price }]);
+    }
+
+    //批量添加
+    addItems() {
+        let ids = this.getSelectItemByIdAndPrice();
+        this.addMaterial(this.aid, ids);
+    }
+
+
+    getSelectItemById() {
+        let ids = [];
+        if (this.selectItems && this.selectItems.length > 0) {
+            this.selectItems.forEach(s => {
+                ids.push(s.id);
+            })
+        }
+        return ids;
+    }
+    editPromotionPrice() {
+        this.resetVisible = true;
+        this.editAllPrice = true;
+    }
+    getSelectItemByIdAndPrice() {
+        let ids = [];
+        if (this.selectItems && this.selectItems.length > 0) {
+            this.selectItems.forEach(s => {
+                ids.push({
+                    id: s.id,
+                    activityPrice: s.activityPrice
+                });
+            })
+        }
+        return ids;
+    }
+
+    changeValue(e, m) {
+        console.log(e);
+        console.log("current model is", m);
+    }
+
+
+    /**
+     * 根据审核状态是否可编辑
+     * @returns {boolean}
+     */
+    getEditByType() {
+        return showItemInArray(this.auditType, [1, 4]);
+    }
+
+    /**
+     * 只能删除
+     * @returns {boolean}
+     */
+    getDelByType() {
+        return showItemInArray(this.auditType, [2, 3]);
+    }
+
+    openLarge(src: string) {
+        this._albums = [];
+        this._albums.push({ src: src, thumb: src });
+    }
+
+
+    /**
+     * 根据是否失效显示文案
+     * @param data
+     * @param survival
+     * @returns {string}
+     */
+    showTipOnTitle(data, survival) {
+        return showTitleBySurvival(data, survival);
+    }
+
+
+    handleResetCancel() {
+        this.resetVisible = false;
+        this.resetForm.reset();
+        this.editAllPrice = false;
+    }
+
+    openResetItems() {
+        this.resetVisible = true;
+    }
+    //批量操作活动价和覆盖
+    handleResetOk() {
+        if (this.resetForm.valid && !this.editAllPrice) {
+            let forms = this.getSelectItemByIdAndPrice();
+            if (forms && forms.length > 0) {
+                forms.forEach(item => {
+                    item["activityPrice"] = this.resetForm.value["activityPrice"];
+                })
+            }
+            this.addMaterial(this.aid, forms);
+            this.handleResetCancel();
+        } else if (this.resetForm.valid && this.editAllPrice) {
+            let param = {
+                ids: this.getSelectItemById(),
+                activityPrice: this.resetForm.value["activityPrice"],
+                activityId: this.aid
+            };
+            this.masterPromotion.updateMasterPromitionInPrice(param).then(res => {
+                this.changeData();
+                this.handleResetCancel();
+            }).catch(err => {
+                this.warn.onMsgSuccess(err);
+            });
+
+        }
+    }
+
+    /**
+     * 是零与空的判断和显示
+     * @param num
+     * @returns {string | number}
+     */
+    showZero(num: any) {
+        return equalZero(num, '--');
+    }
+
+
+}

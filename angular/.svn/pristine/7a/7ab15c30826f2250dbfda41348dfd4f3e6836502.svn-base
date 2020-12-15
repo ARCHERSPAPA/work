@@ -1,0 +1,75 @@
+<div class="article">
+  <div class="head">
+    <rev-title [title]="title"></rev-title>
+  </div>
+  <div nz-row class="mt-16">
+    <div nz-col nzSpan="6">
+      <radio-switch [radioSwitch]="radioSwitch"
+                    [defaultRadioSwitch]="defaultSwitchRatio"
+                    (handleSwitch)="handleSwitch($event)"></radio-switch>
+    </div>
+    <div nz-col nzSpan="10" nzOffset="8" class="text-right">
+      <rev-search-simple-bar [forms]="forms"
+                             (handleForm)="handleForm($event)"
+                             (handleSelect)="handleSelect($event)"></rev-search-simple-bar>
+    </div>
+  </div>
+  <div nz-row class="mt-16 exception">
+    <nz-table #exceptTable [nzData]="excepts" [nzBordered]="true" [nzFrontPagination]="false"
+              [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize" [nzTotal]="total" [nzLoading]="loading"
+              (nzPageIndexChange)='changeData()' nzSize="middle" [nzShowPagination]="true">
+      <thead>
+      <tr>
+        <th>编号</th>
+        <th>项目名称</th>
+        <th>客户</th>
+        <th>材料商</th>
+        <th>类型</th>
+        <th>订单金额</th>
+        <th>配送费</th>
+        <th>合计</th>
+        <th>下单工长</th>
+        <th>已提材料费占比</th>
+        <th>加后占比</th>
+        <th>状态</th>
+        <th>工长手机号</th>
+        <th *ngIf="auditState === 1">提交时间</th>
+        <th *ngIf="auditState === 2">审核时间</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+        
+      <ng-template ngFor let-data [ngForOf]="exceptTable.data">
+        <tr>
+          <td [title]="data.materialOrderNo?data.materialOrderNo:''">{{data.materialOrderNo?data.materialOrderNo:'--'}}</td>
+          <td [title]="data.customerHouseAddress?data.customerHouseAddress:''">{{data.customerHouseAddress?data.customerHouseAddress:'--'}}</td>
+          <td [title]="data.customerName?data.customerName:''">{{data.customerName?data.customerName:'--'}}</td>
+          <td [title]="data.abbreviation?data.abbreviation:''">{{data.abbreviation?data.abbreviation:'--'}}</td>
+          <td>{{getOrderName(data.type)}}</td>
+          <td [title]="data.totalPrice?data.totalPrice:''">{{(data.totalPrice?data.totalPrice:0)|number:'1.2'}}</td>
+          <td [title]="data.freight?data.freight:''" style="position: relative;">{{(data.freight?data.freight:0)|number:'1.2'}}
+            <span *ngIf="data.enterExceptionRemark" [nzTitle]="data.enterExceptionRemark" style="position: absolute;
+            right: 5px; top: 13px;" nzPlacement="top" nz-tooltip>
+              <i nz-icon type="info-circle" style="position: relative;top: -2px;"></i>
+            </span>
+
+          </td>
+          <td [title]="computedTotal(data.totalPrice,data.freight)">
+            {{computedTotal(data.totalPrice,data.freight) | number:'1.2'}}</td>
+          <td [title]="data.memberName?data.memberName:''">{{data.memberName?data.memberName:'--'}}</td>
+          <td [title]="data.materialRatio?data.materialRatio:''">{{data.materialRatio?data.materialRatio+'%':equalZero(data.materialRatio)}}</td>
+          <td [title]="data.houseAddress?data.houseAddress:''">{{data.allPriceRatio?data.allPriceRatio+'%':equalZero(data.allPriceRatio)}}</td>
+          <td [title]="getMaterialState(data.state)">{{getMaterialState(data.state)}}</td>
+          <td [title]="data.phone?data.phone:''">{{data.phone?data.phone:'--'}}</td>
+          <td *ngIf="auditState === 1">{{data.createTime?(data.createTime|date:'MM-dd HH:mm'):'--'}}</td>
+          <td *ngIf="auditState === 2">{{data.auditTime?(data.auditTime|date:'MM-dd HH:mm'):'--'}}</td>
+          <td><a href="javascript:void(0)" [routerLink]="['./../detail']"
+                 [queryParams]="{type:3,id:btoa(data.id),materialType:data.type,materialId:btoa(data.materialId)}">详情</a></td>
+        </tr>
+      </ng-template>
+
+      </tbody>
+    </nz-table>
+  </div>
+</div>

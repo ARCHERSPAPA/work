@@ -1,0 +1,130 @@
+<div class="ant-modal-header">
+    <h4 class="ant-modal-title">{{title}}</h4>
+    <button type="button" class="ant-modal-close" aria-label="Close" (click)="activeModal.dismiss()">
+        <span class="ant-modal-close-x"><i nz-icon type="close"></i></span>
+    </button>
+</div>
+
+<div class="ant-modal-body">
+    <!--<dl class="eng-list">-->
+        <!--<dt>-->
+            <!--<span class="w40 name">名称</span>-->
+            <!--<span class="w20">单价</span>-->
+            <!--<span class="w15">数量</span>-->
+            <!--<span class="w20">合计/实收</span>-->
+        <!--</dt>-->
+        <!--&lt;!&ndash;主材&ndash;&gt;-->
+        <!--<div *ngIf="data && data.length > 0" class="eng-content">-->
+            <!--<dd *ngFor="let d of data">-->
+                <!--<div *ngIf="d.type === 2 || d.type === 3 || d.type === 4">-->
+                    <!--<p class="title">-->
+                        <!--<span class="w40 name" [title]="d.name" (click)="toggleAll(d.infos,toggleCheck(d.infos))"><span class="checkbox" [ngClass]="{'checked':toggleCheck(d.infos)}"></span>{{d.name}}</span>-->
+                        <!--<span class="w50 count">小计 {{getTotal(d.type,true) | number:'1.2'}}</span>-->
+                    <!--</p>-->
+                    <!--<p *ngFor="let t of d.infos" >-->
+                        <!--<span class="w40 name" [title]="t.name" (click)="toggleInfo(t)"><span class="checkbox" [ngClass]="{'checked':t.engineerYn}"></span>{{t.name}}</span>-->
+                        <!--<span class="w20">{{t.univalent}}</span>-->
+                        <!--<span class="w15">{{t.num}}</span>-->
+                        <!--<span class="w20">{{t.totalPrice}}</span>-->
+                    <!--</p>-->
+                <!--</div>-->
+            <!--</dd>-->
+        <!--</div>-->
+
+    <!--</dl>-->
+
+    <!--<div class="eng-end">-->
+        <!--<p>工程管理费（默认基础装修项目必需包含在内）</p>-->
+        <!--<p>-->
+            <!--<span class="unchecked">未勾选项目{{getTotalUnchecked()|number:'1.2'}}</span>-->
+            <!--<span class="checked">应收 {{(getTotal(2,true)+getTotal(3,true)+getTotal(4,true)+getTotalSeries())|number:'1.2'}}*{{radio}} = {{getTotalChecked()|number:'1.2'}}</span>-->
+        <!--</p>-->
+    <!--</div>-->
+    <nz-table #engineerTable [nzData]="dataSource" [nzScroll]="{ y: '400px' }"
+              [nzShowPagination]="false" [nzFrontPagination]="false"
+              [nzFooter]="footerTemp" [nzSize]="'small'">
+        <thead>
+            <tr>
+                <th colspan="2" style="width:10%;text-align: left">选择</th>
+                <th colspan="3" style="width:50%;text-align: left">名称</th>
+                <th colspan="2" style="width:40%;text-align: left">小计</th>
+            </tr>
+        </thead>
+        <tbody>
+        <ng-template ngFor let-data [ngForOf]="engineerTable.data">
+            <tr *ngIf="showSubByType(data.type) && data.infoMaps && data.infoMaps.length > 0">
+                <td width="2%" nzShowExpand [(nzExpand)]="data.expand"></td>
+                <td width="3%" nzShowCheckbox [(nzChecked)]="data.checked" [nzIndeterminate]="data.indeterminate"
+                    (nzCheckedChange)="engineerChange($event,data.infoMaps,data.type)"></td>
+                <td width="55%" colspan="3">{{data.name}}</td>
+                <td width="40%" colspan="2">小计：{{getTotalByMaps(data.infoMaps,true)|number:'1.2'}}</td>
+            </tr>
+            <tr *ngIf="showSubByType(data.type) && data.infoMaps && data.infoMaps.length > 0" [nzExpand]="data.expand">
+                <td width="5%" colspan="2"></td>
+                <td colspan="5" width="95%">
+                    <nz-table #middleTable [nzData]="data.infoMaps" [nzShowPagination]="false"
+                              [nzFrontPagination]="false" [nzSize]="'small'">
+                        <tbody>
+                            <ng-template ngFor let-data [ngForOf]="middleTable.data">
+                                <tr *ngIf="data.infos && data.infos.length > 0">
+                                    <td width="2%" nzShowExpand [(nzExpand)]="data.expand"></td>
+                                    <td width="3%" nzShowCheckbox [(nzChecked)]="data.checked" [nzIndeterminate]="data.indeterminate"
+                                        (nzCheckedChange)="middleChange($event,data,data.type)"></td>
+                                    <td width="45%" colspan="3" *ngIf="data.isPlan !== 1">{{data.name}}</td>
+                                    <td width="45%" colspan="3" *ngIf="data.isPlan === 1">套餐：{{data.name}}</td>
+                                    <td width="40%" colspan="2" *ngIf="data.isPlan !== 1">小计：{{getTotalByInfos(data,data.infos,true)|number:'1.2'}}</td>
+                                    <td width="40%" colspan="2" *ngIf="data.isPlan === 1">小计：{{getTotalByInfos(data,data.infos,true)|number:'1.2'}}（{{(data.planPrice | number:'1.2')}}×{{data.planNum}}{{data.planUnit?data.planUnit:'套'}}）</td>
+                                </tr>
+                                <tr *ngIf="data.infos && data.infos.length > 0" [nzExpand]="data.expand">
+                                    <td width="5%" colspan="2"></td>
+                                    <td colspan="5" width="95%">
+                                        <nz-table #innerTable [nzData]="data.infos" [nzShowPagination]="false"
+                                                  [nzFrontPagination]="false" [nzSize]="'small'">
+                                            <thead>
+                                                <tr>
+                                                    <th width="5%" *ngIf="data.isPlan !== 1">选择</th>
+                                                    <th width="55%">名称</th>
+                                                    <th width="15%">单价</th>
+                                                    <th width="10%">数量</th>
+                                                    <th width="15%">合计/实收</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let inner of innerTable.data">
+                                                    <td *ngIf="data.isPlan !== 1" nzShowCheckbox [(nzChecked)]="inner.engineerYn" (nzCheckedChange)="checkedChange($event,data,data.type)"></td>
+                                                    <td>{{inner.name}}</td>
+                                                    <td>{{inner.univalent}}</td>
+                                                    <td>{{inner.num}}</td>
+                                                    <td *ngIf="data.type === 4">{{inner.totalPrice}}</td>
+                                                    <td *ngIf="data.type !== 4">{{converseToDecimal(inner.univalent,inner.num)}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </nz-table>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </tbody>
+                    </nz-table>
+                </td>
+            </tr>
+        </ng-template>
+        </tbody>
+    </nz-table>
+</div>
+<ng-template #footerTemp>
+    <div class="eng-footer">
+        <nz-alert nzType="warning" [nzMessage]="messageTemp"></nz-alert>
+    </div>
+</ng-template>
+<ng-template #messageTemp>
+    <div nz-row>
+        <div nz-col nzSpan="24">工程管理费（默认基础装修项目必需包含在内）</div>
+        <div nz-col nzSpan="12">未勾选项目金额：{{getTotalAll(false)|number:'1.2'}}</div>
+        <div nz-col nzSpan="12">应收：{{(getTotalAll(true)|number:'1.2')+'*'+radio+'='+ ((getTotalAll(true)*radio)|number:'1.2')}}</div>
+    </div>
+</ng-template>
+
+<div class="ant-modal-footer">
+    <button type="button" class="ant-btn ant-btn-default" (click)="activeModal.dismiss()">取消</button>
+    <button type="button" class="ant-btn ant-btn-primary" (click)="confirm($event)">确定</button>
+</div>

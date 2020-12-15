@@ -1,0 +1,135 @@
+<!-- 套餐弹出框 -->
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="getTitle(type)"
+          (nzOnCancel)="handleCancel()" [nzFooter]="footer" nzWidth='700'>
+  <form nz-form [formGroup]="validateForm">
+    <!--套餐名称-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzRequired nzFor="name">套餐名称</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <input nz-input formControlName="packName" id="packName" placeholder="请输入套餐名称"
+               maxlength="30" [(ngModel)]="packName"/>
+        <nz-form-explain *ngIf="validateForm.get('packName').dirty && validateForm.get('packName').errors">
+          <ng-container *ngIf="validateForm.get('packName').hasError('required')">
+            请填写1~30位字符
+          </ng-container>
+          <ng-container *ngIf="validateForm.get('packName').hasError('minlength')">
+            请填写1~30位字符
+          </ng-container>
+          <ng-container *ngIf="validateForm.get('packName').hasError('maxlength')">
+            请填写1~30位字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+    <!--材料商选择-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzRequired nzFor="company">参与公司</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <nz-select id="packSupplyId" nzShowSearch formControlName="packSupplyId" nzPlaceHolder="请选择参与公司"
+                   [(ngModel)]="packSupplyId" [nzDisabled]="disabledCompany">
+          <nz-option [nzValue]="c.id" [nzLabel]="c.companyName" *ngFor="let c of companies"></nz-option>
+        </nz-select>
+        <nz-form-explain *ngIf="validateForm.get('packCombos').dirty && validateForm.get('packCombos').errors">
+          <ng-container *ngIf="validateForm.get('packCombos').hasError('required')">
+            项目必选
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--套系选择-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzFor="company">适用套系</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <nz-select id="packCombos" formControlName="packCombos" nzPlaceHolder="请选择适用套系"
+                   [(ngModel)]="packCombos" nzMode="multiple">
+          <nz-option [nzValue]="c" [nzLabel]="c.comboName" *ngFor="let c of combos"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--单位-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzFor="company">单位</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <input nz-input formControlName="packUnit" id="packUnit" placeholder="请输入套餐单位"
+               maxlength="10" [(ngModel)]="packUnit"/>
+        <nz-form-explain *ngIf="validateForm.get('packUnit').dirty && validateForm.get('packUnit').errors">
+          <ng-container *ngIf="validateForm.get('packUnit').hasError('maxlength')">
+            请填写10位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--销售价格-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzFor="company">销售价</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <nz-input-number [(ngModel)]="packSalePrice" id="packSalePrice" formControlName="packSalePrice"
+                         [nzMin]="0" [nzMax]="999999" [nzStep]="0.01" [nzPlaceHolder]="'请输入销售价'"
+                         style="width:100%;" [nzPrecision]="2"></nz-input-number>
+      </nz-form-control>
+    </nz-form-item>
+    <!--供货价-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzRequired nzFor="company">供货价</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <nz-input-number [(ngModel)]="packSupplyPrice" id="packSupplyPrice" formControlName="packSupplyPrice"
+                         [nzMin]="0" [nzMax]="999999" [nzStep]="0.01" [nzPlaceHolder]="'请输入供货价'"
+                         style="width:100%;" [nzPrecision]="2"></nz-input-number>
+        <nz-form-explain *ngIf="validateForm.get('packSupplyPrice').dirty && validateForm.get('packSupplyPrice').errors">
+          <ng-container *ngIf="validateForm.get('packSupplyPrice').hasError('required')">
+            项目必填
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+	</nz-form-item>
+	<!--活动价-->
+    <nz-form-item>
+		<nz-form-label [nzSm]="4" [nzXs]="24" nzFor="company">活动价</nz-form-label>
+		<nz-form-control [nzSm]="20" [nzXs]="24">
+			<div nz-row [nzGutter]="8">
+				<div nz-col [nzSpan]="8">
+					<nz-input-number [(ngModel)]="packActivityPrice" id="packActivityPrice" formControlName="packActivityPrice"
+						   [nzMin]="0" [nzMax]="999999" [nzStep]="0.01" [nzPlaceHolder]="'请输入活动价'"
+						   style="width:100%;" [nzPrecision]="2"></nz-input-number>
+				</div>
+				<div nz-col [nzSpan]="8">
+					<nz-date-picker [nzPlaceHolder]="'请选择开始时间'" nzShowTime formControlName="startTime" nzShowToday="false"
+							[nzStyle]="{'width':'100%'}" [(ngModel)]="startTime"
+							[nzDisabledDate]="disabledStartDate"
+							[nzFormat]="'yyyy-MM-dd HH:mm'"
+							(nzOnOk)="modelChangeStartTime($event)"></nz-date-picker>
+				</div>
+				<div nz-col [nzSpan]="8">
+					<nz-date-picker [nzPlaceHolder]="'请选择结束时间'" nzShowTime formControlName="endTime" nzShowToday="false"
+							[nzStyle]="{'width':'100%'}" [(ngModel)]="endTime"
+							[nzDisabledDate]="disabledEndDate"
+							[nzFormat]="'yyyy-MM-dd HH:mm'"
+							(nzOnOk)="modelChangeEndTime($event)"></nz-date-picker>
+				</div>
+			</div>
+		</nz-form-control>
+	</nz-form-item>
+    <!--备注-->
+    <nz-form-item>
+      <nz-form-label [nzSm]="4" [nzXs]="24" nzFor="company">备注</nz-form-label>
+      <nz-form-control [nzSm]="20" [nzXs]="24">
+        <textarea formControlName="packRemark" nz-input rows="4" [(ngModel)]="packRemark"
+                  placeholder="请输入300字以内的备注" maxlength="300"></textarea>
+        <nz-form-explain *ngIf="validateForm.get('packRemark').dirty && validateForm.get('packRemark').errors">
+          <ng-container *ngIf="validateForm.get('packRemark').hasError('maxLength')">
+            请填写300位以内的字符
+          </ng-container>
+        </nz-form-explain>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
+<ng-template #footer>
+  <div nz-row>
+    <button nz-button nzType="default" (click)="handleCancel()">取消</button>
+    <button nz-button nzType="primary" [disabled]="!validateForm.valid" (click)="handleOk()">提交</button>
+  </div>
+</ng-template>

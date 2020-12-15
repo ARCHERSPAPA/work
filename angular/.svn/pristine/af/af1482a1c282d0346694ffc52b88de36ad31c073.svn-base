@@ -1,0 +1,27 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgZorroAntdModule} from 'ng-zorro-antd';
+import {SearchSimpleBarComponent} from "./search-simple-bar.component";
+import { SearchInputComponent } from './search-input/search-input.component';
+
+@NgModule({
+    declarations: [
+        SearchSimpleBarComponent,
+        SearchInputComponent
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgZorroAntdModule
+    ],
+    exports:[
+        SearchSimpleBarComponent
+    ],
+    entryComponents:[
+        SearchSimpleBarComponent
+    ]
+})
+export class SearchSimpleBarModule {
+}

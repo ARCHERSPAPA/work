@@ -1,0 +1,52 @@
+import {Component, OnInit, Input,Output,EventEmitter} from '@angular/core';
+
+@Component({
+    selector: 'rev-search-simple-bar',
+    templateUrl: './search-simple-bar.component.html',
+    styleUrls: ['./search-simple-bar.component.scss']
+})
+export class SearchSimpleBarComponent implements OnInit {
+
+    @Input() forms: any;
+    //文本输出
+    @Output() handleForm: EventEmitter<any> = new EventEmitter<any>();
+    //选项输入
+    @Output() handleSelect: EventEmitter<any> = new EventEmitter<any>();
+
+    constructor() {
+    }
+
+    ngOnInit() {
+        console.log(this.forms);
+    }
+
+
+    modelSelectChanged(e:any,name:string){
+        console.log("input changed ",e);
+        console.log("input name is",name);
+        this.handleSelect.emit({value:e,name: name});
+    }
+
+    clickChanged(e:any){
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleForm.emit(this.getInfo());
+
+    }
+
+
+    //精验输入文本的数据信息
+    getInfo(){
+        let maps = new Map();
+        if(this.forms && this.forms.length > 0){
+            let find = this.forms.filter(f => f.type ==='text');
+            if(find && find.length > 0){
+                find.forEach(f =>{
+                    maps.set(f.name,f.value);
+                })
+            }
+        }
+        return maps;
+    }
+
+}

@@ -1,0 +1,16 @@
+@import "../../../../assets/scss/mixin";
+.item-pack-table{
+  tr td,
+  tr th{
+    min-width: 120px;
+    max-width: 120px;
+    @include ellipsis;
+    span{
+      width: 100px;
+      @include ellipsis;
+    }
+  }
+}
+.delete{
+  color: #F5222D;
+}

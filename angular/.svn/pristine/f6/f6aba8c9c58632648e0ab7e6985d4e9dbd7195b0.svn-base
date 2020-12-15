@@ -1,0 +1,71 @@
+<div class="personnel">
+    <div class="person-head">
+        <rev-title [title]="title"></rev-title>
+    </div>
+    <div class="person-content">
+        <nz-table #nzTable [nzData]="examineList" [nzBordered]="true"
+                  [nzFrontPagination]="false"
+                  nzSize="middle" [nzShowPagination]='false'>
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let data of nzTable.data;let i = index">
+                <td [title]="getRenderName(data.type,data.workName)">
+                    {{getRenderName(data.type,data.workName)}}
+                </td>
+                <td *ngIf="data.type <= 3">
+                    <a href="javascript:void(0)" (click)="editItem(data)">编辑</a>
+                </td>
+                <td *ngIf="data.type === 4">
+                    <a href="javascript:void(0)" (click)="openItem(data)">编辑</a>
+                </td>
+                <td *ngIf="data.type === 5">
+                    <a href="javascript:void(0)" (click)="openItem(data)">编辑</a>
+                </td>
+            </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+
+<nz-modal [(nzVisible)]="isAutoVisible" nzTitle="自动确认设置"
+          (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk(1)"
+          [nzOkLoading]="isOkLoading">
+    <div nz-row>
+        <div nz-col nzSpan="24">
+            <div nz-col nzSpan="9" nzOffset="3" style="text-align: right">申请开工后7天自动确认</div>
+            <div nz-col nzSpan="9" nzOffset="3">
+                <label nz-checkbox [(ngModel)]="materialState">是</label>
+            </div>
+        </div>
+        <div nz-col nzSpan="24" class="mt-16">
+            <div nz-col nzSpan="9" nzOffset="3" style="text-align: right">材料订单送达后7天自动签收</div>
+            <div nz-col nzSpan="9" nzOffset="3">
+                <label nz-checkbox [(ngModel)]="costState">是</label>
+            </div>
+        </div>
+    </div>
+</nz-modal>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="材料审核流程"
+          (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk(0)"
+          [nzOkLoading]="isOkLoading">
+    <div nz-row>
+        <div nz-col nzSpan="24">
+            <div nz-col nzSpan="8" nzOffset="2" style="text-align: right">下单流程</div>
+            <div nz-col nzSpan="8" nzOffset="2">
+                <label nz-checkbox [(ngModel)]="audit">需要审核</label>
+            </div>
+        </div>
+        <div nz-col nzSpan="24" class="mt-16">
+            <div nz-col nzSpan="8" nzOffset="2" style="text-align: right">必填水印照片</div>
+            <div nz-col nzSpan="8" nzOffset="2">
+                <label nz-checkbox [(ngModel)]="watermark">是</label>
+            </div>
+        </div>
+    </div>
+</nz-modal>
+

@@ -1,0 +1,153 @@
+import { Component, OnInit } from '@angular/core';
+import qrCode from 'qrcode'
+import { Router, ActivatedRoute } from '@angular/router';
+import { RequestService } from '../../service/request.service';
+import { WarningService } from '../../service/warning.service';
+import { Messages } from '../../model/msg';
+import { atob, getMaterialState } from '../../model/methods';
+
+@Component({
+	selector: 'rev-view-materials',
+	templateUrl: './view-materials.component.html',
+	styleUrls: ['./view-materials.component.scss']
+})
+export class ViewMaterialsComponent implements OnInit {
+	public Ids;
+	public marterialList = [];
+	public orderList = [];
+	public showTable: boolean = false; // 是否展示材料结算列表
+	public wageState;
+	public status;//材料状态（审核，通过等）
+	public type;//材料类别（主材，辅材）
+	public supplierId;//材料商ID
+	constructor(
+		private req: RequestService,
+		private warn: WarningService,
+		private activatedRoute: ActivatedRoute) {
+	}
+	ngOnInit() {
+		this.activatedRoute.queryParams.subscribe(params => {
+			if(params['supplierId']){
+				this.supplierId = atob(params['supplierId']); //材料的全部打印
+				this.status= atob(params['status']);
+				this.type = atob(params['materialType']);
+				this.getAllData().then(res=>{
+					this.marterialList = res;
+					this.marterialList.forEach((v, i) => {
+						setTimeout(() => {
+							this.renderQr(i)
+						}, 400);
+					});
+				})
+			}
+			if (params && params['id']) {
+				this.Ids = atob(params['id']); 
+				this.Ids = this.Ids.split(',')
+				
+				if (params['show']) {
+					this.showTable = params['show']
+					this.wageState = params['state']
+					this.getPrintList();
+				}
+				if (!this.showTable) {
+					this.getList();
+				}
+			}
+		});
+	}
+	  //获取所有需打印的数据
+	  getAllData(): Promise<any> {
+		return new Promise((reslove, rej) => {
+		  this.req.doPost({
+			url: 'allMaterialPrint',
+			data: {
+			  supplierId: this.supplierId,
+			  type: this.type,
+			  status: this.status
+			},
+			success: res => {
+			  if (res && res.code == 200) {
+				reslove(res.data);
+			  } else {
+				this.warn.onError(res.msg || Messages.FAIL.DATA);
+			  }
+			  console.log(res)
+			}
+		  })
+		})
+	  }
+	// 打印材料结算列表
+	getPrintList() {
+		this.req.doPost({
+			url: 'printList',
+			data: {
+				orderIds: this.Ids
+			},
+			success: res => {
+				if (res && res.code == 200) {
+					this.orderList = res.data;
+					let orderPrice=0,freightPrice=0;
+					
+					this.orderList.map(v=>{
+						orderPrice+=v['totalPrice'];
+						freightPrice+=v['freight'];
+					})
+					this.orderList.push({totalPrice:orderPrice,freight:freightPrice,materialOrderNo:'合计'})
+				} else {
+					this.warn.onError(res.msg || Messages.FAIL.DATA);
+				}
+			}
+		})
+	}
+	getTypeName(type) {
+		switch(type){
+		  case 1 :      return'标准订单';
+		  case 2 :      return'定制订单';
+		  default:   return'--';
+		}
+	  }
+	  getCountPrice(material){
+		return (material.totalPrice?material.totalPrice:0)+(material.freight?material.freight:0)
+	  }
+	// 状态
+	getState(state: number) {
+		return getMaterialState(state)
+	}
+	//获取材料列表
+	getList() {
+		this.req.doPost({
+			url: 'printMaterial',
+			data: {
+				detail: this.Ids
+			},
+			success: res => {
+				if (res && res.code == 200) {
+					this.marterialList = res.data;
+					this.marterialList.forEach((v, i) => {
+						setTimeout(() => {
+							this.renderQr(i)
+						}, 400);
+					});
+				} else {
+					this.warn.onError(res.msg || Messages.FAIL.DATA);
+				}
+			}
+		})
+	}
+
+	print() {
+		window.print();
+	}
+//渲染二维码
+	renderQr(i) {
+		qrCode.toCanvas(document.getElementById(`canvas${i}`), this.marterialList[i]['sku'] ? this.marterialList[i].sku : '暂无数据', {
+			width: 230,
+			height: 230,
+			margin: 0, //白边的大小，0为无白边
+			errorCorrectionLevel: 'H'
+		}, function (error) {
+			if (error) console.error(error)
+			console.log('success!');
+		})
+	}
+}

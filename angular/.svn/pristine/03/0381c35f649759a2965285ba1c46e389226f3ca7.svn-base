@@ -1,0 +1,104 @@
+<div class="viewMasterls" *ngIf="!showTable">
+  <!--startprint--><!--注意要加上html里star和end的这两个标记--> 
+  <div class="viewMasterls-content" >
+    <ul>
+      <li *ngFor='let marter of marterialList;let i=index'>
+        <div class="qrcode">
+          <canvas [id]="'canvas'+i" ></canvas>
+          <p style="width: 230px;">打开项目详情右上角
+            菜单扫码</p>
+        </div>
+        <div class="info">
+          <p style="height: 40px; text-overflow:ellipsis;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;">
+            <span class="info-title">编号：</span>
+            <span class="info-detail">{{marter.sku?marter.sku:'--'}}</span>
+          </p>
+          <p style="height: 64px; text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;">
+            <span class="info-title">类别/品牌/名称：</span>
+            <span class="info-detail">{{marter.category?marter.category:'--'}}/{{marter.brand?marter.brand:'--'}}/{{marter.name?marter.name:'--'}}</span>
+          </p>
+          <p style="height: 64px; text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;">
+            <span class="info-title">颜色/材质/产地：</span>
+            <span class="info-detail">{{marter.color?marter.color:'--'}}/{{marter.material?marter.material:'--'}}/{{marter.origin?marter.origin:'--'}}</span>
+          </p>
+          <p style="height: 40px; text-overflow:ellipsis;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;">
+            <span class="info-title">型号：</span>
+            <span class="info-detail">{{marter.model?marter.model:'--'}}</span>
+          </p>
+          <p style="height: 40px; text-overflow:ellipsis;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;">
+            <span class="info-title">规格：</span>
+            <span class="info-detail">{{marter.spec?marter.spec:'--'}}</span>
+          </p>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+  <!--endprint--> 
+</div>
+<div class="viewMasterls" *ngIf="showTable">
+	<!--startprint--><!--注意要加上html里star和end的这两个标记--> 
+	<div class="viewMasterls-content" style="padding: 24px;">
+		<nz-table
+			#nzTable 
+			nzSize="middle"
+			[nzBordered]="true"
+			[nzFrontPagination]="false"
+			[nzShowPagination]="false"
+			[nzData]="orderList">
+			<thead>
+				<tr>
+					<th>编号</th>
+					<th>项目名称</th>
+					<th>客户</th>
+					<th>材料商</th>
+					<th>订单金额</th>
+					<th>配送费</th>
+					<th>工长</th>
+					<th>工长手机号</th>
+					<th>签收时间</th>
+					<th *ngIf="wageState == 0">申请时间</th>
+					<th *ngIf="wageState == 1">结算时间</th>
+					<th>状态</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let data of nzTable.data">
+					<td [title]="data.materialOrderNo?data.materialOrderNo:''">
+						{{data.materialOrderNo?data.materialOrderNo:'--'}}
+					</td>
+					<td [title]="data.houseAddress?data.houseAddress:''">
+						{{data.houseAddress?data.houseAddress:'--'}}
+					</td>
+					<td [title]="data.customerName?data.customerName:''">
+						{{data.customerName?data.customerName:'--'}}
+					</td>
+					<td [title]="data.materialName?data.materialName:''">
+						{{data.materialName?data.materialName:'--'}}
+					</td>
+					<td [title]="data.totalPrice || data.totalPrice == 0?data.totalPrice:''">
+						{{data.totalPrice || data.totalPrice == 0?(data.totalPrice|number:'1.2'):'--'}}
+					</td>
+					<td [title]="data.freight?data.freight:0">
+                        {{(data.freight?data.freight:0)|number:'1.2'}}
+                    </td>
+					<td [title]="data.workerName?data.workerName:''">
+						{{data.workerName?data.workerName:'--'}}
+					</td>
+					<td [title]="data.workerPhone?data.workerPhone:''">
+						{{data.workerPhone?data.workerPhone:'--'}}
+					</td>
+					<td>{{data.signingTime?(data.signingTime | date:'yy-MM-dd HH:mm'):'--'}}</td>
+					<td *ngIf="wageState == 0">{{data.submitSettlementTime?(data.submitSettlementTime | date:'yy-MM-dd HH:mm'):'--'}}</td>
+					<td *ngIf="wageState == 1">{{data.auditSettlementTime?(data.auditSettlementTime | date:'yy-MM-dd HH:mm'):'--'}}</td>
+					<td>{{getState(data.state)}}</td>
+				</tr>
+			</tbody>    
+		</nz-table>
+	</div>
+	<!--endprint-->
+</div>
+<button nz-button [nzType]="'primary'" (click)='print()'id='printBTN' >
+  打印
+</button>
+

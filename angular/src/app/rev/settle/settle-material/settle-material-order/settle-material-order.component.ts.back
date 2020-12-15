@@ -1,0 +1,384 @@
+import {Component, OnInit} from '@angular/core';
+import {btoa} from '../../../../model/methods';
+import {Default, orderMaterialStatus} from '../../../../model/constant';
+import {RequestService} from '../../../../service/request.service';
+import {WarningService} from '../../../../service/warning.service';
+import {Messages} from '../../../../model/msg';
+import {Router, ActivatedRoute} from '@angular/router';
+import {getMaterialState} from '../../../../model/methods';
+import {SettleMaterialOrderService} from '../settle-material-order/settle-material-order.service';
+import {SettleMaterialWageService} from "../settle-material-wage/settle-material-wage.service";
+
+@Component({
+    selector: 'rev-settle-material-order',
+    templateUrl: './settle-material-order.component.html',
+    styleUrls: ['./settle-material-order.component.scss']
+})
+export class SettleMaterialOrderComponent implements OnInit {
+
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    //查询相关
+    public query;
+    public state;
+    public querys;
+    public companyName;
+    // public lock = true;//用于区分回显数据
+    public companyPhone;
+    public orderState = '';
+    // public orderStateStatus;
+
+
+    // public historyData = {
+    //     querys: '',
+    //     query: '',
+    //     selectCompany: '',
+    //     pageNo: null,
+    //     serchType: 1,
+    //     companyId: '',
+    //     orderState: ''
+    // };//搜索
+    public serchType = 1;
+    // public queryType = [{
+    //     key: 1,
+    //     text: '楼盘名字'
+    // },
+    //     {
+    //         key: 2,
+    //         text: '客户'
+    //     },
+    //     {
+    //         key: 3,
+    //         text: '工长'
+    //     }, {
+    //         key: 4,
+    //         text: '材料订单编号'
+    //     }];
+    public radioSwitch = [
+        {
+            key: 1,
+            text: '待审核'
+        },
+        {
+            key: 2,
+            text: '已审核'
+        }
+    ];
+    public pageType:number = 1; //切换的tab待审核，已审核
+    //默认tab
+    public defaultSwitchRadio:any;
+    public materialList;
+    public companyStatus;
+    public auditState;
+    public title;
+
+    public selectCompany: string;
+
+
+    public forms: Array<any> = [
+        {
+            type: "select",
+            name: "orderState",
+            placeholder: "请选择订单状态",
+            data: orderMaterialStatus,
+            cols: 4,
+            value: null
+        },
+        {
+            type: "select",
+            name: "company",
+            placeholder: "请选择材料商",
+            data: null,
+            cols: 4,
+            value: null
+        },
+        {
+            type: "group",
+            name: "group",
+            placeholder: "请输入",
+            cols: 6,
+            data: [
+                {label: "楼盘名称", value: 0},
+                {label: "客户", value: 1},
+                {label: "工长", value: 2},
+                {label: "材料订单编号", value: 3}
+            ],
+            value: {
+                select: 0,
+                text: null
+            }
+        },
+        {
+            type: "button",
+            name: "search",
+            text: "查询"
+        }
+    ]
+
+
+    constructor(private settleMaterialOrderService: SettleMaterialOrderService,
+                private settleMaterialWageService: SettleMaterialWageService,
+                private router: Router,
+                private warn: WarningService,
+                private activatedRoute: ActivatedRoute,
+    ) {
+    }
+
+    ngOnInit() {
+        // this.querys = 1;
+        this.title = '材料订单'
+        this.activatedRoute.queryParams.subscribe(params => {
+            if (params && params['pageType']) {
+                this.pageType = params['pageType'];
+            }
+        });
+        // if (this.pageType == 1) {
+        //     this.defaultPage = this.radioSwitch[0]
+        // } else if (this.pageType == 2) {
+        //     this.defaultPage = this.radioSwitch[1]
+        // }
+        this.defaultSwitchRadio = this.pageType === 1? this.radioSwitch[0]: this.radioSwitch[1];
+
+        //加载材料商信息
+        this.getMaterialList();
+
+        // this.getHistory();
+        // this.settleMaterialOrderService.getMaterialSupplierList().then(res => {    //获取材料商
+        //     this.companyStatus = res;
+        //     this.companyStatus.unshift({id: '', companyName: '全部材料商'})
+        // }).catch(err => {
+        //     this.warn.onMsgError(err || Messages.FAIL.DATA);
+        // })
+
+        // this.orderStateStatus = orderMaterialStatus;
+        this.settleMaterialOrderService.needAudit().then((res) => {       //判断需要审核
+            this.auditState = res;
+            this.changeData();
+        }).catch(error => {
+            this.warn.onMsgError(error);
+        });
+    }
+
+
+    getNeedAudit(){
+        this.settleMaterialOrderService.needAudit()
+            .then(data =>{
+                this.auditState = data;
+            })
+            .catch(err =>{
+                this.warn.onMsgError(err);
+            })
+    }
+
+
+    //拉取所有的材料商数据
+    getMaterialList() {
+        this.settleMaterialWageService.getMaterialSupplierList()
+            .then((data: any) => {
+                if (data && data.length > 0) {
+                    data.forEach(d => {
+                        d["content"] = d.companyName
+                    });
+                    this.companyStatus = data;
+                }
+                this.companyStatus.unshift({id: '', content: '全部材料商'});
+                this.forms[1].data = this.companyStatus;
+                if (this.selectCompany) {
+                    this.forms[0].value = this.forms[0].data.filter(d => d.id === parseInt(this.selectCompany))[0];
+                }
+            })
+            .catch(err => {
+                this.warn.onMsgError(err);
+            });
+    }
+
+
+    // 状态
+    getState(state: number) {
+        return getMaterialState(state);
+    }
+
+    //切换搜索框条件
+    // swichType(e) {
+    //     this.pageNo = Default.PAGE.PAGE_NO;
+    //     this.serchType = e;
+    //     this.query = '';
+    // }
+    // swichState() {
+    //     this.pageNo = Default.PAGE.PAGE_NO;
+    //     this.query = '';
+    //     this.changeData();
+    // }
+    //
+    // swichCompany() {
+    //     this.query = '';
+    //     this.pageNo = Default.PAGE.PAGE_NO;
+    //     this.changeData();
+    // }
+
+
+    //切换页面radio
+    handleSwitch(type:number) {
+        this.pageType = type;
+        // this.pageNo = Default.PAGE.PAGE_NO;
+        // this.query = "";
+        // this.orderState = "";
+        // this.selectCompany = "";
+        this.resetData();
+
+    }
+
+    //搜索回调
+    handleForm(e: any) {
+        console.log("form is", e);
+    }
+
+    handleSelect(e: any) {
+        console.log("select form is", e);
+        if (e && e.name === this.forms[0].name) {
+            this.orderState = e.value ? e.value.id : null;
+        } else if (e && e.name === this.forms[1].name) {
+            this.selectCompany = e.value ? e.value.id : null;
+        }
+        this.resetData();
+    }
+
+    resetData(){
+        this.pageNo = Default.PAGE.PAGE_NO;
+        this.changePage();
+    }
+
+    changePage() {
+        this.router.navigate(['./'],
+            {
+                queryParams: {
+                    pageType: this.pageType,
+                    orderState: this.orderState,
+                    selectCompany: this.selectCompany
+                }, relativeTo: this.activatedRoute
+            });
+    }
+
+
+    btoa(id: string) {
+        return btoa(id);
+    }
+
+
+    // setHistory() {
+    //     this.historyData.pageNo = this.pageNo;
+    //     this.historyData.selectCompany = this.selectCompany;
+    //     this.historyData.querys = this.querys;
+    //     this.historyData.query = this.query;
+    //     this.historyData.orderState = this.orderState;
+    //     this.historyData.serchType = this.serchType;
+    //     window.localStorage.setItem('materialHistory', JSON.stringify(this.historyData))
+    // }
+
+    // getHistory() {
+    //     if (localStorage.getItem('materialHistory')) {
+    //         this.selectCompany = JSON.parse(localStorage.getItem('materialHistory')).selectCompany;
+    //         this.querys = JSON.parse(localStorage.getItem('materialHistory')).querys;
+    //         this.query = JSON.parse(localStorage.getItem('materialHistory')).query;
+    //         this.serchType = JSON.parse(localStorage.getItem('materialHistory')).serchType;
+    //         this.orderState = JSON.parse(localStorage.getItem('materialHistory')).orderState;
+    //         this.pageNo = JSON.parse(localStorage.getItem('materialHistory')).pageNo;
+    //     }
+    // }
+
+    //为了区分点击详情
+    ngOnDestroy() {
+        // if (this.lock) {
+        // this.clearHistory();
+        // }
+    }
+
+    // setOpen() {
+    //     this.lock = false;
+    // }
+
+    // clearHistory() {
+    //     localStorage.removeItem('materialHistory');
+    //     this.selectCompany = '';
+    //     this.query = '';
+    //     this.querys = 1;
+    //     this.pageNo = 1;
+    //     this.orderState = '';
+    //     this.serchType = 1;
+    // }
+
+    selectTable() {
+        const table = {
+            '1': {'name': this.query},
+            '2': {'customerName': this.query},
+            '3': {'memberName': this.query},
+            '4': {'materialOrderNo': this.query}
+        }
+        return table[this.serchType];
+    }
+
+    changeData() {
+        let params = {
+            pageSize: this.pageSize,
+            page: this.pageNo
+        };
+        // if (e) {
+        //     this.pageNo = Default.PAGE.PAGE_NO;
+        //     this.pageSize = Default.PAGE.PAGE_SIZE;
+        // }
+        params = this.selectTable();
+        // this.setHistory();
+        if (this.auditState == 1) {
+            params['type'] = this.pageType;
+        } else {
+            params['type'] = 3;
+        }
+        if (this.selectCompany) {
+            params['materialId'] = this.selectCompany;
+        }
+        if (this.orderState) {
+            params['state'] = this.orderState;
+        }
+        // params['page'] = this.pageNo;
+        // this.req.doPost({
+        //     url: 'orderMaterialList',
+        //     data: param,
+        //     success: res => {
+        //         if (res && res.code == 200) {
+        //             this.total = res.data.total;
+        //             this.materialList = res.data.list;
+        //         } else {
+        //             this.warn.onMsgError(res.msg || Messages.FAIL.DATA);
+        //         }
+        //     }
+        // })
+
+        console.log("params %\c",params);
+
+        this.settleMaterialOrderService.getMaterialOrders(params)
+            .then(data =>{
+                this.total = data.total;
+                this.materialList = data.list
+            })
+            .catch(err =>{
+                this.warn.onMsgError(err);
+            })
+    }
+
+    getTypeName(type) {
+        switch (type) {
+            case 1:
+                return '标品';
+            case 2:
+                return '定制';
+            default:
+                return '标品';
+        }
+    }
+
+    getCountPrice(material) {
+        return (material.totalPrice ? material.totalPrice : 0) + (material.freight ? material.freight : 0)
+    }
+}
+

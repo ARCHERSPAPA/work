@@ -515,7 +515,6 @@ export class StatsOverallComponent implements OnInit {
 							}
 						}
 					}
-					console.log(excelData)
 					const json = excelData;
 					const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
 					const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };

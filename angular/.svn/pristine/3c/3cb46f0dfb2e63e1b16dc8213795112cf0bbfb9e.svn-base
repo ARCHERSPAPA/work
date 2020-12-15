@@ -1,0 +1,646 @@
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RequestService } from '../../../service/request.service';
+import { WarningService } from '../../../service/warning.service';
+import { Default } from '../../../model/constant';
+import { Messages } from '../../../model/msg';
+import { UserService } from '../../../service/user.service';
+import {
+    atob,
+    equalToSame,
+} from '../../../model/methods';
+import { HeaderService } from '../../../service/header.service';
+import { ContractUploadService } from '../../../public/accessory/contractUpload.service';
+import { btoa, ViewFile } from '../../../model/methods';
+@Component({
+    selector: 'rev-uploader-file',
+    templateUrl: './uploader-file.component.html',
+    styleUrls: ['./uploader-file.component.scss']
+})
+
+export class uploaderFileComponent implements OnInit {
+    @Input() type: any = 0; //1代表成本，0代表报价
+    @Input() state;//0未上架，1上架
+    @Input() costId;
+    @Input() costState;//1-基装 2-套装 3-整装,4-临基,5-临套,6-临整
+    public userFiles = [];
+    public ids = [];
+    // public OldIds = [];
+    public filesData: any;
+    public addFileData: any; //添加附件的列表
+    public uploaderForm: FormGroup;
+    public isVisible: boolean;
+    public isFistSubmit: number; //0不是第一次提交，1是第一次提交
+    public isClose: number; //0未关闭1已关闭
+    public info: string;
+    public isDesigners = false;
+
+    public total: number = Default.PAGE.PAGE_TOTAL;
+    public pageSize: number = Default.PAGE.PAGE_SIZE;
+    public pageNo: number = Default.PAGE.PAGE_NO;
+    // 报价单Id
+    public id: string;
+    public accessoryId = [];
+    //预览
+    public _albums = [];
+    public imgIndex;
+
+
+    constructor(private req: RequestService,
+        private warn: WarningService,
+        private activatedRoute: ActivatedRoute,
+        private user: UserService,
+        private router: Router,
+        private header: HeaderService,
+        private file: ContractUploadService) { }
+
+    ngOnInit() {
+
+        this.activatedRoute.queryParams.subscribe((params) => {
+            if (params && params['cid']) {
+                this.id = atob(params.cid);
+                this.uploaderLoadDetail();
+            } else {
+                this.getCostList();
+            }
+        });
+    }
+    getCostList() {
+        this.file.getAccessoryList({ decorationTypeId: this.costId, decorationType: this.costState }).then(res => {
+            this.filesData = res;
+        });
+    }
+    ngDoCheck() {
+        if (this.header && this.header.getHeaderInfo()) {
+            if (this.header.getHeaderInfo()['quoteBase'].state == -1) {
+                this.isClose = 1;
+            }
+            this.isDesigners = equalToSame(this.user.getPhone(), this.header.getHeaderInfo()['designers']);
+        }
+    }
+
+    addFiles(e: any, index) {
+        if (e.checked == true) {
+            this.userFiles.splice(index, 1, e.id);
+        } else {
+            this.userFiles.splice(index, 1, '');
+        }
+    }
+    openLarge(index) {
+
+        this.imgIndex = index;
+        this._albums = [];
+        // this.contractList.forEach((i) => {
+        //     this._albums.push({ src: i.url });
+        // });
+    }
+    viewProduct(type, file) {
+        if (type == 1) {
+            ViewFile(file);
+        } else {
+            this.openLarge(1);
+        }
+
+    }
+    //详情跳转
+    detail(data) {
+        this.router.navigate(['../../../../../cost/accessory/detail'], { queryParams: { id: btoa(data.id), isOfer: 1, type: data.type, oferId: btoa(this.id), isClose: this.isClose, isFirst: this.isFistSubmit, isDesigners: this.isDesigners }, relativeTo: this.activatedRoute });
+    }
+    openfileModel() {
+        this.isVisible = true;
+        this.loadDetailList();
+    }
+    //添加公司附件
+    loadDetailList() {
+        let url = 'currentOfferContractList';
+        if (this.type == 1) {
+            url = 'getContractList'
+        }
+        this.req.doPost({
+            url: url,
+            success: (res => {
+                if (res.data && res.data.length > 0) {
+                    const length = res.data.length;
+                    this.userFiles = new Array(length).fill('');
+                    this.addFileData = res.data.filter((item, i) => {
+                        item['checked'] = false;
+                        if (this.type == 1) {
+                                return item['state'] == 1;
+                        } else {
+                            return item;
+                        }
+                    });
+                } else {
+                    this.warn.onWarn('请先在合同附件库添加附件');
+                }
+            })
+        });
+    }
+
+    handleCancel() {
+        this.isVisible = false;
+        this.userFiles = [];
+    }
+
+    //加载页面详情
+    uploaderLoadDetail() {
+        this.req.doPost({
+            url: 'getOfferContractListNew',
+            data: {
+                'quoteId': this.id,
+            },
+            success: (res => {
+                if (res.data) {
+                    this.filesData = res.data.list;
+                    this.isFistSubmit = res.data.isFirst;
+                    this.isClose = res.data.isClose;
+                    this.info = res.data.isAffirm == 0 ? '客户尚未确认' : '客户已确认';
+                    if(this.filesData && this.filesData.length>0){
+                        this.filesData.forEach(id => {
+                            this.accessoryId.push(id.id);
+                        });
+                    }
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+
+            })
+        });
+    }
+
+    NoResult() {
+        return this.userFiles.length == 0 ? false : true;
+    }
+
+    delList(accessoryId, index) {
+        if (this.isFistSubmit == 1) {
+            this.filesData.splice(index, 1);
+            this.accessoryId.splice(index, 1);
+        } else {
+            let url;
+            let param = {};
+            if (this.type == 1) {
+                url = 'accessoryListDel';
+                param['accessoryConfigId'] = accessoryId;
+            } else {
+                url = 'delOfferContractListFile';
+                param = {
+                    'id': accessoryId,
+                    'quoteId': this.id
+                }
+            }
+            this.req.doPost({
+                url: url,
+                data: param,
+                success: (res => {
+                    if (res && res.code == 200) {
+                        this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                        if (this.type == 1) {
+                            this.getCostList();
+                        } else {
+                            this.uploaderLoadDetail();
+                        }
+                    } else {
+                        this.warn.onError(res.msg || Messages.FAIL.DATA);
+                    }
+                })
+            });
+        }
+    }
+    checkSub() {
+        return this.addFileData.some(v => {
+            return v['checked'];
+        })
+    }
+    submitAdd() {
+        let url;
+        let param = {};
+        this.addFileData.forEach(v => {
+            if (v['checked']) {
+                this.ids.push(v['id'])
+            }
+        });
+        if (this.type == 1) {
+            url = 'accessoryListAdd';
+            param['decorationTypeId'] = this.costId;
+            param['decorationType'] = this.costState;
+            param['accessoryId'] = this.ids;
+        } else {
+            url = 'addOfferContractList';
+            param = {
+                'ids': this.userFiles,
+                'quoteId': this.id
+            }
+        }
+        this.req.doPost({
+            url: url,
+            data: param,
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    if (this.type == 1) {
+                        this.getCostList();
+                    } else {
+                        this.uploaderLoadDetail();
+                    }
+                    this.isVisible = false;
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+
+    submit() {
+        this.req.doPost({
+            url: 'submitOfferContractListFirst',
+            data: {
+                'ids': this.accessoryId,
+                'quoteId': this.id
+            },
+            success: (res => {
+                if (res && res.code == 200) {
+                    this.warn.onSuccess(res.msg || Messages.SUCCESS.DATA);
+                    this.uploaderLoadDetail();
+                } else {
+                    this.warn.onError(res.msg || Messages.FAIL.DATA);
+                }
+            })
+        });
+    }
+    btoa(id: string) {
+        return btoa(id);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

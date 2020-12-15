@@ -1,0 +1,286 @@
+<div class="master">
+    <!--head section start-->
+    <div class="master-head">
+        <rev-title [title]="title"></rev-title>
+        <div nz-row class="master-head-info mt-8">
+            <div nz-row class="mt-16">
+                <span class="head-title">{{name}}</span>
+                <a class="head-btn" href="javascript:void(0)" (click)="openPack()" *ngIf="showBtnByStatus()">修改</a>
+            </div>
+            <div nz-row class="head-base mt-16" nzGutter="16">
+                <!-- <div nz-col nzSpan="8" [nzTitle]="getComboNames()?getComboNames():''"
+                     nzPlacement="topLeft" nz-tooltip>适用套系：{{getComboNames()?getComboNames():'--'}}</div> -->
+                <div nz-col nzSpan="6" [nzTitle]="comboName?comboName:''" nzPlacement="topLeft" nz-tooltip
+                     class="head-company">
+                    适用套系：{{comboName?comboName:'--'}}
+                </div>
+                <div nz-col nzSpan="6" [title]="unit?unit:''">
+                    套餐单位：{{unit?unit:'--'}}
+                </div>
+                <div nz-col nzSpan="6" [title]="sellingPrice?sellingPrice:showZero(sellingPrice)">
+                    销售价：{{sellingPrice?(sellingPrice|number:'1.2'):showZero(sellingPrice)}}
+                </div>
+                <div nz-col nzSpan="6" [title]="newSupplyPrice?newSupplyPrice:showZero(newSupplyPrice)">
+                    供货价：{{newSupplyPrice?(newSupplyPrice|number:'1.2'):showZero(newSupplyPrice)}}
+                </div>
+            </div>
+            <div nz-row class="head-base mt-16" nzGutter="16">
+                <div nz-col nzSpan="6"
+                     [nzTitle]="(supplyPrice?supplyPrice:showZero(supplyPrice)) + (startTime || endTime ? '（'+ (startTime ? (startTime | date:'yyyy-MM-dd HH:mm'):'--') + '~' + (endTime ? (endTime | date:'yyyy-MM-dd HH:mm') : '--') +'）' : '')"
+                     nzPlacement="topLeft" nz-tooltip>
+                    活动价：{{supplyPrice?(supplyPrice|number:'1.2'):showZero(supplyPrice)}}
+                    {{startTime || endTime ? '（'+ (startTime ? (startTime |
+                    date:'yyyy-MM-dd HH:mm') :'--' ) + '~' + (endTime ? (endTime | date:'yyyy-MM-dd HH:mm') : '--') +'）' : ''}}
+                </div>
+                <div nz-col nzSpan="6" class="head-company" [nzTitle]="getCompanyName()?getCompanyName():''"
+                     nzPlacement="topLeft" nz-tooltip>参与公司：{{getCompanyName()}}
+                </div>
+                <div nz-col nzSpan="6">
+                    <span *ngIf="separable === '1'">允许拆分</span>
+                    <span *ngIf="separable === '0'">不允许拆分</span>
+                </div>
+            </div>
+            <div nz-row class="head-base mt-16">
+                <div nz-col nzSpan="24" [nzTitle]="remark?remark:''" nzPlacement="topLeft" nz-tooltip>
+                    备注：{{remark?remark:'暂无备注'}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end head section-->
+    <div class="master-line mt-24"></div>
+
+    <!--content section start-->
+
+    <div class="wrap" style="min-height: 960px;">
+        <div nz-row class="mt-24">
+            <div nz-col nzSpan="4" *ngIf="showBtnByStatus()">
+                <radio-switch [radioSwitch]="radioSwitch" (handleSwitch)="handleSwitch($event)"></radio-switch>
+            </div>
+            <div nz-col nzSpan="20" [nzOffset]="showBtnByStatus()?0:4">
+                <select-brand (handleCategory)="handleCategory($event)" (handleBrand)="handleBrand($event)"
+                              (handleSearch)="handleSearch($event)" [type]="1"></select-brand>
+            </div>
+        </div>
+
+        <div class="mt-24">
+            <nz-table [nzData]="materials" #materialTable nzSize="small" [nzScroll]="{ x:'130%'}" [nzTotal]="total"
+                      [nzTitle]="header" [nzLoading]="loading" [(nzPageIndex)]='pageNo' [(nzPageSize)]="pageSize"
+                      [nzFrontPagination]="false" (nzPageIndexChange)="changeData()" [nzShowPagination]="true"
+                      nzBordered="true">
+                <thead>
+                <tr>
+                    <th nzLeft="0px" nzShowCheckbox [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="checkAll($event)" *ngIf="showBtnByStatus()"></th>
+                    <th>SPU编号</th>
+                    <th>图片</th>
+                    <th>品牌</th>
+                    <th>类别</th>
+                    <th>名称</th>
+                    <th>SKU编号</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>材质</th>
+                    <th>颜色</th>
+                    <th>产地</th>
+                    <th>单位</th>
+                    <th *ngIf="radio === 1">活动价</th>
+                    <th>市场价</th>
+                    <th>供货价</th>
+                    <th>销售价</th>
+                    <th *ngIf="radio === 1">数量</th>
+                    <th nzRight="0px" *ngIf="showBtnByStatus()">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let m of materials;let i = index" [ngClass]="{'dead':m.survival === 0}">
+                    <td nzLeft="0px" nzShowCheckbox [(nzChecked)]="m.checked" (nzCheckedChange)="refreshStatus()"
+                        *ngIf="showBtnByStatus()"></td>
+                    <td [attr.rowspan]="m.rows" *ngIf="m.rows!==0" style="vertical-align: middle;"
+                        [nzTitle]="showTipOnTitle(m.spu,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.spu?m.spu:'--'}}</span></td>
+                    <td [attr.rowspan]="m.rows" *ngIf="m.rows!==0" style="vertical-align: middle;">
+                        <a *ngIf="m.defaultImage" href="javascript:void(0)" (click)="openLarge(m.defaultImage)">[图片]</a>
+                        <span *ngIf="!m.defaultImage">--</span>
+                    </td>
+                    <td [attr.rowspan]="m.rows" *ngIf="m.rows !==0" [nzTitle]="showTipOnTitle(m.brand,m.survival)"
+                        nzPlacement="topLeft" nz-tooltip style="vertical-align: middle;">
+                        <span>{{m.brand?m.brand:'--'}}</span>
+                    </td>
+                    <td [attr.rowspan]="m.rows" *ngIf="m.rows!==0" [nzTitle]="showTipOnTitle(m.category,m.survival)"
+                        nzPlacement="topLeft" nz-tooltip style="vertical-align: middle;">
+                        <span>{{m.category?m.category:'--'}}</span></td>
+
+                    <td [attr.rowspan]="m.rows" *ngIf="m.rows!==0" [nzTitle]="showTipOnTitle(m.name,m.survival)"
+                        nzPlacement="topLeft" nz-tooltip style="vertical-align: middle;">
+                        <span>{{m.name?m.name:'--'}}</span>
+                    </td>
+
+                    <td [nzTitle]="showTipOnTitle(m.sku,m.survival)" nzPlacement="topLeft" nz-tooltip
+                        style="position:relative;">
+                        <span>{{m.sku?m.sku:'--'}}</span>
+                        <span *ngIf="m.remark" [nzTitle]="m.remark" style="position: absolute;left: 130px; top: 10px;"
+                              nzPlacement="top" nz-tooltip>
+                    <i nz-icon type="info-circle" style="position: relative;top: -2px;"></i>
+                  </span>
+                    </td>
+                    <td [nzTitle]="showTipOnTitle(m.spec,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.spec?m.spec:'--'}}</span></td>
+                    <td [nzTitle]="showTipOnTitle(m.model,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.model?m.model:'--'}}</span></td>
+                    <td [nzTitle]="showTipOnTitle(m.material,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.material?m.material:'--'}}</span></td>
+                    <td [nzTitle]="showTipOnTitle(m.color,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.color?m.color:'--'}}</span></td>
+                    <td [nzTitle]="showTipOnTitle(m.origin,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.origin?m.origin:'--'}}</span></td>
+                    <td [nzTitle]="showTipOnTitle(m.unit,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.unit?m.unit:'--'}}</span></td>
+                    <td *ngIf="radio === 1" style="width: 100px;"
+                        [nzTitle]="showTipOnTitle(m.materialActivityPrice,m.survival)"
+                        nzPlacement="topLeft" nz-tooltip>
+                        <nz-input-number [nzDisabled]="!showBtnByStatus()" style="width: 100%;" [(ngModel)]="m.materialActivityPrice" [nzSize]="'small'" [nzMin]="0" [nzStep]="0.01" [nzPrecision]="2" (ngModelChange)="modelPriceAndNumChange(m,'price')"></nz-input-number>
+                    </td>
+                    <td [nzTitle]="showTipOnTitle(m.marketPrice,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.marketPrice?(m.marketPrice|number:'1.2'):'--'}}</span>
+                    </td>
+                    <td [nzTitle]="showTipOnTitle(m.supplyPrice,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.supplyPrice?(m.supplyPrice|number:'1.2'):'--'}}</span>
+                    </td>
+                    <td [nzTitle]="showTipOnTitle(m.sellingPrice,m.survival)" nzPlacement="topLeft" nz-tooltip>
+                        <span>{{m.sellingPrice?(m.sellingPrice|number:'1.2'):'--'}}</span>
+                    </td>
+                    <td *ngIf="radio === 1" style="width: 100px;"
+                        [nzTitle]="showTipOnTitle(m.number,m.survival)"
+                        nzPlacement="topLeft" nz-tooltip>
+                        <nz-input-number [nzDisabled]="!showBtnByStatus()" style="width: 100%;" [(ngModel)]="m.number" [nzSize]="'small'"
+                                         [nzMin]="0" [nzStep]="0.01" [nzPrecision]="2"
+                                         (ngModelChange)="modelPriceAndNumChange(m,'num')"></nz-input-number>
+                    </td>
+                    <td nzRight="0px" *ngIf="showBtnByStatus()">
+                        <a href="javascript:void(0)" nz-popconfirm nzTitle="确定删除该材料吗?" nzOkText="删除"
+                           (nzOnConfirm)="deleteItem(m.id)" (nzOnCancel)="cancel()" nzPlacement="topLeft"
+                           *ngIf="radio === 1">删除</a>
+                        <a href="javascript:void(0)" (click)="addItem(m)" *ngIf="radio === 0">添加</a>
+                    </td>
+
+                </tr>
+                </tbody>
+            </nz-table>
+
+        </div>
+
+        <div class="master-shelf">
+            <button nz-button [nzType]="'primary'" nz-popconfirm nzTitle="确认提交该套餐吗?" nzOkText="提交"
+                    (nzOnConfirm)="submitItem(pid)" (nzOnCancel)="cancel()" nzPlacement="topLeft"
+                    *ngIf="materials && materials.length > 0 && radio === 1 && showBtnByStatus() && status !== 2 && status !== 1">
+                <span>提交审核</span>
+            </button>
+            <button nz-button [nzType]="'primary'" nz-popconfirm nzTitle="确定撤回该套餐审核申请吗?" nzOkText="撤回"
+                    (nzOnConfirm)="recallItem(pid)" (nzOnCancel)="cancel()" nzPlacement="topLeft" *ngIf="status === 1">
+                <span>撤回</span>
+            </button>
+            <button nz-button [nzType]="'primary'" nz-popconfirm [nzTitle]="getTitleByShelf(shelf)"
+                    [nzOkText]="shelf?'下架':'上架'" (nzOnConfirm)="shelfItem(pid,0)" (nzOnCancel)="cancel()"
+                    nzPlacement="topLeft"
+                    *ngIf="status === 2">
+                <span>{{shelf?'下架':'上架'}}</span>
+            </button>
+        </div>
+
+    </div>
+    <!--end content section-->
+
+    <!-- <nz-tab nzTitle="附件">
+      <rev-uploader-file [type]='1' [state]='state'></rev-uploader-file>
+    </nz-tab> -->
+</div>
+
+
+<ng-template #header>
+    <div *ngIf="showBtnByStatus()">
+        <button nz-button [disabled]="selectItems.length === 0" (click)="deleteItems()" *ngIf="radio === 1"
+                nzType="danger">删除
+        </button>
+        <button nz-button class="ml-8" [disabled]="selectItems.length === 0" (click)="editAmount()" *ngIf="radio === 1"
+                nzType="primary">数量
+        </button>
+        <button nz-button class="ml-8" [disabled]="selectItems.length === 0" (click)="editPrice()" *ngIf="radio === 1"
+                nzType="primary">活动价
+        </button>
+        <button nz-button [disabled]="selectItems.length === 0" (click)="addItems()" *ngIf="radio === 0"
+                nzType="primary">添加
+        </button>
+        <span class="ml-8" *ngIf="selectItems.length > 0">已选{{selectItems.length}}项</span>
+    </div>
+</ng-template>
+
+
+<!--弹出框-->
+<rev-master-common-pack [companies]="companys" [combos]="combos" [isVisible]="isVisible"
+                        (confirmEmitter)="handleOk($event)" [type]="2" [form]="form"></rev-master-common-pack>
+
+<!-- 数量弹出框 -->
+<nz-modal [(nzVisible)]="amountVisible" nzTitle="修改数量" [nzContent]="modalAmountContent"
+          [nzFooter]="AmountModalFooter"
+          (nzOnCancel)="amountCancel()">
+    <ng-template #modalAmountContent>
+        <form nz-form [formGroup]="amountForm">
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="amount">数量</nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <nz-input-number formControlName="amount" style="width: 100%;"
+                                     id="amount" placeholder="请输入数量"
+                                     [nzMax]="99999.99" [nzStep]="0.01" [nzMin]="0.01"
+                                     [nzPrecision]="2"></nz-input-number>
+                    <nz-form-explain *ngIf="amountForm.get('amount').dirty && amountForm.get('amount').errors">
+                        <ng-container *ngIf="amountForm.get('amount').hasError('required')">
+                            数量必填
+                        </ng-container>
+                        <ng-container *ngIf="amountForm.get('amount').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </ng-template>
+    <ng-template #AmountModalFooter>
+        <button nz-button nzType="default" (click)="amountCancel()">取消</button>
+        <button nz-button nzType="primary" [disabled]="!amountForm.valid" (click)="handleAmount()">确定</button>
+    </ng-template>
+</nz-modal>
+
+<!-- 活动价弹出框 -->
+<nz-modal [(nzVisible)]="priceVisible" nzTitle="修改活动价" [nzContent]="modalPriceContent"
+          [nzFooter]="priceModalFooter"
+          (nzOnCancel)="priceCancel()">
+    <ng-template #modalPriceContent>
+        <form nz-form [formGroup]="priceForm">
+            <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="price">活动价</nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24">
+                    <nz-input-number formControlName="price" style="width: 100%;"
+                                     id="price" placeholder="请输入活动价"
+                                     [nzMax]="99999.99" [nzStep]="0.01" [nzMin]="0.01"
+                                     [nzPrecision]="2"></nz-input-number>
+                    <nz-form-explain *ngIf="priceForm.get('price').dirty && priceForm.get('price').errors">
+                        <ng-container *ngIf="priceForm.get('price').hasError('required')">
+                            活动价必填
+                        </ng-container>
+                        <ng-container *ngIf="priceForm.get('price').hasError('minlength')">
+                            至少输入1位字符
+                        </ng-container>
+                    </nz-form-explain>
+                </nz-form-control>
+            </nz-form-item>
+        </form>
+    </ng-template>
+    <ng-template #priceModalFooter>
+        <button nz-button nzType="default" (click)="priceCancel()">取消</button>
+        <button nz-button nzType="primary" [disabled]="!priceForm.valid" (click)="handlePrice()">确定</button>
+    </ng-template>
+</nz-modal>
+
+<!--查看图片-->
+<rev-imgview [album]="_albums" [index]="0" *ngIf="_albums.length > 0"></rev-imgview>

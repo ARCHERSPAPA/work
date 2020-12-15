@@ -1,0 +1,172 @@
+import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {WarningService} from "../../../../service/warning.service";
+
+@Component({
+    selector: 'rev-master-common-pack',
+    templateUrl: './master-common-pack.component.html',
+    styleUrls: ['./master-common-pack.component.scss']
+})
+export class MasterCommonPackComponent implements OnInit {
+
+
+
+    public validateForm: FormGroup;
+    //套餐名称
+    public packName:string;
+    //材料商简称
+    public packSupplyId:number;
+    //套餐适用套系
+    public packCombos:Array<any> = []
+    //单位
+    public packUnit:string;
+    //销售价
+    public packSalePrice:number = 0;
+    //供货价
+    public packSupplyPrice:number = 0;
+    //活动价
+    public packActivityPrice:number = 0;
+    //开始时间
+    public startTime: Date;
+    //结束时间
+    public endTime: Date;
+    //备注
+    public packRemark:string;
+
+    //是否禁用公司选择
+    public disabledCompany:boolean = false;
+
+    //区别显示title
+    @Input() type:number = 1;
+    //获取当前关联的合作公司
+    @Input() companies:any;
+    //获取当前套系列表
+    @Input() combos:any;
+    //当时选中时的数据
+    @Input() form:any;
+    //是否显示弹出框
+    @Input() isVisible:boolean = false;
+    //确定提交时
+    @Output() confirmEmitter:EventEmitter<any> = new EventEmitter<any>();
+
+    constructor(private fb: FormBuilder,
+                private warn:WarningService) {
+    }
+
+
+    ngOnInit() {
+        this.validateForm = this.fb.group({
+            packName:[this.packName,[
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(30),
+            ]],
+            packSupplyId:[this.packSupplyId,[
+               Validators.required
+            ]],
+            packCombos:[this.packCombos,[]],
+            packUnit:[this.packUnit,[
+                Validators.maxLength(10)
+            ]],
+            packSalePrice:[this.packSalePrice,[
+                Validators.min(0)
+            ]],
+            packSupplyPrice:[this.packSupplyPrice,[
+                Validators.required,
+                Validators.min(0)
+            ]],
+            packActivityPrice:[this.packActivityPrice,[
+                Validators.min(0)
+            ]],
+            startTime: [this.startTime, []],
+            endTime: [this.endTime, []],
+            packRemark:[this.packRemark,[
+                Validators.maxLength(300)
+            ]]
+        });
+    }
+
+    ngOnChanges(changes:SimpleChanges){
+        if(changes.form && changes.form.currentValue){
+            const values = changes.form.currentValue;
+            this.packName = values["packName"];
+            this.packSupplyId = values["packSupplyId"];
+            this.packCombos = values["packCombos"];
+            this.packUnit = values["packUnit"];
+            this.packSalePrice = values["packSalePrice"];
+            this.packSupplyPrice = values["packSupplyPrice"];
+            this.packActivityPrice = values["packActivityPrice"]
+            this.startTime = values["startTime"];
+            this.endTime = values["endTime"];
+            this.packRemark = values["packRemark"];
+            this.isVisible = true;
+            if(this.type == 2){
+                this.disabledCompany = true;
+            }else{
+                this.disabledCompany = false;
+            }
+        }
+    }
+
+    disabledStartDate = (st:Date):boolean =>{
+        if(!st) return false;
+        return st.getTime() <= new Date('2020/1/1').getTime() - 1;
+    }
+
+    disabledEndDate = (et:Date):boolean =>{
+        if(!et) return false;
+        return et.getTime() <= new Date(new Date().toLocaleDateString()).getTime() - 1;
+    }
+
+    modelChangeStartTime(e:Date){
+        let st = new Date(e).getTime();
+        if(this.endTime){
+            let et = new Date(this.endTime).getTime();
+            if(st > et){
+                this.startTime = null;
+                this.warn.onMsgWarn("最早可选择到当前时间，且早于结束时间")
+            }
+        }
+    }
+
+    modelChangeEndTime(e:Date){
+        let et = new Date(e).getTime();
+        if(this.startTime){
+            let st = new Date(this.startTime).getTime();
+            if(st > et){
+                this.endTime = null;
+                this.warn.onMsgWarn("开始时间必须晚于结束时间");
+            }
+        }
+    }
+
+    handleCancel (){
+        this.isVisible = false;
+        this.validateForm.reset();
+    }
+
+    handleOk(){
+        if(this.validateForm.valid){
+            if((this.validateForm.value.packActivityPrice && this.validateForm.value.startTime) ||  (!this.validateForm.value.packActivityPrice && !this.validateForm.value.startTime)){
+                this.confirmEmitter.emit(this.validateForm.value);
+            }else{
+                this.warn.onModalInfo({
+                    title: '提示',
+                    content: '请填写完整活动价',
+                    ok: () => {
+                        console.log('tips');
+                    }
+                });
+            }
+        }
+    }
+
+
+    getTitle(type:number){
+        switch(type){
+            case 1:return "新建套餐";
+            case 2: return "修改套餐";
+            default: return "修改套餐";
+        }
+    }
+}
