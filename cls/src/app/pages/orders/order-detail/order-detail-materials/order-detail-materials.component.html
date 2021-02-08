@@ -1,0 +1,287 @@
+<div class="order-detail-materials">
+
+    <!-- 标单的table -->
+    <div class="order-detail-materials-normal layout" *ngIf="orderType==1">
+        <nz-table #orderTable [nzData]="materials" [nzLoading]="loading" [nzFrontPagination]="false" nzSize="middle">
+            <thead>
+                <tr class="ctrl-tr">
+                    <th>品牌</th>
+                    <th>名称</th>
+                    <th>类型</th>
+                    <th>规格</th>
+                    <th>型号</th>
+                    <th>材质</th>
+                    <th>颜色</th>
+                    <th>产地</th>
+                    <th>供货价</th>
+                    <th>单位</th>
+                    <th>数量</th>
+                    <th>套餐数量</th>
+                    <th>小计</th>
+                    <th>SKU</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-template ngFor let-data [ngForOf]="orderTable.data">
+                    <tr class="ctrl-tr">
+                        <td [title]="renderName(data.brand,'')">{{renderName(data.brand)}}</td>
+                        <td [title]="renderName(data.name,'')">{{renderName(data.name)}}</td>
+                        <td [title]="renderName(data.category,'')">{{renderName(data.category)}}</td>
+                        <td [title]="renderName(data.spec,'')">{{renderName(data.spec)}}</td>
+                        <td [title]="renderName(data.model,'')">{{renderName(data.model)}}</td>
+                        <td [title]="renderName(data.material,'')">{{renderName(data.material)}}</td>
+                        <td [title]="renderName(data.color,'')">{{renderName(data.color)}}</td>
+                        <td [title]="renderName(data && data.origin,'')">{{renderName( data &&data.origin)}}</td>
+                        <td [title]="data.supplyPrice">{{ equalZero(data.supplyPrice) === "无"?'--':(data.supplyPrice|number:'1.2')}}
+                        </td>
+                        <td [title]="renderName(data.unit,'')">{{renderName(data.unit)}}</td>
+
+                        <td [title]="renderName(data.count,'')" *ngIf="data.isPlan==1 && data.materialPlanSeparable==1">
+                            <nz-input-number [nzMax]="9999999" [nzDisabled]="!canEdit()" [nzStep]="1" [nzPrecision]="2" [(ngModel)]="data.count" style="width:100%" (nzBlur)="modelPriceChangeNomal(data.id,data.count)">
+                            </nz-input-number>
+                        </td>
+                        <td *ngIf="data.ListRows == 1 && data.isPlan==0">
+                            <nz-input-number [nzMax]="9999999" [nzDisabled]="!canEdit()" [nzStep]="1" [nzPrecision]="2" [(ngModel)]="data.count" style=" width:100% " (nzBlur)="modelPriceChangeNomal(data.id,data.count)">
+                            </nz-input-number>
+                        </td>
+                        <td *ngIf=" data.isPlan==0 || (data.isPlan==1 && data.materialPlanSeparable==1) ">--</td>
+                        <!--<td *ngIf="data.isPlan==1 && data.materialPlanSeparable==1">-->
+                        <!--&#45;&#45;-->
+                        <!--</td>-->
+                        <td *ngIf=" data.isPlan==1 &&data.materialPlanSeparable==0">
+                            {{equalZero(data.count) === "无"?'--':data.count}}
+                        </td>
+
+                        <td [title]="renderName(data.materialPlanCount,'')" [rowSpan]="data.ListRows" *ngIf="data.ListRows > 0 && data.isPlan == 1 && data.materialPlanSeparable==0">
+                            <div>
+                                <nz-input-number [nzDisabled]="!canEdit() " [nzMax]="9999999" [nzStep]="1" [nzPrecision]="2" [(ngModel)]="data.materialPlanCount" style="width:100%" (nzBlur)="modelPriceChangeNomal(data.id,data.materialPlanCount)">
+                                </nz-input-number>
+                            </div>
+                        </td>
+
+                        <td *ngIf="data.isPlan == 0">
+                            {{getTotal(data.count,data.supplyPrice) | number:'1.2'}}
+                        </td>
+                        <td [rowSpan]="data.ListRows" *ngIf="data.ListRows > 0 && data.isPlan == 1 && data.materialPlanSeparable == 1">
+                            {{getTotal(data.count,data.supplyPrice) | number:'1.2'}}
+                        </td>
+                        <td [rowSpan]="data.ListRows" *ngIf="data.ListRows > 0 && data.isPlan == 1 && data.materialPlanSeparable == 0">
+                            {{getTotal(data.materialPlanCount,data.materialPlanPrice) | number:'1.2'}}
+                        </td>
+                        <td [title]="renderName(data.sku,'')">{{renderName(data.sku)}}</td>
+                        <td [title]="renderName(data.workerRemark,'')">{{renderName(data.workerRemark)}}</td>
+                    </tr>
+                </ng-template>
+            </tbody>
+        </nz-table>
+    </div>
+
+    <!-- 定制单的table -->
+    <div class="order-detail-materials-custom" *ngIf="orderType==2">
+        <nz-table #nzTable [nzData]="customData" [nzShowPagination]='false'>
+            <thead>
+                <tr>
+                    <th [colSpan]="1" style="padding-left: 40px;">标题</th>
+                    <th [colSpan]="23" style="padding-right: 64px;text-align: right;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let item of customData">
+                    <tr>
+                        <td [colSpan]="22" [nzExpand]="expandSet.has(item.id)" (nzExpandChange)="onExpandChange(item.id, $event)">
+                            <span nz-col>{{ item.name }}</span>
+                            <a nz-col nzOffset="21" href="javascript:void(0)" (click)="openModal(item.id)" *ngIf="canEdit()">添加材料</a>
+                        </td>
+                    </tr>
+                    <tr [nzExpand]="expandSet.has(item.id)">
+                        <nz-table #orderTable [nzData]="item.list" [nzLoading]="loading" [nzFrontPagination]="false" nzSize="middle">
+                            <thead>
+                                <tr class="ctrl-tr">
+                                    <th>品牌</th>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>规格</th>
+                                    <th>型号</th>
+                                    <th>材质</th>
+                                    <th>颜色</th>
+                                    <th>产地</th>
+                                    <th>供货价</th>
+                                    <th *ngIf="item.id==1">销售价</th>
+                                    <th>单位</th>
+                                    <th>数量</th>
+                                    <th>备注</th>
+                                    <th>小计</th>
+                                    <th>SKU</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-template ngFor let-data [ngForOf]="orderTable.data">
+                                    <tr class="ctrl-tr">
+                                        <td [title]="renderName(data.brand,'')">{{renderName(data.brand)}}</td>
+                                        <td [title]="renderName(data.name,'')">{{renderName(data.name)}}</td>
+                                        <td [title]="renderName(data.category,'')">{{renderName(data.category)}}</td>
+                                        <td [title]="renderName(data.spec,'')">{{renderName(data.spec)}}</td>
+                                        <td [title]="renderName(data.model,'')">{{renderName(data.model)}}</td>
+                                        <td [title]="renderName(data.material,'')">{{renderName(data.material)}}</td>
+                                        <td [title]="renderName(data.color,'')">{{renderName(data.color)}}</td>
+                                        <td [title]="renderName(data && data.origin,'')">{{renderName( data &&data.origin)}}</td>
+                                        <td [title]="data.supplyPrice">{{ equalZero(data.supplyPrice) === "无"?'--':(data.supplyPrice|number:'1.2')}}
+                                        </td>
+                                        <td [title]="data.sellingPrice" *ngIf="item.id==1">{{ equalZero(data.sellingPrice) === "无"?'--':(data.sellingPrice|number:'1.2')}}
+                                        </td>
+                                        <td [title]="renderName(data.unit,'')">{{renderName(data.unit)}}</td>
+                                        <td>
+                                            <nz-input-number [nzMax]="9999999" [nzDisabled]="!canEdit()" [nzStep]="1" [nzPrecision]="2" [(ngModel)]="data.count" style=" width:100% " (nzBlur)=" modelPriceChange(data.id,data.count)">
+                                            </nz-input-number>
+                                        </td>
+                                        <td [title]="renderName(data.workerRemark,'')">{{renderName(data.workerRemark)}}</td>
+                                        <td [title]="renderName(data.materialPlanTotalPrice,'')">
+                                            {{getTotal(data.count,data.supplyPrice) | number:'1.2'}}
+                                        </td>
+                                        <td [title]="renderName(data.sku,'')">{{renderName(data.sku)}}</td>
+
+                                        <td>
+                                            <a href="javascript:void(0)" style="margin-right: 8px;" *ngIf="canEdit() " (click)="deleteList(data.id)">删除</a>
+                                            <a href="javascript:void(0)" *ngIf="canEdit() " (click)="openRemark(data.id,data.workerRemark)">备注</a>
+                                        </td>
+                                    </tr>
+
+
+                                </ng-template>
+                            </tbody>
+                        </nz-table>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </nz-table>
+    </div>
+
+    <!-- 材料总额 -->
+    <div class="order-detail-materials-price layout">
+        材料总额：<span>{{equalZero(Price.snapshotPrice) === "无"?'--':(Price.snapshotPrice | number:'1.2')}}</span>
+    </div>
+
+    <!-- 增减记录 -->
+    <div class="order-detail-materials-record layout" *ngIf="recordData&&recordData.length>0">
+        <h3 [ngStyle]="{ margin: '16px 0' }">增减记录</h3>
+        <ul nz-list [nzDataSource]="recordData" nzBordered nzSize="large">
+            <li nz-list-item *ngFor="let item of recordData" nzNoFlex>
+                <ul nz-list-item-actions>
+                    <nz-list-item-action>
+                        <span class="orderPrice">总额：{{ item.type==1?'+':"-" }}{{equalZero(item.priceAbs) ===
+              "无"?'--':(item.priceAbs | number:'1.2')}}</span>
+                        <a href="javascript:void(0)" nzOkText="删除" nzCancelText="取消" (nzOnConfirm)='deletePause(item.id)' nz-popconfirm nzPopconfirmTitle="确定删除该金额及备注吗？" *ngIf="canEdit()  && !lockingBudget" class="work_a">删除</a>
+                    </nz-list-item-action>
+                </ul>
+                {{ item.type==1?'增加':"减少" }}：<span class="orderInfo">
+        </span> <span [nzTooltipTitle]="item.remark" nzTooltipPlacement="topRight" nz-tooltip>
+          {{trimStr(item.remark,2) }}</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 按钮集合 -->
+    <div class="order-detail-materials-btn">
+        <span class="greyPrice" *ngIf='orderType==2' style="margin-right: 8px;">
+      合计客户增加费用：{{equalZero(Price.customersIncreasePrice) ===
+      "无"?'0':(Price.customersIncreasePrice | number:'1.2')}}
+      <a href="javascript:void(0)" *ngIf="(state==41||state==42) && !lockingBudget"><i nz-icon nzType="edit"
+          (click)="openEditModal()" nzTheme="outline"></i>
+      </a>
+    </span>
+        <span class="bigPrice"> 合计：{{equalZero(Price.totalPrice) === "无"?'--':(Price.totalPrice | number:'1.2')}}
+    </span>
+        <a href="javascript:void(0)" *ngIf="showTotalEdit()"><i nz-icon nzType="edit" (click)="openAddModal()"
+        nzTheme="outline"></i>
+    </a>
+        <button nz-button (click)="reBack()" nzType="default">返回</button>
+        <button nz-button nzType="primary" *ngIf="showRecall()" nzOkText="撤回" nzCancelText="取消" (nzOnConfirm)='Recall()' nz-popconfirm nzPopconfirmTitle="撤回订单后将无法恢复！">撤回
+    </button>
+        <button nz-button *ngIf="showUnlock() &&lockingBudget==1" nzType="primary" nzOkText="解锁" nzCancelText="取消" (nzOnConfirm)='lockOrder(0)' nz-popconfirm nzPopconfirmTitle="解除锁定后可编辑配送费、材料数量、合计总额！">解锁
+    </button>
+        <button nz-button *ngIf="showUnlock()&&lockingBudget==0" (click)="lockOrder(1)">锁定
+    </button>
+        <button nz-button nzType="primary" *ngIf="showWorkSubmit()" nzOkText="确认" nzCancelText="取消" (nzOnConfirm)='submitWork()' nz-popconfirm [nzPopconfirmTitle]="getTitle()">提交工长确认
+    </button>
+        <button nz-button nzType="primary" *ngIf="state==41" nzOkText="确认" nzCancelText="取消" (nzOnConfirm)='submitWorkSpe()' nz-popconfirm nzPopconfirmTitle="确认提交订单给工长确认吗？">提交工长确认
+    </button>
+        <!-- <button nz-button *ngIf="state==48" nzType="primary" nzOkText="确认" nzCancelText="取消" (nzOnConfirm)='delete()'
+  nz-popconfirm nzPopconfirmTitle="该材料单需要上传照片，请前往手机拍照">送达
+</button> -->
+        <button nz-button (click)="phoneModal()" *ngIf="showReach()" nzType="primary">派单</button>
+
+        <button nz-button *ngIf="showSend()" nzType="primary" nzOkText="确认" nzCancelText="取消" (nzOnConfirm)='send()' nz-popconfirm [nzPopconfirmTitle]="getTitle()">确认发货
+    </button>
+        <button nz-button *ngIf="showArive()" nzType="primary" nzOkText="确定" nzCancelText="取消" (nzOnConfirm)='receviOrder()' nz-popconfirm nzPopconfirmTitle="确认接单后工长将无法撤回！">确认接单
+    </button>
+    </div>
+    <!-- 弹窗 -->
+    <nz-drawer [nzClosable]="false" *ngIf="quoteId" [nzHeight]="600" [nzVisible]="visible" nzPlacement="bottom" nzTitle="添加材料" (nzOnClose)="close()" [nzFooter]="footerTpl">
+        <ng-container *nzDrawerContent>
+            <app-add-material-list (handleList)="addMaterial($event)" [quoteId]="quoteId" [reset]="visible">
+            </app-add-material-list>
+        </ng-container>
+    </nz-drawer>
+
+</div>
+<ng-template #footerTpl>
+    <div style="float: right">
+        <button nz-button style="margin-right: 8px;" (click)="close()">取消</button>
+        <button nz-button nzType="primary" (click)="submitMaterial()">确定</button>
+    </div>
+</ng-template>
+
+<!-- 操作增加费用 -->
+<nz-modal [(nzVisible)]="priceisVisible" [nzTitle]="'变更合计'" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+    <ng-container *nzModalContent>
+        <div style="position: relative;">
+            增加：
+            <nz-input-number [nzMin]="0" [ngStyle]="{ margin: '24px 24px 0 16px',width:'244px',paddingLeft:'10px' }" [nzMax]="9999999" [nzStep]="100" [nzPrecision]="2" [(ngModel)]="addPrice"></nz-input-number>
+            <span class="symbol">{{symbol}}</span>
+            <nz-radio-group (ngModelChange)="addTypeChange()" [(ngModel)]="addPriceType">
+                <label nz-radio nzValue="1">增加</label>
+                <label nz-radio nzValue="0">减少</label>
+            </nz-radio-group>
+        </div>
+        <div nz-row class="grey">
+            <span nz-col nzOffset="3">当前合计：{{equalZero(Price.totalPrice) === "无"?'--':(Price.totalPrice |
+        number:'1.2')}}，</span>
+            <span nz-col>{{addPriceType=='1'?'增加':'减少'}}后：{{equalZero(currentPrice()) === "无"?'--':(currentPrice() |
+        number:'1.2')}}</span>
+        </div>
+        <div nz-row style="margin: 24px 0;">
+            <span nz-col nzSpan="3">备注：</span>
+            <div nz-col nzSpan="21">
+                <nz-textarea-count [nzMaxCharacterCount]="300">
+                    <textarea maxlength="300" rows="3" [(ngModel)]="remark.remark" nz-input></textarea>
+                </nz-textarea-count>
+            </div>
+        </div>
+    </ng-container>
+</nz-modal>
+<!-- 修改费用 -->
+<nz-modal [(nzVisible)]="editPriceisVisible" [nzTitle]="'修改费用'" (nzOnCancel)="handleCancel()" (nzOnOk)="editAddprice()">
+    <ng-container *nzModalContent>
+        <span nz-col nzOffset="3">修改费用：</span>
+        <nz-input-number [nzMin]="0" [nzMax]="9999999" [ngStyle]="{ margin: '24px 24px 0 16px',width:'244px',paddingLeft:'10px' }" [nzStep]="100" [nzPrecision]="2" [(ngModel)]="Price.customersIncreasePrice" placeholder="请输入修改费用">
+        </nz-input-number>
+    </ng-container>
+</nz-modal>
+<!-- 派单 -->
+<nz-modal [(nzVisible)]="payPhoneisVisible" [nzTitle]="'派单'" (nzOnCancel)="handleCancel()" (nzOnOk)="phoneOk()">
+    <ng-container *nzModalContent>
+        <span nz-col nzOffset="3">配送员手机号：</span>
+        <input nz-input type="text" style="width: 50%;" [(ngModel)]="phone" placeholder="请输入配送员手机号码" />
+    </ng-container>
+</nz-modal>
+<!-- 备注 -->
+<nz-modal [(nzVisible)]="remarkIsVisible" [nzTitle]="'备注'" (nzOnCancel)="handleCancel()" (nzOnOk)="remarkOk()">
+    <ng-container *nzModalContent>
+        <span nz-col nzOffset="3" style="vertical-align: top;">备注：</span>
+        <nz-textarea-count [nzMaxCharacterCount]="300">
+            <textarea maxlength="300" rows="3" [(ngModel)]="remark.remark" nz-input style="width: 78%;"></textarea>
+        </nz-textarea-count>
+    </ng-container>
+</nz-modal>

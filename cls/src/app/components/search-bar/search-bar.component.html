@@ -1,0 +1,87 @@
+<div *ngIf="forms && forms.length > 0" class="search-bar">
+  <!--选项区-->
+  <ng-container *ngFor="let f of forms">
+    <!--日期区-->
+    <div class="search-bar-side" *ngIf="f.type ==='dateRange'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <nz-range-picker [nzMode]="f && f.mode?f.mode:'date'" [(ngModel)]="f.value"
+                       [nzAllowClear]="f.clear" [nzDisabledDate]="disabledDateRange"
+                       nzFormat="yyyy-MM-dd"
+                       (ngModelChange)="modelSelectChanged($event,f.name)"></nz-range-picker>
+    </div>
+
+    <div class="search-bar-side" *ngIf="f.type ==='date'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <nz-date-picker [nzMode]="f && f.mode?f.mode:'date'" [(ngModel)]="f.value"
+                       [nzAllowClear]="f.clear" [nzDisabledDate]="disabledDate"
+                       nzFormat="yyyy-MM-dd"
+                       (ngModelChange)="modelSelectChanged($event,f.name)"></nz-date-picker>
+    </div>
+
+    <!--<div class="search-bar-side" *ngIf="f.type === 'dateDouble'">-->
+    <!--<nz-date-picker-->
+    <!--[nzDisabledDate]="disabledRangeDate" nzFormat="yyyy-MM-dd"-->
+    <!--[(ngModel)]="f.value" [nzPlaceHolder]="f.placeholder?f.placeholder:'请选择'"-->
+    <!--(nzOnOpenChange)="modelSelectChanged($event,f.name)">-->
+    <!--</nz-date-picker>-->
+    <!--</div>-->
+    <!--<div class="search-bar-side" *ngIf="f.type === 'dateDouble'">-->
+    <!--<nz-date-picker *ngIf="f.name === 'endTime'"-->
+    <!--[nzDisabledDate]="disabledRangeDate" nzFormat="yyyy-MM-dd"-->
+    <!--[(ngModel)]="f.value" [nzPlaceHolder]="f.placeholder?f.placeholder:'请选择'"-->
+    <!--(nzOnOpenChange)="modelSelectChanged($event,f.name)">-->
+    <!--</nz-date-picker>-->
+    <!--</div>-->
+
+    <!--选项区-->
+    <div class="search-bar-side" *ngIf="f.type === 'select'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <nz-select [nzShowSearch]="f.search" [(ngModel)]="f.value"
+                 (ngModelChange)="modelSelectChanged($event,f.name)"
+                 [nzAllowClear]="f.clear" [nzMode]="f.mode"
+                 [ngClass]="{'select-simple':!f.mode,'select-multiple':f.mode}"
+                 [nzPlaceHolder]="f.placeholder" [nzDisabled]="getConnectInfo(f.connect)">
+        <ng-container *ngIf="f.data && f.data.length > 0">
+          <nz-option *ngFor="let fp of f.data"
+                     [nzValue]="fp" [nzLabel]="fp.content"></nz-option>
+        </ng-container>
+      </nz-select>
+    </div>
+
+    <!--多文本选择输入区-->
+    <div class="search-bar-side" *ngIf="f.type === 'group'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <nz-input-group nzCompact>
+        <nz-select [(ngModel)]="f.value.select" style="width:40%">
+          <ng-container *ngIf="f.data && f.data.length > 0">
+            <nz-option *ngFor="let fp of f.data"
+                       [nzValue]="fp.value" [nzLabel]="fp.label"></nz-option>
+          </ng-container>
+        </nz-select>
+        <input type="text" nz-input [(ngModel)]="f.value.text"
+               placeholder="{{f.placeholder+getTips(f.value.select,f.data)}}" style="width:60%;">
+      </nz-input-group>
+    </div>
+
+    <!--单文本输入区-->
+    <div class="search-bar-side" *ngIf="f.type ==='text'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <input nz-input placeholder="{{f.placeholder}}" [(ngModel)]="f.value"
+             (keydown)="keydownChange($event,f)"/>
+    </div>
+
+    <div class="search-bar-side" *ngIf="f.type === 'textGroup'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixButton">
+        <input nz-input placeholder="{{f.placeholder}}" [(ngModel)]="f.value"/>
+      </nz-input-group>
+      <ng-template #suffixButton>
+        <button nz-button nzType="primary"
+                nzSearch (click)="clickChanged($event,f.name)">{{f.text?f.text:'查询'}}
+        </button>
+      </ng-template>
+    </div>
+
+    <!--按钮控制区-->
+    <div class="search-bar-side" *ngIf="f.type === 'button'" [ngStyle]="{'flex':f.cols?f.cols:1}">
+      <button nz-button (click)="clickChanged($event,f.name)" [nzType]="f.theme"
+              style="width:100%;">{{f.text?f.text:'查询'}}
+      </button>
+    </div>
+
+  </ng-container>
+</div>

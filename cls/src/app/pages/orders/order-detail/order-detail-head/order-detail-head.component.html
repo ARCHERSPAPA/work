@@ -1,0 +1,85 @@
+<div class="order-detail-head">
+    <nz-page-header nzBackIcon [nzGhost]="false" (nzBack)="back()" style="padding: 0;    margin-top: -16px;">
+        <nz-page-header-title style="padding-top: 16px;">
+            <span class="mar8">{{headDetails.address}}</span>
+            <P class="postage">
+                <span>
+          项目编号：
+        </span>
+                <span>
+          {{headDetails.quoteNo}}
+        </span>
+            </P>
+            <nz-tag [nzColor]="'blue'" style="margin-left: 16px;font-weight: 100;">{{stateName}}
+            </nz-tag>
+        </nz-page-header-title>
+    </nz-page-header>
+    <div nz-row>
+        <div nz-col nzSpan='8'>
+            <span>装修公司：</span><span>{{headDetails.abbreviation?headDetails.abbreviation:'--'}}</span>
+        </div>
+        <div nz-col nzSpan='8'>
+            <span>收货人：{{headDetails.consigneeName?headDetails.consigneeName:'--'}}</span><span *ngIf="headDetails.consigneeName">（{{headDetails.consigneePhone?headDetails.consigneePhone:'--'}}）</span>
+        </div>
+        <div nz-col nzSpan='8' style="text-align: right;" class="flex">
+            <div [nzTooltipTitle]="headDetails.customerGpsAddress" nzTooltipPlacement="topRight" nz-tooltip>
+                <span>收货地址：</span><span>{{trimStr(headDetails.customerGpsAddress)}}</span>
+            </div>
+            <div>
+                <span class="postage">
+          <span style="margin-right: 8px;">配送费</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div nz-row class="mar8-top">
+        <div nz-col nzSpan='8'>
+            <span>下单时间：</span><span>{{headDetails.createTime| date:'yyyy-MM-dd'}}</span>
+        </div>
+        <div nz-col nzSpan='8'>
+            <span>订单编号：</span><span>{{headDetails.materialOrderNo}}</span>
+        </div>
+        <div nz-col nzSpan='8' class="flex">
+            <div [nzTooltipTitle]="headDetails.freightRemark" nzTooltipPlacement="topRight" nz-tooltip>
+                <span>配送备注：</span><span>{{trimStr(headDetails.freightRemark,2)}}</span>
+            </div>
+            <div class="ctr-price">
+                <span *ngIf="showPriceInput==1">自提</span>
+                <span *ngIf="showPriceInput==0">{{equalZero(headDetails.freight) === "无"?'0':(headDetails.freight |
+          number:'1.2')}}</span>
+                <a href="javascript:void(0)">
+                    <i nz-icon nzType="edit" *ngIf=" canEdit() " (click)="openModal()" nzTheme="outline" nz-col nzOffset="1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="tab mar8">
+        <app-tab [tabs]='tabs' [index]="index" (handleSelect)="tab($event)">
+        </app-tab>
+    </div>
+</div>
+<!-- 修改费用 -->
+<nz-modal [(nzVisible)]="editPriceisVisible" [nzTitle]="'修改费用'" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+    <ng-container *nzModalContent>
+        <div style="text-align: center;margin-bottom: 24px;">
+            <app-switch-tab [switches]="switches" (handleSwitch)="handleSwitch($event)">
+            </app-switch-tab>
+        </div>
+
+        <div nz-row *ngIf="showPriceInput == 0">
+            <span nz-col nzSpan="4">修改费用：</span>
+            <div nz-col nzSpan="20">
+                <nz-input-number [nzMin]="0" [nzMax]="9999999" [nzStep]="100" [nzPrecision]="2" [(ngModel)]="headDetails.freight" style="width:100%">
+                </nz-input-number>
+
+            </div>
+        </div>
+        <div nz-row class="mar8-top">
+            <span nz-col nzSpan="4" style="padding-left:27px">备注：</span>
+            <div nz-col nzSpan="20">
+                <nz-textarea-count [nzMaxCharacterCount]="300">
+                    <textarea maxlength="300" rows="3" [(ngModel)]="headDetails.freightRemark" nz-input></textarea>
+                </nz-textarea-count>
+            </div>
+        </div>
+    </ng-container>
+</nz-modal>

@@ -1,0 +1,23 @@
+@charset "utf-8";
+@import "../../../../assets/less/base";
+
+.order-table{
+  margin: 0 @cls-base*2;
+  background:@cls-bg-white;
+  tr th,
+  tr td {
+    font-size: 14px;
+    min-width: 60px;
+    max-width: 60px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tr.ctrl-tr th.ctrl-th,
+  tr.ctrl-tr td.ctrl-td{
+    min-width: 10px;
+    max-width: 12px;
+    overflow: hidden;
+  }
+}

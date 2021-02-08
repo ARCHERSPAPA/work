@@ -1,0 +1,16 @@
+<div class="user-login">
+  <div class="login">
+    <div class="login-title">
+      <span>{{title}}</span>
+    </div>
+    <div class="login-img">
+      <div class="qr-expire-mask" *ngIf="isExpire">
+        <p>二维码已失效</p>
+        <a (click)="changeQrCode()" href="javascript:void(0)">刷新</a>
+      </div>
+      <qr-code [value]="qrCode" [size]="200" [errorCorrectionLevel]="'H'"></qr-code>
+    </div>
+    <p class="login-desc">请使用马克巴APP登录后，使用TOP材料商<br/>扫二维码登录网页</p>
+  </div>
+</div>
+<div class="user-footer"><app-footer></app-footer></div>

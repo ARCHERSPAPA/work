@@ -1,0 +1,4 @@
+<nz-tabset [nzSelectedIndex]="index" [nzLinkRouter]="true">
+    <nz-tab *ngFor="let tab of tabs" [nzTitle]="tab.name" (nzClick)="tabClick(tab.url,tab.params)">
+    </nz-tab>
+</nz-tabset>

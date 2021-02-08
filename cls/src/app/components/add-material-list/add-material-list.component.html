@@ -1,0 +1,59 @@
+<div class="add-material-list">
+    <nz-table #orderTable [nzData]="materials" [nzLoading]="loading" [nzTitle]="header" [nzFrontPagination]="false" [nzShowPagination]="true" [(nzPageIndex)]="orderParams.pageNum" [(nzPageSize)]="orderParams.pageSize" (nzPageIndexChange)="changePageIndex($event)"
+        [nzTotal]="total" nzSize="middle">
+        <thead>
+            <tr class="ctrl-tr">
+                <th [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"></th>
+                <th>类别</th>
+                <th>名称</th>
+                <th>品牌</th>
+                <th>规格</th>
+                <th>型号</th>
+                <th>单位</th>
+                <th>材质</th>
+                <th>颜色</th>
+                <th>产地</th>
+                <th>SKU</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-template ngFor let-data [ngForOf]="orderTable.data" let-index="index">
+                <tr class="ctrl-tr">
+                    <td [(nzChecked)]="data.checked" [nzDisabled]="data.disabled" (nzCheckedChange)="refreshStatus(true,index)">
+                    </td>
+                    <td [title]="renderName(data.category,'')">
+                        {{renderName(data.category)}}
+                    </td>
+                    <td [title]="renderName(data.name,'')">{{renderName(data.name)}}</td>
+                    <td [title]="renderName(data.brand,'')">{{renderName(data.brand)}}</td>
+                    <td [title]="renderName(data.spec,'')">{{renderName(data.spec)}}
+                    </td>
+                    <td [title]="renderName(data.model,'')">{{renderName(data.model)}}</td>
+                    <td [title]="renderName(data.unit,'')">{{renderName(data.unit)}}</td>
+                    <td [title]="renderName(data.material,'')">{{renderName(data.material)}}</td>
+                    <td [title]="renderName(data.color,'')">{{renderName(data.color)}}</td>
+                    <td [title]="renderName(data && data.origin,'')">{{renderName( data &&data.origin)}}</td>
+                    <td [title]="renderName(data.sku,'')">{{renderName(data.sku)}}</td>
+
+                    <td><a nz-col nzOffset="21" href="javascript:void(0)" style="margin-right: 8px;" (click)="onItemChecked(data,index)">
+              添加</a>
+                        <a href="javascript:void(0)" (click)="removeItem(data.id,index)" [hidden]="!exist(data.id)">删除({{itemsSize(data.id)}})</a>
+                    </td>
+                </tr>
+            </ng-template>
+        </tbody>
+    </nz-table>
+    <ng-template #header>
+        <div class="flex">
+            <div>
+                <span class="count">已选 {{ setOfCheckedIds.length}}</span>
+            </div>
+
+            <div>
+                <app-search-bar [forms]="forms" (handleSelect)="handleSelect($event)" (handleForm)="handleForm($event)">
+                </app-search-bar>
+            </div>
+        </div>
+    </ng-template>
+</div>

@@ -1,0 +1,51 @@
+<nz-layout>
+  <nz-sider [nzCollapsed]="isCollapsed" nzWidth="256px" style="min-height: 100%;">
+    <div class="page-logo" [ngClass]="{'page-logo-small':isCollapsed}">材料商系统</div>
+    <ul nz-menu nzTheme="dark" nzMode="inline">
+      <ng-container *ngFor="let menu of menus">
+        <ng-template #titleTemp>
+          <i nz-icon [nzIconfont]="menu.icon"></i>
+          <span>{{menu.catalogName}}</span>
+        </ng-template>
+        <li nz-submenu [nzOpen]="menu.selected" [nzTitle]="titleTemp">
+          <ul>
+            <ng-container *ngFor="let item of menu.catalogs">
+              <li nz-menu-item [nzSelected]="item.selected" (click)="clickMenu(item,menus)">{{item.catalogName}}</li>
+            </ng-container>
+
+          </ul>
+        </li>
+      </ng-container>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <i class="page-trigger" nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+         (click)="isCollapsed = !isCollapsed"></i>
+      <div class="page-user">
+        <nz-avatar [nzSize]="32" [nzSrc]="user.headImg"></nz-avatar>
+        <a nz-dropdown [nzDropdownMenu]="menu" class="page-user-name">
+          <span>{{user.nickName}}</span>
+          <i nz-icon nzType="down"></i>
+        </a>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu nzSelectable>
+            <li nz-menu-item (click)="logout()">退出</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </nz-header>
+    <nz-content>
+      <!--<nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'customBreadcrumb'"></nz-breadcrumb>-->
+      <app-breadcrumb></app-breadcrumb>
+      <div style="min-height: calc(100vh - 128px);"><router-outlet></router-outlet></div>
+    </nz-content>
+    <nz-footer>
+      <div>
+        <app-footer></app-footer>
+      </div>
+    </nz-footer>
+  </nz-layout>
+</nz-layout>
+
+

@@ -1,0 +1,31 @@
+@charset "utf-8";
+@import "../../../../assets/less/base";
+.settle-table{
+  margin: 0 @cls-base*2;
+  background:@cls-bg-white;
+  tr th,
+  tr td {
+    font-size: 14px;
+    min-width: 100px;
+    max-width: 100px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tr.ctrl-tr th.ctrl-th,
+  tr.ctrl-tr td.ctrl-td{
+    min-width: 20px;
+    max-width: 20px;
+    overflow: hidden;
+  }
+  tr th:last-child,
+  tr td:last-child{
+    min-width: 80px;
+    max-width: 80px;
+    overflow: hidden;
+  }
+  .settle-select{
+    margin-top: @cls-base*2;
+  }
+}

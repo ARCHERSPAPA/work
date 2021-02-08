@@ -1,0 +1,24 @@
+<div class="order-detail-graph">
+    <div nz-row>
+        <label nz-col>备注：</label>
+        <div nz-col nzSpan="23">
+            <p nz-typography [nzEditable]="showEditableByState()" [(nzContent)]="editStr" (nzContentChange)="changeRemarkAndImgs(true)"></p>
+            <span *ngIf="editStr.length>0" class="count"> <span style="color: red;">{{editStr.length}}</span>/120</span>
+
+        </div>
+        <label nz-col nzSpan="24" class="graph-side">设计图纸</label>
+        <div nz-col nzSpan="24" *ngIf="showEditableByState();else showImgTemp">
+            <app-uploader-img (handleImage)="handleImage($event)" [fileList]="imgList" [showOmg]="showOmg">
+            </app-uploader-img>
+        </div>
+        <ng-template #showImgTemp>
+            <div nz-col nzSpan="24">
+                <app-uploader-img (handleImage)="handleImage($event)" [fileList]="imgList" [showOmg]="showOmg" *ngIf="imgList && imgList.length > 0">
+                </app-uploader-img>
+                <p *ngIf="imgList && imgList.length == 0">暂无图纸数据</p>
+            </div>
+        </ng-template>
+    </div>
+
+
+</div>

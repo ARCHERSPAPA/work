@@ -1,0 +1,16 @@
+<div style="margin: 16px;padding-top: 16px;">
+    <nz-timeline>
+        <nz-timeline-item *ngFor="let node of nodeList" [nzColor]="showColor(node.state,node.type)">
+            <p class="title">
+                <span *ngIf="node.title">{{node.title}}</span>
+                <span class="time" *ngIf="node.nodeTime">{{node.nodeTime | date:'yyyy-MM-dd HH:mm'}}</span>
+            </p>
+            <p class="imgs" *ngIf="node.imgUrls && node.imgUrls.length > 0">
+                <nz-image-group>
+                    <img nz-image *ngFor="let img of node.imgUrls; let i=index" style="margin-right: 8px;" width="200px" height="200px" [nzSrc]="img" alt="">
+                </nz-image-group>
+            </p>
+            <p class="order" *ngIf="node.remark">{{node.remark}}</p>
+        </nz-timeline-item>
+    </nz-timeline>
+</div>

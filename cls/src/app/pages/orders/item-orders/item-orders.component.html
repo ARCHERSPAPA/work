@@ -1,0 +1,121 @@
+<div nz-row class="order-table">
+  <div nz-col nzSpan="24">
+    <nz-table #orderTable [nzData]="orders" [nzLoading]="loading" [nzTitle]="header" [nzFrontPagination]="false"
+              [nzShowPagination]="true" [(nzPageIndex)]="orderParams.pageNum" [(nzPageSize)]="orderParams.pageSize"
+              (nzPageIndexChange)="changePageIndex($event)" [nzTotal]="total" nzSize="middle">
+      <thead>
+      <tr class="ctrl-tr">
+        <th class="ctrl-th"></th>
+        <th [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"
+            style="text-align: center;" class="ctrl-th"></th>
+        <th>订单编号</th>
+        <th>客户</th>
+        <th>楼盘房号</th>
+        <th>工长</th>
+        <th>材料商</th>
+        <th>装修公司</th>
+        <th>状态</th>
+        <th>创建日期</th>
+        <th>配送费</th>
+        <th>合计</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-template ngFor let-data [ngForOf]="orderTable.data">
+        <tr class="ctrl-tr">
+          <td [(nzExpand)]="data.expand" class="ctrl-td"></td>
+          <td [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()" class="ctrl-td"></td>
+          <td [title]="renderName(data.materialOrderNo,'')">{{renderName(data.materialOrderNo)}}</td>
+          <td [title]="renderName(data.customerName,'')">{{renderName(data.customerName)}}</td>
+          <td [title]="renderName(data.customerHouseAddress,'')">
+            {{renderName(data.customerHouseAddress)}}{{data.customerRoomNumber}}
+          </td>
+          <td [title]="renderName(data.consigneeName,'')">{{renderName(data.consigneeName)}}{{data.consigneeName &&
+            data.consigneePhone?'('+data.consigneePhone+')':''}}
+          </td>
+          <td [title]="renderName(data.supplierName,'')">{{renderName(data.supplierName)}}</td>
+          <td [title]="renderName(data.companyName,'')">{{renderName(data.companyName)}}</td>
+          <td [title]="getStateName(data.state)">{{ getStateName(data.state)}}</td>
+          <td>{{ data.createTime | date:'yyyy-MM-dd'}}</td>
+          <td [title]="data.freight">{{ equalZero(data.freight) === "无"?'--':(data.freight|number:'1.2')}}</td>
+          <td [title]="data.totalPrice">{{equalZero(data.totalPrice) === "无"?'--':(data.totalPrice | number:'1.2')}}
+          </td>
+        </tr>
+
+        <tr [nzExpand]="data.expand">
+          <nz-table #innerTable [nzData]="data.list" nzSize="middle" [nzShowPagination]="false">
+      <thead>
+      <tr>
+        <th>SKU</th>
+        <th>名称</th>
+        <th>品牌</th>
+        <th>规格</th>
+        <th>型号</th>
+        <th>材质</th>
+        <th>颜色</th>
+        <th>产地</th>
+        <th>单位</th>
+        <th>数量</th>
+        <th>核算单价</th>
+        <th>备注</th>
+        <th>小计</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-template ngFor let-item [ngForOf]="innerTable.data">
+        <tr>
+          <td [title]="renderName(item.sku,'')">{{renderName(item.sku)}}</td>
+          <td [title]="renderName(item.name,'')">{{renderName(item.name)}}</td>
+          <td [title]="renderName(item.brand,'')">{{renderName(item.brand)}}</td>
+          <td [title]="renderName(item.spec,'')">{{renderName(item.spec)}}</td>
+          <td [title]="renderName(item.model,'')">{{renderName(item.model)}}</td>
+          <td [title]="renderName(item.material,'')">{{renderName(item.material)}}</td>
+          <td [title]="renderName(item.color,'')">{{renderName(item.color)}}</td>
+          <td [title]="renderName(item.origin,'')">{{renderName(item.origin)}}</td>
+          <td [title]="renderName(item.unit,'')">{{renderName(item.unit)}}</td>
+          <td [title]="item.num">{{equalZero(item.num) === "无"?'--':(item.num|number:'1.2')}}</td>
+          <td [title]="item.supplyPrice">{{equalZero(item.supplyPrice) === "无"?'--':(item.supplyPrice|number:'1.2')}}
+          </td>
+          <td [nzTooltipTitle]="renderName(item.remark,'')" nzTooltipPlacement="left" nz-tooltip>
+            {{renderName(item.remark,'--')}}
+          </td>
+          <td [title]="getSmallTotal(item.num,item.supplyPrice)">{{getSmallTotal(item.num,item.supplyPrice)}}</td>
+        </tr>
+      </ng-template>
+      <ng-container *ngIf="data.pause && data.pause.length > 0">
+        <tr *ngFor="let pause of data.pause">
+          <td>{{pause.type?'增加':'减少'}}</td>
+          <td [nzTooltipTitle]="renderName(pause.remark,'')" nzTooltipPlacement="left"
+              nz-tooltip [colSpan]="11">{{renderName(pause.remark,'--')}}
+          </td>
+          <td [title]="pause.price">{{equalZero(pause.price) === "无"?'--':(pause.price|number:'1.2')}}</td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </nz-table>
+    </tr>
+    </ng-template>
+    </tbody>
+    </nz-table>
+  </div>
+</div>
+
+
+<ng-template #header>
+  <div nz-row style="padding:4px 8px;">
+    <div nz-col nzSpan="6">
+      <a nz-button [disabled]="selectItems.length === 0" nzType="primary"
+         [routerLink]="['/views/order']" target="_blank"
+         [queryParams]="{ids:getOrderIds()}">打印</a>
+      <span *ngIf="selectItems && selectItems.length > 0" style="margin-left: 8px;">已选{{selectItems.length}}项</span>
+      <span *ngIf="selectItems && selectItems.length > 0"
+            style="margin-left: 8px;">总计：{{selectTotal|number:'1.2'}}</span>
+    </div>
+    <div nz-col nzSpan="18">
+      <app-search-bar [forms]="forms"
+                      (handleSelect)="handleSelect($event)"
+                      (handleForm)="handleForm($event)"></app-search-bar>
+    </div>
+  </div>
+
+</ng-template>

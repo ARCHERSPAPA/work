@@ -1,0 +1,52 @@
+<div nz-row class="order-table">
+  <div nz-col nzSpan="24">
+    <nz-table #orderTable [nzData]="orders" [nzLoading]="loading" [nzTitle]="header" [nzFrontPagination]="false"
+              [nzShowPagination]="true" [(nzPageIndex)]="orderParams.pageNo" [(nzPageSize)]="orderParams.pageSize"
+              (nzPageIndexChange)="changePageIndex($event)" [nzTotal]="total" nzSize="middle">
+      <thead>
+      <tr class="ctrl-tr">
+        <th>日期时间</th>
+        <th>订单编号</th>
+        <th>楼盘房号</th>
+        <th>地址</th>
+        <th>装修公司</th>
+        <!--<th [nzFilters]="statesOfFilter" [nzFilterMultiple]="false"-->
+            <!--(nzFilterChange)="stateFilterFn($event)">订单状态</th>-->
+        <th>订单状态</th>
+        <th>收货人</th>
+        <th>联系方式</th>
+        <th>合计金额</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="ctrl-tr" *ngFor="let data of orders">
+        <td [title]="renderName(data.materialState,'')">{{renderName(data.materialState)}}</td>
+        <td [title]="renderName(data.materialOrderNo,'')">{{renderName(data.materialOrderNo)}}</td>
+        <td [title]="renderName(data.houseAddress,'')">{{renderName(data.houseAddress)}}</td>
+        <td [title]="renderName(data.address,'')">{{renderName(data.address)}}</td>
+        <td [title]="renderName(data.abbreviation,'')">{{renderName(data.abbreviation)}}</td>
+        <td [title]="getStateName(data.state)">{{getStateName(data.state)}}</td>
+        <td [title]="renderName(data.consigneeName,'')">{{ renderName(data.consigneeName)}}</td>
+        <td [title]="renderName(data.consigneePhone,'')">{{renderName(data.consigneePhone)}}</td>
+        <td [title]="data.totalPrice">{{ equalZero(data.totalPrice) === "无"?'--':(data.totalPrice|number:'1.2')}}</td>
+        <td><a (click)="todo(data)" href="javascript:void(0)">详情</a></td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+
+<ng-template #header>
+  <div nz-row style="padding: 4px 8px;">
+    <div nz-col nzSpan="8">
+      <app-switch-tab [switches]="switches" (handleSwitch)="handleSwitch($event)"></app-switch-tab>
+    </div>
+    <div nz-col nzSpan="16">
+      <app-search-bar [forms]="forms" (handleSelect)="handleSelect($event)" (handleForm)="handleForm($event)">
+      </app-search-bar>
+    </div>
+  </div>
+
+</ng-template>

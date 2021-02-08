@@ -1,0 +1,21 @@
+<div class="uploader-img">
+    <nz-upload nzAction="//upload.qiniup.com/" nzListType="picture-card" [nzShowButton]="fileList.length < uploadOmg.num" [nzRemove]="removeFile" (nzChange)="handleChange($event)" [nzBeforeUpload]="beforeUpload" [nzData]="getExtraData" [nzPreview]="handlePreview" [(nzFileList)]="fileList"
+        [nzShowUploadList]="{ showPreviewIcon: uploadOmg.showPreview,
+                  showRemoveIcon:  uploadOmg.showRemove,
+                  showDownloadIcon: uploadOmg.showDownload }">
+        <!--<div>-->
+        <!--<i nz-icon nzType="plus"></i>-->
+        <!--<div style="margin-top: 8px">上传图纸</div>-->
+        <!--</div>-->
+        <ng-container>
+            <i class="upload-icon" nz-icon [nzType]="loading ? 'loading' : 'plus'"></i>
+            <div class="ant-upload-text">上传图纸</div>
+        </ng-container>
+        <!--<img *ngIf="avatarUrl" [src]="avatarUrl" style="width: 100%" />-->
+    </nz-upload>
+</div>
+<nz-modal [nzVisible]="previewVisible" [nzContent]="modalContent" [nzFooter]="null" (nzOnCancel)="previewVisible = false">
+    <ng-template #modalContent>
+        <img [src]="previewImage" [ngStyle]="{ width: '100%' }" />
+    </ng-template>
+</nz-modal>

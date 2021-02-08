@@ -1,0 +1,96 @@
+@charset "utf-8";
+@import "../../../assets/less/base";
+
+//@cls-base: 8px;
+//@cls-color: #000;
+//@cls-font-weight: 500;
+
+.schedule{
+   margin: @cls-base*9;
+   min-width: 1200px;
+   &-title{
+     font-size: @cls-base*3.75;
+     font-weight: @cls-font-weight;
+     line-height: @cls-base*5.25;
+     color: fade(@cls-color,85%);
+     text-align: center;
+     white-space: nowrap;
+     text-overflow:ellipsis;
+     overflow: hidden;
+   }
+   &-content{
+      margin-top: @cls-base*9;
+      background: #FFF;
+      border-radius: @cls-base*0.25;;
+     .schedule-head{
+        position: relative;
+        text-align: center;
+        padding: @cls-base*6 0 @cls-base*3 0;
+        &-img{
+          position: absolute;
+          top: -@cls-base*6;;
+          left: 50%;
+          margin-left: -@cls-base*6;
+          width: @cls-base*12;
+          height: @cls-base*12;
+          border-radius: 50%;
+          overflow: hidden;
+          > img{
+            height: 100%;
+          }
+        }
+       &-name{
+         font-size: @cls-base*2;
+         font-weight: @cls-font-weight;
+         line-height: @cls-base*3;
+         color: fade(@cls-color,85%);
+         margin-top: @cls-base*2;
+       }
+       &-phone{
+         font-size: @cls-base*1.75;
+         font-weight: @cls-font-weight*0.8;
+         line-height:@cls-base*2.75;
+         color: fade(@cls-color,85%);
+         margin-top: @cls-base;
+       }
+       &-role{
+         font-size: @cls-base*1.75;
+         font-weight: @cls-font-weight*0.8;
+         line-height: @cls-base*2.75;
+         color: fade(@cls-color,45%);
+         margin-top: @cls-base;
+       }
+     }
+     .schedule-tips{
+       border-top: 1px solid fade(@cls-color,6%);
+       &-item{
+         text-align: center;
+         cursor: pointer;
+         padding: @cls-base*3.75 0;
+         a{
+           color: transparent;
+           display: block;
+         }
+         span{
+           display: block;
+           &.num{
+             font-size: @cls-base*3;
+             font-weight: @cls-font-weight;
+             line-height: @cls-base*4;
+             color: #1890FF;
+           }
+           &.key{
+             margin-top: @cls-base;
+             font-size: @cls-base*1.75;
+             font-weight: @cls-font-weight*0.8;
+             line-height: @cls-base*2.75;
+             color: fade(@cls-color,85%);
+           }
+         }
+         &:hover{
+           background: #f0f2f5;
+         }
+       }
+     }
+   }
+}

@@ -1,0 +1,8 @@
+<div class="mkb-breadcrumb" [ngStyle]="{backgroundColor:color}">
+<nz-breadcrumb>
+  <nz-breadcrumb-item *ngFor="let bread of breadcrumbs;let last = last">
+    <a href="javascript:void(0)" (click)="todo(bread)" *ngIf="!last">{{bread.label}}</a>
+    <span *ngIf="last">{{bread.label}}</span>
+  </nz-breadcrumb-item>
+</nz-breadcrumb>
+</div>

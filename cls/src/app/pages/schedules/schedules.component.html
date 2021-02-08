@@ -1,0 +1,24 @@
+<div class="schedule">
+  <div class="schedule-title">{{user.company}}</div>
+  <div class="schedule-content">
+    <div class="schedule-head">
+      <div class="schedule-head-img">
+        <img [src]="user.headImg+'?imageMogr2/thumbnail/!96x96r'"/>
+      </div>
+      <div class="schedule-head-name">{{user.username}}</div>
+      <div class="schedule-head-phone">{{user.phone}}</div>
+      <div class="schedule-head-role">{{user.role}}</div>
+    </div>
+
+    <div class="schedule-tips" nz-row *ngIf="schedules && schedules.length > 0">
+      <ng-container *ngFor="let schedule of schedules">
+        <div nz-col [nzSpan]="24/count" class="schedule-tips-item">
+          <a href="javascript:void(0)" (click)="todo(schedule)">
+            <span class="num">{{schedule.count}}</span>
+            <span class="key">{{schedule.code}}</span>
+          </a>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

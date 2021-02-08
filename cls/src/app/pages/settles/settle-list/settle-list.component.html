@@ -1,0 +1,67 @@
+<div nz-row class="settle-table">
+  <div nz-col nzSpan="24">
+    <nz-table #orderTable [nzData]="settles" [nzLoading]="loading" [nzTitle]="header" [nzFrontPagination]="false"
+              [nzShowPagination]="true" [(nzPageIndex)]="settleParams.pageNo" [(nzPageSize)]="settleParams.pageSize"
+              (nzPageIndexChange)="changePageIndex($event)" [nzTotal]="total" nzSize="middle">
+      <thead>
+      <tr class="ctrl-tr">
+        <th [(nzChecked)]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="checkAll($event)"
+            style="text-align: center;" class="ctrl-th" *ngIf="showCheckboxByState()"></th>
+        <th>日期时间</th>
+        <th>订单编号</th>
+        <th>楼盘房号</th>
+        <th>装修公司</th>
+        <th>材料类别</th>
+        <th>结算状态</th>
+        <th>结算金额</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="ctrl-tr" *ngFor="let data of settles">
+        <td [(nzChecked)]="data.checked" (nzCheckedChange)="refreshStatus()" class="ctrl-td"
+            *ngIf="showCheckboxByState()" [nzDisabled]="!data.accountingPeriod"></td>
+        <!--<td>{{renderTime(settleParams.state,data)?(renderTime(settleParams.state,data)|date:'MM-dd HH:mm')+(showCheckboxByState()?'签收':''):'--'}}</td>-->
+		<td [title]="renderName(data.materialState)">{{renderName(data.materialState)}}</td>
+        <td [title]="renderName(data.materialOrderNo,'')">{{renderName(data.materialOrderNo)}}</td>
+        <td [title]="renderName(data.houseAddress,'')">{{renderName(data.houseAddress)}}</td>
+        <td [title]="renderName(data.abbreviation,'')">{{renderName(data.abbreviation)}}</td>
+        <td [title]="renderArrayName(data.categorys,'')">{{renderArrayName(data.categorys)}}</td>
+        <td>{{getSettleName(data.state,settleParams.state,data.accountingPeriod)}}</td>
+        <td [title]="data.totalPrice">{{equalZero(data.totalPrice) === "无"?'--':(data.totalPrice | number:'1.2')}}
+        </td>
+        <td>
+          <a href="javascript:void(0)"   nz-popconfirm nzPopconfirmTitle="确定申请结算该订单吗?"
+             (nzOnConfirm)="doSettle(data.id)" [nzOkText]="'结算'" style="margin-right:8px;"
+             *ngIf="showCheckboxByState() && data.accountingPeriod">申请结算</a>
+          <a (click)="todo(data)" href="javascript:void(0)">详情</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+
+<ng-template #header>
+  <div nz-row  style="padding:4px 8px;">
+    <div nz-col nzSpan="10">
+      <app-switch-tab [switches]="switches" (handleSwitch)="handleSwitch($event)"></app-switch-tab>
+    </div>
+    <div nz-col nzSpan="14">
+      <app-search-bar [forms]="forms"
+                      (handleSelect)="handleSelect($event)"
+                      (handleForm)="handleForm($event)"></app-search-bar>
+    </div>
+    <div nz-col nzSpan="24" class="settle-select" *ngIf="showCheckboxByState()">
+      <div nz-col nzSpan="24">
+        <button nz-button nzType="primary" [disabled]="selectItems && selectItems.length === 0"
+           nz-popconfirm nzPopconfirmTitle="确定申请结算勾选的订单吗?"
+           (nzOnConfirm)="confirmSettle()" [nzOkText]="'结算'">申请结算</button>
+        <span *ngIf="selectItems && selectItems.length > 0"
+              style="margin-left: 8px;">已选择{{selectItems.length}}项，总金额：{{getSettleTotal() | number:'1.2'}}</span>
+      </div>
+    </div>
+  </div>
+
+</ng-template>
