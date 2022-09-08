@@ -37,7 +37,7 @@
     "jquery": "^3.4.1",
     "js-base64": "^2.4.9",
     "js-pinyin": "^0.1.9",
-    "jszip": "^3.2.2",
+    "jszip": "^3.7.0",
     "ng-zorro-antd": "^1.8.1",
     "ngx-amap": "^2.1.1",
     "ngx-bootstrap": "^3.0.1",
